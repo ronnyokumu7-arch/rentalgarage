@@ -5,8 +5,9 @@ import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { 
   CheckCircle2, UserPlus, Calendar, Clock, ArrowRight,
-  Zap, Sparkles, Tag, Loader2, MoreVertical,
-  Play, XCircle, Eye, Car, User, FileText, MapPin
+  Zap, Sparkles, Loader2, MoreVertical,
+  Play, XCircle, Eye, Car, User, FileText, MapPin,
+  CalendarDays, ChevronRight, DollarSign
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import toast from "react-hot-toast";
@@ -20,7 +21,7 @@ type SubTab = "tasks" | "bookings" | "activity";
 
 const HEADER_COPY: Record<SubTab, { title: string; description: string; icon: LucideIcon; iconClassName?: string }> = {
   tasks: { title: "Active Tasks", description: "What needs your attention today", icon: Zap },
-  bookings: { title: "Upcoming Bookings", description: "Track latest trips & late returns", icon: Calendar, iconClassName: "scale-y-90" },
+  bookings: { title: "Upcoming Rentals", description: "Track latest trips & late returns", icon: Calendar, iconClassName: "scale-y-90" },
   activity: { title: "Activity Logs", description: "The live pulse of your fleet's latest moves.", icon: Clock },
 };
 
@@ -55,18 +56,11 @@ const rentalDays = (start?: string | null, end?: string | null): number | null =
   return isNaN(d) ? null : Math.max(1, d);
 };
 
-const formatDateFull = (dateStr: string) => {
+const formatDateShort = (dateStr: string) => {
   if (!dateStr) return "—";
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return "—";
-  return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" });
-};
-
-const formatDateMed = (dateStr: string) => {
-  if (!dateStr) return "—";
-  const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return "—";
-  return d.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 };
 
 const parseTaskTitle = (title: string): { action: string; subject: string | null } => {
@@ -192,18 +186,18 @@ export default function ActionCenterWidget() {
     <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden h-full flex flex-col">
       
       {/* HEADER */}
-      <div className="p-5 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary)]/80 flex items-center justify-center text-white shadow-md shadow-[var(--color-primary)]/20">
-              <HeaderIcon size={20} className={headerCopy.iconClassName} />
+      <div className="px-4 py-3 border-b border-[var(--color-surface-border)] bg-gradient-to-r from-[var(--color-surface-hover)] to-transparent">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary)]/80 flex items-center justify-center text-white shadow-md shadow-[var(--color-primary)]/20">
+              <HeaderIcon size={16} className={headerCopy.iconClassName} />
             </div>
             <div>
               <h3 className="text-sm font-bold text-[var(--color-ink)] tracking-tight flex items-center gap-2">
                 {headerCopy.title}
-                <Sparkles size={12} className="text-[var(--color-primary)] opacity-70" />
+                <Sparkles size={11} className="text-[var(--color-primary)] opacity-70" />
               </h3>
-              <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">{headerCopy.description}</p>
+              <p className="text-[10px] text-[var(--color-ink-muted)] mt-0.5">{headerCopy.description}</p>
             </div>
           </div>
           
@@ -213,14 +207,14 @@ export default function ActionCenterWidget() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveSubTab(tab.id)}
-                  className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all whitespace-nowrap ${
                     activeSubTab === tab.id ? "bg-[var(--color-primary)] text-white shadow-sm"
                       : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"
                   }`}
                 >
                   {tab.label}
                   {tab.count > 0 && (
-                    <span className={`px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                    <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold ${
                       activeSubTab === tab.id ? "bg-white/20 text-white" : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] border border-[var(--color-surface-border)]"
                     } ${activeSubTab === tab.id ? "hidden sm:inline" : "inline"}`}>
                       {tab.count}
@@ -234,23 +228,23 @@ export default function ActionCenterWidget() {
       </div>
 
       {/* CONTENT */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar px-3 py-4 sm:p-5 max-h-80 space-y-2.5 sm:space-y-3">
+      <div className="flex-1 overflow-y-auto custom-scrollbar px-2 py-2 sm:p-3 max-h-80 space-y-2">
         
-        {/* RENTALS */}
+        {/* RENTALS - COMPACT PREMIUM CARDS */}
         {activeSubTab === "bookings" && (
-          <div className="space-y-3 animate-in fade-in duration-200">
+          <div className="space-y-2 animate-in fade-in duration-200">
             {bookingsLoading ? (
-              <div className="flex flex-col items-center justify-center py-8 text-[var(--color-ink-muted)] text-sm">
-                <Loader2 size={20} className="animate-spin mb-2 text-[var(--color-primary)]" />
+              <div className="flex flex-col items-center justify-center py-6 text-[var(--color-ink-muted)] text-sm">
+                <Loader2 size={18} className="animate-spin mb-2 text-[var(--color-primary)]" />
                 Loading rentals...
               </div>
             ) : bookings.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="w-12 h-12 rounded-xl bg-blue-500/10 border border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3">
-                  <Calendar size={20} />
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-2">
+                  <Calendar size={18} />
                 </div>
                 <p className="text-sm font-bold text-[var(--color-ink)]">No upcoming rentals</p>
-                <p className="text-xs text-[var(--color-ink-muted)] mt-1">Scheduled rentals will appear here.</p>
+                <p className="text-[10px] text-[var(--color-ink-muted)] mt-0.5">Scheduled rentals will appear here.</p>
               </div>
             ) : (
               bookings.map((booking) => {
@@ -263,172 +257,182 @@ export default function ActionCenterWidget() {
                 const destination = resolveField(booking.destination, "name", "destination");
                 const tripOverdue = booking.status === "active" && isOverdue(booking.end_date);
                 const isActive = booking.status === "active";
+                const isPending = booking.status === "pending";
+                const isConfirmed = booking.status === "confirmed";
 
                 return (
-                  <div key={`booking-${booking.id}`} className="group relative p-3 sm:p-4 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-sm)] transition-all duration-200">
-                    <div className="flex items-start gap-3">
-                      <div className="w-9 h-9 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20 flex items-center justify-center text-[11px] font-extrabold flex-shrink-0">
-                        {getInitials(clientName)}
-                      </div>
-
-                      <div className="flex-1 min-w-0">
-                        {/* Row 1: Name + Status */}
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="text-sm font-semibold text-[var(--color-ink)] truncate">{clientName}</p>
-                          {/* Desktop pill */}
-                          <span className={`hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase tracking-wider border flex-shrink-0 ${meta.badge}`}>
-                            <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
-                            {meta.label}
-                          </span>
-                          {/* ✅ Mobile dot with pulse for active */}
-                          <span className="sm:hidden relative flex-shrink-0 w-2.5 h-2.5" title={meta.label}>
-                            {isActive && (
-                              <span className={`absolute inset-0 rounded-full ${meta.dot} animate-ping opacity-60`} />
-                            )}
-                            <span className={`relative block w-2.5 h-2.5 rounded-full ${meta.dot} ${isActive ? "animate-pulse" : ""}`} />
-                          </span>
-                        </div>
-
-                        {/* Desktop: Vehicle + headline on one line */}
-                        <div className="hidden sm:flex items-center gap-2 mt-1 min-w-0">
-                          <span className="flex items-center gap-1 text-xs text-[var(--color-ink-muted)] flex-shrink-0">
-                            <Car size={11} className="text-[var(--color-ink-subtle)]" />
-                            {vehicleLabel}
-                          </span>
-                          {plate && (
-                            <span className="text-xs text-[var(--color-ink)] font-mono font-semibold flex-shrink-0">{plate}</span>
-                          )}
-                          {(days || destination) && (
-                            <span className="flex items-center gap-1.5 min-w-0" title={destination || undefined}>
-                              <MapPin size={11} className="text-[var(--color-primary)] flex-shrink-0" />
-                              {days && (
-                                <span className="text-[11px] font-bold text-[var(--color-ink)] whitespace-nowrap flex-shrink-0">
-                                  {days} {days === 1 ? "day" : "days"}
+                  <div 
+                    key={`booking-${booking.id}`} 
+                    className="group relative rounded-xl overflow-hidden border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:border-[var(--color-primary)]/40 hover:shadow-md transition-all duration-300"
+                  >
+                    {/* Premium Gradient Accent Bar - Thinner */}
+                    <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${
+                      isActive ? 'from-emerald-400 to-emerald-600' :
+                      isConfirmed ? 'from-blue-400 to-blue-600' :
+                      isPending ? 'from-amber-400 to-amber-600' :
+                      'from-gray-400 to-gray-600'
+                    }`} />
+                    
+                    <div className="p-3 pt-3.5">
+                      {/* Row 1: Client + Status + Menu */}
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          {/* Compact Avatar */}
+                          <div className="relative flex-shrink-0">
+                            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-[10px] ${
+                              isActive ? 'bg-gradient-to-br from-emerald-500 to-emerald-600' :
+                              isConfirmed ? 'bg-gradient-to-br from-blue-500 to-blue-600' :
+                              isPending ? 'bg-gradient-to-br from-amber-500 to-amber-600' :
+                              'bg-gradient-to-br from-gray-500 to-gray-600'
+                            } shadow-sm ring-2 ring-[var(--color-surface)]`}>
+                              {getInitials(clientName)}
+                            </div>
+                            <div className="absolute -bottom-0.5 -right-0.5">
+                              <div className={`w-2.5 h-2.5 rounded-full ${meta.dot} ring-2 ring-[var(--color-surface)] ${
+                                isActive ? 'animate-pulse' : ''
+                              }`} />
+                            </div>
+                          </div>
+                          
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5">
+                              <p className="text-xs font-bold text-[var(--color-ink)] truncate">
+                                {clientName}
+                              </p>
+                              {isActive && (
+                                <span className="flex-shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[7px] font-extrabold uppercase tracking-wider border border-emerald-500/20">
+                                  <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                                  LIVE
                                 </span>
                               )}
-                              {destination && (
+                            </div>
+                            <div className="flex items-center gap-1 mt-0.5">
+                              <Car size={9} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                              <span className="text-[9px] font-medium text-[var(--color-ink-muted)] truncate">
+                                {vehicleLabel}
+                              </span>
+                              {plate && (
                                 <>
-                                  {days && <span className="text-[var(--color-ink-subtle)] flex-shrink-0">·</span>}
-                                  <span className="text-[11px] font-medium text-[var(--color-ink-muted)] truncate min-w-0">{destination}</span>
+                                  <span className="text-[8px] text-[var(--color-ink-subtle)]">•</span>
+                                  <span className="text-[8px] font-mono font-semibold text-[var(--color-ink)]">
+                                    {plate}
+                                  </span>
                                 </>
                               )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Kebab menu */}
+                        <div className="relative flex-shrink-0" data-booking-menu>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); setOpenBookingMenuId(openBookingMenuId === booking.id ? null : booking.id); }}
+                            className="p-1 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all active:scale-95"
+                            aria-label="Booking actions"
+                          >
+                            {actingBookingId === booking.id ? <Loader2 size={12} className="animate-spin" /> : <MoreVertical size={12} />}
+                          </button>
+
+                          {openBookingMenuId === booking.id && (
+                            <div className="absolute right-0 top-full mt-1 w-44 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-lg shadow-black/5 z-20 overflow-hidden animate-in fade-in slide-up duration-150">
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setOpenBookingMenuId(null); router.push(`/dashboard/bookings/${booking.id}`); }}
+                                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[10px] font-bold text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors"
+                              >
+                                <Eye size={12} /> View Booking
+                              </button>
+                              {isPending && (
+                                <button onClick={(e) => { e.stopPropagation(); handleBookingAction(booking.id, "confirm"); }}
+                                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[10px] font-bold text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors border-t border-[var(--color-surface-border)]">
+                                  <CheckCircle2 size={12} /> Confirm Booking
+                                </button>
+                              )}
+                              {isConfirmed && (
+                                <button onClick={(e) => { e.stopPropagation(); handleBookingAction(booking.id, "activate"); }}
+                                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors border-t border-[var(--color-surface-border)]">
+                                  <Play size={12} /> Start Trip
+                                </button>
+                              )}
+                              {isActive && (
+                                <button onClick={(e) => { e.stopPropagation(); handleBookingAction(booking.id, "complete"); }}
+                                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors border-t border-[var(--color-surface-border)]">
+                                  <CheckCircle2 size={12} /> End Trip
+                                </button>
+                              )}
+                              {(isPending || isConfirmed) && (
+                                <button onClick={(e) => { e.stopPropagation(); handleBookingAction(booking.id, "cancel"); }}
+                                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[10px] font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors border-t border-[var(--color-surface-border)]">
+                                  <XCircle size={12} /> Cancel Booking
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Row 2: Stats Grid - Ultra Compact */}
+                      <div className="grid grid-cols-3 gap-1.5 mt-2 pt-1.5 border-t border-[var(--color-surface-border)]/40">
+                        {/* Days */}
+                        <div className="flex items-center gap-1">
+                          <CalendarDays size={9} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-[9px] font-bold text-[var(--color-ink)] leading-tight">
+                              {days || 0}d
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Date */}
+                        <div className="flex items-center gap-1">
+                          <Clock size={9} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-[9px] font-bold text-[var(--color-ink)] leading-tight truncate">
+                              {formatDateShort(booking.start_date)}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Amount */}
+                        <div className="flex items-center gap-1 justify-end">
+                          <DollarSign size={9} className="text-[var(--color-primary)] flex-shrink-0" />
+                          <div className="min-w-0">
+                            <p className="text-[9px] font-bold text-[var(--color-primary-text)] leading-tight tabular-nums truncate">
+                              {Number(booking.total_amount).toLocaleString()}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Row 3: Status + Destination + Actions */}
+                      <div className="flex items-center justify-between gap-2 mt-1.5 pt-1.5 border-t border-[var(--color-surface-border)]/40">
+                        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[7px] font-extrabold uppercase tracking-wider ${meta.badge}`}>
+                            <span className={`w-1 h-1 rounded-full ${meta.dot} ${isActive ? 'animate-pulse' : ''}`} />
+                            {meta.label}
+                          </span>
+                          {tripOverdue && (
+                            <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[7px] font-extrabold uppercase tracking-wider border border-rose-500/20">
+                              <span className="w-1 h-1 rounded-full bg-rose-500 animate-pulse" />
+                              Overdue
+                            </span>
+                          )}
+                          {destination && (
+                            <span className="flex items-center gap-0.5 min-w-0">
+                              <MapPin size={8} className="text-[var(--color-primary)] flex-shrink-0" />
+                              <span className="text-[8px] font-medium text-[var(--color-ink-muted)] truncate">
+                                {destination}
+                              </span>
                             </span>
                           )}
                         </div>
-
-                        {/* Mobile: Vehicle line */}
-                        <p className="sm:hidden mt-1 text-xs text-[var(--color-ink-muted)] leading-snug">
-                          <Car size={11} className="inline-block align-[-1.5px] mr-1 text-[var(--color-ink-subtle)]" />
-                          {vehicleLabel}
-                          {plate && (
-                            <>
-                              <span className="mx-1 text-[var(--color-ink-subtle)]">·</span>
-                              <span className="font-mono font-semibold text-[var(--color-ink)]">{plate}</span>
-                            </>
-                          )}
-                        </p>
-
-                        {/* Mobile: Trip headline */}
-                        {(days || destination) && (
-                          <p className="sm:hidden mt-1 text-[11px] text-[var(--color-ink-muted)] leading-snug">
-                            <MapPin size={11} className="inline-block align-[-1.5px] mr-1 text-[var(--color-primary)]" />
-                            {days && (
-                              <span className="font-bold text-[var(--color-ink)]">
-                                {days} {days === 1 ? "day" : "days"}
-                              </span>
-                            )}
-                            {days && destination && <span className="mx-1 text-[var(--color-ink-subtle)]">·</span>}
-                            {destination && <span>{destination}</span>}
-                          </p>
-                        )}
-
-                        {/* Desktop dates + price */}
-                        <div className="hidden sm:flex items-center justify-between gap-2 mt-2 min-w-0">
-                          <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)] min-w-0">
-                            <Calendar size={11} className="flex-shrink-0" />
-                            <span className="truncate">{formatDateFull(booking.start_date)} to {formatDateFull(booking.end_date)}</span>
-                          </span>
-                          {tripOverdue && (
-                            <span className="text-[10px] font-extrabold text-rose-600 dark:text-rose-400 flex-shrink-0">OVERDUE</span>
-                          )}
-                          <span className="ml-auto text-xs font-extrabold normal-case tracking-normal text-[var(--color-ink)] tabular-nums flex-shrink-0">
-                            {booking.currency_code || "KES"} {Number(booking.total_amount).toLocaleString()}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Kebab menu */}
-                      <div className="relative flex-shrink-0 -mr-1 -mt-1" data-booking-menu>
                         <button
-                          onClick={(e) => { e.stopPropagation(); setOpenBookingMenuId(openBookingMenuId === booking.id ? null : booking.id); }}
-                          className="p-2 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all active:scale-95"
-                          aria-label="Booking actions"
+                          onClick={() => router.push(`/dashboard/bookings/${booking.id}`)}
+                          className="inline-flex items-center gap-0.5 text-[8px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity group flex-shrink-0"
                         >
-                          {actingBookingId === booking.id ? <Loader2 size={16} className="animate-spin" /> : <MoreVertical size={16} />}
+                          Details
+                          <ChevronRight size={10} className="group-hover:translate-x-0.5 transition-transform" />
                         </button>
-
-                        {openBookingMenuId === booking.id && (
-                          <div className="absolute right-0 top-full mt-1 w-48 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-lg shadow-black/5 z-20 overflow-hidden animate-in fade-in slide-up duration-150">
-                            {/* ✅ Mobile-only status top bar */}
-                            <div className="sm:hidden flex items-center gap-2 px-3.5 py-2.5 bg-[var(--color-surface-hover)]/60 border-b border-[var(--color-surface-border)]">
-                              <span className="relative flex w-2 h-2">
-                                {isActive && (
-                                  <span className={`absolute inset-0 rounded-full ${meta.dot} animate-ping opacity-60`} />
-                                )}
-                                <span className={`relative w-2 h-2 rounded-full ${meta.dot}`} />
-                              </span>
-                              <span className="text-[10px] font-extrabold uppercase tracking-wider text-[var(--color-ink-muted)]">
-                                {meta.label}
-                              </span>
-                            </div>
-
-                            <button
-                              onClick={(e) => { e.stopPropagation(); setOpenBookingMenuId(null); router.push(`/dashboard/bookings/${booking.id}`); }}
-                              className="w-full flex items-center gap-2.5 px-3.5 py-3 text-xs font-bold text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors"
-                            >
-                              <Eye size={14} /> View Booking
-                            </button>
-                            {booking.status === "pending" && (
-                              <button onClick={(e) => { e.stopPropagation(); handleBookingAction(booking.id, "confirm"); }}
-                                className="w-full flex items-center gap-2.5 px-3.5 py-3 text-xs font-bold text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors border-t border-[var(--color-surface-border)]">
-                                <CheckCircle2 size={14} /> Confirm Booking
-                              </button>
-                            )}
-                            {booking.status === "confirmed" && (
-                              <button onClick={(e) => { e.stopPropagation(); handleBookingAction(booking.id, "activate"); }}
-                                className="w-full flex items-center gap-2.5 px-3.5 py-3 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors border-t border-[var(--color-surface-border)]">
-                                <Play size={14} /> Start Trip
-                              </button>
-                            )}
-                            {booking.status === "active" && (
-                              <button onClick={(e) => { e.stopPropagation(); handleBookingAction(booking.id, "complete"); }}
-                                className="w-full flex items-center gap-2.5 px-3.5 py-3 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors border-t border-[var(--color-surface-border)]">
-                                <CheckCircle2 size={14} /> End Trip
-                              </button>
-                            )}
-                            {(booking.status === "pending" || booking.status === "confirmed") && (
-                              <button onClick={(e) => { e.stopPropagation(); handleBookingAction(booking.id, "cancel"); }}
-                                className="w-full flex items-center gap-2.5 px-3.5 py-3 text-xs font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors border-t border-[var(--color-surface-border)]">
-                                <XCircle size={14} /> Cancel Booking
-                              </button>
-                            )}
-                          </div>
-                        )}
                       </div>
-                    </div>
-
-                    {/* Mobile: Receipt-style total bar */}
-                    <div className="sm:hidden mt-2.5 pt-2.5 border-t border-[var(--color-surface-border)]/50 flex items-center justify-between gap-2">
-                      <span className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)] min-w-0">
-                        <Calendar size={11} className="flex-shrink-0" />
-                        <span className="truncate">{formatDateMed(booking.start_date)} – {formatDateMed(booking.end_date)}</span>
-                      </span>
-                      {tripOverdue && (
-                        <span className="text-[10px] font-extrabold text-rose-600 dark:text-rose-400 flex-shrink-0">OVERDUE</span>
-                      )}
-                      <span className="text-sm font-extrabold text-[var(--color-ink)] tabular-nums flex-shrink-0">
-                        {booking.currency_code || "KES"} {Number(booking.total_amount).toLocaleString()}
-                      </span>
                     </div>
                   </div>
                 );
@@ -439,32 +443,32 @@ export default function ActionCenterWidget() {
 
         {/* ACTIVITY */}
         {activeSubTab === "activity" && (
-          <div className="space-y-3 animate-in fade-in duration-200">
+          <div className="space-y-2 animate-in fade-in duration-200">
             {activityLoading ? (
-              <div className="flex flex-col items-center justify-center py-8 text-[var(--color-ink-muted)] text-sm">
-                <Loader2 size={20} className="animate-spin mb-2 text-[var(--color-primary)]" />
+              <div className="flex flex-col items-center justify-center py-6 text-[var(--color-ink-muted)] text-sm">
+                <Loader2 size={18} className="animate-spin mb-2 text-[var(--color-primary)]" />
                 Loading activity...
               </div>
             ) : activities.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-3">
-                  <Clock size={20} />
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-2">
+                  <Clock size={18} />
                 </div>
                 <p className="text-sm font-bold text-[var(--color-ink)]">No recent activity</p>
-                <p className="text-xs text-[var(--color-ink-muted)] mt-1">Recent fleet moves will be logged here.</p>
+                <p className="text-[10px] text-[var(--color-ink-muted)] mt-0.5">Recent fleet moves will be logged here.</p>
               </div>
             ) : (
               activities.map((activity: any) => (
-                <div key={`activity-${activity.id}`} className="p-3 sm:p-4 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-sm)] transition-all duration-200 flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-lg bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center flex-shrink-0 text-[var(--color-primary)] mt-0.5">
-                    <Clock size={14} />
+                <div key={`activity-${activity.id}`} className="p-2.5 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:border-[var(--color-primary)]/40 hover:shadow-sm transition-all duration-200 flex items-start gap-2.5">
+                  <div className="w-7 h-7 rounded-lg bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center flex-shrink-0 text-[var(--color-primary)]">
+                    <Clock size={12} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-xs font-semibold text-[var(--color-ink)] leading-snug">
+                    <p className="text-[10px] font-semibold text-[var(--color-ink)] leading-snug">
                       {activity.title || activity.description || activity.action}
                     </p>
                     {activity.timestamp && (
-                      <p className="text-[10px] text-[var(--color-ink-muted)] mt-1 font-medium">{formatDate(activity.timestamp)}</p>
+                      <p className="text-[8px] text-[var(--color-ink-muted)] mt-0.5 font-medium">{formatDate(activity.timestamp)}</p>
                     )}
                   </div>
                 </div>
@@ -475,19 +479,19 @@ export default function ActionCenterWidget() {
 
         {/* TASKS */}
         {activeSubTab === "tasks" && (
-          <div className="space-y-3 animate-in fade-in duration-200">
+          <div className="space-y-2 animate-in fade-in duration-200">
             {tasksLoading ? (
-              <div className="flex flex-col items-center justify-center py-8 text-[var(--color-ink-muted)] text-sm">
-                <Loader2 size={20} className="animate-spin mb-2 text-[var(--color-primary)]" />
+              <div className="flex flex-col items-center justify-center py-6 text-[var(--color-ink-muted)] text-sm">
+                <Loader2 size={18} className="animate-spin mb-2 text-[var(--color-primary)]" />
                 Loading tasks...
               </div>
             ) : tasks.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3">
-                  <CheckCircle2 size={20} />
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2">
+                  <CheckCircle2 size={18} />
                 </div>
                 <p className="text-sm font-bold text-[var(--color-ink)]">All caught up!</p>
-                <p className="text-xs text-[var(--color-ink-muted)] mt-1">No pending tasks right now.</p>
+                <p className="text-[10px] text-[var(--color-ink-muted)] mt-0.5">No pending tasks right now.</p>
               </div>
             ) : (
               tasks.map((task) => {
@@ -498,55 +502,47 @@ export default function ActionCenterWidget() {
                 const SubjectIcon = subject ? getSubjectIcon(subject) : null;
 
                 return (
-                  <div key={`task-${safeTaskId}`} className="group relative p-3 sm:p-4 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:border-[var(--color-primary)]/40 hover:shadow-[var(--shadow-sm)] transition-all duration-200">
-                    <div className="flex items-start gap-3 sm:gap-4">
-                      <div className={`mt-1.5 flex-shrink-0 w-2.5 h-2.5 rounded-full ring-2 ring-[var(--color-surface)] ${getPriorityDotColor(task.priority)}`} />
+                  <div key={`task-${safeTaskId}`} className="group relative p-2.5 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:border-[var(--color-primary)]/40 hover:shadow-sm transition-all duration-200">
+                    <div className="flex items-start gap-2.5">
+                      <div className={`mt-1 flex-shrink-0 w-2 h-2 rounded-full ring-2 ring-[var(--color-surface)] ${getPriorityDotColor(task.priority)}`} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold leading-tight text-[var(--color-ink)]">{action}</p>
+                        <p className="text-[10px] font-semibold leading-tight text-[var(--color-ink)]">{action}</p>
                         {subject && SubjectIcon && (
-                          <div className="flex items-center gap-1.5 mt-1 mb-2">
-                            <SubjectIcon size={12} className="text-[var(--color-ink-muted)] flex-shrink-0" />
-                            <span className="text-xs text-[var(--color-ink-muted)] truncate">{subject}</span>
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <SubjectIcon size={10} className="text-[var(--color-ink-muted)] flex-shrink-0" />
+                            <span className="text-[9px] text-[var(--color-ink-muted)] truncate">{subject}</span>
                           </div>
                         )}
-                        {task.description && (
-                          <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed mb-2 sm:mb-2.5 line-clamp-2">{task.description}</p>
+                        {task.due_date && (
+                          <span className={`flex items-center gap-1 mt-0.5 text-[8px] font-bold uppercase tracking-wider ${overdue ? "text-rose-600 dark:text-rose-400" : "text-[var(--color-ink-subtle)]"}`}>
+                            <Calendar size={9} />
+                            {formatDate(task.due_date)}
+                            {overdue && <span className="ml-1 px-1 py-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[7px] font-extrabold">OVERDUE</span>}
+                          </span>
                         )}
-                        <div className="flex flex-wrap items-center gap-3 text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)]">
-                          {task.category && (
-                            <span className="flex items-center gap-1"><Tag size={11} /><span className="capitalize">{task.category}</span></span>
-                          )}
-                          {task.due_date && (
-                            <span className={`flex items-center gap-1 ${overdue ? "text-rose-600 dark:text-rose-400 font-bold" : ""}`}>
-                              <Calendar size={11} />
-                              {formatDate(task.due_date)}
-                              {overdue && <span className="ml-1 px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[9px] font-extrabold">OVERDUE</span>}
-                            </span>
-                          )}
-                        </div>
                       </div>
 
                       {hasActions && (
-                        <div className="relative flex-shrink-0 -mr-1 -mt-1" data-task-menu>
+                        <div className="relative flex-shrink-0" data-task-menu>
                           <button
                             onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === safeTaskId ? null : safeTaskId); }}
-                            className="p-2 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all active:scale-95"
+                            className="p-1 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all active:scale-95"
                             aria-label="Task actions"
                           >
-                            {updatingId === safeTaskId ? <Loader2 size={16} className="animate-spin" /> : <MoreVertical size={16} />}
+                            {updatingId === safeTaskId ? <Loader2 size={12} className="animate-spin" /> : <MoreVertical size={12} />}
                           </button>
                           {openMenuId === safeTaskId && (
-                            <div className="absolute right-0 top-full mt-1 w-44 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-lg shadow-black/5 z-20 overflow-hidden animate-in fade-in slide-up duration-150">
+                            <div className="absolute right-0 top-full mt-1 w-40 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-lg shadow-black/5 z-20 overflow-hidden animate-in fade-in slide-up duration-150">
                               {task.status === "unassigned" && (
                                 <button onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); handleClaimTask(safeTaskId); }}
-                                  className="w-full flex items-center gap-2.5 px-3.5 py-3 text-xs font-bold text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors">
-                                  <UserPlus size={14} /> Claim Task
+                                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[10px] font-bold text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors">
+                                  <UserPlus size={12} /> Claim Task
                                 </button>
                               )}
                               {task.status !== "unassigned" && task.status !== "completed" && (
                                 <button onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); handleCompleteTask(safeTaskId); }}
-                                  className="w-full flex items-center gap-2.5 px-3.5 py-3 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors">
-                                  <CheckCircle2 size={14} /> Mark Complete
+                                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors">
+                                  <CheckCircle2 size={12} /> Mark Complete
                                 </button>
                               )}
                             </div>
@@ -563,13 +559,13 @@ export default function ActionCenterWidget() {
       </div>
 
       {/* FOOTER */}
-      <div className="p-3.5 border-t border-[var(--color-surface-border)] bg-[var(--color-surface-hover)] text-center mt-auto">
+      <div className="px-3 py-2 border-t border-[var(--color-surface-border)] bg-[var(--color-surface-hover)] text-center">
         <button
           onClick={() => router.push(`/dashboard/${activeSubTab === "bookings" ? "bookings" : activeSubTab}`)}
-          className="inline-flex items-center gap-1.5 text-xs font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity"
+          className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity"
         >
           View all {headerCopy.title}
-          <ArrowRight size={14} />
+          <ArrowRight size={12} />
         </button>
       </div>
     </div>
