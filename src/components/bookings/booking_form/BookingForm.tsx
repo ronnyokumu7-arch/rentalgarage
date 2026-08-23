@@ -41,7 +41,7 @@ export default function BookingForm() {
   const selectedDriver = getSelectedDriver();
   const totalAmount = calculateTotal();
 
-  // ✅ MILESTONE 2: Driver field is service-aware (catalog-driven)
+  // Determine whether the selected service requires a staff driver
   const selectedServiceDef = services.find(
     (s) => s.key === ((formData.service_type as ServiceType) || "selfdrive")
   );
@@ -52,12 +52,13 @@ export default function BookingForm() {
       
       <div className="space-y-3">
         
+        {/* Section 1: Client, Vehicle & Driver */}
         <section className={sectionClass}>
           <div className="flex items-center gap-2 mb-3">
             <div className="w-6 h-6 rounded-md bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
               <User size={14} />
             </div>
-            <h3 className="text-sm font-bold text-[var(--color-ink)]">Client & Vehicle & Driver</h3>
+            <h3 className="text-sm font-bold text-[var(--color-ink)]">Client, Vehicle & Driver</h3>
           </div>
 
           <div className="space-y-3">
@@ -83,7 +84,7 @@ export default function BookingForm() {
               }}
             />
 
-            {/* ✅ MILESTONE 2: Driver selector only for driver-requiring services */}
+            {/* Driver selector: only shown for services that require a staff driver */}
             {requiresDriver ? (
               <DriverSearch
                 selectedDriverId={formData.driver_id}
@@ -98,18 +99,19 @@ export default function BookingForm() {
             ) : (
               <p className="text-[10px] text-[var(--color-ink-muted)] flex items-start gap-1.5">
                 <Info size={11} className="text-[var(--color-primary)] shrink-0 mt-[1px]" />
-                Self-drive — the client drives. No staff driver required.
+                This is a self-drive rental — the client will drive the vehicle themselves. No staff driver needed.
               </p>
             )}
           </div>
         </section>
 
+        {/* Section 2: Service Type & Schedule */}
         <section className={sectionClass}>
           <div className="flex items-center gap-2 mb-3">
             <div className="w-6 h-6 rounded-md bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
               <CalendarDays size={14} />
             </div>
-            <h3 className="text-sm font-bold text-[var(--color-ink)]">Rental Period</h3>
+            <h3 className="text-sm font-bold text-[var(--color-ink)]">Service Type & Schedule</h3>
           </div>
 
           <div className="mb-3">
@@ -117,7 +119,7 @@ export default function BookingForm() {
               value={(formData.service_type as ServiceType) || "selfdrive"}
               onChange={(type) => {
                 updateField('service_type', type);
-                // ✅ Auto-clear driver when switching to a non-driver service
+                // Auto-clear driver when switching to a service that doesn't require one
                 const svc = services.find((s) => s.key === type);
                 if (!svc?.requires_driver && formData.driver_id) {
                   updateField('driver_id', '');
@@ -134,6 +136,7 @@ export default function BookingForm() {
               onChange={(datetime) => {
                 updateField('pickup_at', datetime);
                 updateField('start_date', datetime.split('T')[0]);
+                // Clear return if it's now before the new pickup
                 if (formData.scheduled_return_at && new Date(datetime) >= new Date(formData.scheduled_return_at)) {
                   updateField('scheduled_return_at', '');
                   updateField('end_date', '');
@@ -154,12 +157,13 @@ export default function BookingForm() {
           </div>
         </section>
 
+        {/* Section 3: Pickup & Return Locations */}
         <section className={sectionClass}>
           <div className="flex items-center gap-2 mb-3">
             <div className="w-6 h-6 rounded-md bg-purple-500/10 text-purple-500 flex items-center justify-center">
               <MapPin size={14} />
             </div>
-            <h3 className="text-sm font-bold text-[var(--color-ink)]">Pickup & Return</h3>
+            <h3 className="text-sm font-bold text-[var(--color-ink)]">Pickup & Return Locations</h3>
           </div>
 
           <div className="space-y-3">
@@ -167,21 +171,21 @@ export default function BookingForm() {
               value={formData.pickup_location}
               onChange={(value) => updateField('pickup_location', value)}
               label="Pickup Location"
-              placeholder="Search pickup location..."
+              placeholder="Enter the pickup address..."
             />
 
             <AddressAutocomplete
               value={formData.return_location}
               onChange={(value) => updateField('return_location', value)}
               label="Return Location"
-              placeholder="Search return location..."
+              placeholder="Enter the return address..."
             />
 
             <AddressAutocomplete
               value={formData.destination}
               onChange={(value) => updateField('destination', value)}
-              label="Destination"
-              placeholder="Search destination..."
+              label="Destination (optional)"
+              placeholder="Enter the destination address..."
             />
           </div>
         </section>
@@ -211,7 +215,7 @@ export default function BookingForm() {
             {loading ? (
               <>
                 <Loader2 size={16} className="animate-spin" />
-                Creating...
+                Creating booking...
               </>
             ) : (
               <>
@@ -221,7 +225,7 @@ export default function BookingForm() {
             )}
           </button>
           <p className="text-[10px] text-center text-[var(--color-ink-muted)] mt-2">
-            Booking will be created in pending state
+            Your booking will be created with "Pending" status. You can confirm it once all details are verified.
           </p>
         </div>
 

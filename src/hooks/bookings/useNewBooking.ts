@@ -224,7 +224,18 @@ export function useNewBooking() {
       toast.success('Booking created successfully!');
       router.push('/dashboard/bookings');
     } catch (error: any) {
-      toast.error(error.response?.data?.detail || 'Failed to create booking');
+      // ✅ MILESTONE 2 LOCKDOWN: FastAPI validation errors arrive as an ARRAY of
+      // objects like [{loc: [...], msg: "Value error, end_date...", type: "value_error"}].
+      // Rendering the array raw crashes React with "Objects are not valid as a React child".
+      // Extract a human-readable string instead.
+      const detail = error.response?.data?.detail;
+      let msg = 'Failed to create booking';
+      if (typeof detail === 'string') {
+        msg = detail;
+      } else if (Array.isArray(detail) && detail.length > 0) {
+        msg = String(detail[0]?.msg || 'Validation failed').replace(/^Value error,?\s*/i, '');
+      }
+      toast.error(msg);
     } finally {
       setLoading(false);
     }

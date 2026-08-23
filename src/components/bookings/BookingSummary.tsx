@@ -1,7 +1,6 @@
-// src/components/bookings/BookingSummary.tsx
 "use client";
 
-import { User, UserCircle, Car, CalendarDays, DollarSign, Phone, Loader2, ShieldCheck, CreditCard } from 'lucide-react';
+import { User, UserCircle, Car, CalendarDays, DollarSign, Phone, Loader2, ShieldCheck, CreditCard, Clock, MapPin, Route } from 'lucide-react';
 import type { Client, Vehicle, DriverListItem, ServiceType, PricingResult } from '@/lib/types';
 
 interface BookingSummaryProps {
@@ -27,6 +26,28 @@ const SERVICE_LABELS: Record<ServiceType, string> = {
   airport_transfer: "Airport Transfer",
   chauffeur_taxi: "Taxi",
   route_stops_service: "Places-Visited Tour",
+};
+
+// ✅ Billing-model icons for the Period header (visual cue per service type)
+const BILLING_ICONS: Record<string, typeof CalendarDays> = {
+  rolling_24h: CalendarDays,
+  event_base: CalendarDays,
+  hourly: Clock,
+  package: Clock,
+  fixed_route: MapPin,
+  distance_time: Route,
+  route_stops: MapPin,
+};
+
+// ✅ Period labels — match what the engine actually computes
+const PERIOD_LABELS: Record<string, { startLabel: string; endLabel: string }> = {
+  rolling_24h: { startLabel: "Pickup", endLabel: "Return" },
+  event_base: { startLabel: "Event starts", endLabel: "Event ends" },
+  hourly: { startLabel: "Start", endLabel: "End" },
+  package: { startLabel: "Start", endLabel: "End" },
+  fixed_route: { startLabel: "Pickup", endLabel: "Drop-off" },
+  distance_time: { startLabel: "Pickup", endLabel: "Drop-off" },
+  route_stops: { startLabel: "Pickup", endLabel: "Drop-off" },
 };
 
 const fmtMoney = (v: number | string) => Number(v).toLocaleString();
@@ -58,6 +79,107 @@ const DRIVER_STATUS_LABELS: Record<string, string> = {
   on_trip: "On Trip",
 };
 
+// ✅ Billing-model-aware duration renderer — uses the engine's own output
+// so the display always matches what was actually charged.
+const renderDuration = (quote: PricingResult | null, fallbackDays: number) => {
+  if (!quote) {
+    // No quote yet — generic fallback
+    if (fallbackDays <= 0) return null;
+    return (
+      <span className="font-semibold text-[var(--color-ink)]">
+        {fallbackDays} day{fallbackDays !== 1 ? "s" : ""} × 24h
+      </span>
+    );
+  }
+
+  const { billing_model, included_days, extra_hours, day_hours } = quote;
+
+  switch (billing_model) {
+    case "event_base":
+      return (
+        <span className="font-semibold text-[var(--color-ink)]">
+          1 event × {day_hours}h base
+          {extra_hours > 0 && ` + ${extra_hours}h add-on`}
+        </span>
+      );
+    case "hourly":
+      // For hourly, included_days isn't meaningful; total hours is what matters.
+      // We don't have raw hours on PricingResult, so use base_charge / per_hour proxy:
+      // (not reliable). Instead show the billed day-equivalent.
+      return (
+        <span className="font-semibold text-[var(--color-ink)]">
+          {included_days} block{included_days !== 1 ? "s" : ""} × {day_hours}h
+        </span>
+      );
+    case "package":
+      return (
+        <span className="font-semibold text-[var(--color-ink)]">
+          {day_hours <= 4 ? "Half-day" : "Full-day"} package
+          {extra_hours > 0 && ` + ${extra_hours}h extra`}
+        </span>
+      );
+    case "fixed_route":
+    case "distance_time":
+    case "route_stops":
+      // These models don't have a "duration" concept — show billing basis instead
+      return (
+        <span className="font-semibold text-[var(--color-ink)]">
+          Flat rate
+        </span>
+      );
+    case "rolling_24h":
+    default:
+      return (
+        <span className="font-semibold text-[var(--color-ink)]">
+          {included_days} day{included_days !== 1 ? "s" : ""} × {day_hours}h
+          {extra_hours > 0 && ` + ${extra_hours}h OT`}
+        </span>
+      );
+  }
+};
+
+// ✅ Billing-model-aware footer line — matches the duration display
+const renderFooter = (quote: PricingResult | null, serviceType: ServiceType, fallbackDays: number, vehicle?: Vehicle) => {
+  const label = quote?.service_label || SERVICE_LABELS[serviceType];
+
+  if (quote) {
+    const bits: string[] = [label];
+    const { billing_model, included_days, day_hours, driver_charge } = quote;
+
+    switch (billing_model) {
+      case "event_base":
+        bits.push(`1 event × ${day_hours}h`);
+        break;
+      case "hourly":
+      case "package":
+        bits.push(`${included_days} block${included_days !== 1 ? "s" : ""} × ${day_hours}h`);
+        break;
+      case "fixed_route":
+      case "distance_time":
+      case "route_stops":
+        bits.push("flat/metered");
+        break;
+      case "rolling_24h":
+      default:
+        bits.push(`${included_days} day(s) × ${day_hours}h`);
+        break;
+    }
+
+    if (Number(driver_charge) > 0) bits.push("includes driver fees");
+    return <div className="text-[10px] text-[var(--color-ink-muted)] mt-1">{bits.join(" · ")}</div>;
+  }
+
+  // No quote — legacy fallback
+  if (fallbackDays > 0 && vehicle) {
+    return (
+      <div className="text-[10px] text-[var(--color-ink-muted)] mt-1">
+        {fallbackDays} days × KES {Number(vehicle.daily_rate).toLocaleString()}/day
+      </div>
+    );
+  }
+  return null;
+};
+
 export default function BookingSummary({
   client,
   vehicle,
@@ -82,6 +204,14 @@ export default function BookingSummary({
 
   const driverStatusStyle = driver ? (DRIVER_STATUS_STYLES[driver.status] || DRIVER_STATUS_STYLES.available) : null;
 
+  // ✅ Resolve billing-model-aware labels + icon
+  const billingModel = quote?.billing_model || "rolling_24h";
+  const PeriodIcon = BILLING_ICONS[billingModel] || CalendarDays;
+  const periodLabels = PERIOD_LABELS[billingModel] || PERIOD_LABELS.rolling_24h;
+
+  // ✅ Use engine's own service_label when available (always up to date with catalog)
+  const serviceBadgeLabel = quote?.service_label || SERVICE_LABELS[serviceType];
+
   return (
     <div className="bg-gradient-to-br from-[var(--color-surface)] to-[var(--color-surface-hover)] rounded-xl border border-[var(--color-surface-border)] p-4">
       
@@ -91,7 +221,7 @@ export default function BookingSummary({
           Booking Summary
         </div>
         <span className="px-2 py-0.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-[9px] font-bold uppercase tracking-wide">
-          {SERVICE_LABELS[serviceType]}
+          {serviceBadgeLabel}
         </span>
       </div>
       
@@ -166,27 +296,28 @@ export default function BookingSummary({
         </div>
       )}
 
-      {/* Dates + Times */}
+      {/* Dates + Times — ✅ now billing-model-aware */}
       <div className="mb-3 pb-3 border-b border-[var(--color-surface-border)]">
         <div className="flex items-center gap-2 mb-2">
-          <CalendarDays size={14} className="text-[var(--color-primary)]" />
-          <span className="text-xs font-semibold text-[var(--color-ink)]">Period</span>
+          <PeriodIcon size={14} className="text-[var(--color-primary)]" />
+          <span className="text-xs font-semibold text-[var(--color-ink)]">
+            {billingModel === "event_base" ? "Event Schedule" : 
+             billingModel === "fixed_route" || billingModel === "distance_time" ? "Trip Schedule" : "Period"}
+          </span>
         </div>
         {startDate && endDate ? (
           <div className="space-y-1 text-xs">
             <div className="flex justify-between">
-              <span className="text-[var(--color-ink-muted)]">Pickup</span>
+              <span className="text-[var(--color-ink-muted)]">{periodLabels.startLabel}</span>
               <span className="font-medium text-[var(--color-ink)]">{fmtDateTime(startDate)}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-[var(--color-ink-muted)]">Return</span>
+              <span className="text-[var(--color-ink-muted)]">{periodLabels.endLabel}</span>
               <span className="font-medium text-[var(--color-ink)]">{fmtDateTime(endDate)}</span>
             </div>
             <div className="pt-1 border-t border-[var(--color-surface-border)] flex justify-between items-center">
               <span className="text-[var(--color-ink-muted)]">Duration</span>
-              <span className="font-semibold text-[var(--color-ink)]">
-                {days} day{days !== 1 ? "s" : ""} × {quote ? quote.day_hours : 24}h
-              </span>
+              {renderDuration(quote, days)}
             </div>
           </div>
         ) : (
@@ -237,18 +368,7 @@ export default function BookingSummary({
         <div className="text-2xl font-bold text-[var(--color-ink)]">
           KES {totalAmount.toLocaleString()}
         </div>
-        {quote ? (
-          <div className="text-[10px] text-[var(--color-ink-muted)] mt-1">
-            {quote.included_days} day(s) × {quote.day_hours}h · {SERVICE_LABELS[serviceType]}
-            {Number(quote.driver_charge) > 0 && " · includes driver fees"}
-          </div>
-        ) : (
-          days > 0 && vehicle && (
-            <div className="text-[10px] text-[var(--color-ink-muted)] mt-1">
-              {days} days × KES {Number(vehicle.daily_rate).toLocaleString()}/day
-            </div>
-          )
-        )}
+        {renderFooter(quote, serviceType, days, vehicle)}
       </div>
     </div>
   );
