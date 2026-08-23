@@ -1,3 +1,5 @@
+/* src/app/globals.css */
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
 
@@ -5,22 +7,51 @@
    BRAND TYPOGRAPHY & GLOBAL DEFAULTS
    ═══════════════════════════════════════════════════════════ */
 @layer base {
-  *, ::before, ::after {
-    font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, sans-serif !important;
-    border-color: var(--color-surface-border);
+  /* ✅ Force Inter as the default sans-serif font */
+  html {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
-  /* ✅ HEADINGS: Space Grotesk — Modern, confident, tech-forward */
-  h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-display), var(--font-sans), sans-serif !important;
+  /* ✅ Force Space Grotesk for ALL headings */
+  h1, h2, h3, h4, h5, h6,
+  .heading, .headline, [class*="heading"] {
+    font-family: "Space Grotesk", "Inter", sans-serif !important;
     letter-spacing: -0.02em;
+    font-weight: 700;
   }
 
-  code, pre, .font-mono,
-  [class*="tabular-nums"] {
-    font-family: var(--font-mono), ui-monospace, SFMono-Regular, monospace !important;
+  /* ✅ Force monospace for code & numbers */
+  code, pre, .font-mono, .mono,
+  [class*="tabular-nums"],
+  [class*="font-mono"] {
+    font-family: "JetBrains Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
   }
 
+  /* ✅ Ensure all text uses the correct fonts */
+  body, p, span, div, section, article, main, aside, header, footer, nav {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  /* ✅ Inputs, buttons, selects should use Inter */
+  input, button, select, textarea, label {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  /* ✅ Tables and data displays */
+  table, td, th {
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+
+  /* ✅ Fix monospace for plate numbers, IDs, etc. */
+  .plate-number, .id-number, .reference-code {
+    font-family: "JetBrains Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+    letter-spacing: 0.02em;
+  }
+
+  /* ✅ Utility text classes */
   .text-ink-muted { color: var(--color-ink-muted) !important; }
   .text-ink { color: var(--color-ink) !important; }
   .text-primary { color: var(--color-primary) !important; }
@@ -31,9 +62,9 @@
    ============================================================ */
 
 @theme {
-  --font-sans: var(--font-sans);
-  --font-display: var(--font-display);
-  --font-mono: var(--font-mono);
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Space Grotesk", "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 
   --color-primary: var(--color-primary);
   --color-primary-hover: var(--color-primary-hover);
@@ -104,12 +135,6 @@
    ============================================================ */
 
 :root {
-  /* ── Typography ─────────────────────────────────────────── */
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  /* ✅ Space Grotesk for headings — modern, confident, tech-forward */
-  --font-display: "Space Grotesk", "Inter", sans-serif;
-  --font-mono: "JetBrains Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-
   /* ── Brand Identity — Deep Royal Indigo (Wealth, Trust, Authority) ── */
   --color-primary:        #4338CA;
   --color-primary-hover:  #3730A3;
@@ -333,43 +358,88 @@
 
 /* ============================================================
    BASE STYLES
+   ✅ INSIDE @layer base — so Tailwind utilities
+   (text-xs / text-sm / text-base / ...) can override them per-component.
+   This is what unlocks proper premium density across the app.
    ============================================================ */
+@layer base {
+  :root {
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-left: env(safe-area-inset-left, 0px);
+  }
 
-:root {
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-right: env(safe-area-inset-right, 0px);
-  --safe-bottom: env(safe-area-inset-bottom, 0px);
-  --safe-left: env(safe-area-inset-left, 0px);
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: none !important;
+    font-size: 15px;   /* premium density; bump to 16px if preferred */
+    line-height: 1.55;
+  }
+
+  /* ✅ Inherit sizes so Tailwind utilities can override per-component */
+  p, li, td, th, label, input, textarea, select, button {
+    font-size: inherit;
+    line-height: inherit;
+  }
+
+  /* ✅ Tighter, denser heading scale for premium dashboards */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Space Grotesk", "Inter", sans-serif !important;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+
+  h1 { font-size: 1.875rem; font-weight: 800; }
+  h2 { font-size: 1.5rem;   font-weight: 700; }
+  h3 { font-size: 1.25rem;  font-weight: 700; }
+  h4 { font-size: 1.125rem; font-weight: 700; }
+  h5 { font-size: 1rem;     font-weight: 600; }
+  h6 { font-size: 0.875rem; font-weight: 600; }
+
+  /* ✅ Monospace for codes, numbers, plates */
+  code, pre, .font-mono, .mono,
+  [class*="tabular-nums"],
+  [class*="font-mono"],
+  .plate-number, .id-number, .reference-code {
+    font-family: "JetBrains Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+    letter-spacing: 0.02em;
+  }
+
+  /* ✅ Utility text classes */
+  .text-ink-muted { color: var(--color-ink-muted) !important; }
+  .text-ink { color: var(--color-ink) !important; }
+  .text-primary { color: var(--color-primary) !important; }
 }
 
-body {
-  background-color: var(--color-bg);
-  color: var(--color-ink);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  transition: none !important;
-}
-
-/* ✅ FIXED: Removed global * transition that was slowing down the entire app.
-   Transitions are now only applied via Tailwind utility classes (e.g., transition-all)
-   on specific interactive elements like buttons, inputs, and cards. */
-
-
-/* 1. ALLOW SECTIONS TO FLOW NATURALLY */
+/* ============================================================
+   PDF CONTRACT PRINT RULES (used by contract_premium.html)
+   ============================================================ */
 .contract-section {
     break-inside: auto;
     margin-bottom: 14pt;
 }
 
-/* 2. PROTECT HEADERS (No Orphans) */
 .section-title {
     break-after: avoid;
     page-break-after: avoid;
 }
 
-/* 3. PROTECT CRITICAL BLOCKS (No Cutoffs) */
 .signature-box, .audit-stamp, .charges-table {
     break-inside: avoid;
     page-break-inside: avoid;
+}
+
+/* ✅ Hide scrollbar for cleaner UI */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }

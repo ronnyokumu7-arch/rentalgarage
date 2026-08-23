@@ -185,31 +185,29 @@ export default function ActionCenterWidget() {
   return (
     <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden h-full flex flex-col">
       
-      {/* PREMIUM HEADER - Optimized for Mobile */}
-      <div className="px-3 py-2 border-b border-[var(--color-surface-border)] bg-gradient-to-r from-[var(--color-surface-hover)]/50 to-transparent">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2">
-          {/* Left: Icon + Title - More compact */}
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary)]/80 flex items-center justify-center text-white shadow-sm shadow-[var(--color-primary)]/20 flex-shrink-0">
-              <HeaderIcon size={12} className={headerCopy.iconClassName} />
+      {/* HEADER */}
+      <div className="px-5 py-3.5 border-b border-[var(--color-surface-border)] bg-gradient-to-r from-[var(--color-surface-hover)]/50 to-transparent">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary)]/80 flex items-center justify-center text-white shadow-sm shadow-[var(--color-primary)]/20 flex-shrink-0">
+              <HeaderIcon size={20} className={headerCopy.iconClassName} />
             </div>
             <div className="min-w-0">
-              <h3 className="text-[10px] font-bold text-[var(--color-ink)] tracking-tight flex items-center gap-1">
+              <h3 className="text-sm font-bold text-[var(--color-ink)] tracking-tight flex items-center gap-1.5">
                 {headerCopy.title}
-                <Sparkles size={8} className="text-[var(--color-primary)] opacity-70 flex-shrink-0" />
+                <Sparkles size={13} className="text-[var(--color-primary)] opacity-70 flex-shrink-0" />
               </h3>
-              <p className="text-[8px] text-[var(--color-ink-muted)] truncate">{headerCopy.description}</p>
+              <p className="text-xs text-[var(--color-ink-muted)] truncate">{headerCopy.description}</p>
             </div>
           </div>
 
-          {/* Right: Premium Tab Switcher - Optimized for Mobile */}
           <div className="flex items-center gap-1 p-0.5 bg-[var(--color-surface-hover)]/50 rounded-full border border-[var(--color-surface-border)]/50 flex-shrink-0 overflow-x-auto max-w-full">
             {subTabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveSubTab(tab.id)}
                 className={`
-                  relative flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[8px] font-bold transition-all duration-300 whitespace-nowrap
+                  relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 whitespace-nowrap
                   ${activeSubTab === tab.id 
                     ? "bg-[var(--color-surface)] text-[var(--color-ink)] shadow-sm" 
                     : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface)]/50"
@@ -219,7 +217,7 @@ export default function ActionCenterWidget() {
                 {tab.label}
                 {tab.count > 0 && (
                   <span className={`
-                    px-1 py-0.5 rounded-full text-[7px] font-bold transition-colors
+                    px-1.5 py-0.5 rounded-full text-[10px] font-bold transition-colors
                     ${activeSubTab === tab.id 
                       ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)]" 
                       : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)]"
@@ -235,21 +233,21 @@ export default function ActionCenterWidget() {
       </div>
 
       {/* CONTENT */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar px-2 py-2 sm:p-3 max-h-80 space-y-2">
+      <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-3 sm:p-4 max-h-[480px] space-y-2.5">
         {activeSubTab === "bookings" && (
-          <div className="space-y-2 animate-in fade-in duration-200">
+          <div className="space-y-2.5 animate-in fade-in duration-200">
             {bookingsLoading ? (
-              <div className="flex flex-col items-center justify-center py-6 text-[var(--color-ink-muted)] text-sm">
-                <Loader2 size={18} className="animate-spin mb-2 text-[var(--color-primary)]" />
-                Loading rentals...
+              <div className="flex flex-col items-center justify-center py-8 text-[var(--color-ink-muted)]">
+                <Loader2 size={24} className="animate-spin mb-3 text-[var(--color-primary)]" />
+                <p className="text-sm font-medium">Loading rentals...</p>
               </div>
             ) : bookings.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-6 text-center">
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-2">
-                  <Calendar size={18} />
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3">
+                  <Calendar size={24} />
                 </div>
                 <p className="text-sm font-bold text-[var(--color-ink)]">No upcoming rentals</p>
-                <p className="text-[10px] text-[var(--color-ink-muted)] mt-0.5">Scheduled rentals will appear here.</p>
+                <p className="text-xs text-[var(--color-ink-muted)] mt-1">Scheduled rentals will appear here.</p>
               </div>
             ) : (
               bookings.map((booking) => {
@@ -268,15 +266,15 @@ export default function ActionCenterWidget() {
                 return (
                   <div 
                     key={`booking-${booking.id}`} 
-                    className="group relative rounded-xl overflow-hidden border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:border-[var(--color-primary)]/40 hover:shadow-md transition-all duration-300"
+                    className="group relative rounded-xl overflow-hidden border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:border-[var(--color-primary)]/40 hover:shadow-sm transition-all duration-200"
                   >
-                    <div className="p-3">
-                      {/* Row 1: Client + Status + Menu */}
-                      <div className="flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
-                          {/* Premium Avatar with subtle ring */}
+                    <div className="p-3.5">
+                      {/* Row 1: Avatar + Client + Status Badge (Desktop) / Dot (Mobile) + Menu */}
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          {/* Avatar - Smaller */}
                           <div className="relative flex-shrink-0">
-                            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-[10px] shadow-sm ring-2 ring-[var(--color-surface)] ${
+                            <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm ring-2 ring-[var(--color-surface)] ${
                               isActive ? 'bg-gradient-to-br from-emerald-500 to-emerald-600' :
                               isConfirmed ? 'bg-gradient-to-br from-blue-500 to-blue-600' :
                               isPending ? 'bg-gradient-to-br from-amber-500 to-amber-600' :
@@ -284,7 +282,8 @@ export default function ActionCenterWidget() {
                             }`}>
                               {getInitials(clientName)}
                             </div>
-                            <div className="absolute -bottom-0.5 -right-0.5">
+                            {/* Status dot - Mobile only */}
+                            <div className="absolute -bottom-0.5 -right-0.5 sm:hidden">
                               <div className={`w-2.5 h-2.5 rounded-full ${meta.dot} ring-2 ring-[var(--color-surface)] ${
                                 isActive ? 'animate-pulse' : ''
                               }`} />
@@ -292,26 +291,26 @@ export default function ActionCenterWidget() {
                           </div>
                           
                           <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-1.5">
-                              <p className="text-xs font-bold text-[var(--color-ink)] truncate">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <p className="text-sm font-semibold text-[var(--color-ink)] truncate">
                                 {clientName}
                               </p>
                               {isActive && (
-                                <span className="flex-shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[7px] font-extrabold uppercase tracking-wider border border-emerald-500/20">
-                                  <span className="w-1 h-1 rounded-full bg-emerald-500 animate-pulse" />
+                                <span className="flex-shrink-0 flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[9px] font-extrabold uppercase tracking-wider border border-emerald-500/20">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                                   LIVE
                                 </span>
                               )}
                             </div>
-                            <div className="flex items-center gap-1 mt-0.5">
-                              <Car size={9} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                              <span className="text-[9px] font-medium text-[var(--color-ink-muted)] truncate">
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <Car size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                              <span className="text-xs font-medium text-[var(--color-ink-muted)] truncate">
                                 {vehicleLabel}
                               </span>
                               {plate && (
                                 <>
-                                  <span className="text-[8px] text-[var(--color-ink-subtle)]">•</span>
-                                  <span className="text-[8px] font-mono font-semibold text-[var(--color-ink)]">
+                                  <span className="text-xs text-[var(--color-ink-subtle)]">•</span>
+                                  <span className="text-xs font-mono font-semibold text-[var(--color-ink)]">
                                     {plate}
                                   </span>
                                 </>
@@ -320,46 +319,54 @@ export default function ActionCenterWidget() {
                           </div>
                         </div>
 
+                        {/* Status Badge - Desktop only */}
+                        <div className="hidden sm:flex items-center gap-2">
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${meta.badge}`}>
+                            <span className={`w-1.5 h-1.5 rounded-full ${meta.dot} ${isActive ? 'animate-pulse' : ''}`} />
+                            {meta.label}
+                          </span>
+                        </div>
+
                         {/* Kebab menu */}
                         <div className="relative flex-shrink-0" data-booking-menu>
                           <button
                             onClick={(e) => { e.stopPropagation(); setOpenBookingMenuId(openBookingMenuId === booking.id ? null : booking.id); }}
-                            className="p-1 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all active:scale-95"
+                            className="p-1.5 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all active:scale-95"
                             aria-label="Booking actions"
                           >
-                            {actingBookingId === booking.id ? <Loader2 size={12} className="animate-spin" /> : <MoreVertical size={12} />}
+                            {actingBookingId === booking.id ? <Loader2 size={15} className="animate-spin" /> : <MoreVertical size={15} />}
                           </button>
 
                           {openBookingMenuId === booking.id && (
-                            <div className="absolute right-0 top-full mt-1 w-44 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-lg shadow-black/5 z-20 overflow-hidden animate-in fade-in slide-up duration-150">
+                            <div className="absolute right-0 top-full mt-2 w-52 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-lg shadow-black/5 z-20 overflow-hidden animate-in fade-in slide-up duration-150">
                               <button
                                 onClick={(e) => { e.stopPropagation(); setOpenBookingMenuId(null); router.push(`/dashboard/bookings/${booking.id}`); }}
-                                className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[10px] font-bold text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors"
+                                className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors"
                               >
-                                <Eye size={12} /> View Booking
+                                <Eye size={15} /> View Booking
                               </button>
                               {isPending && (
                                 <button onClick={(e) => { e.stopPropagation(); handleBookingAction(booking.id, "confirm"); }}
-                                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[10px] font-bold text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors border-t border-[var(--color-surface-border)]">
-                                  <CheckCircle2 size={12} /> Confirm Booking
+                                  className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors border-t border-[var(--color-surface-border)]">
+                                  <CheckCircle2 size={15} /> Confirm Booking
                                 </button>
                               )}
                               {isConfirmed && (
                                 <button onClick={(e) => { e.stopPropagation(); handleBookingAction(booking.id, "activate"); }}
-                                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors border-t border-[var(--color-surface-border)]">
-                                  <Play size={12} /> Start Trip
+                                  className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors border-t border-[var(--color-surface-border)]">
+                                  <Play size={15} /> Start Trip
                                 </button>
                               )}
                               {isActive && (
                                 <button onClick={(e) => { e.stopPropagation(); handleBookingAction(booking.id, "complete"); }}
-                                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors border-t border-[var(--color-surface-border)]">
-                                  <CheckCircle2 size={12} /> End Trip
+                                  className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors border-t border-[var(--color-surface-border)]">
+                                  <CheckCircle2 size={15} /> End Trip
                                 </button>
                               )}
                               {(isPending || isConfirmed) && (
                                 <button onClick={(e) => { e.stopPropagation(); handleBookingAction(booking.id, "cancel"); }}
-                                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[10px] font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors border-t border-[var(--color-surface-border)]">
-                                  <XCircle size={12} /> Cancel Booking
+                                  className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors border-t border-[var(--color-surface-border)]">
+                                  <XCircle size={15} /> Cancel Booking
                                 </button>
                               )}
                             </div>
@@ -367,69 +374,65 @@ export default function ActionCenterWidget() {
                         </div>
                       </div>
 
-                      {/* Row 2: Stats Grid - Ultra Compact with subtle dividers */}
-                      <div className="grid grid-cols-3 gap-1.5 mt-2 pt-1.5 border-t border-[var(--color-surface-border)]/30">
-                        {/* Days */}
-                        <div className="flex items-center gap-1">
-                          <CalendarDays size={9} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                          <div className="min-w-0">
-                            <p className="text-[9px] font-bold text-[var(--color-ink)] leading-tight">
+                      {/* Row 2: Compact Stats Grid - 3 items side by side */}
+                      <div className="grid grid-cols-3 gap-2 mt-2.5 pt-2.5 border-t border-[var(--color-surface-border)]/30">
+                        <div className="flex items-center gap-1.5">
+                          <CalendarDays size={13} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                          <div>
+                            <p className="text-sm font-semibold text-[var(--color-ink)] leading-tight">
                               {days || 0}d
                             </p>
+                            <p className="text-[10px] text-[var(--color-ink-muted)] leading-tight">Duration</p>
                           </div>
                         </div>
 
-                        {/* Date */}
-                        <div className="flex items-center gap-1">
-                          <Clock size={9} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                          <div className="min-w-0">
-                            <p className="text-[9px] font-bold text-[var(--color-ink)] leading-tight truncate">
+                        <div className="flex items-center gap-1.5">
+                          <Clock size={13} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                          <div>
+                            <p className="text-sm font-semibold text-[var(--color-ink)] leading-tight truncate">
                               {formatDateShort(booking.start_date)}
                             </p>
+                            <p className="text-[10px] text-[var(--color-ink-muted)] leading-tight">Start</p>
                           </div>
                         </div>
 
-                        {/* Amount */}
-                        <div className="flex items-center gap-1 justify-end">
-                          <span className="text-[8px] font-bold text-[var(--color-ink-muted)]">
+                        <div className="flex items-center gap-1.5 justify-end">
+                          <span className="text-[10px] font-semibold text-[var(--color-ink-muted)]">
                             {booking.currency_code || "KES"}
                           </span>
-                          <div className="min-w-0">
-                            <p className="text-[9px] font-bold text-[var(--color-primary-text)] leading-tight tabular-nums truncate">
+                          <div>
+                            <p className="text-sm font-semibold text-[var(--color-primary-text)] leading-tight tabular-nums truncate">
                               {Number(booking.total_amount).toLocaleString()}
                             </p>
+                            <p className="text-[10px] text-[var(--color-ink-muted)] text-right leading-tight">Total</p>
                           </div>
                         </div>
                       </div>
 
-                      {/* Row 3: Status + Destination + Actions */}
-                      <div className="flex items-center justify-between gap-2 mt-1.5 pt-1.5 border-t border-[var(--color-surface-border)]/30">
+                      {/* Row 3: Destination + Details link */}
+                      <div className="flex items-center justify-between gap-2 mt-2 pt-2 border-t border-[var(--color-surface-border)]/30">
                         <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[7px] font-extrabold uppercase tracking-wider ${meta.badge}`}>
-                            <span className={`w-1 h-1 rounded-full ${meta.dot} ${isActive ? 'animate-pulse' : ''}`} />
-                            {meta.label}
-                          </span>
-                          {tripOverdue && (
-                            <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[7px] font-extrabold uppercase tracking-wider border border-rose-500/20">
-                              <span className="w-1 h-1 rounded-full bg-rose-500 animate-pulse" />
-                              Overdue
-                            </span>
-                          )}
                           {destination && (
-                            <span className="flex items-center gap-0.5 min-w-0">
-                              <MapPin size={8} className="text-[var(--color-primary)] flex-shrink-0" />
-                              <span className="text-[8px] font-medium text-[var(--color-ink-muted)] truncate">
+                            <span className="flex items-center gap-1 min-w-0">
+                              <MapPin size={12} className="text-[var(--color-primary)] flex-shrink-0" />
+                              <span className="text-xs font-medium text-[var(--color-ink-muted)] truncate">
                                 {destination}
                               </span>
+                            </span>
+                          )}
+                          {tripOverdue && (
+                            <span className="flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 text-[9px] font-extrabold uppercase tracking-wider border border-rose-500/20">
+                              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                              Overdue
                             </span>
                           )}
                         </div>
                         <button
                           onClick={() => router.push(`/dashboard/bookings/${booking.id}`)}
-                          className="inline-flex items-center gap-0.5 text-[8px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity group flex-shrink-0"
+                          className="inline-flex items-center gap-0.5 text-xs font-semibold text-[var(--color-primary)] hover:opacity-80 transition-opacity group flex-shrink-0"
                         >
                           Details
-                          <ChevronRight size={10} className="group-hover:translate-x-0.5 transition-transform" />
+                          <ChevronRight size={13} className="group-hover:translate-x-0.5 transition-transform" />
                         </button>
                       </div>
                     </div>
@@ -440,33 +443,34 @@ export default function ActionCenterWidget() {
           </div>
         )}
 
+        {/* Activity and Tasks sections remain the same */}
         {activeSubTab === "activity" && (
           <div className="space-y-2 animate-in fade-in duration-200">
             {activityLoading ? (
-              <div className="flex flex-col items-center justify-center py-6 text-[var(--color-ink-muted)] text-sm">
-                <Loader2 size={18} className="animate-spin mb-2 text-[var(--color-primary)]" />
-                Loading activity...
+              <div className="flex flex-col items-center justify-center py-8 text-[var(--color-ink-muted)]">
+                <Loader2 size={24} className="animate-spin mb-3 text-[var(--color-primary)]" />
+                <p className="text-sm font-medium">Loading activity...</p>
               </div>
             ) : activities.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-6 text-center">
-                <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-2">
-                  <Clock size={18} />
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="w-14 h-14 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-3">
+                  <Clock size={24} />
                 </div>
                 <p className="text-sm font-bold text-[var(--color-ink)]">No recent activity</p>
-                <p className="text-[10px] text-[var(--color-ink-muted)] mt-0.5">Recent fleet moves will be logged here.</p>
+                <p className="text-xs text-[var(--color-ink-muted)] mt-1">Recent fleet moves will be logged here.</p>
               </div>
             ) : (
               activities.map((activity: any) => (
-                <div key={`activity-${activity.id}`} className="p-2.5 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:border-[var(--color-primary)]/40 hover:shadow-sm transition-all duration-200 flex items-start gap-2.5">
-                  <div className="w-7 h-7 rounded-lg bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center flex-shrink-0 text-[var(--color-primary)]">
-                    <Clock size={12} />
+                <div key={`activity-${activity.id}`} className="p-3 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:border-[var(--color-primary)]/40 hover:shadow-sm transition-all duration-200 flex items-start gap-3">
+                  <div className="w-9 h-9 rounded-lg bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center flex-shrink-0 text-[var(--color-primary)]">
+                    <Clock size={16} />
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-[10px] font-semibold text-[var(--color-ink)] leading-snug">
+                    <p className="text-sm font-semibold text-[var(--color-ink)] leading-snug">
                       {activity.title || activity.description || activity.action}
                     </p>
                     {activity.timestamp && (
-                      <p className="text-[8px] text-[var(--color-ink-muted)] mt-0.5 font-medium">{formatDate(activity.timestamp)}</p>
+                      <p className="text-xs text-[var(--color-ink-muted)] mt-1 font-medium">{formatDate(activity.timestamp)}</p>
                     )}
                   </div>
                 </div>
@@ -478,17 +482,17 @@ export default function ActionCenterWidget() {
         {activeSubTab === "tasks" && (
           <div className="space-y-2 animate-in fade-in duration-200">
             {tasksLoading ? (
-              <div className="flex flex-col items-center justify-center py-6 text-[var(--color-ink-muted)] text-sm">
-                <Loader2 size={18} className="animate-spin mb-2 text-[var(--color-primary)]" />
-                Loading tasks...
+              <div className="flex flex-col items-center justify-center py-8 text-[var(--color-ink-muted)]">
+                <Loader2 size={24} className="animate-spin mb-3 text-[var(--color-primary)]" />
+                <p className="text-sm font-medium">Loading tasks...</p>
               </div>
             ) : tasks.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-6 text-center">
-                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2">
-                  <CheckCircle2 size={18} />
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="w-14 h-14 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3">
+                  <CheckCircle2 size={24} />
                 </div>
                 <p className="text-sm font-bold text-[var(--color-ink)]">All caught up!</p>
-                <p className="text-[10px] text-[var(--color-ink-muted)] mt-0.5">No pending tasks right now.</p>
+                <p className="text-xs text-[var(--color-ink-muted)] mt-1">No pending tasks right now.</p>
               </div>
             ) : (
               tasks.map((task) => {
@@ -499,23 +503,23 @@ export default function ActionCenterWidget() {
                 const SubjectIcon = subject ? getSubjectIcon(subject) : null;
 
                 return (
-                  <div key={`task-${safeTaskId}`} className="group relative p-2.5 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:border-[var(--color-primary)]/40 hover:shadow-sm transition-all duration-200">
-                    <div className="flex items-start gap-2.5">
-                      <div className={`mt-1 flex-shrink-0 w-2 h-2 rounded-full ring-2 ring-[var(--color-surface)] ${getPriorityDotColor(task.priority)}`} />
+                  <div key={`task-${safeTaskId}`} className="group relative p-3 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:border-[var(--color-primary)]/40 hover:shadow-sm transition-all duration-200">
+                    <div className="flex items-start gap-3">
+                      <div className={`mt-1.5 flex-shrink-0 w-2.5 h-2.5 rounded-full ring-2 ring-[var(--color-surface)] ${getPriorityDotColor(task.priority)}`} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-[10px] font-semibold leading-tight text-[var(--color-ink)]">{action}</p>
+                        <p className="text-sm font-semibold leading-tight text-[var(--color-ink)]">{action}</p>
                         {subject && SubjectIcon && (
-                          <div className="flex items-center gap-1 mt-0.5">
-                            <SubjectIcon size={10} className="text-[var(--color-ink-muted)] flex-shrink-0" />
-                            <span className="text-[9px] text-[var(--color-ink-muted)] truncate">{subject}</span>
+                          <div className="flex items-center gap-1.5 mt-1">
+                            <SubjectIcon size={13} className="text-[var(--color-ink-muted)] flex-shrink-0" />
+                            <span className="text-xs text-[var(--color-ink-muted)] truncate">{subject}</span>
                           </div>
                         )}
                         {task.due_date && (
-                          <span className={`flex items-center gap-1 mt-0.5 text-[8px] font-bold uppercase tracking-wider ${overdue ? "text-rose-600 dark:text-rose-400" : "text-[var(--color-ink-subtle)]"}`}>
-                            <Calendar size={9} />
+                          <div className={`flex items-center gap-1.5 mt-2 text-[11px] font-bold uppercase tracking-wider ${overdue ? "text-rose-600 dark:text-rose-400" : "text-[var(--color-ink-subtle)]"}`}>
+                            <Calendar size={12} />
                             {formatDate(task.due_date)}
-                            {overdue && <span className="ml-1 px-1 py-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[7px] font-extrabold">OVERDUE</span>}
-                          </span>
+                            {overdue && <span className="ml-1 px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[9px] font-extrabold">OVERDUE</span>}
+                          </div>
                         )}
                       </div>
 
@@ -523,23 +527,23 @@ export default function ActionCenterWidget() {
                         <div className="relative flex-shrink-0" data-task-menu>
                           <button
                             onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === safeTaskId ? null : safeTaskId); }}
-                            className="p-1 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all active:scale-95"
+                            className="p-1.5 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all active:scale-95"
                             aria-label="Task actions"
                           >
-                            {updatingId === safeTaskId ? <Loader2 size={12} className="animate-spin" /> : <MoreVertical size={12} />}
+                            {updatingId === safeTaskId ? <Loader2 size={15} className="animate-spin" /> : <MoreVertical size={15} />}
                           </button>
                           {openMenuId === safeTaskId && (
-                            <div className="absolute right-0 top-full mt-1 w-40 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-lg shadow-black/5 z-20 overflow-hidden animate-in fade-in slide-up duration-150">
+                            <div className="absolute right-0 top-full mt-2 w-48 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-lg shadow-black/5 z-20 overflow-hidden animate-in fade-in slide-up duration-150">
                               {task.status === "unassigned" && (
                                 <button onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); handleClaimTask(safeTaskId); }}
-                                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[10px] font-bold text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors">
-                                  <UserPlus size={12} /> Claim Task
+                                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-bold text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors">
+                                  <UserPlus size={14} /> Claim Task
                                 </button>
                               )}
                               {task.status !== "unassigned" && task.status !== "completed" && (
                                 <button onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); handleCompleteTask(safeTaskId); }}
-                                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors">
-                                  <CheckCircle2 size={12} /> Mark Complete
+                                  className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors">
+                                  <CheckCircle2 size={14} /> Mark Complete
                                 </button>
                               )}
                             </div>
@@ -556,13 +560,13 @@ export default function ActionCenterWidget() {
       </div>
 
       {/* FOOTER */}
-      <div className="px-3 py-2 border-t border-[var(--color-surface-border)] bg-[var(--color-surface-hover)] text-center">
+      <div className="px-5 py-2.5 border-t border-[var(--color-surface-border)] bg-[var(--color-surface-hover)] text-center">
         <button
           onClick={() => router.push(`/dashboard/${activeSubTab === "bookings" ? "bookings" : activeSubTab}`)}
-          className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity"
+          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-primary)] hover:opacity-80 transition-opacity"
         >
           View all {headerCopy.title}
-          <ArrowRight size={12} />
+          <ArrowRight size={14} />
         </button>
       </div>
     </div>

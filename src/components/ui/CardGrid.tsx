@@ -66,6 +66,9 @@ export default function CardGrid<T>({
   const [isMobile, setIsMobile] = useState(false);
   const actionButtonRef = useRef<HTMLButtonElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+  
+  // ✅ Track touch position to distinguish taps from scrolls
+  const touchStartPos = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -114,7 +117,7 @@ export default function CardGrid<T>({
     };
   }, [openActionId]);
 
-  // Handle touch events for mobile
+  // Close dropdown on touch outside (mobile)
   useEffect(() => {
     if (!openActionId) return;
     
@@ -349,11 +352,30 @@ export default function CardGrid<T>({
                           ref={actionButtonRef}
                           type="button"
                           onClick={(e) => handleToggleActions(e, item)}
-                          onTouchEnd={(e) => {
-                            if (e.cancelable) {
-                              e.preventDefault();
+                          onTouchStart={(e) => {
+                            // ✅ Track touch start position to detect scroll vs tap
+                            if (e.touches.length === 1) {
+                              touchStartPos.current = {
+                                x: e.touches[0].clientX,
+                                y: e.touches[0].clientY,
+                              };
                             }
-                            handleToggleActions(e, item);
+                          }}
+                          onTouchEnd={(e) => {
+                            // ✅ Only fire action if touch didn't move significantly (i.e., it was a tap, not a scroll)
+                            if (touchStartPos.current && e.changedTouches.length === 1) {
+                              const dx = Math.abs(e.changedTouches[0].clientX - touchStartPos.current.x);
+                              const dy = Math.abs(e.changedTouches[0].clientY - touchStartPos.current.y);
+                              
+                              // If movement < 10px, it's a tap — fire the action
+                              if (dx < 10 && dy < 10) {
+                                if (e.cancelable) {
+                                  e.preventDefault();
+                                }
+                                handleToggleActions(e, item);
+                              }
+                            }
+                            touchStartPos.current = null;
                           }}
                           className={`
                             w-8 h-8 flex items-center justify-center rounded-lg 

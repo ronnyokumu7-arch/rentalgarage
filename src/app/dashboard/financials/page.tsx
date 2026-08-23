@@ -127,9 +127,9 @@ export default function FinancialsPage() {
         <div className="hidden lg:flex items-center gap-6">
           {currentStats.map((stat, index) => (
             <div key={index} className="text-right">
-              <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)]">{stat.label}</p>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)]">{stat.label}</p>
               <p className="text-base font-extrabold text-[var(--color-ink)] tabular-nums">{stat.value}</p>
-              <p className={`text-[9px] font-bold ${stat.positive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
+              <p className={`text-[10px] font-bold ${stat.positive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
                 {stat.change}
               </p>
             </div>
@@ -149,7 +149,7 @@ export default function FinancialsPage() {
               type="button"
               onClick={() => handleTabChange(tab.id)}
               className={`
-                relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all duration-300 
+                relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 
                 whitespace-nowrap touch-manipulation cursor-pointer flex-shrink-0
                 ${isActive 
                   ? `bg-gradient-to-br ${tab.color} text-[var(--color-ink)] shadow-sm border ${tab.borderColor}` 

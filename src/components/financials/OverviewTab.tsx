@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, AlertCircle, Clock, Calendar, CalendarDays } from "lucide-react";
+import { Loader2, AlertCircle, Clock, Calendar, CalendarDays, Rocket, Zap } from "lucide-react";
 import { useFinancialOverview } from "@/hooks/financials/useFinancialOverview";
 
 import RevenueOverviewWidget from "./overview/RevenueOverviewWidget";
@@ -56,7 +56,7 @@ export default function OverviewTab() {
       if (timeFilter === "week") return activityDate >= weekAgo;
       if (timeFilter === "month") return activityDate >= monthAgo;
       return true;
-    }).slice(0, 4); // Limit to 4 items max
+    }).slice(0, 10); // ✅ Feed window shows ~3 cards; the rest scrolls
   };
 
   const filteredActivities = filterActivitiesByTime(data.recent_activity);
@@ -72,11 +72,18 @@ export default function OverviewTab() {
       </div>
 
       <div className="space-y-6">
+        {/* ✅ Activity Feed Container with Premium Header */}
         <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden">
           <div className="p-5 border-b border-[var(--color-surface-border)] flex items-center justify-between">
-            <h3 className="text-[10px] font-bold text-[var(--color-ink-muted)] uppercase tracking-wider">
-              Recent Activity
-            </h3>
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)]">
+                <Rocket size={16} />
+              </div>
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)]">Recent Activity</p>
+                <p className="text-[10px] text-[var(--color-ink-subtle)]">Live feed of your business</p>
+              </div>
+            </div>
             <div className="flex items-center gap-1">
               <button
                 onClick={() => setTimeFilter("today")}
@@ -113,16 +120,28 @@ export default function OverviewTab() {
               </button>
             </div>
           </div>
-          <ActivityFeed activities={filteredActivities} />
+
+          {/* ✅ SCROLL WINDOW: ~3 cards visible (320px); extra cards scroll inside */}
+          <div className="max-h-80 overflow-y-auto custom-scrollbar">
+            <ActivityFeed activities={filteredActivities} />
+          </div>
         </div>
 
+        {/* ✅ Quick Actions Container with Premium Header */}
         <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden p-5">
-          <h3 className="text-[10px] font-bold text-[var(--color-ink-muted)] uppercase tracking-wider mb-4">
-            Quick Actions
-          </h3>
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400">
+              <Zap size={16} />
+            </div>
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)]">Quick Actions</p>
+              <p className="text-[10px] text-[var(--color-ink-subtle)]">Common tasks at your fingertips</p>
+            </div>
+          </div>
           <QuickActions 
             onCreateInvoice={() => router.push("/dashboard/financials?tab=invoices")}
             onRecordPayment={() => router.push("/dashboard/financials?tab=payments")}
+            onGenerateContract={() => router.push("/dashboard/financials?tab=contracts")}
           />
         </div>
       </div>

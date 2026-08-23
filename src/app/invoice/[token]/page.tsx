@@ -1,4 +1,3 @@
-// src/app/invoice/[token]/page.tsx
 "use client";
 import { useParams } from "next/navigation";
 import { invoicesApi } from "@/lib/api/invoices";
@@ -6,7 +5,7 @@ import { useState, useEffect, useMemo } from "react";
 import {
   FileText, Download, CheckCircle2, AlertCircle, Loader2, Calendar, Car,
   User, Banknote, CreditCard, Receipt, Smartphone, Landmark, Phone, Mail,
-  Store, Wallet, Send, Info
+  Store, Wallet, Send, Info, UserCircle
 } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { usePublicInvoice } from "@/hooks/public-docs/usePublicInvoice";
@@ -37,6 +36,9 @@ export default function PublicInvoicePage() {
   const hasAirtel = !!pd?.airtel_number;
   // ✅ Bank logic based on actual DB columns
   const hasBank = !!(pd?.bank_name && pd?.bank_account_number);
+
+  // ✅ MILESTONE 2: Driver assignment check
+  const hasDriver = !!(invoice?.driver_name);
 
   const availableChannels = useMemo(
     () =>
@@ -211,6 +213,24 @@ export default function PublicInvoicePage() {
                   </div>
                 </div>
               </div>
+              
+              {/* ✅ MILESTONE 2: Driver Details (only when assigned) */}
+              {hasDriver && (
+                <div className="space-y-2 sm:space-y-4">
+                  <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Assigned Driver</h3>
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 bg-slate-100 rounded-lg shrink-0"><UserCircle size={18} className="text-slate-600" /></div>
+                    <div>
+                      <p className="text-sm font-bold text-slate-900">{invoice.driver_name}</p>
+                      <p className="text-xs text-slate-500">{invoice.driver_phone || "—"}</p>
+                      {invoice.driver_dl_number && (
+                        <p className="text-xs text-slate-500 font-mono">DL {invoice.driver_dl_number}</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+              
               <div className="space-y-2 sm:space-y-4">
                 <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Invoice Dates</h3>
                 <div className="flex items-start gap-3">
@@ -295,15 +315,7 @@ export default function PublicInvoicePage() {
                     <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-900 space-y-1">
                       <p className="font-bold text-emerald-800 mb-2">Pochi la Biashara Instructions:</p>
                       <p>1. Go to M-Pesa → <span className="font-bold">Pochi la Biashara</span></p>
-                      <p>2. Enter Number: <span className="font-bold">{pd?.till_number}</span></p>
-                      <p>3. Enter the amount and confirm.</p>
-                    </div>
-                  )}
-                  {activeChannel === "pochi" && (
-                    <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg text-xs text-emerald-900 space-y-1">
-                      <p className="font-bold text-emerald-800 mb-2">Pochi la Biashara Instructions:</p>
-                      <p>1. Go to M-Pesa → <span className="font-bold">Pochi la Biashara</span></p>
-                      <p>2. Enter Number: <span className="font-bold">{pd?.mpesa_pochi}</span></p>
+                      <p>2. Enter Number: <span className="font-bold">{pd?.mpesa_pochi || pd?.till_number}</span></p>
                       <p>3. Enter the amount and confirm.</p>
                     </div>
                   )}

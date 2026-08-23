@@ -7,14 +7,17 @@ import {
   Car, CreditCard, 
   AlertTriangle, CheckCircle2, Truck, UserPlus,
   Receipt, Handshake,
-  Rocket, Sparkles, Zap
+  Sparkles, Zap
 } from "lucide-react";
 import CardGrid from "@/components/ui/CardGrid";
 import type { ActivityItem } from "@/hooks/financials/useFinancialOverview";
 
 interface ActivityFeedProps {
   activities: ActivityItem[];
+  /** Kept for caller compatibility — header & card chrome are rendered by the parent page. */
   title?: string;
+  /** Max items rendered into the scroll window (default 10; ~3 visible, rest scrolls). */
+  limit?: number;
 }
 
 const getActivityIcon = (type: string) => {
@@ -77,64 +80,40 @@ const formatTimeAgo = (dateString: string) => {
   return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 };
 
-export default function ActivityFeed({ activities, title = "Recent Activity" }: ActivityFeedProps) {
+/**
+ * ✅ CHROME-FREE FEED: renders ONLY the cards (and footer).
+ * The parent container (OverviewTab) owns the card chrome.
+ * ✅ VIEWPORT: shows ~3 cards max; extra cards scroll inside the container.
+ */
+export default function ActivityFeed({ activities, limit = 10 }: ActivityFeedProps) {
   const router = useRouter();
 
-  if (activities.length === 0) {
+  const displayedActivities = activities.slice(0, limit);
+
+  // ✅ EMPTY STATE — plain body, no wrapper (parent provides the card chrome)
+  if (displayedActivities.length === 0) {
     return (
-      <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden">
-        {/* Header - Clean straight edges */}
-        <div className="px-4 py-3 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/30">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)]">
-              <Rocket size={16} />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-[var(--color-ink)]">{title}</h3>
-              <p className="text-[10px] text-[var(--color-ink-muted)]">Live feed of your business</p>
-            </div>
-          </div>
+      <div className="flex flex-col items-center justify-center py-12 text-[var(--color-ink-muted)]">
+        <div className="w-14 h-14 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mb-4">
+          <Zap size={22} className="text-[var(--color-ink-subtle)]" />
         </div>
-        <div className="flex flex-col items-center justify-center py-12 text-[var(--color-ink-muted)]">
-          <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mb-4">
-            <Zap size={24} className="text-[var(--color-ink-subtle)]" />
-          </div>
-          <p className="text-sm font-semibold text-[var(--color-ink)]">No recent activity</p>
-          <p className="text-xs text-[var(--color-ink-muted)] mt-1">Activity will appear here as it happens</p>
-        </div>
+        <p className="text-sm font-semibold text-[var(--color-ink)]">No recent activity</p>
+        <p className="text-xs text-[var(--color-ink-muted)] mt-1">Activity will appear here as it happens</p>
       </div>
     );
   }
 
+  // ✅ CARDS ONLY — 3-card visible window, scroll for the rest
   return (
-    <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden">
-      
-      {/* Header - Clean straight edges */}
-      <div className="px-4 py-3 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/30">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)]">
-              <Rocket size={16} />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-[var(--color-ink)]">{title}</h3>
-              <p className="text-[10px] text-[var(--color-ink-muted)]">Live feed of your business</p>
-            </div>
-          </div>
-          <span className="text-[8px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)] bg-[var(--color-surface-hover)] px-2 py-1 rounded-full border border-[var(--color-surface-border)]">
-            {activities.length} items
-          </span>
-        </div>
-      </div>
-
-      {/* CardGrid - Premium Activity Cards */}
+    <>
       <div className="p-2">
         <CardGrid
-          data={activities}
+          data={displayedActivities}
           getCardId={(activity) => activity.id}
           compact={true}
           cardClassName="!p-2.5 hover:!border-[var(--color-primary)]/30 hover:shadow-md transition-all duration-200"
-          containerClassName="max-h-80 overflow-y-auto custom-scrollbar"
+          /* ✅ ~3 compact cards visible (≈300px); anything beyond scrolls */
+          containerClassName="max-h-[300px] overflow-y-auto custom-scrollbar"
           
           renderCardHeader={({ item }) => {
             const Icon = getActivityIcon(item.type);
@@ -148,13 +127,13 @@ export default function ActivityFeed({ activities, title = "Recent Activity" }: 
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-bold text-[var(--color-ink)] truncate">
+                    <span className="text-sm font-bold text-[var(--color-ink)] truncate">
                       {item.title}
                     </span>
                     <span className="text-xs sm:hidden">{emoji}</span>
                   </div>
                   <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="text-[9px] text-[var(--color-ink-muted)] truncate">
+                    <span className="text-xs text-[var(--color-ink-muted)] truncate">
                       {item.description}
                     </span>
                   </div>
@@ -167,8 +146,8 @@ export default function ActivityFeed({ activities, title = "Recent Activity" }: 
             return (
               <div className="mt-1.5 pt-1.5 border-t border-[var(--color-surface-border)]/50 flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                  <Clock size={10} className="text-[var(--color-ink-subtle)]" />
-                  <span className="text-[8px] font-medium text-[var(--color-ink-muted)]">
+                  <Clock size={11} className="text-[var(--color-ink-subtle)]" />
+                  <span className="text-[10px] font-medium text-[var(--color-ink-muted)]">
                     {formatTimeAgo(item.timestamp)}
                   </span>
                 </div>
@@ -177,10 +156,10 @@ export default function ActivityFeed({ activities, title = "Recent Activity" }: 
                     e.stopPropagation();
                     router.push(item.link);
                   }}
-                  className="inline-flex items-center gap-0.5 text-[8px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity group"
+                  className="inline-flex items-center gap-0.5 text-[10px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity group"
                 >
                   View
-                  <ChevronRight size={10} className="group-hover:translate-x-0.5 transition-transform" />
+                  <ChevronRight size={11} className="group-hover:translate-x-0.5 transition-transform" />
                 </button>
               </div>
             );
@@ -190,16 +169,18 @@ export default function ActivityFeed({ activities, title = "Recent Activity" }: 
         />
       </div>
 
-      {/* Footer */}
-      <div className="px-4 py-2.5 border-t border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/30 text-center">
-        <button
-          onClick={() => router.push("/dashboard/activity")}
-          className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity"
-        >
-          View all activity
-          <ChevronRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
-        </button>
-      </div>
-    </div>
+      {/* Footer - Only show if there are more activities than the scroll window holds */}
+      {activities.length > limit && (
+        <div className="px-4 py-2.5 border-t border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/30 text-center">
+          <button
+            onClick={() => router.push("/dashboard/activity")}
+            className="inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity"
+          >
+            View all {activities.length} activities
+            <ChevronRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+          </button>
+        </div>
+      )}
+    </>
   );
 }

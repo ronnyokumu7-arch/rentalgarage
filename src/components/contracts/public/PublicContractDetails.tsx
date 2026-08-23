@@ -1,7 +1,7 @@
 // src/components/contracts/public/PublicContractDetails.tsx
 "use client";
 
-import { Calendar, Car, User, Banknote } from "lucide-react";
+import { Calendar, Car, User, Banknote, UserCircle } from "lucide-react";
 import type { PublicContractView } from "@/lib/types";
 
 interface Props {
@@ -17,6 +17,9 @@ const formatDate = (dateStr: string) => {
 };
 
 export default function PublicContractDetails({ contract }: Props) {
+  // ✅ MILESTONE 2: Driver assignment check
+  const hasDriver = !!(contract.driver_name);
+
   return (
     <div className="p-4 sm:p-8">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8">
@@ -36,6 +39,17 @@ export default function PublicContractDetails({ contract }: Props) {
           primary={`${contract.vehicle_make} ${contract.vehicle_model}`}
           secondary={`Plate: ${contract.vehicle_plate}`}
         />
+
+        {/* ✅ MILESTONE 2: Driver Details (only when assigned) */}
+        {hasDriver && (
+          <DetailSection
+            title="Assigned Driver"
+            icon={<UserCircle size={18} className="text-slate-600" />}
+            primary={contract.driver_name!}
+            secondary={contract.driver_phone || "—"}
+            tertiary={contract.driver_dl_number ? `DL ${contract.driver_dl_number}` : undefined}
+          />
+        )}
 
         {/* Dates */}
         <DetailSection
@@ -62,12 +76,14 @@ function DetailSection({
   title, 
   icon, 
   primary, 
-  secondary 
+  secondary,
+  tertiary 
 }: { 
   title: string; 
   icon: React.ReactNode; 
   primary: string; 
   secondary: string;
+  tertiary?: string;
 }) {
   return (
     <div className="space-y-2 sm:space-y-4">
@@ -77,6 +93,9 @@ function DetailSection({
         <div>
           <p className="text-sm font-bold text-slate-900">{primary}</p>
           <p className="text-xs text-slate-500">{secondary}</p>
+          {tertiary && (
+            <p className="text-xs text-slate-500 font-mono">{tertiary}</p>
+          )}
         </div>
       </div>
     </div>

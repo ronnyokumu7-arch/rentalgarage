@@ -446,6 +446,8 @@ export interface BookingQuote {
   service_type: ServiceType;
   pickup_at: string;
   return_at: string;
+  // ✅ MILESTONE 2: Optional driver for per-driver fee resolution
+  driver_id?: number | null;
   // ✅ Future-proof for distance_time, fixed_route, route_stops
   distance_km?: number;
   route_key?: string;
@@ -514,7 +516,7 @@ export interface PublicContractView {
   booking_number?: string | null;
   tenant_name: string;
 
-  // ✅ NEW: Owning Tenant&apos;s branding (resolved from the contract's tenant)
+  // ✅ NEW: Owning Tenant's branding (resolved from the contract's tenant)
   tenant_logo_url?: string | null;
   tenant_address?: string | null;
   tenant_phone?: string | null;
@@ -532,6 +534,11 @@ export interface PublicContractView {
   status: ContractStatus;
   signed_by_client: boolean;
   created_at: string;
+
+  // ✅ MILESTONE 2: Assigned driver (null for self-drive bookings)
+  driver_name?: string | null;
+  driver_phone?: string | null;
+  driver_dl_number?: string | null;
 }
 
 // ─── Invoices ────────────────────────────────────────────────────────────────
@@ -624,6 +631,11 @@ export interface PublicInvoiceView {
   remaining_balance?: number | string | null;
   payment_details?: PublicPaymentDetails | null;
   created_at: string;
+
+  // ✅ MILESTONE 2: Assigned driver (null for self-drive bookings)
+  driver_name?: string | null;
+  driver_phone?: string | null;
+  driver_dl_number?: string | null;
 }
 
 // ─── Payments ────────────────────────────────────────────────────────────────

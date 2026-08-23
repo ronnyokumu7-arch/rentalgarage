@@ -114,6 +114,7 @@ export function useNewBooking() {
   }, [services]);
 
   // ✅ MILESTONE 1: Debounced quote API call
+  // ✅ MILESTONE 2: Includes driver_id so quote reflects per-driver fees
   useEffect(() => {
     if (
       !formData.vehicle_id ||
@@ -132,6 +133,8 @@ export function useNewBooking() {
           service_type: formData.service_type,
           pickup_at: formData.pickup_at,
           return_at: formData.scheduled_return_at,
+          // ✅ MILESTONE 2: Send driver_id for per-driver fee resolution
+          driver_id: formData.driver_id ? parseInt(formData.driver_id) : undefined,
         });
         setQuote(result);
       } catch (err: any) {
@@ -149,6 +152,7 @@ export function useNewBooking() {
     formData.service_type,
     formData.pickup_at,
     formData.scheduled_return_at,
+    formData.driver_id,  // ✅ MILESTONE 2: Re-quote when driver changes
   ]);
 
   const updateField = (field: string, value: string) => {
