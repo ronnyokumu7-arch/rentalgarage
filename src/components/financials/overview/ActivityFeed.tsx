@@ -3,11 +3,11 @@
 
 import { useRouter } from "next/navigation";
 import { 
-  Clock, ChevronRight, TrendingUp, Calendar, 
-  Users, Car, FileCheck, CreditCard, 
+  Clock, ChevronRight, Calendar, 
+  Car, CreditCard, 
   AlertTriangle, CheckCircle2, Truck, UserPlus,
-  CalendarDays, DollarSign, Receipt, Handshake,
-  Crown, Star, Rocket, Sparkles, Zap
+  Receipt, Handshake,
+  Rocket, Sparkles, Zap
 } from "lucide-react";
 import CardGrid from "@/components/ui/CardGrid";
 import type { ActivityItem } from "@/hooks/financials/useFinancialOverview";
