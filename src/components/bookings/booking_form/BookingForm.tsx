@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import { CalendarDays, MapPin, User, Loader2, CheckCircle, Info } from 'lucide-react';
 import { useNewBooking } from '@/hooks/bookings/useNewBooking';
 import ClientSearch from '../ClientSearch';
@@ -47,6 +48,32 @@ export default function BookingForm() {
   );
   const requiresDriver = !!selectedServiceDef?.requires_driver;
 
+  // ✅ Ticking "now" for live past-time blocking (updates every 60s)
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const id = setInterval(() => setNow(new Date()), 60_000);
+    return () => clearInterval(id);
+  }, []);
+
+  // Compute pickup minTime: "now rounded up to next 30-min slot" (only applies when today selected)
+  const pickupMinTime = useMemo(() => {
+    const totalMin = now.getHours() * 60 + now.getMinutes();
+    const slotMin = Math.ceil(totalMin / 30) * 30;
+    const h = Math.floor(slotMin / 60);
+    const m = slotMin % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+  }, [now]);
+
+  // Return picker: enforce "after pickup" when both fall on the same day
+  const pickupDate = (formData.pickup_at || formData.start_date || "").split("T")[0];
+  const returnDate = (formData.scheduled_return_at || formData.end_date || "").split("T")[0];
+  const returnMinTime = useMemo(() => {
+    if (!pickupDate || !returnDate || pickupDate !== returnDate) return undefined;
+    // Use pickup's time portion as the floor
+    const pickupTime = (formData.pickup_at || formData.start_date || "").split("T")[1]?.slice(0, 5);
+    return pickupTime || undefined;
+  }, [pickupDate, returnDate, formData.pickup_at, formData.start_date]);
+
   return (
     <form onSubmit={handleSubmit} className="max-w-6xl mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-4 items-start">
       
@@ -84,7 +111,6 @@ export default function BookingForm() {
               }}
             />
 
-            {/* Driver selector: only shown for services that require a staff driver */}
             {requiresDriver ? (
               <DriverSearch
                 selectedDriverId={formData.driver_id}
@@ -119,7 +145,6 @@ export default function BookingForm() {
               value={(formData.service_type as ServiceType) || "selfdrive"}
               onChange={(type) => {
                 updateField('service_type', type);
-                // Auto-clear driver when switching to a service that doesn't require one
                 const svc = services.find((s) => s.key === type);
                 if (!svc?.requires_driver && formData.driver_id) {
                   updateField('driver_id', '');
@@ -132,11 +157,13 @@ export default function BookingForm() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <PremiumDateAndTimePicker
               label="Pickup Date & Time"
+              blockPast
+              minTime={pickupMinTime}
               value={formData.pickup_at || formData.start_date}
               onChange={(datetime) => {
                 updateField('pickup_at', datetime);
                 updateField('start_date', datetime.split('T')[0]);
-                // Clear return if it's now before the new pickup
+                // If pickup moves past the current return, clear return
                 if (formData.scheduled_return_at && new Date(datetime) >= new Date(formData.scheduled_return_at)) {
                   updateField('scheduled_return_at', '');
                   updateField('end_date', '');
@@ -146,6 +173,7 @@ export default function BookingForm() {
             />
             <PremiumDateAndTimePicker
               label="Return Date & Time"
+              minTime={returnMinTime}
               value={formData.scheduled_return_at || formData.end_date}
               onChange={(datetime) => {
                 updateField('scheduled_return_at', datetime);
