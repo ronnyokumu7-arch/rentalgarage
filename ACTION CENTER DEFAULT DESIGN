@@ -7,7 +7,7 @@ import {
   CheckCircle2, UserPlus, Calendar, Clock, ArrowRight,
   Zap, Sparkles, Loader2, MoreVertical,
   Play, XCircle, Eye, Car, User, FileText, MapPin,
-  CalendarDays, ChevronRight
+  CalendarDays, ChevronRight, DollarSign
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import toast from "react-hot-toast";
@@ -185,57 +185,52 @@ export default function ActionCenterWidget() {
   return (
     <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden h-full flex flex-col">
       
-      {/* PREMIUM HEADER - Optimized for Mobile */}
-      <div className="px-3 py-2 border-b border-[var(--color-surface-border)] bg-gradient-to-r from-[var(--color-surface-hover)]/50 to-transparent">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1.5 sm:gap-2">
-          {/* Left: Icon + Title - More compact */}
-          <div className="flex items-center gap-2 min-w-0">
-            <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary)]/80 flex items-center justify-center text-white shadow-sm shadow-[var(--color-primary)]/20 flex-shrink-0">
-              <HeaderIcon size={12} className={headerCopy.iconClassName} />
+      {/* HEADER */}
+      <div className="px-4 py-3 border-b border-[var(--color-surface-border)] bg-gradient-to-r from-[var(--color-surface-hover)] to-transparent">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary)]/80 flex items-center justify-center text-white shadow-md shadow-[var(--color-primary)]/20">
+              <HeaderIcon size={16} className={headerCopy.iconClassName} />
             </div>
-            <div className="min-w-0">
-              <h3 className="text-[10px] font-bold text-[var(--color-ink)] tracking-tight flex items-center gap-1">
+            <div>
+              <h3 className="text-sm font-bold text-[var(--color-ink)] tracking-tight flex items-center gap-2">
                 {headerCopy.title}
-                <Sparkles size={8} className="text-[var(--color-primary)] opacity-70 flex-shrink-0" />
+                <Sparkles size={11} className="text-[var(--color-primary)] opacity-70" />
               </h3>
-              <p className="text-[8px] text-[var(--color-ink-muted)] truncate">{headerCopy.description}</p>
+              <p className="text-[10px] text-[var(--color-ink-muted)] mt-0.5">{headerCopy.description}</p>
             </div>
           </div>
-
-          {/* Right: Premium Tab Switcher - Optimized for Mobile */}
-          <div className="flex items-center gap-1 p-0.5 bg-[var(--color-surface-hover)]/50 rounded-full border border-[var(--color-surface-border)]/50 flex-shrink-0 overflow-x-auto max-w-full">
-            {subTabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveSubTab(tab.id)}
-                className={`
-                  relative flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[8px] font-bold transition-all duration-300 whitespace-nowrap
-                  ${activeSubTab === tab.id 
-                    ? "bg-[var(--color-surface)] text-[var(--color-ink)] shadow-sm" 
-                    : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface)]/50"
-                  }
-                `}
-              >
-                {tab.label}
-                {tab.count > 0 && (
-                  <span className={`
-                    px-1 py-0.5 rounded-full text-[7px] font-bold transition-colors
-                    ${activeSubTab === tab.id 
-                      ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)]" 
-                      : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)]"
-                    }
-                  `}>
-                    {tab.count}
-                  </span>
-                )}
-              </button>
-            ))}
+          
+          <div className="flex items-center gap-3 w-full sm:w-auto">
+            <div className="flex items-center gap-1 p-1 bg-[var(--color-surface)] rounded-xl border border-[var(--color-surface-border)] max-w-full overflow-x-auto">
+              {subTabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveSubTab(tab.id)}
+                  className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold transition-all whitespace-nowrap ${
+                    activeSubTab === tab.id ? "bg-[var(--color-primary)] text-white shadow-sm"
+                      : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"
+                  }`}
+                >
+                  {tab.label}
+                  {tab.count > 0 && (
+                    <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold ${
+                      activeSubTab === tab.id ? "bg-white/20 text-white" : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] border border-[var(--color-surface-border)]"
+                    } ${activeSubTab === tab.id ? "hidden sm:inline" : "inline"}`}>
+                      {tab.count}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
       {/* CONTENT */}
       <div className="flex-1 overflow-y-auto custom-scrollbar px-2 py-2 sm:p-3 max-h-80 space-y-2">
+        
+        {/* RENTALS - COMPACT PREMIUM CARDS */}
         {activeSubTab === "bookings" && (
           <div className="space-y-2 animate-in fade-in duration-200">
             {bookingsLoading ? (
@@ -270,18 +265,26 @@ export default function ActionCenterWidget() {
                     key={`booking-${booking.id}`} 
                     className="group relative rounded-xl overflow-hidden border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:border-[var(--color-primary)]/40 hover:shadow-md transition-all duration-300"
                   >
-                    <div className="p-3">
+                    {/* Premium Gradient Accent Bar - Thinner */}
+                    <div className={`absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r ${
+                      isActive ? 'from-emerald-400 to-emerald-600' :
+                      isConfirmed ? 'from-blue-400 to-blue-600' :
+                      isPending ? 'from-amber-400 to-amber-600' :
+                      'from-gray-400 to-gray-600'
+                    }`} />
+                    
+                    <div className="p-3 pt-3.5">
                       {/* Row 1: Client + Status + Menu */}
                       <div className="flex items-center justify-between gap-2">
                         <div className="flex items-center gap-2 min-w-0 flex-1">
-                          {/* Premium Avatar with subtle ring */}
+                          {/* Compact Avatar */}
                           <div className="relative flex-shrink-0">
-                            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-[10px] shadow-sm ring-2 ring-[var(--color-surface)] ${
+                            <div className={`w-7 h-7 rounded-full flex items-center justify-center text-white font-bold text-[10px] ${
                               isActive ? 'bg-gradient-to-br from-emerald-500 to-emerald-600' :
                               isConfirmed ? 'bg-gradient-to-br from-blue-500 to-blue-600' :
                               isPending ? 'bg-gradient-to-br from-amber-500 to-amber-600' :
                               'bg-gradient-to-br from-gray-500 to-gray-600'
-                            }`}>
+                            } shadow-sm ring-2 ring-[var(--color-surface)]`}>
                               {getInitials(clientName)}
                             </div>
                             <div className="absolute -bottom-0.5 -right-0.5">
@@ -367,8 +370,8 @@ export default function ActionCenterWidget() {
                         </div>
                       </div>
 
-                      {/* Row 2: Stats Grid - Ultra Compact with subtle dividers */}
-                      <div className="grid grid-cols-3 gap-1.5 mt-2 pt-1.5 border-t border-[var(--color-surface-border)]/30">
+                      {/* Row 2: Stats Grid - Ultra Compact */}
+                      <div className="grid grid-cols-3 gap-1.5 mt-2 pt-1.5 border-t border-[var(--color-surface-border)]/40">
                         {/* Days */}
                         <div className="flex items-center gap-1">
                           <CalendarDays size={9} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
@@ -391,9 +394,7 @@ export default function ActionCenterWidget() {
 
                         {/* Amount */}
                         <div className="flex items-center gap-1 justify-end">
-                          <span className="text-[8px] font-bold text-[var(--color-ink-muted)]">
-                            {booking.currency_code || "KES"}
-                          </span>
+                          <DollarSign size={9} className="text-[var(--color-primary)] flex-shrink-0" />
                           <div className="min-w-0">
                             <p className="text-[9px] font-bold text-[var(--color-primary-text)] leading-tight tabular-nums truncate">
                               {Number(booking.total_amount).toLocaleString()}
@@ -403,7 +404,7 @@ export default function ActionCenterWidget() {
                       </div>
 
                       {/* Row 3: Status + Destination + Actions */}
-                      <div className="flex items-center justify-between gap-2 mt-1.5 pt-1.5 border-t border-[var(--color-surface-border)]/30">
+                      <div className="flex items-center justify-between gap-2 mt-1.5 pt-1.5 border-t border-[var(--color-surface-border)]/40">
                         <div className="flex items-center gap-1.5 min-w-0 flex-1">
                           <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[7px] font-extrabold uppercase tracking-wider ${meta.badge}`}>
                             <span className={`w-1 h-1 rounded-full ${meta.dot} ${isActive ? 'animate-pulse' : ''}`} />
@@ -440,6 +441,7 @@ export default function ActionCenterWidget() {
           </div>
         )}
 
+        {/* ACTIVITY */}
         {activeSubTab === "activity" && (
           <div className="space-y-2 animate-in fade-in duration-200">
             {activityLoading ? (
@@ -475,6 +477,7 @@ export default function ActionCenterWidget() {
           </div>
         )}
 
+        {/* TASKS */}
         {activeSubTab === "tasks" && (
           <div className="space-y-2 animate-in fade-in duration-200">
             {tasksLoading ? (
