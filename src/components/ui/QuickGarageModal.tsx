@@ -18,6 +18,17 @@ const inputClass =
 const labelClass =
   "block text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)] mb-1.5 sm:mb-2";
 
+// ✅ NEW: Extract the backend's human-readable message from any error shape
+const getErrorMessage = (err: unknown): string => {
+  const anyErr = err as any;
+  return (
+    anyErr?.response?.data?.message ||
+    anyErr?.response?.data?.detail ||
+    anyErr?.message ||
+    "Update failed. Please try again."
+  );
+};
+
 export default function QuickGarageModal({ vehicle, open, onClose, onSave }: QuickGarageModalProps) {
   const [newMileage, setNewMileage] = useState<string>("");
   const [nextService, setNextService] = useState<string>("");
@@ -30,10 +41,12 @@ export default function QuickGarageModal({ vehicle, open, onClose, onSave }: Qui
       setNewMileage(vehicle.current_mileage.toString());
       setNextService(vehicle.next_service_km ? vehicle.next_service_km.toString() : "");
       setError("");
+      setIsLoading(false); // ✅ NEW: guarantee no stale spinner on reopen
     } else {
       setNewMileage("");
       setNextService("");
       setError("");
+      setIsLoading(false); // ✅ NEW: kill spinner if closed mid-flight
     }
   }, [open, vehicle]);
 
@@ -60,8 +73,12 @@ export default function QuickGarageModal({ vehicle, open, onClose, onSave }: Qui
         current_mileage: mileageNum,
         next_service_km: serviceNum ?? null,
       });
-    } catch {
-      // Error is handled by the hook (toast), but we keep the modal open for retry
+      // Parent closes the modal on success; finally still resets state safely
+    } catch (err) {
+      // ✅ NEW: Surface the backend message inline and keep modal open for retry
+      setError(getErrorMessage(err));
+    } finally {
+      // ✅ CRITICAL FIX: Spinner ALWAYS resets — success, throw, or swallowed error
       setIsLoading(false);
     }
   };
@@ -81,15 +98,15 @@ export default function QuickGarageModal({ vehicle, open, onClose, onSave }: Qui
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-          {/* Current Status Banner */}
+          {/* ✅ COPY FIX: Neutral banner — accurate for ANY vehicle, not just "awaiting" ones */}
           <div className="p-3.5 sm:p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-2.5 sm:gap-3">
             <Wrench size={18} className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
             <div>
               <p className="text-xs sm:text-sm font-semibold text-amber-700 dark:text-amber-300">
-                Awaiting Mileage Update
+                Garage Update
               </p>
               <p className="text-[11px] sm:text-xs text-amber-600/80 dark:text-amber-400/80 mt-0.5 sm:mt-1 leading-relaxed">
-                This vehicle is currently locked from new bookings. Enter the latest odometer reading to return it to the available fleet.
+                Record the latest odometer reading and, optionally, the next service interval to keep this vehicle's profile current.
               </p>
             </div>
           </div>
@@ -144,7 +161,7 @@ export default function QuickGarageModal({ vehicle, open, onClose, onSave }: Qui
             </div>
           </div>
 
-          {/* Actions: Stacking on mobile screens for comfortable touch targets */}
+          {/* Actions */}
           <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center sm:justify-end gap-2.5 sm:gap-3 pt-4 border-t border-[var(--color-surface-border)]">
             <button
               type="button"

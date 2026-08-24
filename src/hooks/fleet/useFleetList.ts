@@ -139,14 +139,22 @@ export function useFleetList() {
     if (!garageVehicle) return;
     setActionLoadingId(garageVehicle.id);
     try {
-      await vehiclesApi.updateMileage(garageVehicle.id, payload);
-      toast.success("Mileage updated and vehicle is now available!");
+      if (garageVehicle.status === "awaiting_mileage") {
+        // ✅ GUARDED LIFECYCLE PATH: updates mileage AND releases vehicle back to fleet
+        await vehiclesApi.updateMileage(garageVehicle.id, payload);
+        toast.success("Mileage updated and vehicle is now available!");
+      } else {
+        // ✅ GENERAL PATH: records mileage/service for ANY vehicle (no guard)
+        await vehiclesApi.update(garageVehicle.id, payload);
+        toast.success("Vehicle mileage updated!");
+      }
       setGarageModalOpen(false);
       setGarageVehicle(null);
       await fetchVehicles();
     } catch (error: unknown) {
-      const err = error as { response?: { data?: { detail?: string } } };
-      toast.error(err.response?.data?.detail || "Failed to update mileage");
+      const err = error as { response?: { data?: { detail?: string; message?: string } } };
+      toast.error(err.response?.data?.message || err.response?.data?.detail || "Failed to update mileage");
+      throw error; // ✅ NEW: rethrow so QuickGarageModal shows the inline error & resets its spinner
     } finally {
       setActionLoadingId(null);
     }
