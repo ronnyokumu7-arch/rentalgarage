@@ -9,9 +9,9 @@ import { env } from "@/lib/env";
  * 
  * Key Features:
  * - Uses Zod-validated environment variables for the base URL.
- * - Automatically attaches JWT tokens from localStorage to outgoing requests.
- * - Intercepts 401 Unauthorized responses to safely handle session expiration,
- *   preventing concurrent 401s from corrupting state or triggering multiple redirects.
+ * - Sends HttpOnly refresh cookies automatically via `withCredentials: true`.
+ * - Attaches short-lived access tokens from cookies to outgoing requests.
+ * - Intercepts 401 Unauthorized responses to safely handle session expiration.
  * - Logs network timeouts and 5xx server errors for easier debugging.
  */
 
@@ -23,9 +23,17 @@ import { env } from "@/lib/env";
  */
 let isHandling401 = false;
 
+// ─── COOKIE HELPERS ──────────────────────────────────────────────────────────
+const getCookie = (name: string): string | null => {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
+  return match ? decodeURIComponent(match[2]) : null;
+};
+
 // Initialize Axios instance with strict typing and validated env vars
 const apiClient = axios.create({
   baseURL: env.NEXT_PUBLIC_API_URL,
+  withCredentials: true, // ✅ CRITICAL: Ensures HttpOnly refresh cookies are sent to backend
   headers: {
     "Content-Type": "application/json",
   },
@@ -34,13 +42,13 @@ const apiClient = axios.create({
 
 // ─── REQUEST INTERCEPTOR ─────────────────────────────────────────────────────
 /**
- * Attaches the JWT token to outgoing requests.
- * Ensures we only read from localStorage on the client side.
+ * Attaches the short-lived JWT access token to outgoing requests.
+ * The refresh token is sent automatically by the browser via HttpOnly cookie.
  */
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("rm_token");
+      const token = getCookie("rm_token");
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }
@@ -58,27 +66,29 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     const status = error.response?.status;
+    const pathname = typeof window !== "undefined" ? window.location.pathname : "";
 
-    // 1. ✅ FIXED: Handle 401 Unauthorized (Session Expired / Invalid Token)
+    // 1. Handle 401 Unauthorized (Session Expired / Invalid Token)
     if (
       status === 401 &&
       typeof window !== "undefined" &&
-      !window.location.pathname.includes("/login") &&
+      !pathname.includes("/login") &&
+      !pathname.includes("/forgot-password") &&
+      !pathname.includes("/reset-password") &&
       !isHandling401 // ✅ Prevents concurrent 401s from triggering multiple redirects
     ) {
       isHandling401 = true; // Lock the redirect
       
       console.warn("[API Client] 401 Unauthorized: Session expired. Clearing credentials.");
       
-      // Clear localStorage
-      localStorage.removeItem("rm_token");
-      
-      // Clear cookie (Must match the logic in auth-context.tsx)
+      // Clear access token cookie
       document.cookie = "rm_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
       
-      // ✅ FIXED: Mid-Render State Corruption Prevention
-      // A slight delay (100ms) yields to the main thread, allowing React to finish 
-      // its current render cycle before the hard reload destroys the DOM and state.
+      // Clean up any legacy localStorage tokens just in case
+      localStorage.removeItem("rm_token");
+      localStorage.removeItem("rm_refresh_token");
+      
+      // Yield to the main thread before hard reload
       setTimeout(() => {
         window.location.href = "/login?reason=session_expired";
       }, 100);

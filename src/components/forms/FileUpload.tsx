@@ -17,11 +17,15 @@ interface FileUploadProps {
   shape?: "square" | "circle";
 }
 
+// ✅ MILESTONE: Smartphone/scanner-friendly accept list.
+// iPhone HEIC/HEIF, Android AVIF, scanners (BMP/TIFF), plus standard web formats + PDF.
+const DEFAULT_ACCEPT = "image/jpeg,image/png,image/webp,image/heic,image/heif,image/avif,image/bmp,image/tiff,application/pdf";
+
 export default function FileUpload({
   value,
   onChange,
-  accept = "image/*",
-  maxSizeMB = 5,
+  accept = DEFAULT_ACCEPT,
+  maxSizeMB = 25,   // ✅ MILESTONE: 25 MB raw (server compresses to ≤4 MB stored)
   preview = true,
   label = "Upload file",
   hint,
@@ -45,12 +49,12 @@ export default function FileUpload({
       return () => URL.revokeObjectURL(url);
     }
     setPreviewUrl(null);
-    return undefined; // ✅ FIXED: explicit return so all paths return a value
+    return undefined;
   }, [value, preview]);
 
   const validateFile = (file: File): string | null => {
     if (file.size > maxSizeMB * 1024 * 1024) {
-      return `File size must be less than ${maxSizeMB}MB`;
+      return `File too large. Maximum size is ${maxSizeMB}MB.`;
     }
     if (accept !== "*" && accept !== "*/*") {
       const acceptedTypes = accept.split(",").map((t) => t.trim());
@@ -64,7 +68,7 @@ export default function FileUpload({
         }
         return file.type === type;
       });
-      if (!isAccepted) return `File type not accepted`;
+      if (!isAccepted) return `File type not accepted. Try a JPG, PNG, or PDF.`;
     }
     return null;
   };
@@ -101,7 +105,6 @@ export default function FileUpload({
   const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] || null;
     handleFile(file);
-    // Reset input so same file can be re-selected
     if (inputRef.current) inputRef.current.value = "";
   };
 
@@ -219,7 +222,7 @@ export default function FileUpload({
               and drop
             </p>
             <p className="text-xs text-ink-muted mt-0.5">
-              {hint || `Max ${maxSizeMB}MB`}
+              {hint || `Up to ${maxSizeMB}MB — JPG, PNG, HEIC, PDF accepted. We compress automatically.`}
             </p>
           </div>
         )}
