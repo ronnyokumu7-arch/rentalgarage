@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 
 interface Props {
   contract: PublicContractView;
-  onSign: (signature: string) => Promise<boolean>;
+  onSign: (signature: string) => Promise<boolean>; // Now returns boolean
   isSigned: boolean;
 }
 
@@ -19,11 +19,8 @@ export default function PublicContractSignTab({ contract, onSign, isSigned }: Pr
   const [signing, setSigning] = useState(false);
   const [signed, setSigned] = useState(isSigned);
 
-  // Function to handle clearing the signature
   const handleClearSignature = () => {
     signatureRef.current?.clear();
-    // Optional: Show a small toast confirming the clear
-    // toast.success("Signature cleared"); 
   };
 
   const handleSign = async () => {
@@ -39,14 +36,21 @@ export default function PublicContractSignTab({ contract, onSign, isSigned }: Pr
     }
 
     setSigning(true);
-    const success = await onSign(signature);
-    if (success) {
-      setSigned(true);
-      toast.success("Contract signed successfully!");
-    } else {
-      toast.error("Failed to sign contract. Please try again.");
+    
+    try {
+      const success = await onSign(signature);
+      
+      if (success) {
+        setSigned(true);
+        toast.success("Contract signed successfully!");
+      } else {
+        toast.error("Failed to sign contract. Please try again.");
+      }
+    } catch {
+      toast.error("An unexpected error occurred. Please try again.");
+    } finally {
+      setSigning(false);
     }
-    setSigning(false);
   };
 
   // Success State
@@ -68,7 +72,6 @@ export default function PublicContractSignTab({ contract, onSign, isSigned }: Pr
 
   return (
     <div className="p-4 sm:p-8 space-y-6">
-      
       {/* Signature Pad Section */}
       <div>
         <div className="flex items-center justify-between mb-3">
@@ -76,7 +79,6 @@ export default function PublicContractSignTab({ contract, onSign, isSigned }: Pr
             <FileText size={16} className="text-slate-600" />
             Electronic Signature
           </h4>
-          {/* ✅ CLEAR BUTTON */}
           <button
             type="button"
             onClick={handleClearSignature}
@@ -93,7 +95,7 @@ export default function PublicContractSignTab({ contract, onSign, isSigned }: Pr
         </p>
         
         {/* Signature Pad Container */}
-        <div className="border-2 border-dashed border-slate-300 rounded-xl bg-slate-50 overflow-hidden relative group">
+        <div className="border-2 border-dashed border-slate-300 rounded-xl overflow-hidden relative group">
           <SignaturePad ref={signatureRef} />
         </div>
       </div>
@@ -117,7 +119,7 @@ export default function PublicContractSignTab({ contract, onSign, isSigned }: Pr
         </label>
       </div>
 
-      {/* Sign Button (Disabled until checkbox + signature) */}
+      {/* Sign Button */}
       <button
         onClick={handleSign}
         disabled={!termsAccepted || signing}

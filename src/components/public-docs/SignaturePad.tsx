@@ -13,11 +13,9 @@ const SignaturePad = forwardRef<SignaturePadRef>((_, ref) => {
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
 
-  // ✅ FIX 1: Define isEmpty as a local helper function so it can be used inside getSignature
   const isEmpty = () => {
     const canvas = canvasRef.current;
     if (!canvas) return true;
-    // Quick check: if the canvas is completely transparent/white
     const blank = document.createElement('canvas');
     blank.width = canvas.width;
     blank.height = canvas.height;
@@ -26,7 +24,7 @@ const SignaturePad = forwardRef<SignaturePadRef>((_, ref) => {
 
   useImperativeHandle(ref, () => ({
     getSignature: () => {
-      if (isEmpty()) return null; // Now this works!
+      if (isEmpty()) return null;
       return canvasRef.current?.toDataURL('image/png') || null;
     },
     clear: () => {
@@ -37,7 +35,7 @@ const SignaturePad = forwardRef<SignaturePadRef>((_, ref) => {
         setHasDrawn(false);
       }
     },
-    isEmpty: isEmpty // Expose the helper function to the parent
+    isEmpty: isEmpty
   }));
 
   useEffect(() => {
@@ -45,10 +43,28 @@ const SignaturePad = forwardRef<SignaturePadRef>((_, ref) => {
     if (!canvas) return;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    
+    // ✅ CRITICAL: Clear the canvas to make it transparent
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
     ctx.lineWidth = 2.5;
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.strokeStyle = '#09090b'; // Matches var(--color-ink)
+    ctx.strokeStyle = '#09090b';
+  }, []);
+
+  // ✅ NEW: Ensure canvas is transparent on resize or any re-render
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    
+    // Make sure canvas stays transparent
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Redraw existing signature if needed
+    // This prevents white background from appearing
   }, []);
 
   const getCoords = (e: React.MouseEvent | React.TouchEvent) => {
@@ -81,7 +97,7 @@ const SignaturePad = forwardRef<SignaturePadRef>((_, ref) => {
 
   const draw = (e: React.MouseEvent | React.TouchEvent) => {
     if (!isDrawing) return;
-    e.preventDefault(); // Prevent scrolling on mobile while signing
+    e.preventDefault();
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (!ctx) return;
@@ -98,7 +114,12 @@ const SignaturePad = forwardRef<SignaturePadRef>((_, ref) => {
         ref={canvasRef}
         width={800}
         height={250}
-        className="w-full h-48 bg-surface-card border-2 border-dashed border-surface-border-strong rounded-xl cursor-crosshair touch-none"
+        className="w-full h-48 border-2 border-dashed border-surface-border-strong rounded-xl cursor-crosshair touch-none"
+        style={{ 
+          background: 'transparent !important',
+          backgroundColor: 'transparent !important',
+          display: 'block',
+        }}
         onMouseDown={startDrawing}
         onMouseMove={draw}
         onMouseUp={stopDrawing}
@@ -107,7 +128,6 @@ const SignaturePad = forwardRef<SignaturePadRef>((_, ref) => {
         onTouchMove={draw}
         onTouchEnd={stopDrawing}
       />
-      {/* ✅ FIX 2: Corrected the broken '& &' syntax artifact from the upload */}
       {!hasDrawn && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <span className="text-ink-subtle text-sm font-medium tracking-wide uppercase">Sign Here</span>

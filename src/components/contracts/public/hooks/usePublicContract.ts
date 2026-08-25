@@ -10,7 +10,7 @@ export interface UsePublicContractReturn {
   loading: boolean;
   error: string | null;
   isSigning: boolean;
-  signContract: (signatureData: string) => Promise<boolean>;  // ← boolean
+  signContract: (signatureData: string) => Promise<boolean>;
   downloadPdf: () => Promise<void>;
   signed: boolean;
   signingError: string | null;
@@ -41,15 +41,41 @@ export function usePublicContract(token: string): UsePublicContractReturn {
     }
   }, [token]);
 
-  const signContract = async (_signatureData: string): Promise<boolean> => {
-    if (!contract || contract.signed_by_client) return false;
+  const signContract = async (signatureData: string): Promise<boolean> => {
+    // Validate contract state
+    if (!contract) {
+      setSigningError("No contract found");
+      return false;
+    }
+    
+    if (contract.signed_by_client) {
+      setSigningError("Contract already signed");
+      toast.error("This contract has already been signed");
+      return false;
+    }
+    
+    // Validate signature data
+    if (!signatureData || signatureData.trim() === "") {
+      setSigningError("Please provide a valid signature");
+      toast.error("Signature is required");
+      return false;
+    }
+    
+    // Check if signature is empty canvas (common issue with signature pads)
+    if (signatureData === "data:image/png;base64," || signatureData.length < 100) {
+      setSigningError("Please draw your signature before submitting");
+      toast.error("Signature cannot be empty");
+      return false;
+    }
     
     setIsSigning(true);
     setSigningError(null);
     
     try {
-      await contractsApi.publicSign(token);
+      // ✅ FIXED: Pass the signature data to the API
+      await contractsApi.publicSign(token, signatureData);
       
+      // Update local state
       setContract(prev => prev ? { 
         ...prev, 
         signed_by_client: true,
@@ -59,19 +85,47 @@ export function usePublicContract(token: string): UsePublicContractReturn {
       toast.success("Contract signed successfully!");
       return true;
     } catch (err: unknown) {
-      const apiErr = err as { response?: { status?: number; data?: { detail?: string; opens_at?: string } } };
-      const status = apiErr.response?.status;
-      const detail = apiErr.response?.data?.detail || "Failed to sign contract.";
+      const apiErr = err as { 
+        response?: { 
+          status?: number; 
+          data?: { 
+            detail?: string; 
+            opens_at?: string;
+            errors?: Array<{ msg: string; loc: string[] }>;
+          } 
+        } 
+      };
       
+      const status = apiErr.response?.status;
+      const responseData = apiErr.response?.data;
+      
+      // Handle validation errors (422)
       if (status === 422) {
-        setSigningError(detail);
-        const opensAt = apiErr.response?.data?.opens_at;
+        // Parse validation errors if available
+        if (responseData?.errors) {
+          const errorMessages = responseData.errors
+            .map(err => `${err.loc.join('.')}: ${err.msg}`)
+            .join(', ');
+          setSigningError(errorMessages);
+          toast.error(errorMessages);
+        } else {
+          const detail = responseData?.detail || "Validation error. Please check your input.";
+          setSigningError(detail);
+          toast.error(detail);
+        }
+        
+        // Check if there's an opens_at field for future signing
+        const opensAt = responseData?.opens_at;
         if (opensAt) {
           setSigningOpensAt(opensAt);
         }
       } else {
+        // Handle other errors
+        const detail = responseData?.detail || "Failed to sign contract. Please try again.";
+        setSigningError(detail);
         toast.error(detail);
       }
+      
       return false;
     } finally {
       setIsSigning(false);
@@ -79,32 +133,46 @@ export function usePublicContract(token: string): UsePublicContractReturn {
   };
 
   const downloadPdf = async () => {
-    if (!contract) return;
+    if (!contract) {
+      toast.error("No contract available to download");
+      return;
+    }
+    
     try {
-      toast.loading("Generating PDF...");
+      const loadingToast = toast.loading("Generating PDF...");
+      
       const res = await contractsApi.publicDownloadPdf(token);
       const blob = res.data instanceof Blob ? res.data : new Blob([res.data]);
+      
+      // Create download link
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `contract-${contract.contract_number}.pdf`;
+      link.download = `contract-${contract.contract_number || "document"}.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      
+      // Clean up
+      setTimeout(() => {
+        window.URL.revokeObjectURL(url);
+      }, 100);
+      
+      toast.dismiss(loadingToast);
+      toast.success("PDF downloaded successfully");
+    } catch (error) {
       toast.dismiss();
-      toast.success("PDF downloaded");
-    } catch {
-      toast.dismiss();
-      toast.error("Failed to download PDF");
+      console.error("PDF download error:", error);
+      toast.error("Failed to download PDF. Please try again.");
     }
   };
 
+  // Fetch contract when token changes
   useEffect(() => {
-    if (token) fetchContract();
+    if (token) {
+      fetchContract();
+    }
   }, [token, fetchContract]);
-
-  const signed = contract?.signed_by_client ?? false;
 
   return {
     contract,
@@ -113,7 +181,7 @@ export function usePublicContract(token: string): UsePublicContractReturn {
     isSigning,
     signContract,
     downloadPdf,
-    signed,
+    signed: contract?.signed_by_client ?? false,
     signingError,
     signingOpensAt,
     refetch: fetchContract

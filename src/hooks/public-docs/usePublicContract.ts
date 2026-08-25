@@ -10,7 +10,7 @@ export interface UsePublicContractReturn {
   loading: boolean;
   error: string | null;
   isSigning: boolean;
-  signContract: (signatureData: string) => Promise<void>;
+  signContract: (signatureData: string) => Promise<boolean>; // Changed to return boolean
   downloadPdf: () => Promise<void>;
   signed: boolean;
   signingError: string | null;
@@ -41,14 +41,36 @@ export function usePublicContract(token: string): UsePublicContractReturn {
     }
   }, [token]);
 
-  const signContract = async (_signatureData: string) => {
-    if (!contract || contract.signed_by_client) return;
+  const signContract = async (signatureData: string): Promise<boolean> => {
+    // Validate contract state
+    if (!contract) {
+      setSigningError("No contract found");
+      return false;
+    }
+    
+    if (contract.signed_by_client) {
+      setSigningError("Contract already signed");
+      return false;
+    }
+    
+    // Validate signature data
+    if (!signatureData || signatureData.trim() === "") {
+      setSigningError("Please provide a valid signature");
+      return false;
+    }
+    
+    // Check if signature is empty canvas
+    if (signatureData === "data:image/png;base64," || signatureData.length < 100) {
+      setSigningError("Please draw your signature before submitting");
+      return false;
+    }
     
     setIsSigning(true);
     setSigningError(null);
     
     try {
-      await contractsApi.publicSign(token);
+      // ✅ FIXED: Pass the signature data to the API
+      await contractsApi.publicSign(token, signatureData);
       
       setContract(prev => prev ? { 
         ...prev, 
@@ -56,30 +78,61 @@ export function usePublicContract(token: string): UsePublicContractReturn {
         status: "signed" as const
       } : null);
       
-      toast.success("Contract signed successfully!");
+      // ✅ REMOVED: toast.success("Contract signed successfully!");
+      // Let the component handle the toast to avoid duplicates
+      return true;
     } catch (err: unknown) {
-      const apiErr = err as { response?: { status?: number; data?: { detail?: string; opens_at?: string } } };
+      const apiErr = err as { 
+        response?: { 
+          status?: number; 
+          data?: { 
+            detail?: string; 
+            opens_at?: string;
+            errors?: Array<{ msg: string; loc: string[] }>;
+          } 
+        } 
+      };
+      
       const status = apiErr.response?.status;
-      const detail = apiErr.response?.data?.detail || "Failed to sign contract.";
+      const responseData = apiErr.response?.data;
       
       if (status === 422) {
-        setSigningError(detail);
-        const opensAt = apiErr.response?.data?.opens_at;
+        // Parse validation errors
+        if (responseData?.errors) {
+          const errorMessages = responseData.errors
+            .map(err => `${err.loc.join('.')}: ${err.msg}`)
+            .join(', ');
+          setSigningError(errorMessages);
+          // ✅ Let component handle error toast
+        } else {
+          const detail = responseData?.detail || "Validation error. Please check your input.";
+          setSigningError(detail);
+        }
+        
+        const opensAt = responseData?.opens_at;
         if (opensAt) {
           setSigningOpensAt(opensAt);
         }
       } else {
-        toast.error(detail);
+        // For non-422 errors, set the error state but let component decide on toast
+        const detail = responseData?.detail || "Failed to sign contract. Please try again.";
+        setSigningError(detail);
       }
+      
+      return false;
     } finally {
       setIsSigning(false);
     }
   };
 
   const downloadPdf = async () => {
-    if (!contract) return;
+    if (!contract) {
+      toast.error("No contract available to download");
+      return;
+    }
+    
     try {
-      toast.loading("Generating PDF...");
+      const loadingToast = toast.loading("Generating PDF...");
       const res = await contractsApi.publicDownloadPdf(token);
       const blob = res.data instanceof Blob ? res.data : new Blob([res.data]);
       const url = window.URL.createObjectURL(blob);
@@ -90,7 +143,7 @@ export function usePublicContract(token: string): UsePublicContractReturn {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      toast.dismiss();
+      toast.dismiss(loadingToast);
       toast.success("PDF downloaded");
     } catch {
       toast.dismiss();
@@ -102,8 +155,6 @@ export function usePublicContract(token: string): UsePublicContractReturn {
     if (token) fetchContract();
   }, [token, fetchContract]);
 
-  const signed = contract?.signed_by_client ?? false;
-
   return {
     contract,
     loading,
@@ -111,7 +162,7 @@ export function usePublicContract(token: string): UsePublicContractReturn {
     isSigning,
     signContract,
     downloadPdf,
-    signed,
+    signed: contract?.signed_by_client ?? false,
     signingError,
     signingOpensAt,
     refetch: fetchContract
