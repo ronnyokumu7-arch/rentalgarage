@@ -23,13 +23,13 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null);
-  
+
   const [customAmount, setCustomAmount] = useState<string>("");
   const [customRate, setCustomRate] = useState<string>("");
   const [dueDate, setDueDate] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
   const [rateLocked, setRateLocked] = useState(false); // true = amount drives rate, false = rate drives amount
-  
+
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(false);
 
@@ -51,14 +51,14 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
 
   const eligibleBookings = useMemo(() => {
     const invoiceMap = new Map(invoices.map(inv => [inv.booking_id, inv]));
-    
+
     return bookings.filter(b => {
       const isBookingActive = ['pending', 'confirmed', 'active'].includes(b.status);
       if (!isBookingActive) return false;
 
       const invoice = invoiceMap.get(b.id);
       if (!invoice) return true;
-      
+
       return invoice.status !== 'paid' && invoice.status !== 'void';
     });
   }, [bookings, invoices]);
@@ -66,9 +66,8 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
   const selectedBooking = bookings.find(b => b.id === selectedBookingId);
   const existingInvoice = invoices.find(inv => inv.booking_id === selectedBookingId);
 
-  // ✅ ENGINE RULE (matches backend): exact hours / 24 → ceil → min 1.
+  // ✅ ENGINE RULE (matches backend): ceil(duration / 24h), min 1 day.
   // Uses pickup_at / scheduled_return_at when available, falls back to dates.
-  // No "+1" — the legacy inclusive-day bug is gone here too.
   const billableDays = useMemo(() => {
     if (!selectedBooking) return 1;
     const startStr = selectedBooking.pickup_at || selectedBooking.start_date;
@@ -77,29 +76,31 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
     const start = new Date(startStr);
     const end = new Date(endStr);
     const hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
+    if (!isFinite(hours) || hours <= 0) return 1;
     return Math.max(1, Math.ceil(hours / 24));
   }, [selectedBooking]);
 
-  // ✅ Derive the effective rate for pre-fill: booking.daily_rate > total/days
+  // ✅ Source of truth: booking.daily_rate ONLY.
+  // ❌ Removed: total_amount / billableDays fallback.
+  // The backend engine used daily_rate × days to compute total_amount, so
+  // reversing that division is lossy and produces ghost numbers (e.g. 0.50).
+  // If daily_rate is missing, we have no reliable source — return 0 and
+  // require the user to enter a rate explicitly.
   const effectiveDailyRate = useMemo(() => {
     if (!selectedBooking) return 0;
-    if (selectedBooking.daily_rate) return Number(selectedBooking.daily_rate);
-    if (selectedBooking.total_amount && billableDays > 0) {
-      return Number(selectedBooking.total_amount) / billableDays;
-    }
-    return 0;
-  }, [selectedBooking, billableDays]);
+    return Number(selectedBooking.daily_rate) || 0;
+  }, [selectedBooking]);
 
   // ✅ Pre-fill form when booking changes
   useEffect(() => {
     if (selectedBooking) {
       const rate = effectiveDailyRate;
-      const amount = existingInvoice 
-        ? Number(existingInvoice.amount_due) 
-        : Number(selectedBooking.total_amount);
-      
-      setCustomRate(rate.toFixed(2));
-      setCustomAmount(amount.toFixed(2));
+      const amount = existingInvoice
+        ? Number(existingInvoice.amount_due)
+        : (effectiveDailyRate > 0 ? effectiveDailyRate * billableDays : Number(selectedBooking.total_amount));
+
+      setCustomRate(rate > 0 ? rate.toFixed(2) : "");
+      setCustomAmount(amount > 0 ? amount.toFixed(2) : "");
       setDueDate((existingInvoice?.due_date || selectedBooking.end_date).split('T')[0]);
       setNotes(existingInvoice?.notes || `Auto-generated for Booking #${selectedBooking.booking_number}`);
       setRateLocked(false); // default: rate drives amount
@@ -109,54 +110,68 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
       setDueDate("");
       setNotes("");
     }
-  }, [selectedBookingId, selectedBooking, existingInvoice, effectiveDailyRate]);
+  }, [selectedBookingId, selectedBooking, existingInvoice, effectiveDailyRate, billableDays]);
 
   // ✅ Rate → Amount auto-recompute (when rate is the driver)
+  // Guards: only compute when rate is a valid positive number.
   const handleRateChange = (value: string) => {
     setCustomRate(value);
     if (!rateLocked && value && billableDays > 0) {
-      const computed = parseFloat(value) * billableDays;
-      setCustomAmount(computed.toFixed(2));
+      const parsed = parseFloat(value);
+      if (!isNaN(parsed) && parsed > 0) {
+        setCustomAmount((parsed * billableDays).toFixed(2));
+      }
     }
   };
 
   // ✅ Amount → Rate auto-recompute (when amount is the driver)
+  // Guards: only compute when amount is a valid positive number.
   const handleAmountChange = (value: string) => {
     setCustomAmount(value);
     if (rateLocked && value && billableDays > 0) {
-      const computed = parseFloat(value) / billableDays;
-      setCustomRate(computed.toFixed(2));
+      const parsed = parseFloat(value);
+      if (!isNaN(parsed) && parsed > 0) {
+        setCustomRate((parsed / billableDays).toFixed(2));
+      }
     }
   };
 
   // ✅ Unified submit — always uses generate-invoice (handles create AND update, writes rate to booking)
   const handleSubmit = async () => {
     if (!selectedBookingId || !customAmount || !dueDate) return;
-    
+
+    const amountNum = parseFloat(customAmount);
+    if (isNaN(amountNum) || amountNum <= 0) {
+      toast.error("Total amount must be a positive number");
+      return;
+    }
+
     setLoading(true);
     try {
-      const payload: any = {
-        custom_amount: parseFloat(customAmount),
+      const payload: Record<string, unknown> = {
+        custom_amount: amountNum,
         due_date: new Date(dueDate).toISOString(),
         notes: notes,
       };
-      
+
       // ✅ Only send rate if it differs from effective (prevents noise on no-op updates)
-      if (customRate && parseFloat(customRate) !== effectiveDailyRate) {
-        payload.custom_rate = parseFloat(customRate);
+      const rateNum = customRate ? parseFloat(customRate) : NaN;
+      if (!isNaN(rateNum) && rateNum > 0 && rateNum !== effectiveDailyRate) {
+        payload.custom_rate = rateNum;
       }
-      
+
       await bookingsApi.generateInvoice(selectedBookingId, payload);
       toast.success(
-        existingInvoice 
+        existingInvoice
           ? "Invoice updated successfully! Regenerate the contract to reflect new rate."
           : "Invoice generated successfully!"
       );
-      
+
       onCreated();
       handleClose();
-    } catch (error: any) {
-      toast.error(error.response?.data?.detail || "Failed to process invoice");
+    } catch (error: unknown) {
+      const err = error as { response?: { data?: { detail?: string } } };
+      toast.error(err.response?.data?.detail || "Failed to process invoice");
     } finally {
       setLoading(false);
     }
@@ -180,7 +195,7 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
   return (
     <Modal open={open} onClose={handleClose} title="Customize Invoice" subtitle="Override rates, amounts, or due dates" size="md">
       <div className="space-y-6">
-        
+
         {/* Booking Selection */}
         <div>
           <label className={labelClass}>
@@ -205,12 +220,12 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
               );
             })}
           </select>
-          
+
           {eligibleBookings.length === 0 && !fetching && (
             <div className="mt-3 p-4 rounded-xl bg-[var(--color-warning-bg)]/30 border border-[var(--color-warning-bg)] flex items-start gap-3">
               <AlertCircle size={16} className="text-[var(--color-warning-text)] mt-0.5 flex-shrink-0" />
               <p className="text-xs text-[var(--color-warning-text)] font-medium">
-                No bookings are eligible. Ensure bookings are 'Pending/Active' and invoices are not 'Paid'.
+                No bookings are eligible. Ensure bookings are &apos;Pending/Active&apos; and invoices are not &apos;Paid&apos;.
               </p>
             </div>
           )}
@@ -286,7 +301,7 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
                 </button>
               </div>
               <p className="text-[10px] text-[var(--color-ink-muted)] mt-1.5">
-                {!rateLocked 
+                {!rateLocked
                   ? "Daily rate drives the total (rate × days). Edit the rate."
                   : "Total amount drives the rate (amount ÷ days). Edit the total."}
               </p>
@@ -301,6 +316,7 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
                 <input
                   type="number"
                   step="0.01"
+                  min="0"
                   value={customRate}
                   onChange={(e) => handleRateChange(e.target.value)}
                   disabled={rateLocked}
@@ -315,6 +331,7 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
                 <input
                   type="number"
                   step="0.01"
+                  min="0"
                   value={customAmount}
                   onChange={(e) => handleAmountChange(e.target.value)}
                   disabled={!rateLocked}
@@ -323,6 +340,13 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
                 />
               </div>
             </div>
+
+            {/* ✅ Live breakdown hint */}
+            {customRate && customAmount && billableDays > 0 && (
+              <p className="text-[11px] text-[var(--color-ink-muted)] -mt-2">
+                = {customRate} × {billableDays} day{billableDays > 1 ? 's' : ''} → {customAmount}
+              </p>
+            )}
 
             <div>
               <label className={labelClass}>
@@ -361,16 +385,16 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
 
         {/* Actions */}
         <div className="flex items-center justify-end gap-3 pt-4 border-t border-[var(--color-surface-border)]">
-          <button 
-            type="button" 
-            onClick={handleClose} 
+          <button
+            type="button"
+            onClick={handleClose}
             className="px-5 py-2.5 rounded-xl text-sm font-semibold text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all"
           >
             Cancel
           </button>
-          <button 
-            onClick={handleSubmit} 
-            disabled={loading || !selectedBookingId || !customAmount || !customRate} 
+          <button
+            onClick={handleSubmit}
+            disabled={loading || !selectedBookingId || !customAmount || !customRate || !dueDate}
             className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-lg)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />}

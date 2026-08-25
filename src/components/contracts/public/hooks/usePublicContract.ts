@@ -1,70 +1,121 @@
-// src/components/contracts/public/hooks/usePublicContract.ts
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { contractsApi } from "@/lib/api/contracts";
 import type { PublicContractView } from "@/lib/types";
+import toast from "react-hot-toast";
 
-interface UsePublicContractReturn {
+export interface UsePublicContractReturn {
   contract: PublicContractView | null;
   loading: boolean;
   error: string | null;
-  signed: boolean;
-  fetchContract: () => Promise<void>;
-  signContract: (signature: string) => Promise<boolean>;
+  isSigning: boolean;
+  signContract: (signatureData: string) => Promise<boolean>;  // ← boolean
   downloadPdf: () => Promise<void>;
+  signed: boolean;
+  signingError: string | null;
+  signingOpensAt: string | null;
+  refetch: () => Promise<void>;
 }
 
 export function usePublicContract(token: string): UsePublicContractReturn {
   const [contract, setContract] = useState<PublicContractView | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [signed, setSigned] = useState(false);
+  const [isSigning, setIsSigning] = useState(false);
+  const [signingError, setSigningError] = useState<string | null>(null);
+  const [signingOpensAt, setSigningOpensAt] = useState<string | null>(null);
 
-  const fetchContract = async () => {
+  const fetchContract = useCallback(async () => {
     try {
       setLoading(true);
+      setError(null);
       const data = await contractsApi.publicView(token);
       setContract(data);
-      setSigned(data.signed_by_client);
-      setError(null);
-    } catch (err: any) {
-      setError(err.response?.data?.detail || "Contract not found");
+    } catch (err: unknown) {
+      const apiErr = err as { response?: { status?: number; data?: { detail?: string } } };
+      const msg = apiErr.response?.data?.detail || "This contract link is invalid or has expired.";
+      setError(msg);
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
 
-  const signContract = async (signature: string) => {
+  const signContract = async (_signatureData: string): Promise<boolean> => {
+    if (!contract || contract.signed_by_client) return false;
+    
+    setIsSigning(true);
+    setSigningError(null);
+    
     try {
-      await contractsApi.publicSign(token, signature);
-      setSigned(true);
-      setContract((prev) => prev ? { ...prev, signed_by_client: true, status: "signed" } : null);
+      await contractsApi.publicSign(token);
+      
+      setContract(prev => prev ? { 
+        ...prev, 
+        signed_by_client: true,
+        status: "signed" as const
+      } : null);
+      
+      toast.success("Contract signed successfully!");
       return true;
-    } catch (err: any) {
-      setError(err.response?.data?.detail || "Failed to sign");
+    } catch (err: unknown) {
+      const apiErr = err as { response?: { status?: number; data?: { detail?: string; opens_at?: string } } };
+      const status = apiErr.response?.status;
+      const detail = apiErr.response?.data?.detail || "Failed to sign contract.";
+      
+      if (status === 422) {
+        setSigningError(detail);
+        const opensAt = apiErr.response?.data?.opens_at;
+        if (opensAt) {
+          setSigningOpensAt(opensAt);
+        }
+      } else {
+        toast.error(detail);
+      }
       return false;
+    } finally {
+      setIsSigning(false);
     }
   };
 
   const downloadPdf = async () => {
+    if (!contract) return;
     try {
-      const response = await contractsApi.publicDownloadPdf(token);
-      const blob = new Blob([response.data], { type: "application/pdf" });
+      toast.loading("Generating PDF...");
+      const res = await contractsApi.publicDownloadPdf(token);
+      const blob = res.data instanceof Blob ? res.data : new Blob([res.data]);
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `Contract-${contract?.contract_number}.pdf`;
+      link.download = `contract-${contract.contract_number}.pdf`;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
+      toast.dismiss();
+      toast.success("PDF downloaded");
     } catch {
-      setError("Failed to download PDF");
+      toast.dismiss();
+      toast.error("Failed to download PDF");
     }
   };
 
   useEffect(() => {
     if (token) fetchContract();
-  }, [token]);
+  }, [token, fetchContract]);
 
-  return { contract, loading, error, signed, fetchContract, signContract, downloadPdf };
+  const signed = contract?.signed_by_client ?? false;
+
+  return {
+    contract,
+    loading,
+    error,
+    isSigning,
+    signContract,
+    downloadPdf,
+    signed,
+    signingError,
+    signingOpensAt,
+    refetch: fetchContract
+  };
 }

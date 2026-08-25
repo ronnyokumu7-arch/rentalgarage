@@ -35,7 +35,11 @@ export default function PremiumDateAndTimePicker({
   const [datePart, timeRaw] = value ? value.split("T") : ["", ""];
   const timePart = timeRaw ? timeRaw.slice(0, 5) : "";
 
-  const emit = (d: string, t: string) => onChange(`${d}T${t}:00`);
+  // ✅ Guard: never emit partial datetimes (e.g., "T08:00:00" or "2026-01-26T:00")
+  const emit = (d: string, t: string) => {
+    if (!d || !t) return;
+    onChange(`${d}T${t}:00`);
+  };
 
   // Compute "now rounded up to next 30-min slot" for past-time blocking
   const isToday = datePart === formatDateToLocalYYYYMMDD(new Date());
@@ -84,7 +88,7 @@ export default function PremiumDateAndTimePicker({
             placeholder="Select date..."
           />
         </div>
-        {/* Time — 24h slot picker, always visible */}
+        {/* Time — native input, always visible */}
         <TimePicker
           value={timePart || "09:00"}
           onChange={(t) => emit(datePart || formatDateToLocalYYYYMMDD(new Date()), t)}
