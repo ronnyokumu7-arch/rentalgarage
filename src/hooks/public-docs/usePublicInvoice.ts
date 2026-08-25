@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { invoicesApi } from '@/lib/api/invoices';
 import toast from 'react-hot-toast';
 import type { PublicInvoiceView } from '@/lib/types';
+import { confirmAction } from "@/lib/utils/confirmAction";
 
 export function usePublicInvoice(token: string) {
   const [invoice, setInvoice] = useState<PublicInvoiceView | null>(null);
@@ -70,7 +71,7 @@ export function usePublicInvoice(token: string) {
    */
   const handleCancel = async () => {
     if (!token) return;
-    if (!confirm('Are you sure you want to cancel this booking? This will void the quotation.')) return;
+    if (!confirmAction('Are you sure you want to cancel this booking? This will void the quotation.')) return;
     setIsCancelling(true);
     try {
       await invoicesApi.cancelPublic(token);
