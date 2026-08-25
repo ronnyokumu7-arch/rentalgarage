@@ -125,7 +125,7 @@ export type ClientUpdate = Partial<
 // ─── Vehicles ────────────────────────────────────────────────────────────────
 export type VehicleStatus =
   | "pending_activation" | "available" | "rented" 
-  | "maintenance" | "awaiting_mileage" | "retired";
+  | "maintenance" | "retired";  // ✅ awaiting_mileage removed
 
 export interface Vehicle {
   id: number;
@@ -139,6 +139,10 @@ export interface Vehicle {
   daily_rate: number;
   current_mileage: number;
   next_service_km: number | null;
+  
+  // ✅ LIFECYCLE: return mileage not yet logged (vehicle stays rentable)
+  mileage_due: boolean;  // ✅ NEW
+  
   insurance_number: string | null;
   insurance_expiry: string | null;
   insurance_doc: string | null;
@@ -172,14 +176,12 @@ export interface VehicleUpdate {
   plate_number?: string;
   vin?: string | null;
   daily_rate?: number;
-  status?: VehicleStatus;
+  // ✅ SECURITY: status removed (transitions via lifecycle endpoints only)
+  // ✅ SECURITY: doc URLs removed (set via file upload endpoint only)
   current_mileage?: number;
   next_service_km?: number | null;
   insurance_number?: string | null;
   insurance_expiry?: string | null;
-  insurance_doc?: string | null;
-  registration_doc?: string | null;
-  inspection_doc?: string | null;
   notes?: string | null;
 }
 
@@ -275,16 +277,22 @@ export interface DriverListItem {
 }
 
 // ─── Bookings ────────────────────────────────────────────────────────────────
-export type BookingStatus = 
-  | "pending" | "confirmed" | "active" | "awaiting_mileage"
-  | "completed" | "cancelled" | "no_show";
+export type BookingStatus =
+  | "pending" | "confirmed" | "active"
+  | "completed" | "cancelled";  // ✅ no_show + awaiting_mileage removed (now 5 states)
+
+// ✅ LIFECYCLE: WHY a booking was cancelled (preserved as data, not a status)
+export type CancellationReason =
+  | "client_cancelled"   // client backed out in advance
+  | "agency_cancelled"   // operator voided it
+  | "no_show"            // client never arrived (forfeit tier)
+  | "expired_unpaid";    // quotation/invoice lapsed unpaid
 
 // ✅ MILESTONE 1.1: Service type enum (backend-defined catalog)
-export type ServiceType = 
-  | "selfdrive" 
-  | "chauffeur_pro_driver" 
+export type ServiceType =
+  | "selfdrive"
+  | "chauffeur_pro_driver"
   | "chauffeur_wedding"
-  // Parked (defined in backend, not yet active):
   | "chauffeur_hourly"
   | "corporate"
   | "city_excursion"
@@ -301,7 +309,6 @@ export type BillingModel =
   | "distance_time"
   | "route_stops";
 
-// ✅ MILESTONE 1.1: Service catalog (from GET /services/)
 export interface ServiceConfig {
   billing_model: BillingModel | null;
   day_hours: number;
@@ -380,9 +387,15 @@ export interface Booking {
   service_type: ServiceType;
   pickup_at?: string | null;
   scheduled_return_at?: string | null;
+  actual_return_at?: string | null;  // ✅ LIFECYCLE: set on complete (late-return reconciliation)
   pricing_day_hours?: number | null;
   pricing_grace_minutes?: number | null;
   pricing_overtime_hourly_rate?: number | string | null;
+
+  // ✅ LIFECYCLE: cancellation metadata (replaces removed no_show status)
+  cancellation_reason?: CancellationReason | null;
+  cancelled_at?: string | null;
+  cancelled_by?: number | null;
 
   // ✅ MILESTONE 2: Driver assignment (scalar FK)
   driver_id?: number | null;
@@ -390,9 +403,8 @@ export interface Booking {
   // Joined Relations
   client?: BookingClientRelation | null;
   vehicle?: BookingVehicleRelation | null;
-  driver?: Driver | null;  // ✅ MILESTONE 2: nested DriverOut (full detail for detail views)
-  
-  // ✅ Nested relations often returned by backend
+  driver?: Driver | null;
+
   contract?: Contract | null;
   invoices?: Invoice[];
   total_price?: string | number | null;
@@ -409,13 +421,11 @@ export interface BookingCreate {
   daily_rate?: number;
   total_amount: number;
   currency_code?: string;
-  
-  // ✅ MILESTONE 1: Service type + exact times
+
   service_type?: ServiceType;
   pickup_at?: string;
   scheduled_return_at?: string;
 
-  // ✅ MILESTONE 2: Optional driver assignment
   driver_id?: number | null;
 }
 
@@ -429,32 +439,26 @@ export interface BookingUpdate {
   daily_rate?: number;
   total_amount?: number;
   currency_code?: string;
-  status?: BookingStatus;
-  
-  // ✅ MILESTONE 1: Service type + exact times
+  // ✅ SECURITY: status removed (transitions via lifecycle endpoints only)
+
   service_type?: ServiceType;
   pickup_at?: string;
   scheduled_return_at?: string;
 
-  // ✅ MILESTONE 2: Optional driver reassignment / unassignment (null clears)
   driver_id?: number | null;
 }
 
-// ✅ MILESTONE 1.1: Live pricing preview request (no DB writes)
 export interface BookingQuote {
   vehicle_id: number;
   service_type: ServiceType;
   pickup_at: string;
   return_at: string;
-  // ✅ MILESTONE 2: Optional driver for per-driver fee resolution
   driver_id?: number | null;
-  // ✅ Future-proof for distance_time, fixed_route, route_stops
   distance_km?: number;
   route_key?: string;
   stops?: number;
 }
 
-// ✅ MILESTONE 1: Pricing breakdown response from /quote endpoint
 export interface PricingLine {
   description: string;
   quantity: string;
@@ -464,7 +468,7 @@ export interface PricingLine {
 export interface PricingResult {
   service_type: ServiceType;
   service_label: string;
-  billing_model: BillingModel;  // ✅ MILESTONE 1.1: strategy used
+  billing_model: BillingModel;
   pickup_at: string;
   return_at: string;
   daily_rate: number | string;
@@ -500,11 +504,11 @@ export interface Contract {
   share_token?: string | null;
   share_token_expires_at?: string | null;
   signed_by_client: boolean;
-  client_signed_at: string | null;
-  signed_at: string | null; 
+  client_signed_at: string | null;  // ✅ set on public sign
+  // ✅ REMOVED: signed_at (legacy/stale — backend only sets client_signed_at)
   created_at: string;
   updated_at: string;
-  
+
   booking_number?: string | null;
   client_id?: number | null;
   client_name?: string | null;
@@ -516,7 +520,7 @@ export interface PublicContractView {
   booking_number?: string | null;
   tenant_name: string;
 
-  // ✅ NEW: Owning Tenant's branding (resolved from the contract's tenant)
+  // ✅ Owning Tenant's branding (resolved from the contract's tenant)
   tenant_logo_url?: string | null;
   tenant_address?: string | null;
   tenant_phone?: string | null;
@@ -544,12 +548,16 @@ export interface PublicContractView {
 // ─── Invoices ────────────────────────────────────────────────────────────────
 export type InvoiceStatus = "draft" | "sent" | "paid" | "overdue" | "void" | "partially_paid";
 
+// ✅ LIFECYCLE: document type (quotation morphs to invoice on client accept)
+export type InvoiceDocType = "quotation" | "invoice";
+
 export interface Invoice {
   id: number;
   tenant_id: number;
   booking_id: number | null;
   invoice_number: string;
   status: InvoiceStatus;
+  doc_type: InvoiceDocType;  // ✅ LIFECYCLE: quotation | invoice (legacy defaults to invoice)
   share_token?: string | null;
   share_token_expires_at?: string | null;
   amount_due: number;
@@ -564,7 +572,7 @@ export interface Invoice {
   notes: string | null;
   created_at: string;
   updated_at: string;
-  
+
   booking_number?: string | null;
   client_id?: number | null;
   client_name?: string | null;
@@ -587,29 +595,31 @@ export interface InvoiceUpdate {
   notes?: string;
   discount_amount?: number;
   discount_reason?: string;
-  status?: InvoiceStatus;
+  // ✅ SECURITY: status removed (transitions via payment recording / lifecycle only)
 }
 
 // ─── Public Invoice Views ────────────────────────────────────────────────────
 export interface PublicPaymentDetails {
-  method_type?: string | null;
-  mpesa_paybill?: string | null;
-  mpesa_paybill_account?: string | null;
-  mpesa_till?: string | null;
-  mpesa_pochi?: string | null;
-  mpesa_number?: string | null;
+  // ── M-Pesa (from MpesaConfig) ───────────────────────────────────
+  method_type?: string | null;        // "paybill" | "till" | "pochi"
+  business_shortcode?: string | null; // Paybill number
+  till_number?: string | null;        // Till or Pochi number
+  account_number?: string | null;     // Paybill account reference
+  account_name?: string | null;       // Display name for clients
+
+  // ── Airtel Money (from AirtelMoneyConfig) ───────────────────────
   airtel_number?: string | null;
-  
+
+  // ── Bank Transfer (from BankAccountConfig) ──────────────────────
   bank_name?: string | null;
-  bank_account?: string | null;
-  bank_account_name?: string | null;
   bank_account_number?: string | null;
-  business_shortcode?: string | null;
-  till_number?: string | null;
-  account_number?: string | null;
-  account_name?: string | null;
+  bank_account_name?: string | null;
   branch_code?: string | null;
   swift_code?: string | null;
+  currency?: string | null;
+
+  // ── Fallback (from TenantProfile) ───────────────────────────────
+  tenant_phone?: string | null;
 }
 
 export interface PublicInvoiceView {
@@ -627,6 +637,7 @@ export interface PublicInvoiceView {
   amount_due: number | string;
   currency_code: string;
   status: InvoiceStatus;
+  doc_type: InvoiceDocType;  // ✅ LIFECYCLE: drives morphing page (quotation vs invoice mode)
   due_date: string;
   remaining_balance?: number | string | null;
   payment_details?: PublicPaymentDetails | null;
@@ -636,6 +647,17 @@ export interface PublicInvoiceView {
   driver_name?: string | null;
   driver_phone?: string | null;
   driver_dl_number?: string | null;
+
+  // Booking reference
+  booking_number?: string | null;
+  booking_start_date?: string | null;
+  booking_end_date?: string | null;
+
+  // Discount
+  discount_amount?: number | string;
+  discount_reason?: string | null;
+  notes?: string | null;
+  paid_at?: string | null;
 }
 
 // ─── Payments ────────────────────────────────────────────────────────────────

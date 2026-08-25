@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { 
+import {
   CheckCircle2, UserPlus, Calendar, Clock, ArrowRight,
   Zap, Sparkles, Loader2, MoreVertical,
   Play, XCircle, Eye, Car, User, FileText, MapPin,
@@ -25,14 +25,13 @@ const HEADER_COPY: Record<SubTab, { title: string; description: string; icon: Lu
   activity: { title: "Activity Logs", description: "The live pulse of your fleet's latest moves.", icon: Clock },
 };
 
+// ✅ LIFECYCLE: 5-state booking (awaiting_mileage + no_show removed)
 const BOOKING_STATUS_META: Record<string, { label: string; badge: string; dot: string }> = {
-  pending:   { label: "Pending",   badge: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",     dot: "bg-amber-500" },
-  confirmed: { label: "Confirmed", badge: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",         dot: "bg-blue-500" },
+  pending:   { label: "Pending",   badge: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",          dot: "bg-amber-500" },
+  confirmed: { label: "Confirmed", badge: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",              dot: "bg-blue-500" },
   active:    { label: "Active",    badge: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20", dot: "bg-emerald-500" },
-  awaiting_mileage: { label: "Awaiting Mileage", badge: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20", dot: "bg-orange-500" },
-  completed: { label: "Completed", badge: "bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20",      dot: "bg-slate-400" },
-  cancelled: { label: "Cancelled", badge: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20",          dot: "bg-rose-500" },
-  no_show:   { label: "No Show",   badge: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20",          dot: "bg-rose-500" },
+  completed: { label: "Completed", badge: "bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20",         dot: "bg-slate-400" },
+  cancelled: { label: "Cancelled", badge: "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20",             dot: "bg-rose-500" },
 };
 
 const resolveField = (value: any, ...objectKeys: string[]): string => {
@@ -163,16 +162,20 @@ export default function ActionCenterWidget() {
     setUpdatingId(taskId); await handleComplete(taskId); setUpdatingId(null);
   };
 
-  const handleBookingAction = async (id: number, action: "confirm" | "activate" | "complete" | "cancel") => {
+  const handleBookingAction = async (id: number, action: "activate" | "complete" | "cancel") => {
     setActingBookingId(id); setOpenBookingMenuId(null);
     const successMessages = {
-      confirm: "Booking confirmed 🎉",
       activate: "Trip started — vehicle is now active",
       complete: "Trip completed",
       cancel: "Booking cancelled",
     };
     try {
-      await bookingsApi[action](id);
+      if (action === "cancel") {
+        // ✅ LIFECYCLE: cancel with reason (agency_cancelled for operator-initiated)
+        await bookingsApi.cancel(id, { reason: "agency_cancelled" });
+      } else {
+        await bookingsApi[action](id);
+      }
       toast.success(successMessages[action]);
       await fetchBookings();
     } catch (e: any) {
@@ -184,7 +187,7 @@ export default function ActionCenterWidget() {
 
   return (
     <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden h-full flex flex-col">
-      
+
       {/* HEADER */}
       <div className="px-5 py-3.5 border-b border-[var(--color-surface-border)] bg-gradient-to-r from-[var(--color-surface-hover)]/50 to-transparent">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5">
@@ -208,8 +211,8 @@ export default function ActionCenterWidget() {
                 onClick={() => setActiveSubTab(tab.id)}
                 className={`
                   relative flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold transition-all duration-300 whitespace-nowrap
-                  ${activeSubTab === tab.id 
-                    ? "bg-[var(--color-surface)] text-[var(--color-ink)] shadow-sm" 
+                  ${activeSubTab === tab.id
+                    ? "bg-[var(--color-surface)] text-[var(--color-ink)] shadow-sm"
                     : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface)]/50"
                   }
                 `}
@@ -218,8 +221,8 @@ export default function ActionCenterWidget() {
                 {tab.count > 0 && (
                   <span className={`
                     px-1.5 py-0.5 rounded-full text-[10px] font-bold transition-colors
-                    ${activeSubTab === tab.id 
-                      ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)]" 
+                    ${activeSubTab === tab.id
+                      ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)]"
                       : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)]"
                     }
                   `}>
@@ -264,15 +267,14 @@ export default function ActionCenterWidget() {
                 const isConfirmed = booking.status === "confirmed";
 
                 return (
-                  <div 
-                    key={`booking-${booking.id}`} 
+                  <div
+                    key={`booking-${booking.id}`}
                     className="group relative rounded-xl overflow-hidden border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:border-[var(--color-primary)]/40 hover:shadow-sm transition-all duration-200"
                   >
                     <div className="p-3.5">
                       {/* Row 1: Avatar + Client + Status Badge (Desktop) / Dot (Mobile) + Menu */}
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                          {/* Avatar - Smaller */}
                           <div className="relative flex-shrink-0">
                             <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm ring-2 ring-[var(--color-surface)] ${
                               isActive ? 'bg-gradient-to-br from-emerald-500 to-emerald-600' :
@@ -282,14 +284,13 @@ export default function ActionCenterWidget() {
                             }`}>
                               {getInitials(clientName)}
                             </div>
-                            {/* Status dot - Mobile only */}
                             <div className="absolute -bottom-0.5 -right-0.5 sm:hidden">
                               <div className={`w-2.5 h-2.5 rounded-full ${meta.dot} ring-2 ring-[var(--color-surface)] ${
                                 isActive ? 'animate-pulse' : ''
                               }`} />
                             </div>
                           </div>
-                          
+
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <p className="text-sm font-semibold text-[var(--color-ink)] truncate">
@@ -319,7 +320,6 @@ export default function ActionCenterWidget() {
                           </div>
                         </div>
 
-                        {/* Status Badge - Desktop only */}
                         <div className="hidden sm:flex items-center gap-2">
                           <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-extrabold uppercase tracking-wider ${meta.badge}`}>
                             <span className={`w-1.5 h-1.5 rounded-full ${meta.dot} ${isActive ? 'animate-pulse' : ''}`} />
@@ -327,7 +327,6 @@ export default function ActionCenterWidget() {
                           </span>
                         </div>
 
-                        {/* Kebab menu */}
                         <div className="relative flex-shrink-0" data-booking-menu>
                           <button
                             onClick={(e) => { e.stopPropagation(); setOpenBookingMenuId(openBookingMenuId === booking.id ? null : booking.id); }}
@@ -345,12 +344,7 @@ export default function ActionCenterWidget() {
                               >
                                 <Eye size={15} /> View Booking
                               </button>
-                              {isPending && (
-                                <button onClick={(e) => { e.stopPropagation(); handleBookingAction(booking.id, "confirm"); }}
-                                  className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors border-t border-[var(--color-surface-border)]">
-                                  <CheckCircle2 size={15} /> Confirm Booking
-                                </button>
-                              )}
+                              {/* ✅ REMOVED: "Confirm Booking" button (confirm is now client-driven via quotation accept) */}
                               {isConfirmed && (
                                 <button onClick={(e) => { e.stopPropagation(); handleBookingAction(booking.id, "activate"); }}
                                   className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors border-t border-[var(--color-surface-border)]">
@@ -374,7 +368,7 @@ export default function ActionCenterWidget() {
                         </div>
                       </div>
 
-                      {/* Row 2: Compact Stats Grid - 3 items side by side */}
+                      {/* Row 2: Compact Stats Grid */}
                       <div className="grid grid-cols-3 gap-2 mt-2.5 pt-2.5 border-t border-[var(--color-surface-border)]/30">
                         <div className="flex items-center gap-1.5">
                           <CalendarDays size={13} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
@@ -443,7 +437,6 @@ export default function ActionCenterWidget() {
           </div>
         )}
 
-        {/* Activity and Tasks sections remain the same */}
         {activeSubTab === "activity" && (
           <div className="space-y-2 animate-in fade-in duration-200">
             {activityLoading ? (

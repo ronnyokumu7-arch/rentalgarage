@@ -54,4 +54,28 @@ export const invoicesApi = {
 
   downloadPdfByToken: (token: string) =>
     apiClient.get(`/invoices/public/${token}/pdf`, { responseType: "blob" }),
+
+  // =============================================================================
+  // ✅ LIFECYCLE: Public quotation actions (client-driven, token-scoped, no auth)
+  // =============================================================================
+  
+  /**
+   * ✅ Client accepts the quotation:
+   *   quotation→invoice (due=start) + booking pending→confirmed +
+   *   auto-contract (+ background PDF). ONE atomic commit.
+   */
+  acceptPublic: (token: string) =>
+    apiClient.post<Invoice>(`/invoices/public/${token}/accept`).then((r) => r.data),
+
+  /**
+   * ✅ Client cancels: booking→cancelled (reason=client_cancelled) + invoice void.
+   */
+  cancelPublic: (token: string) =>
+    apiClient.post<Invoice>(`/invoices/public/${token}/cancel`).then((r) => r.data),
+
+  /**
+   * ✅ Client reschedules: re-prices server-side + resets to quotation for re-accept.
+   */
+  reschedulePublic: (token: string, payload: { pickup_at: string; scheduled_return_at: string }) =>
+    apiClient.post<Invoice>(`/invoices/public/${token}/reschedule`, payload).then((r) => r.data),
 };

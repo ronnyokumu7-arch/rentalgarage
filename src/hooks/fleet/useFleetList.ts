@@ -8,7 +8,7 @@ import type { Vehicle, VehicleStatus } from "@/lib/types";
 export function useFleetList() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
-  
+
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<VehicleStatus | "">("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -19,7 +19,6 @@ export function useFleetList() {
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
 
-  // ✅ FIXED: Fetch all vehicles (no server-side status filtering)
   const fetchVehicles = useCallback(async () => {
     setLoading(true);
     try {
@@ -40,19 +39,16 @@ export function useFleetList() {
     setCurrentPage(1);
   }, [search, statusFilter]);
 
-  // ✅ FIXED: Client-side filtering for BOTH search AND status (like Bookings)
   const filteredVehicles = useMemo(() => {
     return vehicles.filter((v) => {
-      // Search filter
       const searchLower = search.toLowerCase();
       const matchesSearch =
         v.make.toLowerCase().includes(searchLower) ||
         v.model.toLowerCase().includes(searchLower) ||
         v.plate_number.toLowerCase().includes(searchLower);
-      
-      // Status filter
+
       const matchesStatus = statusFilter === "" || v.status === statusFilter;
-      
+
       return matchesSearch && matchesStatus;
     });
   }, [vehicles, search, statusFilter]);
@@ -66,6 +62,7 @@ export function useFleetList() {
   const totalVehicles = vehicles.length;
   const availableVehicles = vehicles.filter((v) => v.status === "available").length;
   const rentedVehicles = vehicles.filter((v) => v.status === "rented").length;
+  const mileageDueCount = vehicles.filter((v) => v.mileage_due).length;
 
   const handleStatusAction = async (id: number, action: string) => {
     setActionLoadingId(id);
@@ -79,9 +76,6 @@ export function useFleetList() {
       } else if (action === "reactivate") {
         await vehiclesApi.reactivate(id);
         toast.success("Vehicle reactivated successfully");
-      } else if (action === "awaiting_mileage") {
-        await vehiclesApi.update(id, { status: "awaiting_mileage" });
-        toast.success("Trip ended. Vehicle awaiting mileage update.");
       } else if (action === "restore") {
         await vehiclesApi.restore(id);
         toast.success("Vehicle restored to active fleet");
@@ -89,8 +83,11 @@ export function useFleetList() {
         await vehiclesApi.retire(id);
         toast.success("Vehicle retired successfully");
       } else {
-        await vehiclesApi.update(id, { status: action as VehicleStatus });
-        toast.success("Vehicle status updated");
+        // ✅ LIFECYCLE: all status transitions use dedicated endpoints.
+        // This fallback catches unsupported actions gracefully.
+        console.warn(`Unhandled fleet action: ${action}`);
+        toast.error("Action not supported");
+        return;
       }
       await fetchVehicles();
     } catch (error: unknown) {
@@ -139,12 +136,10 @@ export function useFleetList() {
     if (!garageVehicle) return;
     setActionLoadingId(garageVehicle.id);
     try {
-      if (garageVehicle.status === "awaiting_mileage") {
-        // ✅ GUARDED LIFECYCLE PATH: updates mileage AND releases vehicle back to fleet
+      if (garageVehicle.mileage_due) {
         await vehiclesApi.updateMileage(garageVehicle.id, payload);
         toast.success("Mileage updated and vehicle is now available!");
       } else {
-        // ✅ GENERAL PATH: records mileage/service for ANY vehicle (no guard)
         await vehiclesApi.update(garageVehicle.id, payload);
         toast.success("Vehicle mileage updated!");
       }
@@ -154,7 +149,7 @@ export function useFleetList() {
     } catch (error: unknown) {
       const err = error as { response?: { data?: { detail?: string; message?: string } } };
       toast.error(err.response?.data?.message || err.response?.data?.detail || "Failed to update mileage");
-      throw error; // ✅ NEW: rethrow so QuickGarageModal shows the inline error & resets its spinner
+      throw error;
     } finally {
       setActionLoadingId(null);
     }
@@ -180,6 +175,7 @@ export function useFleetList() {
     totalVehicles,
     availableVehicles,
     rentedVehicles,
+    mileageDueCount,
     refetch: fetchVehicles,
   };
 }

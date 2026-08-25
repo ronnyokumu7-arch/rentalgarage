@@ -155,7 +155,7 @@ export default function FleetPage() {
               className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-4 sm:p-6 group cursor-pointer hover:border-[var(--color-primary)]/30 transition-all flex flex-row sm:flex-col items-start gap-3.5 sm:gap-0"
               onClick={() => {
                 const awaitingVehicle = fleetData.filteredVehicles.find(
-                  (v) => v.status === "awaiting_mileage"
+                  (v) => v.mileage_due === true
                 );
                 if (awaitingVehicle) {
                   fleetData.setGarageVehicle(awaitingVehicle);
@@ -175,7 +175,7 @@ export default function FleetPage() {
                 </p>
                 <div className="flex items-center gap-2 text-xs font-semibold text-[var(--color-primary)]">
                   <span>
-                    {fleetData.filteredVehicles.filter((v) => v.status === "awaiting_mileage").length} vehicles pending
+                    {fleetData.filteredVehicles.filter((v) => v.mileage_due).length} vehicles pending mileage
                   </span>
                   <span className="group-hover:translate-x-1 transition-transform">→</span>
                 </div>

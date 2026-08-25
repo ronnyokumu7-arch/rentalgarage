@@ -1,18 +1,19 @@
 "use client";
 
 import React from "react";
-import { 
-  Calendar, 
-  Clock, 
-  AlertTriangle, 
-  MapPin, 
-  Navigation, 
-  CheckCircle2, 
-  Timer, 
+import {
+  Calendar,
+  Clock,
+  AlertTriangle,
+  MapPin,
+  Navigation,
+  CheckCircle2,
+  Timer,
   Sparkles,
 } from "lucide-react";
 import { useTripTimeline } from "@/hooks/bookings/useTripTimeline";
 import type { Booking } from "@/lib/types";
+import { formatDateShort } from "@/components/bookings/booking_list/constants";
 
 interface TripTimelineWidgetProps {
   booking: Booking;
@@ -22,8 +23,8 @@ export function TripTimelineWidget({ booking }: TripTimelineWidgetProps) {
   const { nodes, totalDays, tripProgress, isOverdue } = useTripTimeline(booking);
 
   // Extract location nodes dynamically from booking if present, or fallback to telemetry defaults
-  const pickupLocation = booking.pickup_location || booking.pickup_location || "Main Operations Hub";
-  const returnLocation = booking.return_location || booking.return_location || booking.return_location || "Main Operations Hub";
+  const pickupLocation = booking.pickup_location || "Main Operations Hub";
+  const returnLocation = booking.return_location || "Main Operations Hub";
 
   return (
     <div className="relative overflow-hidden p-6 bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-3xl shadow-sm space-y-6">
@@ -156,6 +157,13 @@ export function TripTimelineWidget({ booking }: TripTimelineWidgetProps) {
                     <Clock size={13} className="text-[var(--color-primary)]" />
                     <span>{node.timeString}</span>
                   </div>
+                  {/* ✅ LIFECYCLE: Show actual return time for completed bookings */}
+                  {node.type === "dropoff" && booking.status === "completed" && booking.actual_return_at && (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 font-mono text-[11px] font-semibold text-emerald-600 shadow-xs">
+                      <CheckCircle2 size={13} />
+                      <span>Actual: {formatDateShort(booking.actual_return_at)}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

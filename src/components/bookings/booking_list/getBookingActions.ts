@@ -1,10 +1,13 @@
-// src/components/bookings/booking_list/getBookingActions.ts
 /**
  * Shared row-actions factory — consumed by both CardGrid (mobile) and
  * DataTable (desktop) so behaviour is identical across breakpoints.
+ *
+ * ✅ LIFECYCLE: "Confirm Booking" removed from dashboard — confirm is now
+ * client-driven via the public quotation accept flow. Start Trip remains
+ * as the operator's manual trigger (from pending OR confirmed).
  */
 import {
-  Link as LinkIcon, Ban, XCircle, FileText, CalendarPlus, Shield, ShieldAlert,
+  Link as LinkIcon, Ban, XCircle, FileText, CalendarPlus, Shield,
 } from "lucide-react";
 import type { RowAction } from "@/components/ui/DataTable";
 import type { Booking } from "@/lib/types";
@@ -12,11 +15,11 @@ import type { Booking } from "@/lib/types";
 export interface BookingActionsContext {
   routerPush: (href: string) => void;
   onExtendBooking: (booking: Booking) => void;
-  handleConfirm: (id: number) => void;
+  handleConfirm: (id: number) => void;       // ⚠️ deprecated — kept for backward compat
   handleStartTrip: (id: number) => void;
   handleCompleteTrip: (id: number) => void;
-  handleCancel: (id: number) => void;
-  handleNoShow: (id: number) => void;
+  handleCancel: (id: number) => void;        // ✅ now prompts for reason
+  handleNoShow: (id: number) => void;        // ✅ now calls cancel(reason=no_show)
   handleCopyContractLink: (id: number) => void;
 }
 
@@ -25,8 +28,9 @@ export const getBookingActions = (
   ctx: BookingActionsContext,
 ): RowAction<Booking>[] => {
   const {
-    routerPush, onExtendBooking, handleConfirm, handleStartTrip,
-    handleCompleteTrip, handleCancel, handleNoShow, handleCopyContractLink,
+    routerPush, onExtendBooking,
+    handleStartTrip, handleCompleteTrip, handleCancel, handleNoShow,
+    handleCopyContractLink,
   } = ctx;
 
   const actions: RowAction<Booking>[] = [
@@ -35,8 +39,8 @@ export const getBookingActions = (
   ];
 
   if (booking.status === "pending") {
+    // ✅ Confirm removed — client confirms via quotation accept on public portal
     actions.push(
-      { label: "Confirm Booking", icon: ShieldAlert, variant: "primary", onClick: () => handleConfirm(booking.id) },
       { label: "Cancel Booking", icon: Ban, variant: "danger", onClick: () => handleCancel(booking.id) },
     );
   }

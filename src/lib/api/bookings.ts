@@ -6,6 +6,7 @@ import type {
   BookingQuote,
   PricingResult,
   PaginatedResponse,
+  CancellationReason,
 } from "@/lib/types";
 
 export interface ExtendBookingPayload {
@@ -19,19 +20,22 @@ export interface GenerateInvoicePayload {
   notes?: string;
 }
 
+// ✅ LIFECYCLE: cancel-with-reason payload (replaces removed no_show status)
+export interface CancelBookingPayload {
+  reason: CancellationReason;
+  note?: string;
+}
+
 export const bookingsApi = {
   get: (id: number) =>
     apiClient.get<Booking>(`/bookings/${id}`).then((r) => r.data),
 
-  // ✅ FIXED: Unwrap .items from PaginatedResponse
   list: (params?: { vehicle_id?: number; client_id?: number; page?: number; page_size?: number }) =>
     apiClient.get<PaginatedResponse<Booking>>("/bookings/", { params }).then((r) => r.data.items),
 
-  // ✅ FIXED: Unwrap .items from PaginatedResponse
   listArchived: (params?: { page?: number; page_size?: number }) =>
     apiClient.get<PaginatedResponse<Booking>>("/bookings/archived", { params }).then((r) => r.data.items),
 
-  // ✅ MILESTONE 1: Live pricing preview (no DB writes) — powers the form's live breakdown
   quote: (data: BookingQuote) =>
     apiClient.post<PricingResult>("/bookings/quote", data).then((r) => r.data),
 
@@ -59,9 +63,12 @@ export const bookingsApi = {
   complete: (id: number) =>
     apiClient.post<Booking>(`/bookings/${id}/complete`).then((r) => r.data),
 
-  cancel: (id: number) =>
-    apiClient.post<Booking>(`/bookings/${id}/cancel`).then((r) => r.data),
+  // ✅ LIFECYCLE: cancel with reason (new requirement)
+  cancel: (id: number, payload?: CancelBookingPayload) =>
+    apiClient.post<Booking>(`/bookings/${id}/cancel`, payload || {}).then((r) => r.data),
 
+  // ⚠️ DEPRECATED: no_show is now a cancel shortcut (reason=no_show).
+  // Backend endpoint kept for backward compat; new code should call cancel directly.
   noShow: (id: number) =>
     apiClient.post<Booking>(`/bookings/${id}/no-show`).then((r) => r.data),
 
