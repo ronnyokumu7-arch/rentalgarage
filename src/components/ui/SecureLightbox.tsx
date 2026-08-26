@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, ExternalLink, Loader2, AlertTriangle } from "lucide-react";
+import { X, ExternalLink, Loader2, AlertTriangle, RefreshCw, FileText } from "lucide-react";
 import { fetchSignedUrl } from "@/components/ui/SecureImage";
 
 interface SecureLightboxProps {
@@ -14,43 +14,52 @@ interface SecureLightboxProps {
 export default function SecureLightbox({ url, title = "Document", onClose }: SecureLightboxProps) {
   const [signedUrl, setSignedUrl] = useState<string | null>(null);
   const [failed, setFailed] = useState(false);
+  const [attempt, setAttempt] = useState(0);
 
-  // Resolve the signed URL whenever a document is opened
+  // ✅ iOS Safari cannot render PDFs inside an iframe — show an open-card instead
+  const isIOS =
+    typeof navigator !== "undefined" &&
+    /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+  const isPdf = url ? /\.pdf($|\?)/i.test(url) : false;
+
+  // Resolve the signed URL whenever a document is opened or retried.
+  // ✅ bustCache=true on retry defeats aggressive mobile carrier proxies that stale-serve lookups.
   useEffect(() => {
     if (!url) return;
     let cancelled = false;
     setSignedUrl(null);
     setFailed(false);
-    
-    fetchSignedUrl(url).then((u) => {
-      if (cancelled) return;
-      
-      // ✅ FIXED: Replaced ternary expression with standard if/else statement
-      // to satisfy the `@typescript-eslint/no-unused-expressions` rule.
-      if (u) {
-        setSignedUrl(u);
-      } else {
-        setFailed(true);
-      }
-    });
-    
+
+    fetchSignedUrl(url, attempt > 0)
+      .then((u) => {
+        if (cancelled) return;
+        if (u) {
+          setSignedUrl(u);
+        } else {
+          setFailed(true);
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setFailed(true);
+      });
+
     return () => { cancelled = true; };
-  }, [url]);
+  }, [url, attempt]);
 
   // Esc key closes
   useEffect(() => {
-    // ✅ FIXED: Replaced short-circuit expression with standard if statement
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
     };
-    
+
     if (url) window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [url, onClose]);
 
   if (!url) return null;
 
-  const isPdf = /\.pdf($|\?)/i.test(url);
+  const retry = () => setAttempt((a) => a + 1);
 
   return (
     <div
@@ -91,14 +100,56 @@ export default function SecureLightbox({ url, title = "Document", onClose }: Sec
           {failed ? (
             <div className="p-8 text-center">
               <AlertTriangle size={28} className="text-amber-500 mx-auto mb-2" />
-              <p className="text-xs text-[var(--color-ink-muted)]">Unable to load this document.</p>
+              <p className="text-xs text-[var(--color-ink-muted)] mb-4">
+                Unable to load this document. Check your connection and retry.
+              </p>
+              <div className="flex items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={retry}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--color-primary)] text-white text-xs font-semibold hover:opacity-90 transition-opacity active:scale-95"
+                >
+                  <RefreshCw size={12} /> Retry
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.open(signedUrl || url, "_blank")}
+                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[var(--color-surface-border)] text-[var(--color-ink)] text-xs font-semibold hover:bg-[var(--color-surface-hover)] transition-colors active:scale-95"
+                >
+                  <ExternalLink size={12} /> Open in browser
+                </button>
+              </div>
             </div>
           ) : !signedUrl ? (
             <Loader2 size={24} className="animate-spin text-[var(--color-ink-muted)]" />
           ) : isPdf ? (
-            <iframe src={signedUrl} title={title} className="w-full h-[70vh] bg-white" />
+            isIOS ? (
+              // ✅ iOS Safari cannot render PDFs in iframes — open-card instead
+              <div className="p-8 text-center">
+                <div className="w-14 h-14 rounded-2xl bg-[var(--color-surface-hover)] flex items-center justify-center mx-auto mb-3">
+                  <FileText size={24} className="text-[var(--color-ink-muted)]" />
+                </div>
+                <p className="text-xs text-[var(--color-ink-muted)] mb-4">
+                  PDF preview is not supported on this device.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => window.open(signedUrl, "_blank")}
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-[var(--color-primary)] text-white text-xs font-semibold hover:opacity-90 transition-opacity active:scale-95"
+                >
+                  <ExternalLink size={12} /> Open PDF
+                </button>
+              </div>
+            ) : (
+              <iframe src={signedUrl} title={title} className="w-full h-[70vh] bg-white" />
+            )
           ) : (
-            <img src={signedUrl} alt={title} className="max-w-full max-h-[70vh] object-contain" />
+            <img
+              src={signedUrl}
+              alt={title}
+              className="max-w-full max-h-[70vh] object-contain"
+              onError={() => setFailed(true)}   // ✅ dead/expired image → retry UI
+            />
           )}
         </div>
       </div>

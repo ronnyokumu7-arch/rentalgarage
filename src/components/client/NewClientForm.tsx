@@ -13,6 +13,7 @@ import 'react-phone-number-input/style.css';
 import AddressAutocomplete from '@/components/ui/AddressAutocomplete';
 import SecureImage from "@/components/ui/SecureImage";
 import SecureLightbox from "@/components/ui/SecureLightbox";
+import '@/styles/phone-input.css';
 
 interface NewClientFormProps {
   loading: boolean;
@@ -83,7 +84,7 @@ export default function NewClientForm({
   };
 
   const DocUploadSlot = ({
-    label, icon: Icon, file, setFile, required = false, existingUrl,
+    label, icon: Icon, file, setFile, required = false, existingUrl, captureMode,
   }: { 
     label: string; 
     icon: any; 
@@ -91,15 +92,27 @@ export default function NewClientForm({
     setFile: (f: File | null) => void; 
     required?: boolean;
     existingUrl?: string | null;
+    captureMode?: "user" | "environment" | "optional";
   }) => {
     // Priority: new file > existing URL > empty slot
     const hasNewFile = !!file;
     const hasExisting = !!existingUrl && !hasNewFile;
     
+    // ✅ Camera-only enforcement: "user" = selfie, "environment" = rear camera, "optional" = file or camera
+    const captureAttr = captureMode === "user" || captureMode === "environment" 
+      ? captureMode 
+      : undefined;
+    
     return (
       <div className="flex flex-col gap-1">
         <label className="group relative flex flex-col items-center justify-center p-3 rounded-lg border-2 border-dashed border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-primary)]/5 transition-all cursor-pointer">
-          <input type="file" accept="image/*" className="hidden" onChange={(e) => setFile(e.target.files?.[0] || null)} />
+          <input 
+            type="file" 
+            accept="image/*" 
+            capture={captureAttr}
+            className="hidden" 
+            onChange={(e) => setFile(e.target.files?.[0] || null)} 
+          />
           
           {hasNewFile ? (
             // New file selected
@@ -193,7 +206,7 @@ export default function NewClientForm({
                     <Camera size={14} className="text-[var(--color-ink-subtle)] group-hover:text-[var(--color-primary)] transition-colors" />
                   )}
                 </div>
-                <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => setAvatarFile(e.target.files?.[0] || null)} />
+                <input type="file" accept="image/*" capture="user" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => setAvatarFile(e.target.files?.[0] || null)} />
                 <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center shadow-lg border-2 border-[var(--color-surface)]">
                   <Upload size={8} />
                 </div>
@@ -240,6 +253,7 @@ export default function NewClientForm({
                 onChange={(value) => updateField("phone", value || "")}
                 placeholder="+254 712 345678"
                 className="phone-input-custom"
+                countryCallingCodeEditable={false}
                 required
               />
             </div>
@@ -372,6 +386,7 @@ export default function NewClientForm({
                 setFile={setIdFrontFile} 
                 required={isPublicIntake}
                 existingUrl={existingIdFront}
+                captureMode="environment"
               />
               <DocUploadSlot 
                 label="ID Back" 
@@ -379,6 +394,7 @@ export default function NewClientForm({
                 file={idBackFile} 
                 setFile={setIdBackFile} 
                 existingUrl={existingIdBack}
+                captureMode="environment"
               />
               <DocUploadSlot 
                 label="DL Front" 
@@ -387,6 +403,7 @@ export default function NewClientForm({
                 setFile={setDlFrontFile} 
                 required={isPublicIntake}
                 existingUrl={existingDlFront}
+                captureMode="optional"
               />
             </div>
           </div>
@@ -419,6 +436,8 @@ export default function NewClientForm({
                 onChange={(value) => updateField("next_of_kin_phone", value || "")}
                 placeholder="+254 7..."
                 className="phone-input-custom"
+                countryCallingCodeEditable={false}
+                required
               />
             </div>
           </div>

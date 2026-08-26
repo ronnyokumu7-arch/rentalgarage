@@ -235,7 +235,7 @@ export default function DashboardPage() {
             {/* ✅ Platform Commission — REAL-TIME from ledger */}
             <div className="col-span-1">
               <MiniStat
-                label="Service Commission"
+                label="Platform Fee"
                 value={`KES ${commission ? parseFloat(commission.today_total).toLocaleString() : "—"}`}
                 subtext={
                   commission
