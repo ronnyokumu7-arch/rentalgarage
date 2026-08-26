@@ -85,6 +85,7 @@ export interface Client {
   full_name: string;
   email: string | null;
   phone: string;
+  id_type?: "national_id" | "passport";  // ✅ Identity slot type (national ID or passport)
   id_number: string | null;
   dl_number: string | null;
   dl_expiry: string | null;

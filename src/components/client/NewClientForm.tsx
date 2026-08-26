@@ -35,6 +35,8 @@ interface NewClientFormProps {
     phone?: string;
     email?: string;
   };
+  // ✅ Inline validation feedback (field key → message)
+  fieldErrors?: Record<string, string>;
   // ✅ Existing document URLs (for edit mode)
   existingAvatar?: string | null;
   existingIdFront?: string | null;
@@ -63,6 +65,7 @@ export default function NewClientForm({
   updateField, handleSubmit,
   mode = "create",
   tenantBranding,
+  fieldErrors = {},
   existingAvatar,
   existingIdFront,
   existingIdBack,
@@ -74,7 +77,20 @@ export default function NewClientForm({
   const totalDocsUploaded = docCount + (avatarFile ? 1 : 0);
   const isPublicIntake = mode === "public_intake";
   const idType = formData.id_type || "national_id";
-  const idNumberRequired = !!idType;
+
+  // ✅ INLINE VALIDATION HELPERS: red border + message for flagged fields
+  const hasErr = (key: string) => !!fieldErrors[key];
+  const inputCls = (key: string) =>
+    hasErr(key)
+      ? inputClass
+          .replace("border-[var(--color-surface-border)]", "border-[var(--color-danger)]")
+          .replace("focus:ring-[var(--color-primary)]/30", "focus:ring-[var(--color-danger)]/20")
+          .replace("focus:border-[var(--color-primary)]", "focus:border-[var(--color-danger)]")
+      : inputClass;
+  const renderError = (key: string) =>
+    hasErr(key) ? (
+      <p className="text-[10px] font-medium text-[var(--color-danger)] mt-1">{fieldErrors[key]}</p>
+    ) : null;
 
   // ✅ NEW: In-app lightbox state (replaces window.open)
   const [lightbox, setLightbox] = useState<{ url: string; title: string } | null>(null);
@@ -84,7 +100,7 @@ export default function NewClientForm({
   };
 
   const DocUploadSlot = ({
-    label, icon: Icon, file, setFile, required = false, existingUrl, captureMode,
+    label, icon: Icon, file, setFile, required = false, existingUrl, captureMode, error, fieldId,
   }: { 
     label: string; 
     icon: any; 
@@ -93,6 +109,8 @@ export default function NewClientForm({
     required?: boolean;
     existingUrl?: string | null;
     captureMode?: "user" | "environment" | "optional";
+    error?: string;
+    fieldId?: string;
   }) => {
     // Priority: new file > existing URL > empty slot
     const hasNewFile = !!file;
@@ -104,8 +122,10 @@ export default function NewClientForm({
       : undefined;
     
     return (
-      <div className="flex flex-col gap-1">
-        <label className="group relative flex flex-col items-center justify-center p-3 rounded-lg border-2 border-dashed border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-primary)]/5 transition-all cursor-pointer">
+      <div className="flex flex-col gap-1" id={fieldId}>
+        <label className={`group relative flex flex-col items-center justify-center p-3 rounded-lg border-2 border-dashed bg-[var(--color-surface)] hover:bg-[var(--color-primary)]/5 transition-all cursor-pointer ${
+          error ? "border-[var(--color-danger)]/60" : "border-[var(--color-surface-border)] hover:border-[var(--color-primary)]/50"
+        }`}>
           <input 
             type="file" 
             accept="image/*" 
@@ -135,6 +155,9 @@ export default function NewClientForm({
           )}
         </label>
         
+        {/* ✅ Inline validation error for document slots */}
+        {error && <p className="text-[9px] font-medium text-[var(--color-danger)]">{error}</p>}
+        
         {/* ✅ View button → opens in-app lightbox */}
         {hasExisting && (
           <button
@@ -155,7 +178,7 @@ export default function NewClientForm({
 
   return (
     <>
-    <form onSubmit={handleSubmit} className="max-w-6xl mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-4 items-start">
+    <form onSubmit={handleSubmit} noValidate className="max-w-6xl mx-auto p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-[1fr_340px] gap-4 items-start">
       
       {/* LEFT COLUMN: Identity + Compliance */}
       <div className="space-y-3">
@@ -230,21 +253,23 @@ export default function NewClientForm({
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="sm:col-span-2">
+            <div className="sm:col-span-2" id="field-full_name">
               <label className={labelClass}>Full Name <span className="text-[var(--color-danger)]">*</span></label>
               <div className="relative">
                 <User size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" />
-                <input type="text" value={formData.full_name} onChange={(e) => updateField("full_name", e.target.value)} placeholder="e.g. Rebecca Molly" className={`${inputClass} pl-8`} required />
+                <input type="text" value={formData.full_name} onChange={(e) => updateField("full_name", e.target.value)} placeholder="e.g. Rebecca Molly" className={`${inputCls("full_name")} pl-8`} />
               </div>
+              {renderError("full_name")}
             </div>
-            <div>
+            <div id="field-email">
               <label className={labelClass}>Email Address</label>
               <div className="relative">
                 <Mail size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" />
-                <input type="email" value={formData.email} onChange={(e) => updateField("email", e.target.value)} placeholder="rebecca@example.com" className={`${inputClass} pl-8`} />
+                <input type="email" value={formData.email} onChange={(e) => updateField("email", e.target.value)} placeholder="rebecca@example.com" className={`${inputCls("email")} pl-8`} />
               </div>
+              {renderError("email")}
             </div>
-            <div>
+            <div id="field-phone">
               <label className={labelClass}>Phone Number <span className="text-[var(--color-danger)]">*</span></label>
               <PhoneInput
                 international
@@ -252,10 +277,10 @@ export default function NewClientForm({
                 value={formData.phone}
                 onChange={(value) => updateField("phone", value || "")}
                 placeholder="+254 712 345678"
-                className="phone-input-custom"
+                className={`phone-input-custom ${hasErr("phone") ? "phone-input-error" : ""}`}
                 countryCallingCodeEditable={false}
-                required
               />
+              {renderError("phone")}
             </div>
 
             {/* ✅ IDENTITY SLOT: Type selector + Number input */}
@@ -299,17 +324,17 @@ export default function NewClientForm({
               </div>
 
               {/* Number Input (required when type is selected) */}
-              <div className="relative">
+              <div className="relative" id="field-id_number">
                 <CreditCard size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" />
                 <input
                   type="text"
                   value={formData.id_number || ""}
                   onChange={(e) => updateField("id_number", e.target.value)}
                   placeholder={idType === "national_id" ? "National ID Number" : "Passport Number"}
-                  className={`${inputClass} pl-8`}
-                  required={idNumberRequired}
+                  className={`${inputCls("id_number")} pl-8`}
                 />
               </div>
+              {renderError("id_number")}
             </div>
           </div>
         </section>
@@ -387,6 +412,8 @@ export default function NewClientForm({
                 required={isPublicIntake}
                 existingUrl={existingIdFront}
                 captureMode="environment"
+                error={fieldErrors["idFront"]}
+                fieldId="field-idFront"
               />
               <DocUploadSlot 
                 label="ID Back" 
@@ -395,6 +422,8 @@ export default function NewClientForm({
                 setFile={setIdBackFile} 
                 existingUrl={existingIdBack}
                 captureMode="environment"
+                error={fieldErrors["idBack"]}
+                fieldId="field-idBack"
               />
               <DocUploadSlot 
                 label="DL Front" 
@@ -404,6 +433,8 @@ export default function NewClientForm({
                 required={isPublicIntake}
                 existingUrl={existingDlFront}
                 captureMode="optional"
+                error={fieldErrors["dlFront"]}
+                fieldId="field-dlFront"
               />
             </div>
           </div>
@@ -437,7 +468,6 @@ export default function NewClientForm({
                 placeholder="+254 7..."
                 className="phone-input-custom"
                 countryCallingCodeEditable={false}
-                required
               />
             </div>
           </div>
@@ -503,7 +533,7 @@ export default function NewClientForm({
           <button 
             type="submit" 
             disabled={loading} 
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] shadow-lg shadow-[var(--color-primary)]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] shadow-lg shadow-[var(--color-primary)]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98] active:shadow-inner"
           >
             {loading ? (
               <>

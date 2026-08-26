@@ -34,20 +34,20 @@ function TrendSparkline({ positive }: { positive: boolean }) {
   );
 }
 
-/* ── Compact card: icon + digits side-by-side, with label + subtext caption ── */
+/* ── Compact card: small on mobile, matches StatCard on desktop ── */
 function MiniStat({ label, value, subtext, icon: Icon, iconClass }: {
   label: string; value: string; subtext?: string; icon: LucideIcon; iconClass: string;
 }) {
   return (
-    <div className="flex items-start gap-2.5 min-w-0">
-      <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${iconClass}`}>
-        <Icon size={16} />
+    <div className="flex items-start lg:items-center gap-2.5 lg:gap-4 min-w-0">
+      <div className={`w-9 h-9 lg:w-11 lg:h-11 rounded-lg flex items-center justify-center shrink-0 ${iconClass}`}>
+        <Icon size={16} className="lg:w-5 lg:h-5" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-sm sm:text-base font-extrabold tracking-tight text-[var(--color-ink)] tabular-nums break-words leading-tight">
+        <p className="text-sm sm:text-base lg:text-2xl font-extrabold tracking-tight text-[var(--color-ink)] tabular-nums break-words lg:truncate leading-tight">
           {value}
         </p>
-        <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)] truncate">
+        <p className="text-[9px] sm:text-[10px] lg:text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)] truncate">
           {label}
         </p>
         {subtext && (
@@ -80,7 +80,7 @@ function StatCard({
         <p className={`font-extrabold tracking-tight text-[var(--color-ink)] tabular-nums truncate ${
           isCompact ? "text-lg lg:text-2xl" : "text-xl lg:text-2xl"
         }`}>{value}</p>
-        <p className={`font-bold sentencecase tracking-wider text-[var(--color-ink-muted)] truncate ${
+        <p className={`font-bold uppercase tracking-wider text-[var(--color-ink-muted)] truncate ${
           isCompact ? "text-[9px] lg:text-[11px]" : "text-[10px] lg:text-[11px]"
         }`}>{label}</p>
         {subtext && (
@@ -115,10 +115,15 @@ export default function DashboardPage() {
     );
   }
 
-  const lastMonthRevenue = stats.mtdRevenue * 0.85;
-  const monthOverMonthChange = stats.mtdRevenue - lastMonthRevenue;
-  const monthOverMonthPercent = ((monthOverMonthChange / lastMonthRevenue) * 100).toFixed(1);
-  const isPositiveGrowth = monthOverMonthChange > 0;
+  // ✅ NaN GUARD: fresh tenants have 0 revenue → 0/0 produced "NaN%"
+  const mtdRevenue = stats.mtdRevenue || 0;
+  const lastMonthRevenue = mtdRevenue * 0.85;
+  const monthOverMonthChange = mtdRevenue - lastMonthRevenue;
+  const monthOverMonthPercent =
+    lastMonthRevenue > 0
+      ? ((monthOverMonthChange / lastMonthRevenue) * 100).toFixed(1)
+      : "0.0";
+  const isPositiveGrowth = monthOverMonthChange >= 0;
 
   return (
     <div className="space-y-6 relative">
@@ -185,7 +190,7 @@ export default function DashboardPage() {
             <div className="hidden lg:block col-span-1">
               <StatCard
                 label="This Month"
-                value={`KES ${stats.mtdRevenue.toLocaleString()}`}
+                value={`KES ${mtdRevenue.toLocaleString()}`}
                 subtext={`Last month: KES ${lastMonthRevenue.toLocaleString()}`}
                 icon={TrendingUp}
                 iconClass="bg-gradient-to-br from-amber-500/20 to-orange-600/20 text-amber-600 dark:text-amber-400 border border-amber-500/20"
@@ -201,7 +206,7 @@ export default function DashboardPage() {
                   <TrendingUp size={16} />
                 </div>
                 <p className="text-xl font-extrabold tracking-tight text-[var(--color-ink)] tabular-nums whitespace-nowrap">
-                  KES {stats.mtdRevenue.toLocaleString()}
+                  KES {mtdRevenue.toLocaleString()}
                 </p>
                 <span className={`flex items-center gap-0.5 text-[11px] font-extrabold shrink-0 ${
                   isPositiveGrowth ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
