@@ -14,7 +14,7 @@ export interface UsePublicContractReturn {
   downloadPdf: () => Promise<void>;
   signed: boolean;
   signingError: string | null;
-  signingOpensAt: string | null;
+  isDownloadingPdf: boolean;
   refetch: () => Promise<void>;
 }
 
@@ -24,7 +24,7 @@ export function usePublicContract(token: string): UsePublicContractReturn {
   const [error, setError] = useState<string | null>(null);
   const [isSigning, setIsSigning] = useState(false);
   const [signingError, setSigningError] = useState<string | null>(null);
-  const [signingOpensAt, setSigningOpensAt] = useState<string | null>(null);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   const fetchContract = useCallback(async () => {
     try {
@@ -45,6 +45,7 @@ export function usePublicContract(token: string): UsePublicContractReturn {
     // Validate contract state
     if (!contract) {
       setSigningError("No contract found");
+      toast.error("No contract found");
       return false;
     }
     
@@ -72,7 +73,6 @@ export function usePublicContract(token: string): UsePublicContractReturn {
     setSigningError(null);
     
     try {
-      // ✅ FIXED: Pass the signature data to the API
       await contractsApi.publicSign(token, signatureData);
       
       // Update local state
@@ -90,7 +90,6 @@ export function usePublicContract(token: string): UsePublicContractReturn {
           status?: number; 
           data?: { 
             detail?: string; 
-            opens_at?: string;
             errors?: Array<{ msg: string; loc: string[] }>;
           } 
         } 
@@ -101,7 +100,6 @@ export function usePublicContract(token: string): UsePublicContractReturn {
       
       // Handle validation errors (422)
       if (status === 422) {
-        // Parse validation errors if available
         if (responseData?.errors) {
           const errorMessages = responseData.errors
             .map(err => `${err.loc.join('.')}: ${err.msg}`)
@@ -113,14 +111,7 @@ export function usePublicContract(token: string): UsePublicContractReturn {
           setSigningError(detail);
           toast.error(detail);
         }
-        
-        // Check if there's an opens_at field for future signing
-        const opensAt = responseData?.opens_at;
-        if (opensAt) {
-          setSigningOpensAt(opensAt);
-        }
       } else {
-        // Handle other errors
         const detail = responseData?.detail || "Failed to sign contract. Please try again.";
         setSigningError(detail);
         toast.error(detail);
@@ -133,18 +124,14 @@ export function usePublicContract(token: string): UsePublicContractReturn {
   };
 
   const downloadPdf = async () => {
-    if (!contract) {
-      toast.error("No contract available to download");
-      return;
-    }
+    if (!contract || isDownloadingPdf) return;
+    
+    setIsDownloadingPdf(true);
     
     try {
-      const loadingToast = toast.loading("Generating PDF...");
-      
       const res = await contractsApi.publicDownloadPdf(token);
       const blob = res.data instanceof Blob ? res.data : new Blob([res.data]);
       
-      // Create download link
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
@@ -153,21 +140,19 @@ export function usePublicContract(token: string): UsePublicContractReturn {
       link.click();
       document.body.removeChild(link);
       
-      // Clean up
       setTimeout(() => {
         window.URL.revokeObjectURL(url);
       }, 100);
       
-      toast.dismiss(loadingToast);
       toast.success("PDF downloaded successfully");
     } catch (error) {
-      toast.dismiss();
       console.error("PDF download error:", error);
       toast.error("Failed to download PDF. Please try again.");
+    } finally {
+      setIsDownloadingPdf(false);
     }
   };
 
-  // Fetch contract when token changes
   useEffect(() => {
     if (token) {
       fetchContract();
@@ -183,7 +168,7 @@ export function usePublicContract(token: string): UsePublicContractReturn {
     downloadPdf,
     signed: contract?.signed_by_client ?? false,
     signingError,
-    signingOpensAt,
+    isDownloadingPdf,
     refetch: fetchContract
   };
 }

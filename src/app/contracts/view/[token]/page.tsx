@@ -2,7 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { Toaster } from "react-hot-toast";
-import { FileText, CheckCircle2, Download, Clock } from "lucide-react";
+import { FileText, CheckCircle2, Download, Loader2 } from "lucide-react";
 
 import { usePublicContract } from "@/components/contracts/public/hooks/usePublicContract";
 import PublicContractCompanyHeader from "@/components/contracts/public/PublicContractCompanyHeader";
@@ -30,8 +30,7 @@ export default function PublicContractViewPage() {
     signed, 
     signContract, 
     downloadPdf,
-    signingError,
-    signingOpensAt
+    isDownloadingPdf
   } = usePublicContract(token);
 
   if (contractLoading) return <ContractLoadingState message="Loading contract..." />;
@@ -85,41 +84,28 @@ export default function PublicContractViewPage() {
               </div>
             </div>
             
-            <button
-              onClick={downloadPdf}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm shrink-0"
-            >
-              <Download size={14} /> Download PDF
-            </button>
+<button
+  onClick={downloadPdf}
+  disabled={isDownloadingPdf}
+  className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm shrink-0 disabled:opacity-60 disabled:cursor-not-allowed active:scale-95 active:shadow-inner"
+>
+  {isDownloadingPdf ? (
+    <>
+      <Loader2 size={14} className="animate-spin" /> Generating PDF...
+    </>
+  ) : (
+    <>
+      <Download size={14} /> Download PDF
+    </>
+  )}
+</button>
           </div>
-
-          {signingError && !signed && (
-            <div className="mx-4 sm:mx-6 mt-4 p-4 rounded-xl bg-amber-50 border border-amber-200 flex items-start gap-3">
-              <Clock size={16} className="text-amber-600 shrink-0 mt-0.5" />
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-amber-900 mb-1">
-                  Signing not yet available
-                </p>
-                <p className="text-xs text-amber-800">
-                  {signingError}
-                </p>
-                {signingOpensAt && (
-                  <p className="text-xs text-amber-700 mt-2">
-                    Signing opens at: <strong>{formatDate(signingOpensAt)}</strong>
-                  </p>
-                )}
-                <p className="text-[10px] text-amber-600 mt-2">
-                  You can review the contract details below and return when signing opens.
-                </p>
-              </div>
-            </div>
-          )}
 
           <PublicContractDetails contract={contract} />
           
           <PublicContractTermsSection tenantName={tenant.company_name} />
           
-          {!signed && !signingError && (
+          {!signed && (
             <PublicContractSignTab 
               contract={contract}
               onSign={signContract}

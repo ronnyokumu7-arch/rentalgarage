@@ -1,6 +1,6 @@
 // src/components/public-docs/SignaturePad.tsx
 "use client";
-import { useRef, useState, useEffect, forwardRef, useImperativeHandle } from 'react';
+import { useRef, useState, useEffect, forwardRef, useImperativeHandle, useCallback } from 'react';
 
 export interface SignaturePadRef {
   getSignature: () => string | null;
@@ -8,105 +8,148 @@ export interface SignaturePadRef {
   isEmpty: () => boolean;
 }
 
+interface Point { x: number; y: number; pressure: number; }
+
+const mid = (a: Point, b: Point): Point => ({
+  x: (a.x + b.x) / 2,
+  y: (a.y + b.y) / 2,
+  pressure: (a.pressure + b.pressure) / 2,
+});
+
 const SignaturePad = forwardRef<SignaturePadRef>((_, ref) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [isDrawing, setIsDrawing] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
+  const drawingRef = useRef(false);
+  const strokeRef = useRef<Point[]>([]);
 
-  const isEmpty = () => {
+  const isEmpty = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return true;
-    const blank = document.createElement('canvas');
-    blank.width = canvas.width;
-    blank.height = canvas.height;
-    return canvas.toDataURL() === blank.toDataURL();
-  };
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return true;
+    const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    for (let i = 3; i < data.length; i += 4) if (data[i] > 0) return false;
+    return true;
+  }, []);
+
+  const clear = useCallback(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!ctx || !canvas) return;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    strokeRef.current = [];
+    setHasDrawn(false);
+  }, []);
 
   useImperativeHandle(ref, () => ({
-    getSignature: () => {
-      if (isEmpty()) return null;
-      return canvasRef.current?.toDataURL('image/png') || null;
-    },
-    clear: () => {
-      const canvas = canvasRef.current;
-      const ctx = canvas?.getContext('2d');
-      if (ctx && canvas) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        setHasDrawn(false);
-      }
-    },
-    isEmpty: isEmpty
+    getSignature: () => (isEmpty() ? null : canvasRef.current?.toDataURL('image/png') ?? null),
+    clear,
+    isEmpty,
   }));
 
   useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = canvasRef.current?.getContext('2d');
     if (!ctx) return;
-    
-    // ✅ CRITICAL: Clear the canvas to make it transparent
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.lineWidth = 2.5;
+    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
     ctx.strokeStyle = '#09090b';
+    ctx.fillStyle = '#09090b';
   }, []);
 
-  // ✅ NEW: Ensure canvas is transparent on resize or any re-render
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    
-    // Make sure canvas stays transparent
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    // Redraw existing signature if needed
-    // This prevents white background from appearing
-  }, []);
-
-  const getCoords = (e: React.MouseEvent | React.TouchEvent) => {
+  const getPoint = (e: React.PointerEvent<HTMLCanvasElement>): Point => {
     const canvas = canvasRef.current!;
     const rect = canvas.getBoundingClientRect();
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    if ('touches' in e) {
-      return {
-        x: (e.touches[0].clientX - rect.left) * scaleX,
-        y: (e.touches[0].clientY - rect.top) * scaleY,
-      };
-    }
     return {
-      x: (e.clientX - rect.left) * scaleX,
-      y: (e.clientY - rect.top) * scaleY,
+      x: (e.clientX - rect.left) * (canvas.width / rect.width),
+      y: (e.clientY - rect.top) * (canvas.height / rect.height),
+      pressure: e.pressure > 0 ? e.pressure : 0.5,
     };
   };
 
-  const startDrawing = (e: React.MouseEvent | React.TouchEvent) => {
+  // ✅ Pen-like variable width from pressure
+  const widthFor = (p: number) => 2 + p * 2.5;
+
+  const onPointerDown = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    e.preventDefault();
     const canvas = canvasRef.current;
-    const ctx = canvas?.getContext('2d');
-    if (!ctx) return;
-    const { x, y } = getCoords(e);
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    setIsDrawing(true);
+    if (!canvas) return;
+    // ✅ Capture: strokes survive fast movement past edges; up always fires here
+    canvas.setPointerCapture(e.pointerId);
+    drawingRef.current = true;
+    strokeRef.current = [getPoint(e)];
     setHasDrawn(true);
   };
 
-  const draw = (e: React.MouseEvent | React.TouchEvent) => {
-    if (!isDrawing) return;
+  const onPointerMove = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (!drawingRef.current) return;
     e.preventDefault();
+    const ctx = canvasRef.current?.getContext('2d');
+    if (!ctx) return;
+
+    const point = getPoint(e);
+    const pts = strokeRef.current;
+    const last = pts[pts.length - 1];
+
+    // Jitter gate: ignore micro-movements < 2px
+    if (Math.hypot(point.x - last.x, point.y - last.y) < 2) return;
+
+    pts.push(point);
+
+    if (pts.length === 2) {
+      // First segment: p0 → mid(p0,p1)
+      const m = mid(pts[0], pts[1]);
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      ctx.lineTo(m.x, m.y);
+      ctx.lineWidth = widthFor(pts[1].pressure);
+      ctx.stroke();
+    } else if (pts.length >= 3) {
+      // ✅ CONTINUOUS midpoint smoothing: mid(a,b) → quad(b) → mid(b,c)
+      // Each segment starts EXACTLY where the previous one ended → no dashes
+      const [a, b, c] = pts.slice(-3);
+      const m1 = mid(a, b);
+      const m2 = mid(b, c);
+      ctx.beginPath();
+      ctx.moveTo(m1.x, m1.y);
+      ctx.quadraticCurveTo(b.x, b.y, m2.x, m2.y);
+      ctx.lineWidth = widthFor(b.pressure);
+      ctx.stroke();
+    }
+  };
+
+  const onPointerUp = (e: React.PointerEvent<HTMLCanvasElement>) => {
+    if (!drawingRef.current) return;
+    e.preventDefault();
+    drawingRef.current = false;
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext('2d');
     if (!ctx) return;
-    const { x, y } = getCoords(e);
-    ctx.lineTo(x, y);
-    ctx.stroke();
-  };
 
-  const stopDrawing = () => setIsDrawing(false);
+    const pts = strokeRef.current;
+
+    if (pts.length === 1) {
+      // ✅ DOT: tap with no movement → one perfect filled dot
+      const p = pts[0];
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, 1.5 + p.pressure * 2, 0, Math.PI * 2);
+      ctx.fill();
+    } else if (pts.length >= 2) {
+      // ✅ TAIL: complete the stroke to the final pointer position
+      const a = pts[pts.length - 2];
+      const b = pts[pts.length - 1];
+      const m = mid(a, b);
+      ctx.beginPath();
+      ctx.moveTo(m.x, m.y);
+      ctx.lineTo(b.x, b.y);
+      ctx.lineWidth = widthFor(b.pressure);
+      ctx.stroke();
+    }
+
+    strokeRef.current = [];
+    canvas?.releasePointerCapture(e.pointerId);
+  };
 
   return (
     <div className="relative w-full">
@@ -115,18 +158,11 @@ const SignaturePad = forwardRef<SignaturePadRef>((_, ref) => {
         width={800}
         height={250}
         className="w-full h-48 border-2 border-dashed border-surface-border-strong rounded-xl cursor-crosshair touch-none"
-        style={{ 
-          background: 'transparent !important',
-          backgroundColor: 'transparent !important',
-          display: 'block',
-        }}
-        onMouseDown={startDrawing}
-        onMouseMove={draw}
-        onMouseUp={stopDrawing}
-        onMouseLeave={stopDrawing}
-        onTouchStart={startDrawing}
-        onTouchMove={draw}
-        onTouchEnd={stopDrawing}
+        style={{ backgroundColor: 'transparent', display: 'block' }}
+        onPointerDown={onPointerDown}
+        onPointerMove={onPointerMove}
+        onPointerUp={onPointerUp}
+        onPointerCancel={onPointerUp}
       />
       {!hasDrawn && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">

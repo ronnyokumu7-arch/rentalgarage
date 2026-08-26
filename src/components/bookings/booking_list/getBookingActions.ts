@@ -7,7 +7,7 @@
  * as the operator's manual trigger (from pending OR confirmed).
  */
 import {
-  Link as LinkIcon, Ban, XCircle, FileText, CalendarPlus, Shield,
+  Link as LinkIcon, Ban, XCircle, FileText, CalendarPlus, Shield, Send,
 } from "lucide-react";
 import type { RowAction } from "@/components/ui/DataTable";
 import type { Booking } from "@/lib/types";
@@ -21,6 +21,9 @@ export interface BookingActionsContext {
   handleCancel: (id: number) => void;        // ✅ now prompts for reason
   handleNoShow: (id: number) => void;        // ✅ now calls cancel(reason=no_show)
   handleCopyContractLink: (id: number) => void;
+  handleCopyQuotationLink: (id: number) => void; // ✅ NEW: sends quotation (invoice token)
+  hasContract: (id: number) => boolean;      // ✅ NEW: gates "Send Contract"
+  hasQuotation: (id: number) => boolean;     // ✅ NEW: gates "Send Quotation"
 }
 
 export const getBookingActions = (
@@ -30,12 +33,28 @@ export const getBookingActions = (
   const {
     routerPush, onExtendBooking,
     handleStartTrip, handleCompleteTrip, handleCancel, handleNoShow,
-    handleCopyContractLink,
+    handleCopyContractLink, handleCopyQuotationLink,
+    hasContract, hasQuotation,
   } = ctx;
 
   const actions: RowAction<Booking>[] = [
     { label: "Manage Booking", icon: FileText, onClick: () => routerPush(`/dashboard/bookings/${booking.id}`) },
-    { label: "Send Contract", icon: LinkIcon, onClick: () => handleCopyContractLink(booking.id) },
+    
+    // ✅ SEND QUOTATION: active when quotation exists (invoice token)
+    {
+      label: "Send Quotation",
+      icon: Send,
+      onClick: () => handleCopyQuotationLink(booking.id),
+      disabled: !hasQuotation(booking.id),
+    },
+    
+    // ✅ SEND CONTRACT: muted until contract is generated (after quotation acceptance)
+    {
+      label: "Send Contract",
+      icon: LinkIcon,
+      onClick: () => handleCopyContractLink(booking.id),
+      disabled: !hasContract(booking.id),
+    },
   ];
 
   if (booking.status === "pending") {

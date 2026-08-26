@@ -19,6 +19,7 @@ export default function BookingsList({
     upcomingCount, activeTripsCount, completedCount,
     handleConfirm, handleStartTrip, handleCompleteTrip,
     handleCancel, handleNoShow, handleCopyContractLink,
+    handleCopyQuotationLink, hasContract, hasQuotation, // ✅ NEW: quotation link + doc awareness
   } = bookingsData;
 
   // ✅ Shared actions context (router is supplied inside each view component)
@@ -26,6 +27,7 @@ export default function BookingsList({
     onExtendBooking,
     handleConfirm, handleStartTrip, handleCompleteTrip,
     handleCancel, handleNoShow, handleCopyContractLink,
+    handleCopyQuotationLink, hasContract, hasQuotation, // ✅ NEW: pass through to factory
   };
 
   const loading = bookingsLoading || isReferenceDataLoading;

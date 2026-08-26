@@ -10,11 +10,10 @@ export interface UsePublicContractReturn {
   loading: boolean;
   error: string | null;
   isSigning: boolean;
-  signContract: (signatureData: string) => Promise<boolean>; // Changed to return boolean
+  signContract: (signatureData: string) => Promise<boolean>;
   downloadPdf: () => Promise<void>;
   signed: boolean;
   signingError: string | null;
-  signingOpensAt: string | null;
   refetch: () => Promise<void>;
 }
 
@@ -24,7 +23,6 @@ export function usePublicContract(token: string): UsePublicContractReturn {
   const [error, setError] = useState<string | null>(null);
   const [isSigning, setIsSigning] = useState(false);
   const [signingError, setSigningError] = useState<string | null>(null);
-  const [signingOpensAt, setSigningOpensAt] = useState<string | null>(null);
 
   const fetchContract = useCallback(async () => {
     try {
@@ -69,7 +67,6 @@ export function usePublicContract(token: string): UsePublicContractReturn {
     setSigningError(null);
     
     try {
-      // ✅ FIXED: Pass the signature data to the API
       await contractsApi.publicSign(token, signatureData);
       
       setContract(prev => prev ? { 
@@ -78,8 +75,6 @@ export function usePublicContract(token: string): UsePublicContractReturn {
         status: "signed" as const
       } : null);
       
-      // ✅ REMOVED: toast.success("Contract signed successfully!");
-      // Let the component handle the toast to avoid duplicates
       return true;
     } catch (err: unknown) {
       const apiErr = err as { 
@@ -87,7 +82,6 @@ export function usePublicContract(token: string): UsePublicContractReturn {
           status?: number; 
           data?: { 
             detail?: string; 
-            opens_at?: string;
             errors?: Array<{ msg: string; loc: string[] }>;
           } 
         } 
@@ -96,25 +90,13 @@ export function usePublicContract(token: string): UsePublicContractReturn {
       const status = apiErr.response?.status;
       const responseData = apiErr.response?.data;
       
-      if (status === 422) {
+      if (status === 422 && responseData?.errors) {
         // Parse validation errors
-        if (responseData?.errors) {
-          const errorMessages = responseData.errors
-            .map(err => `${err.loc.join('.')}: ${err.msg}`)
-            .join(', ');
-          setSigningError(errorMessages);
-          // ✅ Let component handle error toast
-        } else {
-          const detail = responseData?.detail || "Validation error. Please check your input.";
-          setSigningError(detail);
-        }
-        
-        const opensAt = responseData?.opens_at;
-        if (opensAt) {
-          setSigningOpensAt(opensAt);
-        }
+        const errorMessages = responseData.errors
+          .map(err => `${err.loc.join('.')}: ${err.msg}`)
+          .join(', ');
+        setSigningError(errorMessages);
       } else {
-        // For non-422 errors, set the error state but let component decide on toast
         const detail = responseData?.detail || "Failed to sign contract. Please try again.";
         setSigningError(detail);
       }
@@ -164,7 +146,6 @@ export function usePublicContract(token: string): UsePublicContractReturn {
     downloadPdf,
     signed: contract?.signed_by_client ?? false,
     signingError,
-    signingOpensAt,
     refetch: fetchContract
   };
 }

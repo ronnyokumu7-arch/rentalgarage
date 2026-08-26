@@ -24,12 +24,13 @@ export default function PublicInvoicePage() {
     handleAccept, handleCancel, handleReschedule,
   } = usePublicInvoice(token);
 
-  const [rescheduleOpen, setRescheduleOpen] = useState(false);
+    const [rescheduleOpen, setRescheduleOpen] = useState(false);
+    const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
 
   const handleDownloadPdf = async () => {
-    if (!invoice) return;
+    if (!invoice || isDownloadingPdf) return;   // ✅ double-click guard
+    setIsDownloadingPdf(true);
     try {
-      toast.loading("Generating PDF...");
       const res = await invoicesApi.downloadPdfByToken(token);
       const blob = res.data instanceof Blob ? res.data : new Blob([res.data]);
       const url = window.URL.createObjectURL(blob);
@@ -40,11 +41,11 @@ export default function PublicInvoicePage() {
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
-      toast.dismiss();
       toast.success("PDF downloaded");
     } catch {
-      toast.dismiss();
       toast.error("Failed to download PDF");
+    } finally {
+      setIsDownloadingPdf(false);
     }
   };
 
@@ -86,6 +87,7 @@ export default function PublicInvoicePage() {
           <PublicInvoiceStatusBanner
             invoice={invoice}
             onDownloadPdf={handleDownloadPdf}
+            isDownloadingPdf={isDownloadingPdf}
           />
 
           <div className="p-4 sm:p-8">

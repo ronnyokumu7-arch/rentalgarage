@@ -42,7 +42,7 @@ export default function PublicContractSignTab({ contract, onSign, isSigned }: Pr
       
       if (success) {
         setSigned(true);
-        toast.success("Contract signed successfully!");
+        // ✅ Toast is fired by the hook (single source of truth)
       } else {
         toast.error("Failed to sign contract. Please try again.");
       }
@@ -82,7 +82,7 @@ export default function PublicContractSignTab({ contract, onSign, isSigned }: Pr
           <button
             type="button"
             onClick={handleClearSignature}
-            className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-red-600 hover:bg-red-50 px-2 py-1 rounded-lg transition-colors"
+            className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-red-600 hover:bg-red-50 px-2 py-1 rounded-lg transition-colors active:scale-95"
             title="Clear signature and start over"
           >
             <Eraser size={12} />
@@ -95,7 +95,7 @@ export default function PublicContractSignTab({ contract, onSign, isSigned }: Pr
         </p>
         
         {/* Signature Pad Container */}
-        <div className="border-2 border-dashed border-slate-300 rounded-xl overflow-hidden relative group">
+        <div className="border-2 border-dashed border-slate-300 rounded-xl overflow-hidden relative group bg-white">
           <SignaturePad ref={signatureRef} />
         </div>
       </div>
@@ -125,7 +125,7 @@ export default function PublicContractSignTab({ contract, onSign, isSigned }: Pr
         disabled={!termsAccepted || signing}
         className={`
           w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl 
-          text-sm font-bold transition-all shadow-lg
+          text-sm font-bold transition-all shadow-lg active:scale-[0.98] active:shadow-inner
           ${termsAccepted && !signing
             ? "bg-blue-600 text-white hover:bg-blue-700 shadow-blue-200 cursor-pointer" 
             : "bg-slate-200 text-slate-400 cursor-not-allowed shadow-none"

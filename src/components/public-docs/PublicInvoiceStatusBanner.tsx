@@ -1,14 +1,15 @@
 "use client";
 
-import { FileText, CheckCircle2, Download, XCircle, Send } from "lucide-react";
+import { FileText, CheckCircle2, Download, XCircle, Send, Loader2 } from "lucide-react";
 import type { PublicInvoiceView } from "@/lib/types";
 
 interface PublicInvoiceStatusBannerProps {
   invoice: PublicInvoiceView;
   onDownloadPdf: () => void;
+  isDownloadingPdf?: boolean;
 }
 
-export default function PublicInvoiceStatusBanner({ invoice, onDownloadPdf }: PublicInvoiceStatusBannerProps) {
+export default function PublicInvoiceStatusBanner({ invoice, onDownloadPdf, isDownloadingPdf = false }: PublicInvoiceStatusBannerProps) {
   const isQuotation = invoice.doc_type === "quotation";
   const isPaid = invoice.status === "paid";
   const isVoid = invoice.status === "void";
@@ -71,9 +72,18 @@ export default function PublicInvoiceStatusBanner({ invoice, onDownloadPdf }: Pu
       <button
         type="button"
         onClick={onDownloadPdf}
-        className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors shadow-sm shrink-0"
+        disabled={isDownloadingPdf}
+        className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 hover:border-slate-300 transition-all shadow-sm shrink-0 disabled:opacity-60 disabled:cursor-not-allowed active:scale-95 active:shadow-inner"
       >
-        <Download size={14} /> Download PDF
+        {isDownloadingPdf ? (
+          <>
+            <Loader2 size={14} className="animate-spin" /> Generating PDF...
+          </>
+        ) : (
+          <>
+            <Download size={14} /> Download PDF
+          </>
+        )}
       </button>
     </div>
   );

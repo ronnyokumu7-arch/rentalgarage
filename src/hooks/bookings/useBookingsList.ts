@@ -4,6 +4,7 @@ import { confirmAction } from "@/lib/utils/confirmAction";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { bookingsApi } from "@/lib/api/bookings";
 import { contractsApi } from "@/lib/api/contracts";
+import { invoicesApi } from "@/lib/api/invoices";
 import type { Booking } from "@/lib/types";
 import toast from "react-hot-toast";
 
@@ -27,6 +28,12 @@ export function useBookingsList() {
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
 
+  // ✅ DOC AWARENESS: powers dropdown gating (Send Quotation / Send Contract)
+  const [contractBookingIds, setContractBookingIds] = useState<Set<number>>(new Set());
+  const [invoiceByBooking, setInvoiceByBooking] = useState<
+    Map<number, { id: number; share_token: string | null }>
+  >(new Map());
+
   const fetchBookings = useCallback(async () => {
     setLoading(true);
     try {
@@ -35,6 +42,27 @@ export function useBookingsList() {
         : await bookingsApi.list();
 
       setBookings(data);
+
+      // ✅ DOC AWARENESS (batched, non-blocking): one contracts + one invoices call
+      try {
+        const [contracts, invoices] = await Promise.all([
+          contractsApi.list(),
+          invoicesApi.list({ page: 1, page_size: 200 }),
+        ]);
+        setContractBookingIds(
+          new Set((contracts ?? []).map((c) => c.booking_id).filter((id): id is number => id != null)),
+        );
+        const invMap = new Map<number, { id: number; share_token: string | null }>();
+        (invoices ?? []).forEach((inv) => {
+          // first invoice per booking = the morphing quotation/invoice row
+          if (inv.booking_id != null && !invMap.has(inv.booking_id)) {
+            invMap.set(inv.booking_id, { id: inv.id, share_token: inv.share_token ?? null });
+          }
+        });
+        setInvoiceByBooking(invMap);
+      } catch {
+        // Non-fatal: dropdown degrades gracefully (toasts instead of links)
+      }
     } catch (error: unknown) {
       console.error("Failed to fetch bookings", error);
       toast.error("Failed to load bookings");
@@ -232,6 +260,40 @@ export function useBookingsList() {
     }
   };
 
+  // ✅ SEND QUOTATION: copies the public link (invoice token; morphs quotation→invoice)
+  const handleCopyQuotationLink = async (bookingId: number) => {
+    try {
+      const entry = invoiceByBooking.get(bookingId);
+      if (!entry) {
+        toast.error("No quotation generated for this booking yet.");
+        return;
+      }
+
+      let token = entry.share_token;
+      if (!token) {
+        toast.loading("Generating share link...", { duration: 800 });
+        const res = await invoicesApi.generateShareLink(entry.id);
+        token = res.share_token;
+      }
+
+      await navigator.clipboard.writeText(`${window.location.origin}/invoice/${token}`);
+      toast.success("Quotation link copied to clipboard!");
+    } catch (error: unknown) {
+      toast.error(getErrorMessage(error, "Failed to copy quotation link"));
+    } finally {
+      setOpenDropdownId(null);
+    }
+  };
+
+  const hasContract = useCallback(
+    (bookingId: number) => contractBookingIds.has(bookingId),
+    [contractBookingIds],
+  );
+  const hasQuotation = useCallback(
+    (bookingId: number) => invoiceByBooking.has(bookingId),
+    [invoiceByBooking],
+  );
+
   return {
     bookings,
     loading,
@@ -261,6 +323,9 @@ export function useBookingsList() {
     handleCancel,
     handleNoShow,
     handleCopyContractLink,
+    handleCopyQuotationLink,
+    hasContract,
+    hasQuotation,
     refetch: fetchBookings,
   };
 }
