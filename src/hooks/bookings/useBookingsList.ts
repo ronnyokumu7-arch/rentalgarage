@@ -50,12 +50,12 @@ export function useBookingsList() {
           invoicesApi.list({ page: 1, page_size: 200 }),
         ]);
         setContractBookingIds(
-          new Set((contracts ?? []).map((c) => c.booking_id).filter((id): id is number => id != null)),
+          new Set((contracts ?? []).map((c) => c.booking_id).filter((id): id is number => id !== null)),
         );
         const invMap = new Map<number, { id: number; share_token: string | null }>();
         (invoices ?? []).forEach((inv) => {
           // first invoice per booking = the morphing quotation/invoice row
-          if (inv.booking_id != null && !invMap.has(inv.booking_id)) {
+          if (inv.booking_id !== null && !invMap.has(inv.booking_id)) {
             invMap.set(inv.booking_id, { id: inv.id, share_token: inv.share_token ?? null });
           }
         });
