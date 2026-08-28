@@ -2,7 +2,7 @@
 "use client";
 
 import { LayoutList, CalendarDays } from "lucide-react";
-import { useMemo } from "react";
+import { useMemo, useRef, useState, useEffect } from "react";
 
 import BookingsList from "@/components/bookings/BookingsList";
 import ExtendBookingModal from "@/components/bookings/ExtendBookingModal";
@@ -14,6 +14,89 @@ const TABS = [
   { id: "list", label: "Reservations", icon: LayoutList },
   { id: "calendar", label: "Calendar", icon: CalendarDays },
 ];
+
+// ✅ REUSABLE: Premium Sliding Tab Switcher (Matches Financials/Clients)
+function PremiumTabSwitcher({ activeTab, setActiveTab }: { activeTab: TabMode; setActiveTab: (tab: TabMode) => void }) {
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number; top: number; height: number } | null>(null);
+
+  useEffect(() => {
+    const updateIndicator = () => {
+      const activeEl = tabRefs.current[activeTab];
+      if (activeEl) {
+        const rect = activeEl.getBoundingClientRect();
+        const containerRect = activeEl.parentElement?.getBoundingClientRect();
+        if (containerRect) {
+          setIndicatorStyle({
+            left: rect.left - containerRect.left,
+            width: rect.width,
+            top: rect.top - containerRect.top,
+            height: rect.height,
+          });
+        }
+      }
+    };
+
+    updateIndicator();
+    window.addEventListener("resize", updateIndicator);
+    return () => window.removeEventListener("resize", updateIndicator);
+  }, [activeTab]);
+
+  return (
+    <div className="relative w-full sm:w-auto">
+      {/* Sliding Indicator Pill */}
+      {indicatorStyle && (
+        <div
+          className="absolute z-0 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 shadow-lg shadow-[var(--color-primary)]/10 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          style={{
+            left: indicatorStyle.left,
+            width: indicatorStyle.width,
+            top: indicatorStyle.top,
+            height: indicatorStyle.height,
+          }}
+        />
+      )}
+
+      {/* Tab Container - No Scrollbar, Snap Centering */}
+      <div 
+        className="relative z-10 flex items-center gap-1 overflow-x-auto pb-0.5 pt-0.5 scrollbar-hide snap-x snap-mandatory"
+        style={{
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
+      >
+        {TABS.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          
+          return (
+            <button
+              key={tab.id}
+              ref={(el) => { tabRefs.current[tab.id] = el; }}
+              type="button"
+              onClick={() => setActiveTab(tab.id as TabMode)}
+              className={`
+                relative flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all duration-300 
+                whitespace-nowrap touch-manipulation cursor-pointer snap-center flex-shrink-0
+                ${isActive 
+                  ? "text-[var(--color-ink)]" 
+                  : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]/50"
+                }
+              `}
+            >
+              <Icon size={isActive ? 16 : 14} className={`transition-all duration-300 ${isActive ? "text-[var(--color-primary)]" : "opacity-70"}`} />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
+      
+      {/* Subtle bottom border line */}
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-[var(--color-surface-border)]/50 -z-10" />
+    </div>
+  );
+}
 
 export default function BookingsPage() {
   const {
@@ -42,7 +125,7 @@ export default function BookingsPage() {
 
   return (
     <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden">
-      {/* ── HEADER & TAB SWITCHER ── */}
+      {/* ── HEADER & PREMIUM TAB SWITCHER ── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div className="min-w-0 flex-1">
           <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] flex items-center gap-2.5 sm:gap-3">
@@ -56,28 +139,8 @@ export default function BookingsPage() {
           </p>
         </div>
 
-        {/* Segmented Control / Tab Switcher */}
-        <div className="grid grid-cols-2 sm:flex sm:items-center gap-1 p-1 bg-[var(--color-surface)] rounded-xl border border-[var(--color-surface-border)] shadow-sm w-full sm:w-auto shrink-0">
-          {TABS.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id as TabMode)}
-                className={`flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2.5 sm:py-2 rounded-lg text-xs font-semibold transition-colors duration-150 touch-manipulation select-none ${
-                  isActive 
-                    ? "bg-[var(--color-primary)] text-white shadow-sm" 
-                    : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] active:bg-[var(--color-surface-hover)]"
-                }`}
-              >
-                <Icon size={14} className="shrink-0" />
-                <span className="truncate">{tab.label}</span>
-              </button>
-            );
-          })}
-        </div>
+        {/* ✅ Premium Sliding Tab Switcher */}
+        <PremiumTabSwitcher activeTab={activeTab} setActiveTab={setActiveTab} />
       </div>
 
       {/* ── MAIN CONTENT ── */}

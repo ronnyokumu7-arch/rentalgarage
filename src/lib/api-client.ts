@@ -11,23 +11,48 @@ import { env } from "@/lib/env";
  * - Uses Zod-validated environment variables for the base URL.
  * - Sends HttpOnly refresh cookies automatically via `withCredentials: true`.
  * - Attaches short-lived access tokens from cookies to outgoing requests.
- * - Intercepts 401 Unauthorized responses to safely handle session expiration.
+ * - ✅ NEW: Automatically refreshes expired tokens before logging out.
  * - Logs network timeouts and 5xx server errors for easier debugging.
  */
 
 /**
  * ✅ CRITICAL: Concurrency Guard
  * When a token expires, multiple React Query hooks might fail with a 401 simultaneously.
- * Without this flag, the app would attempt to redirect multiple times concurrently,
- * leading to state corruption, race conditions, and a jarring user experience.
+ * Without this flag, the app would attempt to refresh multiple times concurrently.
  */
-let isHandling401 = false;
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value?: unknown) => void;
+  reject: (reason?: unknown) => void;
+}> = [];
+
+const processQueue = (error: AxiosError | null, token: string | null = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
 
 // ─── COOKIE HELPERS ──────────────────────────────────────────────────────────
 const getCookie = (name: string): string | null => {
   if (typeof document === "undefined") return null;
   const match = document.cookie.match(new RegExp(`(^| )${name}=([^;]+)`));
   return match ? decodeURIComponent(match[2]) : null;
+};
+
+const setCookie = (name: string, value: string, days: number = 7) => {
+  if (typeof document === "undefined") return;
+  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; secure; samesite=lax`;
+};
+
+const clearCookie = (name: string) => {
+  if (typeof document === "undefined") return;
+  document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
 };
 
 // Initialize Axios instance with strict typing and validated env vars
@@ -60,38 +85,85 @@ apiClient.interceptors.request.use(
 
 // ─── RESPONSE INTERCEPTOR ────────────────────────────────────────────────────
 /**
- * Handles global API errors, session expiration, and network issues.
+ * Handles global API errors, automatic token refresh, and session expiration.
  */
 apiClient.interceptors.response.use(
   (response) => response,
-  (error: AxiosError) => {
+  async (error: AxiosError) => {
+    const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
     const status = error.response?.status;
     const pathname = typeof window !== "undefined" ? window.location.pathname : "";
 
-    // 1. Handle 401 Unauthorized (Session Expired / Invalid Token)
+    // 1. Handle 401 Unauthorized (Try to refresh before logging out)
     if (
       status === 401 &&
       typeof window !== "undefined" &&
       !pathname.includes("/login") &&
       !pathname.includes("/forgot-password") &&
       !pathname.includes("/reset-password") &&
-      !isHandling401 // ✅ Prevents concurrent 401s from triggering multiple redirects
+      !originalRequest._retry // ✅ Prevent infinite refresh loops
     ) {
-      isHandling401 = true; // Lock the redirect
-      
-      console.warn("[API Client] 401 Unauthorized: Session expired. Clearing credentials.");
-      
-      // Clear access token cookie
-      document.cookie = "rm_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-      
-      // Clean up any legacy localStorage tokens just in case
-      localStorage.removeItem("rm_token");
-      localStorage.removeItem("rm_refresh_token");
-      
-      // Yield to the main thread before hard reload
-      setTimeout(() => {
-        window.location.href = "/login?reason=session_expired";
-      }, 100);
+      // Don't retry refresh or login endpoints
+      if (originalRequest.url?.includes("/auth/refresh") || originalRequest.url?.includes("/auth/login")) {
+        return Promise.reject(error);
+      }
+
+      // If already refreshing, queue this request
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers.Authorization = `Bearer ${token}`;
+            return apiClient(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        console.warn("[API Client] 401 Unauthorized: Attempting token refresh...");
+
+        // Call refresh endpoint (refresh token is sent via HttpOnly cookie)
+        const response = await axios.post(
+          `${env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+          {},
+          { withCredentials: true }
+        );
+
+        const { access_token } = response.data;
+
+        // Save new access token to cookie
+        setCookie("rm_token", access_token, 1); // 1 day (access token itself expires in 15min via JWT)
+
+        console.log("[API Client] Token refreshed successfully. Retrying original request.");
+
+        // Process queued requests
+        processQueue(null, access_token);
+
+        // Retry the original failed request
+        originalRequest.headers.Authorization = `Bearer ${access_token}`;
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        console.error("[API Client] Token refresh failed. Logging out.");
+
+        // Refresh failed - log user out
+        processQueue(refreshError as AxiosError, null);
+
+        clearCookie("rm_token");
+        localStorage.removeItem("rm_token");
+        localStorage.removeItem("rm_refresh_token");
+
+        setTimeout(() => {
+          window.location.href = "/login?reason=session_expired";
+        }, 100);
+
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
     }
 
     // 2. Handle Network Timeouts

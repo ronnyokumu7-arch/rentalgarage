@@ -3,109 +3,168 @@ export const brand = {
   name: "Rental Garage",
   
   colors: {
-    // ── PRIMARY: Deep Royal Indigo (Wealth, Trust, Authority) ─────────
-    primary:       "#4338CA", // Indigo 700 - Rich, confident
-    primaryHover:  "#3730A3", // Indigo 800 - Deeper on hover
+    // ── PRIMARY: Deep Indigo-Navy (Wealth, Trust, Authority) ──────────
+    // Rich like a bespoke suit, authoritative like a private bank
+    primary:       "#3730A3", // Indigo 800 - Deep, confident
+    primaryHover:  "#312E81", // Indigo 900 - Even deeper on hover
     primaryLight:  "#818CF8", // Indigo 400 - For subtle accents
-    primaryMuted:  "rgba(67, 56, 202, 0.08)", // Ultra-subtle backgrounds
-    primaryGlow:   "rgba(67, 56, 202, 0.15)", // For glow effects
+    primaryMuted:  "rgba(55, 48, 163, 0.08)", // Ultra-subtle backgrounds
+    primaryGlow:   "rgba(55, 48, 163, 0.15)", // For glow effects
+    primaryGradient: "linear-gradient(135deg, #4338CA 0%, #312E81 100%)",
     
     // ── SECONDARY: Warm Gold (Premium, Luxury, Value) ─────────────────
+    // Like fine jewelry - subtle but unmistakably premium
     secondary:     "#D97706", // Amber 600 - Warm, premium feel
-    secondaryLight: "#FBBF24", // Amber 400
+    secondaryLight: "#FCD34D", // Amber 300
     secondaryMuted: "rgba(217, 119, 6, 0.10)",
+    secondaryGradient: "linear-gradient(135deg, #F59E0B 0%, #D97706 100%)",
 
-    // ── SURFACE: Layered Depth (No more washed-out white!) ────────────
-    // Layer 1: Page background - Cool, sophisticated
-    bg:            "#F1F5F9", // Slate 100 - Deep, elegant
-    bgElevated:    "#E2E8F0", // Slate 200
+    // ── SURFACE: Warm, Layered, Luxurious ──────────────────────────────
+    // Light Mode: Warm whites with subtle warmth
+    light: {
+      bg:            "#F7F4F0", // Warm cream - like expensive paper
+      bgElevated:    "#F0EDE8", // Slightly deeper cream
+      surface:       "#FFFFFF", // Pure white - but with warm context
+      surfaceWarm:   "#FDFCFA", // Warm white for cards
+      surfaceHover:  "#FAF8F5", // Subtle warm hover
+      surfaceActive: "#F5F2ED", // Active state
+      surfaceBorder: "rgba(44, 38, 32, 0.08)", // Warm-tinted border
+      surfaceBorderStrong: "rgba(44, 38, 32, 0.14)",
+      surfaceBorderLight: "rgba(44, 38, 32, 0.04)",
+    },
     
-    // Layer 2: Cards & Containers - Crisp white with warmth
-    surface:       "#FFFFFF", // Pure white - Cards pop
-    surfaceHover:  "#F8FAFC", // Slate 50 - Subtle hover
-    surfaceActive: "#F1F5F9",
-    
-    // Layer 3: Borders - Visible but elegant
-    surfaceBorder:        "rgba(15, 23, 42, 0.10)", // Subtle but present
-    surfaceBorderStrong:  "rgba(15, 23, 42, 0.16)",
-    surfaceBorderLight:   "rgba(15, 23, 42, 0.06)",
+    // Dark Mode: Deep charcoal with warmth
+    dark: {
+      bg:            "#0C0A09", // Warm near-black
+      bgElevated:    "#14110E", // Deep warm charcoal
+      surface:       "#1A1714", // Warm dark surface
+      surfaceWarm:   "#1F1C18", // Slightly warmer
+      surfaceHover:  "#25211D", // Hover state
+      surfaceActive: "#2C2823", // Active state
+      surfaceBorder: "rgba(255, 248, 240, 0.06)",
+      surfaceBorderStrong: "rgba(255, 248, 240, 0.12)",
+      surfaceBorderLight: "rgba(255, 248, 240, 0.03)",
+    },
 
-    // ── INK: Deep Contrast (Readability is wealth) ────────────────────
-    ink:           "#0F172A", // Slate 900 - Primary text (deepest)
-    inkSecondary:  "#1E293B", // Slate 800
-    inkMuted:      "#475569", // Slate 600 - Secondary text
-    inkSubtle:     "#94A3B8", // Slate 400 - Tertiary
-    inkFaint:      "#CBD5E1", // Slate 300 - Disabled
-    inkInverse:    "#FFFFFF",
+    // ── INK: Exceptional Readability ────────────────────────────────────
+    ink: {
+      primary:      "#1C1917", // Warm near-black - easiest on eyes
+      secondary:    "#292524", // Deep warm
+      muted:        "#57534E", // Warm gray - readable
+      subtle:       "#78716C", // Lighter warm gray
+      faint:        "#A8A39E", // Very light
+      inverse:      "#FAF8F5", // For dark mode
+    },
 
-    // ── SEMANTIC: Clear, Confident Signals ────────────────────────────
-    success:       "#059669", // Emerald 600 - Trustworthy green
-    successBg:     "rgba(5, 150, 105, 0.10)",
-    successText:   "#047857",
-    successBorder: "rgba(5, 150, 105, 0.20)",
+    // ── SEMANTIC: Refined, Not Screaming ──────────────────────────────
+    success: {
+      main:        "#065F46", // Deep emerald - refined
+      light:       "#10B981",
+      bg:          "rgba(6, 95, 70, 0.08)",
+      text:        "#065F46",
+      border:      "rgba(6, 95, 70, 0.15)",
+    },
     
-    warning:       "#D97706", // Amber 600
-    warningBg:     "rgba(217, 119, 6, 0.10)",
-    warningText:   "#B45309",
-    warningBorder: "rgba(217, 119, 6, 0.20)",
+    warning: {
+      main:        "#92400E", // Deep amber
+      light:       "#F59E0B",
+      bg:          "rgba(146, 64, 14, 0.08)",
+      text:        "#92400E",
+      border:      "rgba(146, 64, 14, 0.15)",
+    },
     
-    danger:        "#DC2626", // Red 600
-    dangerBg:      "rgba(220, 38, 38, 0.10)",
-    dangerText:    "#991B1B",
-    dangerBorder:  "rgba(220, 38, 38, 0.20)",
+    danger: {
+      main:        "#991B1B", // Deep red - not alarming
+      light:       "#EF4444",
+      bg:          "rgba(153, 27, 27, 0.08)",
+      text:        "#991B1B",
+      border:      "rgba(153, 27, 27, 0.15)",
+    },
     
-    info:          "#2563EB", // Blue 600
-    infoBg:        "rgba(37, 99, 235, 0.10)",
-    infoText:      "#1D4ED8",
+    info: {
+      main:        "#1E40AF", // Deep blue
+      light:       "#3B82F6",
+      bg:          "rgba(30, 64, 175, 0.08)",
+      text:        "#1E40AF",
+      border:      "rgba(30, 64, 175, 0.15)",
+    },
 
-    // ── SHADOWS: Deep, Warm, Dimensional ─────────────────────────────
-    // Multi-layered shadows create premium depth
-    shadowSm:      "0 1px 2px 0 rgba(15, 23, 42, 0.04)",
-    shadowMd:      "0 4px 6px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.04)",
-    shadowLg:      "0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04)",
-    shadowXl:      "0 20px 25px -5px rgba(15, 23, 42, 0.10), 0 8px 10px -6px rgba(15, 23, 42, 0.06)",
-    shadow2Xl:     "0 25px 50px -12px rgba(15, 23, 42, 0.16)",
-    
-    // Cards: Border + Shadow = Premium depth
-    shadowCard:    "0 0 0 1px rgba(15, 23, 42, 0.06), 0 1px 2px 0 rgba(15, 23, 42, 0.04)",
-    shadowCardHover: "0 0 0 1px rgba(67, 56, 202, 0.12), 0 8px 25px -8px rgba(67, 56, 202, 0.12)",
-    shadowModal:   "0 25px 50px -12px rgba(15, 23, 42, 0.20), 0 0 0 1px rgba(15, 23, 42, 0.08)",
-    shadowDropdown:"0 10px 15px -3px rgba(15, 23, 42, 0.08), 0 4px 6px -4px rgba(15, 23, 42, 0.04), 0 0 0 1px rgba(15, 23, 42, 0.06)",
-    shadowFocus:   "0 0 0 2px #FFFFFF, 0 0 0 4px #4338CA",
-    shadowGlow:    "0 0 30px rgba(67, 56, 202, 0.15)",
-
-    // ── GRADIENTS: Rich, Dimensional Surfaces ─────────────────────────
+    // ── GRADIENTS: Rich, Dimensional, Premium ──────────────────────────
     gradients: {
-      primary:     "linear-gradient(135deg, #4338CA 0%, #3730A3 100%)",
-      secondary:   "linear-gradient(135deg, #D97706 0%, #B45309 100%)",
-      surface:     "linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)",
-      hover:       "linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%)",
-      dark:        "linear-gradient(160deg, #0F172A 0%, #1E293B 100%)",
-      // Stat card gradients
+      // Primary brand gradient - the "hero" gradient
+      brand:       "linear-gradient(145deg, #4338CA 0%, #312E81 45%, #1E1B4B 100%)",
+      brandLight:  "linear-gradient(145deg, #818CF8 0%, #4338CA 100%)",
+      
+      // Secondary - warm gold
+      gold:        "linear-gradient(145deg, #FCD34D 0%, #D97706 50%, #92400E 100%)",
+      goldLight:   "linear-gradient(145deg, #FDE68A 0%, #F59E0B 100%)",
+      
+      // Surface gradients
+      surfaceLight: "linear-gradient(145deg, #FFFFFF 0%, #FAF8F5 100%)",
+      surfaceDark:  "linear-gradient(145deg, #1A1714 0%, #14110E 100%)",
+      
+      // Backgrounds
+      bgLight:     "linear-gradient(160deg, #F7F4F0 0%, #F0EDE8 50%, #E8E4DE 100%)",
+      bgDark:      "linear-gradient(160deg, #0C0A09 0%, #14110E 50%, #1A1714 100%)",
+      
+      // Stat cards
       statPrimary: "linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%)",
       statSuccess: "linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%)",
       statWarning: "linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%)",
       statDanger:  "linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%)",
+      
+      // Dark stat cards
+      statPrimaryDark: "linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(79, 70, 229, 0.08) 100%)",
+      statSuccessDark: "linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.08) 100%)",
+      statWarningDark: "linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.08) 100%)",
+      statDangerDark:  "linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.08) 100%)",
+    },
+
+    // ── SHADOWS: Deep, Warm, Dimensional ──────────────────────────────
+    // Multi-layered shadows create premium depth
+    shadows: {
+      xs:     "0 1px 2px 0 rgba(44, 38, 32, 0.04)",
+      sm:     "0 1px 3px 0 rgba(44, 38, 32, 0.06), 0 1px 2px -1px rgba(44, 38, 32, 0.04)",
+      md:     "0 4px 12px -2px rgba(44, 38, 32, 0.08), 0 2px 4px -2px rgba(44, 38, 32, 0.04)",
+      lg:     "0 12px 24px -4px rgba(44, 38, 32, 0.10), 0 4px 6px -4px rgba(44, 38, 32, 0.05)",
+      xl:     "0 20px 32px -6px rgba(44, 38, 32, 0.12), 0 8px 12px -6px rgba(44, 38, 32, 0.06)",
+      "2xl":   "0 25px 50px -12px rgba(44, 38, 32, 0.20)",
+      
+      // Cards with warm shadows
+      card:      "0 1px 3px 0 rgba(44, 38, 32, 0.06), 0 1px 2px -1px rgba(44, 38, 32, 0.04)",
+      cardHover: "0 8px 25px -8px rgba(55, 48, 163, 0.12), 0 1px 3px 0 rgba(44, 38, 32, 0.08)",
+      
+      // Premium glow
+      glow:      "0 0 40px rgba(55, 48, 163, 0.08)",
+      glowGold:  "0 0 40px rgba(217, 119, 6, 0.08)",
+      
+      // Focus state
+      focus:     "0 0 0 2px #FFFFFF, 0 0 0 4px #4338CA",
+      focusRing: "0 0 0 3px rgba(67, 56, 202, 0.25)",
+    },
+
+    // ── DARK MODE SHADOWS ──────────────────────────────────────────────
+    darkShadows: {
+      card:      "0 1px 3px 0 rgba(0, 0, 0, 0.4), 0 1px 2px -1px rgba(0, 0, 0, 0.3)",
+      cardHover: "0 8px 25px -8px rgba(0, 0, 0, 0.6), 0 1px 3px 0 rgba(0, 0, 0, 0.3)",
+      glow:      "0 0 40px rgba(99, 102, 241, 0.06)",
+      focus:     "0 0 0 2px #1A1714, 0 0 0 4px #6366F1",
+      focusRing: "0 0 0 3px rgba(99, 102, 241, 0.30)",
     },
   },
 
   typography: {
-    font: "Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif",
-    // Display - For hero sections
-    display: "text-4xl sm:text-5xl font-bold tracking-tight",
-    // Headings
-    h1: "text-3xl sm:text-4xl font-bold tracking-tight",
-    h2: "text-2xl sm:text-3xl font-semibold tracking-tight",
-    h3: "text-xl sm:text-2xl font-semibold",
-    h4: "text-lg font-semibold",
-    h5: "text-base font-semibold",
-    // Body
+    font: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif",
+    display: "font-display text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight",
+    h1: "font-display text-3xl sm:text-4xl font-bold tracking-tight",
+    h2: "font-display text-2xl sm:text-3xl font-semibold tracking-tight",
+    h3: "font-display text-xl sm:text-2xl font-semibold",
+    h4: "font-display text-lg font-semibold",
+    h5: "font-display text-base font-semibold",
     body: "text-base leading-relaxed",
     bodySmall: "text-sm leading-relaxed",
-    // Utilities
-    small: "text-xs text-[var(--color-ink-muted)]",
-    mono: "font-mono text-sm",
     label: "text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-muted)]",
+    mono: "font-mono text-sm",
   },
 
   spacing: {
@@ -118,30 +177,17 @@ export const brand = {
   },
 
   radius: {
-    sm: "rounded-lg",      // 8px - Buttons, inputs
-    md: "rounded-xl",      // 12px - Cards, dropdowns
-    lg: "rounded-2xl",     // 16px - Modals, large cards
-    xl: "rounded-3xl",     // 24px - Special containers
-    full: "rounded-full",  // Badges, avatars
+    xs: "rounded",        // 4px - Small elements
+    sm: "rounded-lg",     // 8px - Buttons, inputs
+    md: "rounded-xl",     // 12px - Cards, dropdowns
+    lg: "rounded-2xl",    // 16px - Modals, large cards
+    xl: "rounded-3xl",    // 24px - Special containers
+    full: "rounded-full", // Badges, avatars
   },
 
-  // ── PREMIUM ANIMATION EASINGS ────────────────────────────────────────
   easing: {
     spring: "cubic-bezier(0.16, 1, 0.3, 1)",
     smooth: "cubic-bezier(0.4, 0, 0.2, 1)",
     bounce: "cubic-bezier(0.34, 1.56, 0.64, 1)",
-  },
-
-  // ── DARK MODE OVERRIDES ──────────────────────────────────────────────
-  dark: {
-    bg: "#0A0B12",
-    surface: "#10121B",
-    surfaceHover: "#171926",
-    surfaceBorder: "rgba(255, 255, 255, 0.06)",
-    ink: "#F8FAFC",
-    inkMuted: "#94A3B8",
-    primary: "#6366F1",
-    primaryMuted: "rgba(99, 102, 241, 0.15)",
-    shadowCard: "0 0 0 1px rgba(255, 255, 255, 0.04), 0 2px 4px 0 rgba(0, 0, 0, 0.4)",
   },
 } as const;

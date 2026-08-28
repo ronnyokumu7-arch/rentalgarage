@@ -7,7 +7,7 @@ import { usePathname } from "next/navigation";
 import {
   Search, Bell, Sun, Moon, User, Settings,
   LogOut, ChevronRight, Command, Briefcase,
-  Menu, Sparkles, X
+  Menu, Sparkles, X, HelpCircle, Shield
 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 
@@ -83,23 +83,22 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
 
   const companyName = user?.role === "super_admin" ? "Rental Garage" : tenant?.name || "Agency";
   const isSuperAdmin = user?.role === "super_admin";
-  const userInitial = user?.full_name?.charAt(0) || "U";
+  const userInitial = user?.full_name?.charAt(0) || user?.email?.charAt(0) || "U";
+  const fullName = user?.full_name || user?.email || "User";
 
-  // ── Render Avatar ──────────────────────────────────────────────────────────
-  const renderAvatar = (size: "sm" | "md" | "lg") => {
+  // ── Render Avatar (Used only in the drawer) ────────────────────────────────
+  const renderAvatar = (size: "md" | "lg") => {
     const dims = {
-      sm: "w-8 h-8",
-      md: "w-11 h-11",
+      md: "w-10 h-10",
       lg: "w-12 h-12"
     };
     const textSizes = {
-      sm: "text-xs",
-      md: "text-base",
+      md: "text-sm",
       lg: "text-lg"
     };
     
     if (user?.avatar_url) {
-      return <img src={user.avatar_url} alt={user.full_name || "User"} className={`${dims[size]} rounded-full object-cover border-2 border-[var(--color-surface-border)]`} />;
+      return <img src={user.avatar_url} alt={fullName} className={`${dims[size]} rounded-full object-cover border-2 border-[var(--color-surface-border)]`} />;
     }
     
     return (
@@ -114,7 +113,7 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
     if (!role) return <Briefcase size={12} className="text-[var(--color-ink-subtle)]" />;
     const roleLower = role.toLowerCase();
     if (roleLower.includes("admin") || roleLower.includes("super")) {
-      return <Settings size={12} className="text-[var(--color-primary)]" />;
+      return <Shield size={12} className="text-[var(--color-primary)]" />;
     }
     if (roleLower.includes("manager") || roleLower.includes("owner")) {
       return <Briefcase size={12} className="text-[var(--color-primary)]" />;
@@ -122,9 +121,20 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
     return <User size={12} className="text-[var(--color-ink-subtle)]" />;
   };
 
-  const greeting = () => {
+  // ── Get Role Badge Label ──────────────────────────────────────────────────
+  const getRoleLabel = (role?: string) => {
+    if (!role) return "User";
+    const roleLower = role.toLowerCase();
+    if (roleLower.includes("super_admin") || roleLower.includes("superadmin")) return "Super Admin";
+    if (roleLower.includes("tenant_admin") || roleLower.includes("admin")) return "Admin";
+    if (roleLower.includes("manager")) return "Manager";
+    return role.replace("_", " ");
+  };
+
+  // ── Get greeting with emoji ──────────────────────────────────────────────
+  const getGreeting = () => {
     const h = new Date().getHours();
-    const name = user?.full_name?.split(" ")[0] || "there";
+    const name = fullName.split(" ")[0] || "there";
     if (h < 12) return `Good morning, ${name}`;
     if (h < 17) return `Good afternoon, ${name}`;
     return `Good evening, ${name}`;
@@ -133,59 +143,26 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
   return (
     <header className="h-14 sm:h-16 flex items-center gap-2 sm:gap-4 px-3 sm:px-6 sticky top-0 z-30 border-b border-[var(--color-surface-border)] bg-[var(--color-bg)]/80 backdrop-blur-xl transition-all duration-300">
       
-      {/* ── LEFT: Mobile Menu Toggle + Brand ────────────────────────────────── */}
-      <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-        {/* Mobile Menu Button */}
-        {onMenuToggle && (
-          <button
-            onClick={onMenuToggle}
-            className="lg:hidden flex items-center justify-center w-9 h-9 rounded-xl text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all duration-200 active:scale-95"
-            aria-label="Toggle menu"
-          >
-            {isMobileMenuOpen ? <X size={18} strokeWidth={2} /> : <Menu size={18} strokeWidth={2} />}
-          </button>
-        )}
-
-        {/* Brand Identity - Premium Wordmark */}
-        <Link href="/dashboard" className="flex items-center gap-2.5 group">
-          <div className="relative">
-            {/* Icon Mark */}
-            <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs sm:text-sm shadow-lg shadow-blue-500/25 ring-2 ring-[var(--color-surface)] transition-all duration-300 group-hover:shadow-blue-500/40 group-hover:scale-105">
-              RG
-            </div>
-            {/* Live indicator dot */}
-            <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 animate-pulse ring-2 ring-[var(--color-surface)]" />
+      {/* ── LEFT: Brand (Hidden on Desktop) ─────────────────────────────────── */}
+      <Link href="/dashboard" className="lg:hidden flex items-center gap-2.5 group">
+        <div className="relative">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-blue-500/25 ring-2 ring-[var(--color-surface)] transition-all duration-300 group-hover:shadow-blue-500/40 group-hover:scale-105">
+            RG
           </div>
-          
-          {/* Wordmark */}
-          <div className="hidden sm:flex items-baseline gap-1.5">
-            <span className="text-base font-bold text-[var(--color-ink)] tracking-tight">
-              Rental<span className="text-blue-600 dark:text-blue-400">Garage</span>
-            </span>
-            <span className="text-[8px] font-semibold text-[var(--color-ink-subtle)] uppercase tracking-widest bg-[var(--color-surface-hover)] px-2 py-0.5 rounded-full border border-[var(--color-surface-border)]">
-              {isSuperAdmin ? "HQ" : "Fleet"}
-            </span>
-          </div>
-
-          {/* Mobile Brand - Compact */}
-          <div className="sm:hidden flex items-center gap-1">
-            <span className="text-sm font-bold text-[var(--color-ink)] tracking-tight">
-              Rental<span className="text-blue-600 dark:text-blue-400">Garage</span>
-            </span>
-          </div>
-        </Link>
-
-        {/* Divider */}
-        <div className="hidden sm:block w-px h-6 bg-[var(--color-surface-border)] mx-1" />
-
-        {/* Breadcrumb / Context - Desktop only */}
-        <div className="hidden lg:flex items-center gap-2 text-sm text-[var(--color-ink-muted)]">
-          <span className="font-medium">{greeting()}</span>
-          <span className="text-[var(--color-ink-subtle)]">•</span>
-          <span className="text-[var(--color-ink-subtle)] capitalize">
-            {pathname.split("/").filter(Boolean).pop()?.replace("-", " ") || "Dashboard"}
-          </span>
+          <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 animate-pulse ring-2 ring-[var(--color-surface)]" />
         </div>
+        <span className="text-sm font-bold text-[var(--color-ink)] tracking-tight">
+          Rental<span className="text-blue-600 dark:text-blue-400">Garage</span>
+        </span>
+      </Link>
+
+      {/* Breadcrumb / Context - Desktop only */}
+      <div className="hidden lg:flex items-center gap-2 text-sm text-[var(--color-ink-muted)]">
+        <span className="font-medium">{getGreeting()}</span>
+        <span className="text-[var(--color-ink-subtle)]">•</span>
+        <span className="text-[var(--color-ink-subtle)] capitalize">
+          {pathname.split("/").filter(Boolean).pop()?.replace("-", " ") || "Dashboard"}
+        </span>
       </div>
 
       {/* ── CENTER: Search Bar ───────────────────────────────────────────────── */}
@@ -239,45 +216,48 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
         {/* Divider */}
         <div className="w-px h-6 bg-[var(--color-surface-border)] mx-0.5 sm:mx-1" />
 
-        {/* User Menu */}
-        <div ref={menuRef} className="relative">
+        {/* User Menu (Desktop Only - Hidden on Mobile) */}
+        <div ref={menuRef} className="hidden lg:block relative">
           <button 
             onClick={() => setShowUserMenu(!showUserMenu)} 
             className="flex items-center gap-2 pl-0.5 pr-2.5 py-0.5 rounded-xl hover:bg-[var(--color-surface-hover)] transition-all duration-200 group"
           >
             <div className="relative flex-shrink-0">
-              {renderAvatar("sm")}
+              {renderAvatar("md")}
               <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-[var(--color-bg)]" />
             </div>
             <span className="hidden md:block text-[13px] font-medium text-[var(--color-ink)] max-w-[80px] truncate">
-              {user?.full_name?.split(" ")[0]}
+              {fullName.split(" ")[0]}
             </span>
             <ChevronRight size={13} strokeWidth={2.5} className={`hidden md:block text-[var(--color-ink-subtle)] transition-transform duration-200 ${showUserMenu ? "rotate-90" : ""}`} />
           </button>
 
-          {/* User Dropdown Menu */}
+          {/* User Dropdown Menu - Upgraded */}
           {showUserMenu && (
-            <div className="absolute right-0 top-[calc(100%+8px)] w-[calc(100vw-2rem)] sm:w-[280px] max-w-[280px] rounded-2xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-[var(--shadow-dropdown)] z-[9999] overflow-hidden animate-in slide-up fade-in duration-200">
+            <div className="absolute right-0 top-[calc(100%+8px)] w-[calc(100vw-2rem)] sm:w-[320px] max-w-[320px] rounded-2xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-[var(--shadow-dropdown)] z-[9999] overflow-hidden animate-in slide-up fade-in duration-200">
               
-              {/* Header */}
-              <div className="px-4 pt-4 pb-3">
+              {/* Header - User Info */}
+              <div className="px-4 pt-4 pb-3 border-b border-[var(--color-surface-border)]">
                 <div className="flex items-center gap-3">
                   <div className="relative flex-shrink-0">
-                    {renderAvatar("md")}
+                    {renderAvatar("lg")}
                     <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-[var(--color-surface)]" />
                   </div>
-                  <div className="min-w-0">
-                    <p className="text-sm font-bold text-[var(--color-ink)] truncate leading-tight">{user?.full_name}</p>
-                    <div className="flex items-center gap-1.5 mt-1">
-                      {renderRoleIcon(user?.role)}
-                      <span className="text-[11px] text-[var(--color-ink-subtle)] capitalize">
-                        {user?.job_title || (user?.role === "tenant_admin" ? "Administrator" : user?.role?.replace("_", " "))}
-                      </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-bold text-[var(--color-ink)] truncate leading-tight">{fullName}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border border-[var(--color-primary)]/20 bg-[var(--color-primary-muted)] text-[var(--color-primary)]">
+                        {renderRoleIcon(user?.role)}
+                        {getRoleLabel(user?.role)}
+                      </div>
+                      {user?.is_active === false && (
+                        <span className="text-[10px] text-[var(--color-danger)] font-medium">Inactive</span>
+                      )}
                     </div>
                   </div>
                 </div>
                 
-                {/* Tenant Badge */}
+                {/* Tenant/Agency Badge */}
                 <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-[var(--color-primary-muted)] to-[var(--color-primary-subtle)] border border-[var(--color-primary)]/20">
                   <div className="w-5 h-5 rounded-md flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0 bg-gradient-to-br from-blue-600 to-indigo-600">
                     {companyName[0]}
@@ -287,9 +267,23 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
                 </div>
               </div>
 
-              <div className="h-px bg-[var(--color-surface-border)] mx-3" />
+              {/* Quick Stats */}
+              <div className="grid grid-cols-3 gap-1 px-3 py-3 bg-[var(--color-surface-hover)]/50">
+                <div className="text-center">
+                  <p className="text-xs font-bold text-[var(--color-ink)]">12</p>
+                  <p className="text-[9px] text-[var(--color-ink-muted)]">Bookings</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs font-bold text-[var(--color-ink)]">4</p>
+                  <p className="text-[9px] text-[var(--color-ink-muted)]">Vehicles</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-xs font-bold text-[var(--color-ink)]">2</p>
+                  <p className="text-[9px] text-[var(--color-ink-muted)]">Active</p>
+                </div>
+              </div>
 
-              {/* Actions */}
+              {/* Actions - PRESERVING ORIGINAL PATHS */}
               <div className="px-2 py-2">
                 <Link 
                   href={isSuperAdmin ? `/super-admin/users/${user?.id}` : `/dashboard/users/${user?.id}`} 
@@ -299,7 +293,9 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
                     <User size={14} strokeWidth={1.8} className="text-[var(--color-ink-muted)] group-hover:text-[var(--color-primary)] transition-colors" />
                   </div>
                   <span className="flex-1 font-medium">View Profile</span>
+                  <ChevronRight size={14} className="text-[var(--color-ink-subtle)] opacity-0 group-hover:opacity-100 transition-opacity" />
                 </Link>
+                
                 <Link 
                   href={isSuperAdmin ? "/super-admin/settings" : "/dashboard/settings"} 
                   className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-all duration-100 group"
@@ -308,9 +304,22 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
                     <Settings size={14} strokeWidth={1.8} className="text-[var(--color-ink-muted)] group-hover:text-[var(--color-primary)] transition-colors" />
                   </div>
                   <span className="flex-1 font-medium">Settings</span>
+                  <ChevronRight size={14} className="text-[var(--color-ink-subtle)] opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Link>
+
+                <Link 
+                  href="/help" 
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-all duration-100 group"
+                >
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] group-hover:border-[var(--color-primary)]/30 group-hover:bg-[var(--color-primary-muted)] transition-all">
+                    <HelpCircle size={14} strokeWidth={1.8} className="text-[var(--color-ink-muted)] group-hover:text-[var(--color-primary)] transition-colors" />
+                  </div>
+                  <span className="flex-1 font-medium">Help Center</span>
+                  <ChevronRight size={14} className="text-[var(--color-ink-subtle)] opacity-0 group-hover:opacity-100 transition-opacity" />
                 </Link>
               </div>
 
+              {/* Divider */}
               <div className="h-px bg-[var(--color-surface-border)] mx-3" />
 
               {/* Logout */}
@@ -323,11 +332,23 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
                     <LogOut size={14} strokeWidth={1.8} className="text-[var(--color-danger-text)]" />
                   </div>
                   <span className="flex-1 text-left">Sign out</span>
+                  <ChevronRight size={14} className="text-[var(--color-danger-text)]/30 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </button>
               </div>
             </div>
           )}
         </div>
+
+        {/* ✅ Hamburger Menu - Moved to FAR RIGHT (Mobile Only) */}
+        {onMenuToggle && (
+          <button
+            onClick={onMenuToggle}
+            className="lg:hidden flex items-center justify-center w-9 h-9 rounded-xl text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all duration-200 active:scale-95"
+            aria-label="Toggle menu"
+          >
+            {isMobileMenuOpen ? <X size={18} strokeWidth={2} /> : <Menu size={18} strokeWidth={2} />}
+          </button>
+        )}
       </div>
     </header>
   );

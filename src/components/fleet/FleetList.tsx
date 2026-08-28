@@ -248,7 +248,7 @@ export default function FleetList({
             <>
               <div className="w-px h-3 bg-[var(--color-surface-border)] flex-shrink-0" />
               <div className="flex items-center gap-2 whitespace-nowrap">
-                <span className="text-xs font-medium text-[var(--color-ink-muted)]">Mileage Due</span>
+                <span className="text-xs font-medium text-[var(--color-ink-muted)]">Update Mileage</span>
                 <span className="text-xs font-bold text-orange-500 tabular-nums">{mileageDueCount}</span>
               </div>
             </>
@@ -303,184 +303,176 @@ export default function FleetList({
         </div>
       ) : (
         <>
-          <div className="block md:hidden">
-            <CardGrid
-              data={paginatedVehicles}
-              getCardId={(v) => v.id}
-              compact={true}
-              cardClassName="!p-2.5 hover:!border-[var(--color-primary)]/30 hover:shadow-md transition-all duration-200"
-              containerClassName="px-2 pb-2"
-              maxHeight="calc(100vh - 160px)"
 
-              renderCardHeader={({ item }) => {
-                const kmToService = item.next_service_km ? item.next_service_km - item.current_mileage : null;
-                const isDueForService = kmToService !== null && kmToService <= 500;
-                const showWrench = item.status === 'maintenance' || isDueForService || item.mileage_due;
-                const showOnTrip = item.status === 'rented';
-                const dot = dotSpec[item.status] || { color: "bg-gray-400", pulse: false };
+{/* ✅ MOBILE: Premium Fleet CardGrid with Glass Effect */}
+<div className="block md:hidden">
+  <CardGrid
+    data={paginatedVehicles}
+    getCardId={(v) => v.id}
+    compact={true}
+    showGlassEffect={true}
+    cardClassName="!p-3 hover:!border-[var(--color-primary)]/40 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] transition-all duration-300"
+    containerClassName="px-2 pb-4"
+    maxHeight="calc(100vh - 160px)"
 
-                return (
-                  <div
-                    className="flex items-center justify-between w-full cursor-pointer"
-                    onClick={() => router.push(`/dashboard/fleet/${item.id}`)}
-                  >
-                    <div className="flex items-center gap-2 min-w-0 flex-1">
-                      <div className="relative flex-shrink-0">
-                        <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center">
-                          <Car size={14} className="text-[var(--color-primary)]" />
-                        </div>
-                        <div className="absolute -top-0.5 -right-0.5">
-                          {showWrench ? (
-                            <div className="w-3 h-3 rounded-full bg-amber-500/20 flex items-center justify-center ring-1 ring-[var(--color-surface)]">
-                              <Wrench size={8} className="text-amber-500" />
-                            </div>
-                          ) : showOnTrip ? (
-                            <div className="w-3 h-3 rounded-full bg-emerald-500/20 flex items-center justify-center ring-1 ring-[var(--color-surface)]">
-                              <span className="text-[4px] font-extrabold text-emerald-500">OT</span>
-                            </div>
-                          ) : (
-                            <div className={`w-2 h-2 rounded-full ${dot.color} ring-1 ring-[var(--color-surface)] ${
-                              dot.pulse ? "animate-pulse" : ""
-                            }`} />
-                          )}
-                        </div>
-                      </div>
+    renderCardHeader={({ item }) => {
+      const kmToService = item.next_service_km ? item.next_service_km - item.current_mileage : null;
+      const isDueForService = kmToService !== null && kmToService <= 500;
+      const showWrench = item.status === 'maintenance' || isDueForService || item.mileage_due;
+      const showOnTrip = item.status === 'rented';
+      const dot = dotSpec[item.status] || { color: "bg-gray-400", pulse: false };
 
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-bold text-[var(--color-ink)] truncate">
-                            {item.make} {item.model}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 mt-0.5">
-                          <div className="flex items-center gap-0.5">
-                            <RectangleHorizontal size={9} className="text-[var(--color-ink-subtle)]" />
-                            <span className="text-[9px] text-[var(--color-ink-muted)] font-mono font-medium truncate">
-                              {formatPlate(item.plate_number)}
-                            </span>
-                          </div>
-                          <span className="text-[8px] text-[var(--color-ink-subtle)]">•</span>
-                          <div className="flex items-center gap-0.5">
-                            <Gauge size={9} className="text-[var(--color-primary)]" />
-                            <span className="text-[9px] text-[var(--color-primary-text)] font-mono font-medium">
-                              {item.current_mileage.toLocaleString()} KM
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <ChevronRight size={14} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
+      return (
+        <div
+          className="flex items-center justify-between w-full cursor-pointer"
+          onClick={() => router.push(`/dashboard/fleet/${item.id}`)}
+        >
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            {/* Premium Icon Container with Glow */}
+            <div className="relative flex-shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center shadow-md">
+                <Car size={16} className="text-[var(--color-primary)]" />
+              </div>
+              {/* Live Status Indicator */}
+              <div className="absolute -top-0.5 -right-0.5">
+                {showWrench ? (
+                  <div className="w-3 h-3 rounded-full bg-amber-500/20 flex items-center justify-center ring-2 ring-[var(--color-surface)] shadow-sm">
+                    <Wrench size={8} className="text-amber-500" />
                   </div>
-                );
-              }}
-
-              renderCardBody={({ item }) => {
-                const kmToService = item.next_service_km ? item.next_service_km - item.current_mileage : null;
-                const isDueForService = kmToService !== null && kmToService <= 500;
-
-                const { progress: tripProgress, rental: activeRental } = calculateTripProgress(item.id);
-
-                return (
-                  <div className="mt-1.5 pt-1.5 border-t border-[var(--color-surface-border)]/50">
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                        <Coins size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                        <div className="min-w-0">
-                          <p className="text-[11px] font-semibold text-[var(--color-ink)] truncate leading-tight">
-                            KES {Number(item.daily_rate).toLocaleString()}
-                          </p>
-                          <span className="text-[8px] text-[var(--color-ink-muted)] font-medium">
-                            Daily Rate
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                        <Wrench size={10} className={`flex-shrink-0 ${
-                          isDueForService ? 'text-amber-500' : 'text-[var(--color-ink-subtle)]'
-                        }`} />
-                        <div className="min-w-0">
-                          <p className="text-[11px] font-semibold text-[var(--color-ink)] truncate leading-tight">
-                            {item.next_service_km ? `${item.next_service_km.toLocaleString()} KM` : "—"}
-                          </p>
-                          <span className="text-[8px] text-[var(--color-ink-muted)] font-medium">
-                            {isDueForService ? '⚠️ Due Soon' : 'Next Service'}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="mt-2 pt-1.5 border-t border-[var(--color-surface-border)]/50">
-                      {(item.status === 'rented' && activeRental) ? (
-                        <div className="space-y-1">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-[8px] font-bold uppercase tracking-wider text-emerald-500">
-                                🚗 On Trip
-                              </span>
-                              {activeRental.booking_number && (
-                                <span className="text-[7px] text-[var(--color-ink-muted)] font-medium">
-                                  • {activeRental.booking_number}
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-[8px] font-medium text-[var(--color-ink-muted)] tabular-nums">
-                              {Math.min(Math.round(tripProgress * 100), 100)}%
-                            </span>
-                          </div>
-                          <div className="relative h-1.5 w-full rounded-full bg-[var(--color-surface-hover)] overflow-hidden">
-                            <div
-                              className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600 transition-all duration-1000 ease-out"
-                              style={{ width: `${Math.min(tripProgress * 100, 100)}%` }}
-                            />
-                          </div>
-                          <div className="flex items-center justify-between">
-                            <span className="text-[7px] font-medium text-[var(--color-ink-muted)]">
-                              {formatDateShort(activeRental.start_date)}
-                            </span>
-                            <span className="text-[7px] font-medium text-[var(--color-ink-muted)]">
-                              {formatDateShort(activeRental.end_date)}
-                            </span>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-end">
-                          {item.status === 'maintenance' && (
-                            <span className="text-[8px] font-bold uppercase tracking-wider text-amber-500">
-                              ⚠️ In Maintenance
-                            </span>
-                          )}
-                          {item.status === 'available' && !item.mileage_due && (
-                            <span className="text-[8px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)]">
-                              ● Available
-                            </span>
-                          )}
-                          {item.status === 'available' && item.mileage_due && (
-                            <span className="text-[8px] font-bold uppercase tracking-wider text-orange-500">
-                              📊 Mileage Due
-                            </span>
-                          )}
-                          {item.status === 'pending_activation' && (
-                            <span className="text-[8px] font-bold uppercase tracking-wider text-amber-500">
-                              ⏳ Pending
-                            </span>
-                          )}
-                          {item.status === 'retired' && (
-                            <span className="text-[8px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)]">
-                              ● Retired
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </div>
+                ) : showOnTrip ? (
+                  <div className="w-3 h-3 rounded-full bg-emerald-500/20 flex items-center justify-center ring-2 ring-[var(--color-surface)] shadow-sm">
+                    <span className="text-[4px] font-extrabold text-emerald-500">OT</span>
                   </div>
-                );
-              }}
+                ) : (
+                  <div className={`w-3 h-3 rounded-full ${dot.color} ring-2 ring-[var(--color-surface)] shadow-sm ${
+                    dot.pulse ? "animate-pulse" : ""
+                  }`} />
+                )}
+              </div>
+            </div>
 
-              rowActions={getVehicleActions}
-            />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
+                  {item.make} {item.model}
+                </span>
+              </div>
+              <div className="flex items-center gap-2 mt-0.5">
+                <div className="flex items-center gap-1">
+                  <RectangleHorizontal size={10} className="text-[var(--color-ink-subtle)]" />
+                  <span className="text-[10px] text-[var(--color-ink-muted)] font-mono font-semibold truncate">
+                    {formatPlate(item.plate_number)}
+                  </span>
+                </div>
+                <span className="text-[8px] text-[var(--color-ink-subtle)]">•</span>
+                <div className="flex items-center gap-1">
+                  <Gauge size={10} className="text-[var(--color-primary)]" />
+                  <span className="text-[10px] text-[var(--color-primary-text)] font-mono font-semibold">
+                    {item.current_mileage.toLocaleString()} KM
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
+
+          <ChevronRight size={16} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
+        </div>
+      );
+    }}
+
+    renderCardBody={({ item }) => {
+      const kmToService = item.next_service_km ? item.next_service_km - item.current_mileage : null;
+      const isDueForService = kmToService !== null && kmToService <= 500;
+      const { progress: tripProgress, rental: activeRental } = calculateTripProgress(item.id);
+
+      return (
+        <div className="mt-3 pt-3 border-t border-[var(--color-surface-border)]/60">
+          
+          {/* Daily Rate Section - Clean & Minimal */}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-1.5">
+              <Coins size={12} className="text-[var(--color-ink-subtle)]" />
+              <span className="text-[9px] font-semibold text-[var(--color-ink-subtle)] uppercase tracking-wider">
+                Daily Rate
+              </span>
+            </div>
+            <p className="text-base font-extrabold text-[var(--color-ink)] tabular-nums tracking-tight">
+              KES {Number(item.daily_rate).toLocaleString()}
+            </p>
+          </div>
+
+          {/* Unified Bottom Status Section - Clean & Minimal */}
+          <div className={`rounded-xl px-3 py-2.5 border ${
+            (item.status === 'maintenance' || isDueForService || item.mileage_due)
+              ? 'bg-amber-500/10 border-amber-500/20'
+              : 'bg-[var(--color-surface-hover)]/50 border-[var(--color-surface-border)]/50'
+          }`}>
+            
+            {/* Rented: Premium Trip Progress Bar */}
+            {(item.status === 'rented' && activeRental) ? (
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    {/* ✅ Removed car emoji, using icon/clean text */}
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-500">
+                      On Trip
+                    </span>
+                    {activeRental.booking_number && (
+                      <span className="text-[8px] text-[var(--color-ink-muted)] font-medium font-mono">
+                        • {activeRental.booking_number}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-[9px] font-bold text-[var(--color-ink-muted)] tabular-nums">
+                    {Math.min(Math.round(tripProgress * 100), 100)}%
+                  </span>
+                </div>
+                
+                <div className="relative h-1.5 w-full rounded-full bg-[var(--color-surface-border)]/50 overflow-hidden">
+                  <div
+                    className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600 transition-all duration-1000 ease-out"
+                    style={{ width: `${Math.min(tripProgress * 100, 100)}%` }}
+                  />
+                </div>
+                
+                <div className="flex items-center justify-between">
+                  <span className="text-[8px] font-medium text-[var(--color-ink-muted)]">
+                    {formatDateShort(activeRental.start_date)}
+                  </span>
+                  <span className="text-[8px] font-medium text-[var(--color-ink-muted)]">
+                    {formatDateShort(activeRental.end_date)}
+                  </span>
+                </div>
+              </div>
+            ) : (
+              /* Non-Rented: Premium Maintenance / Mileage Alert Box */
+              <div className="flex items-center justify-center gap-2">
+                {(item.status === 'maintenance' || isDueForService || item.mileage_due) ? (
+                  <>
+                    <Wrench size={12} className="text-amber-500 flex-shrink-0" />
+                    {/* ✅ Removed emojis, using clean text */}
+                    <span className="text-[10px] font-bold text-amber-600 dark:text-amber-400 truncate">
+                      {item.status === 'maintenance' ? 'In Maintenance' : isDueForService ? 'Service Due Soon' : 'Mileage Due'}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className={`w-2 h-2 rounded-full ${dotSpec[item.status]?.color || 'bg-gray-400'} flex-shrink-0`} />
+                    <span className="text-[10px] font-semibold text-[var(--color-ink-muted)]">
+                      {item.status === 'available' ? 'Ready for Booking' : statusLabels[item.status] || 'Ready'}
+                    </span>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }}
+
+    rowActions={getVehicleActions}
+  />
+</div>
 
           <div className="hidden md:block">
             <DataTable

@@ -1,21 +1,23 @@
 /* src/app/globals.css */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 /* ══════════════════════════════════════════════════════════
-   BRAND TYPOGRAPHY & GLOBAL DEFAULTS
+   🎨 BILLION DOLLAR BRAND SYSTEM
+   Premium, Cohesive, Luxurious
    ═══════════════════════════════════════════════════════════ */
+
 @layer base {
-  /* ✅ Force Inter as the default sans-serif font */
   html {
     font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
+    font-size: 15px;
+    line-height: 1.55;
   }
 
-  /* ✅ Force Space Grotesk for ALL headings */
   h1, h2, h3, h4, h5, h6,
   .heading, .headline, [class*="heading"] {
     font-family: "Space Grotesk", "Inter", sans-serif !important;
@@ -23,385 +25,6 @@
     font-weight: 700;
   }
 
-  /* ✅ Force monospace for code & numbers */
-  code, pre, .font-mono, .mono,
-  [class*="tabular-nums"],
-  [class*="font-mono"] {
-    font-family: "JetBrains Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
-  }
-
-  /* ✅ Ensure all text uses the correct fonts */
-  body, p, span, div, section, article, main, aside, header, footer, nav {
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  }
-
-  /* ✅ Inputs, buttons, selects should use Inter */
-  input, button, select, textarea, label {
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  }
-
-  /* ✅ Tables and data displays */
-  table, td, th {
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  }
-
-  /* ✅ Fix monospace for plate numbers, IDs, etc. */
-  .plate-number, .id-number, .reference-code {
-    font-family: "JetBrains Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
-    letter-spacing: 0.02em;
-  }
-
-  /* ✅ Utility text classes */
-  .text-ink-muted { color: var(--color-ink-muted) !important; }
-  .text-ink { color: var(--color-ink) !important; }
-  .text-primary { color: var(--color-primary) !important; }
-}
-
-/* ============================================================
-   TAILWIND V4 THEME MAPPING
-   ============================================================ */
-
-@theme {
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-display: "Space Grotesk", "Inter", sans-serif;
-  --font-mono: "JetBrains Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-
-  --color-primary: var(--color-primary);
-  --color-primary-hover: var(--color-primary-hover);
-  --color-primary-active: var(--color-primary-active);
-  --color-primary-muted: var(--color-primary-muted);
-  --color-primary-subtle: var(--color-primary-subtle);
-  --color-primary-text: var(--color-primary-text);
-
-  --color-bg: var(--color-bg);
-  --color-bg-elevated: var(--color-bg-elevated);
-  --color-surface: var(--color-surface);
-  --color-surface-hover: var(--color-surface-hover);
-  --color-surface-active: var(--color-surface-active);
-  --color-surface-border: var(--color-surface-border);
-  --color-surface-border-strong: var(--color-surface-border-strong);
-  --color-surface-border-subtle: var(--color-surface-border-subtle);
-
-  --color-ink: var(--color-ink);
-  --color-ink-secondary: var(--color-ink-secondary);
-  --color-ink-muted: var(--color-ink-muted);
-  --color-ink-subtle: var(--color-ink-subtle);
-  --color-ink-faint: var(--color-ink-faint);
-  --color-ink-inverse: var(--color-ink-inverse);
-
-  --color-success: var(--color-success);
-  --color-warning: var(--color-warning);
-  --color-danger: var(--color-danger);
-  --color-info: var(--color-info);
-
-  --color-bar-success: var(--color-bar-success);
-  --color-bar-success-text: var(--color-bar-success-text);
-  --color-bar-warning: var(--color-bar-warning);
-  --color-bar-warning-text: var(--color-bar-warning-text);
-  --color-bar-primary: var(--color-bar-primary);
-  --color-bar-primary-text: var(--color-bar-primary-text);
-  --color-bar-danger: var(--color-bar-danger);
-  --color-bar-danger-text: var(--color-bar-danger-text);
-
-  --background-image-gradient-primary: var(--gradient-primary);
-  --background-image-gradient-surface: var(--gradient-surface);
-  --background-image-gradient-surface-hover: var(--gradient-surface-hover);
-
-  --shadow-xs: var(--shadow-xs);
-  --shadow-sm: var(--shadow-sm);
-  --shadow-md: var(--shadow-md);
-  --shadow-lg: var(--shadow-lg);
-  --shadow-xl: var(--shadow-xl);
-  --shadow-2xl: var(--shadow-2xl);
-  --shadow-card: var(--shadow-card);
-  --shadow-card-hover: var(--shadow-card-hover);
-  --shadow-modal: var(--shadow-modal);
-  --shadow-dropdown: var(--shadow-dropdown);
-
-  --radius-xs: var(--radius-xs);
-  --radius-sm: var(--radius-sm);
-  --radius-md: var(--radius-md);
-  --radius-lg: var(--radius-lg);
-  --radius-xl: var(--radius-xl);
-  --radius-2xl: var(--radius-2xl);
-
-  --ease-spring: var(--ease-spring);
-  --ease-bounce: var(--ease-bounce);
-  --ease-smooth: var(--ease-smooth);
-}
-
-/* ============================================================
-   🎨 PREMIUM LIGHT MODE — "Billion Dollar" Aesthetic
-   ============================================================ */
-
-:root {
-  /* ── Brand Identity — Deep Royal Indigo (Wealth, Trust, Authority) ── */
-  --color-primary:        #4338CA;
-  --color-primary-hover:  #3730A3;
-  --color-primary-active: #2E2A8A;
-  --color-primary-muted:  rgba(67, 56, 202, 0.10);
-  --color-primary-subtle: rgba(67, 56, 202, 0.05);
-  --color-primary-text:   #3730A3;
-  --color-primary-glow:   rgba(67, 56, 202, 0.20);
-
-  /* ── Secondary: Warm Gold (Premium, Luxury, Value) ────── */
-  --color-secondary:      #D97706;
-  --color-secondary-light: #FBBF24;
-  --color-secondary-muted: rgba(217, 119, 6, 0.10);
-
-  /* ── LAYERED BACKGROUNDS ────────────────────────────────── */
-  --color-bg:             #F1F5F9;
-  --color-bg-elevated:    #E2E8F0;
-  
-  --color-surface:        #FFFFFF;
-  --color-surface-hover:  #F8FAFC;
-  --color-surface-active: #F1F5F9;
-  
-  --color-surface-sunken: #F8FAFC;
-  
-  --color-surface-border:        rgba(15, 23, 42, 0.10);
-  --color-surface-border-strong: rgba(15, 23, 42, 0.16);
-  --color-surface-border-subtle: rgba(15, 23, 42, 0.06);
-
-  /* ── Gradients ──────────────────────────────────────────── */
-  --gradient-surface:        linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
-  --gradient-surface-hover:  linear-gradient(180deg, #F8FAFC 0%, #F1F5F9 100%);
-  --gradient-surface-card:   linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%);
-  --gradient-bg:             linear-gradient(180deg, #F1F5F9 0%, #E2E8F0 100%);
-
-  --gradient-stat-primary:  linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
-  --gradient-stat-success:  linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
-  --gradient-stat-warning:  linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
-  --gradient-stat-danger:   linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%);
-
-  /* ── Ink Hierarchy ──────────────────────────────────────── */
-  --color-ink:            #0F172A;
-  --color-ink-secondary:  #1E293B;
-  --color-ink-muted:      #475569;
-  --color-ink-subtle:     #64748B;
-  --color-ink-faint:      #94A3B8;
-  --color-ink-inverse:    #FFFFFF;
-
-  /* ── Semantic Colors ────────────────────────────────────── */
-  --color-success:        #059669;
-  --color-success-hover:  #047857;
-  --color-success-bg:     #ECFDF5;
-  --color-success-text:   #047857;
-  --color-success-border: #A7F3D0;
-
-  --color-warning:        #D97706;
-  --color-warning-hover:  #B45309;
-  --color-warning-bg:     #FFFBEB;
-  --color-warning-text:   #B45309;
-  --color-warning-border: #FDE68A;
-
-  --color-danger:         #DC2626;
-  --color-danger-hover:   #B91C1C;
-  --color-danger-bg:      #FEF2F2;
-  --color-danger-text:    #991B1B;
-  --color-danger-border:  #FECACA;
-
-  --color-info:           #2563EB;
-  --color-info-bg:        #EFF6FF;
-  --color-info-text:      #1D4ED8;
-
-  /* ── Timeline Bars ──────────────────────────────────────── */
-  --color-bar-success:      #059669;
-  --color-bar-success-text: #FFFFFF;
-  --color-bar-warning:      #D97706;
-  --color-bar-warning-text: #FFFFFF;
-  --color-bar-primary:      #4338CA;
-  --color-bar-primary-text: #FFFFFF;
-  --color-bar-danger:       #DC2626;
-  --color-bar-danger-text:  #FFFFFF;
-
-  /* ── Shadows ────────────────────────────────────────────── */
-  --shadow-color:        rgba(15, 23, 42, 0.05);
-  --shadow-color-strong: rgba(15, 23, 42, 0.12);
-
-  --shadow-xs:  0 1px 2px 0 rgba(15, 23, 42, 0.05);
-  --shadow-sm:  0 1px 3px 0 rgba(15, 23, 42, 0.06), 0 1px 2px -1px rgba(15, 23, 42, 0.04);
-  --shadow-md:  0 4px 12px -2px rgba(15, 23, 42, 0.08), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
-  --shadow-lg:  0 12px 24px -4px rgba(15, 23, 42, 0.10), 0 4px 6px -4px rgba(15, 23, 42, 0.05);
-  --shadow-xl:  0 20px 32px -6px rgba(15, 23, 42, 0.12), 0 8px 12px -6px rgba(15, 23, 42, 0.06);
-  --shadow-2xl: 0 25px 50px -12px rgba(15, 23, 42, 0.20);
-
-  --shadow-card:        0 1px 3px 0 rgba(15, 23, 42, 0.06);
-  --shadow-card-hover:  0 4px 12px -2px rgba(15, 23, 42, 0.08);
-  --shadow-card-active: 0 0 0 1px #4338CA, 0 1px 2px 0 rgba(15, 23, 42, 0.05);
-
-  --shadow-modal:       var(--shadow-xl);
-  --shadow-dropdown:    var(--shadow-lg);
-  --shadow-tooltip:     var(--shadow-md);
-
-  --shadow-focus:        0 0 0 2px #FFFFFF, 0 0 0 4px #4338CA;
-  --shadow-focus-ring:  0 0 0 3px rgba(67, 56, 202, 0.25);
-  --shadow-glow-primary: 0 0 30px rgba(67, 56, 202, 0.15);
-  --shadow-glow-success: 0 0 20px rgba(5, 150, 105, 0.15);
-
-  /* ── Motion ────────────────────────────────────────────── */
-  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
-  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
-  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
-
-  --duration-instant: 50ms;
-  --duration-fast:    100ms;
-  --duration-normal:  200ms;
-  --duration-slow:    300ms;
-  --duration-slower:  500ms;
-
-  /* ── Spacing ────────────────────────────────────────────── */
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-5: 1.25rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-10: 2.5rem;
-  --space-12: 3rem;
-
-  /* ── Border Radius ──────────────────────────────────────── */
-  --radius-xs:   0.125rem;
-  --radius-sm:   0.25rem;
-  --radius-md:   0.375rem;
-  --radius-lg:   0.5rem;
-  --radius-xl:   0.75rem;
-  --radius-2xl:  1rem;
-  --radius-full: 9999px;
-}
-
-/* ============================================================
-   DARK MODE — "Space Black" Aesthetic
-   ============================================================ */
-
-.dark {
-  --color-primary:        #6366F1;
-  --color-primary-hover:  #4F46E5;
-  --color-primary-active: #4338CA;
-  --color-primary-muted:  rgba(99, 102, 241, 0.18);
-  --color-primary-subtle: rgba(99, 102, 241, 0.08);
-  --color-primary-text:   #818CF8;
-  --color-primary-glow:   rgba(99, 102, 241, 0.30);
-
-  --color-bg:             #0A0B12;        
-  --color-bg-elevated:    #121422;        
-  --color-surface:        #10121B;        
-  --color-surface-hover:  #171926;
-  --color-surface-active: #1F2233;
-  
-  --color-surface-border:        rgba(255, 255, 255, 0.08);
-  --color-surface-border-strong: rgba(255, 255, 255, 0.14);
-  --color-surface-border-subtle: rgba(255, 255, 255, 0.04);
-
-  --gradient-surface:        linear-gradient(155deg, #161927 0%, #11131F 50%, #0C0E17 100%);
-  --gradient-surface-hover:  linear-gradient(155deg, #1D2133 0%, #161927 50%, #10121C 100%);
-  --gradient-bg:             linear-gradient(160deg, #0A0B12 0%, #111320 100%);
-  
-  --gradient-stat-primary:  linear-gradient(135deg, rgba(99, 102, 241, 0.18) 0%, rgba(79, 70, 229, 0.08) 100%);
-  --gradient-stat-success:  linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(5, 150, 105, 0.08) 100%);
-  --gradient-stat-warning:  linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, rgba(217, 119, 6, 0.08) 100%);
-  --gradient-stat-danger:   linear-gradient(135deg, rgba(239, 68, 68, 0.18) 0%, rgba(220, 38, 38, 0.08) 100%);
-
-  --color-ink:            #F8FAFC;        
-  --color-ink-secondary:  #CBD5E1;        
-  --color-ink-muted:      #94A3B8;        
-  --color-ink-subtle:     #64748B;        
-  --color-ink-faint:      #475569;        
-  --color-ink-inverse:    #0F172A;
-
-  --color-success:            #10B981;
-  --color-success-hover:      #059669;
-  --color-success-bg:         rgba(16, 185, 129, 0.15);
-  --color-success-text:       #34D399;
-  --color-success-border:     rgba(16, 185, 129, 0.30);
-
-  --color-warning:            #F59E0B;
-  --color-warning-hover:      #D97706;
-  --color-warning-bg:         rgba(245, 158, 11, 0.15);
-  --color-warning-text:       #FBBF24;
-  --color-warning-border:     rgba(245, 158, 11, 0.30);
-
-  --color-danger:             #EF4444;
-  --color-danger-hover:       #DC2626;
-  --color-danger-bg:          rgba(239, 68, 68, 0.15);
-  --color-danger-text:        #F87171;
-  --color-danger-border:      rgba(239, 68, 68, 0.30);
-
-  --color-info:               #3B82F6;
-  --color-info-bg:            rgba(59, 130, 246, 0.15);
-  --color-info-text:          #60A5FA;
-  --color-info-border:        rgba(59, 130, 246, 0.30);
-
-  --color-bar-primary:        rgba(99, 102, 241, 0.25);        
-  --color-bar-primary-text:   #F8FAFC;
-  --color-bar-primary-border: rgba(99, 102, 241, 0.40);
-
-  --color-bar-success:        rgba(16, 185, 129, 0.25);        
-  --color-bar-success-text:   #F8FAFC;
-  --color-bar-success-border: rgba(16, 185, 129, 0.40);
-  
-  --color-bar-warning:        rgba(245, 158, 11, 0.25);        
-  --color-bar-warning-text:   #F8FAFC;
-  --color-bar-warning-border: rgba(245, 158, 11, 0.40);
-  
-  --color-bar-danger:         rgba(239, 68, 68, 0.25);        
-  --color-bar-danger-text:    #F8FAFC;
-  --color-bar-danger-border:  rgba(239, 68, 68, 0.40);
-
-  --shadow-color:        rgba(0, 0, 0, 0.4);
-  --shadow-color-strong: rgba(0, 0, 0, 0.7);
-
-  --shadow-card:        0 2px 4px 0 rgb(0 0 0 / 0.4);
-  --shadow-card-hover:  0 8px 16px 0 rgb(0 0 0 / 0.5);
-}
-
-/* ============================================================
-   BASE STYLES
-   ✅ INSIDE @layer base — so Tailwind utilities
-   (text-xs / text-sm / text-base / ...) can override them per-component.
-   This is what unlocks proper premium density across the app.
-   ============================================================ */
-@layer base {
-  :root {
-    --safe-top: env(safe-area-inset-top, 0px);
-    --safe-right: env(safe-area-inset-right, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
-    --safe-left: env(safe-area-inset-left, 0px);
-  }
-
-  body {
-    background-color: var(--color-bg);
-    color: var(--color-ink);
-    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    transition: none !important;
-    font-size: 15px;   /* premium density; bump to 16px if preferred */
-    line-height: 1.55;
-  }
-
-  /* ✅ Inherit sizes so Tailwind utilities can override per-component */
-  p, li, td, th, label, input, textarea, select, button {
-    font-size: inherit;
-    line-height: inherit;
-  }
-
-  /* ✅ Tighter, denser heading scale for premium dashboards */
-  h1, h2, h3, h4, h5, h6 {
-    font-family: "Space Grotesk", "Inter", sans-serif !important;
-    letter-spacing: -0.02em;
-    line-height: 1.2;
-  }
-
-  h1 { font-size: 1.875rem; font-weight: 800; }
-  h2 { font-size: 1.5rem;   font-weight: 700; }
-  h3 { font-size: 1.25rem;  font-weight: 700; }
-  h4 { font-size: 1.125rem; font-weight: 700; }
-  h5 { font-size: 1rem;     font-weight: 600; }
-  h6 { font-size: 0.875rem; font-weight: 600; }
-
-  /* ✅ Monospace for codes, numbers, plates */
   code, pre, .font-mono, .mono,
   [class*="tabular-nums"],
   [class*="font-mono"],
@@ -410,36 +33,590 @@
     letter-spacing: 0.02em;
   }
 
-  /* ✅ Utility text classes */
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-ink-primary) !important;
+    font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    transition: background-color 0.4s ease, color 0.4s ease;
+  }
+
+  * {
+    border-color: var(--color-surface-border);
+  }
+
+  p, span, div, section, article, main, aside, header, footer, nav,
+  li, td, th, label, input, textarea, select, button, a {
+    color: inherit;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--color-ink-primary) !important;
+  }
+
+  ::placeholder {
+    color: var(--color-ink-faint);
+    opacity: 1;
+  }
+  
+  ::selection {
+    background: var(--color-primary);
+    color: white;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════
+   🌟 LIGHT MODE - "Warm Luxury"
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  /* ── PRIMARY: Deep Purple-Indigo ───────────────────────── */
+  --color-primary:        #7C3AED;
+  --color-primary-hover:  #6D28D9;
+  --color-primary-active: #5B21B6;
+  --color-primary-muted:  rgba(124, 58, 237, 0.10);
+  --color-primary-subtle: rgba(124, 58, 237, 0.05);
+  --color-primary-text:   #6D28D9;
+  --color-primary-glow:   rgba(124, 58, 237, 0.15);
+  --color-primary-gradient: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%);
+  --color-primary-gradient-light: linear-gradient(135deg, #A78BFA 0%, #7C3AED 100%);
+
+  /* ── SECONDARY: Warm Gold ──────────────────────────────── */
+  --color-secondary:      #D97706;
+  --color-secondary-hover: #B45309;
+  --color-secondary-light: #FCD34D;
+  --color-secondary-muted: rgba(217, 119, 6, 0.10);
+  --color-secondary-gradient: linear-gradient(135deg, #FCD34D 0%, #D97706 50%, #92400E 100%);
+  --color-secondary-gradient-light: linear-gradient(135deg, #FDE68A 0%, #F59E0B 100%);
+
+  /* ── SURFACES - Warm & Luxurious ───────────────────────── */
+  --color-bg:             #F7F4F0;
+  --color-bg-elevated:    #F0EDE8;
+  --color-bg-gradient:    linear-gradient(160deg, #F7F4F0 0%, #F0EDE8 50%, #E8E4DE 100%);
+
+  --color-surface:        #FFFFFF;
+  --color-surface-warm:   #FDFCFA;
+  --color-surface-hover:  #FAF8F5;
+  --color-surface-active: #F5F2ED;
+  --color-surface-sunken: #F0EDE8;
+
+  --color-surface-border:        rgba(44, 38, 32, 0.08);
+  --color-surface-border-strong: rgba(44, 38, 32, 0.14);
+  --color-surface-border-subtle: rgba(44, 38, 32, 0.04);
+
+  /* ── INK - Exceptional Readability ──────────────────────── */
+  --color-ink-primary:    #1C1917;
+  --color-ink-secondary:  #292524;
+  --color-ink-muted:      #57534E;
+  --color-ink-subtle:     #78716C;
+  --color-ink-faint:      #A8A39E;
+  --color-ink-inverse:    #FAF8F5;
+
+  /* ── STATUS BADGES - Premium Colors ────────────────────── */
+  --status-confirmed:     #059669;
+  --status-confirmed-bg:  rgba(5, 150, 105, 0.10);
+  --status-confirmed-border: rgba(5, 150, 105, 0.20);
+
+  --status-active:        #2563EB;
+  --status-active-bg:     rgba(37, 99, 235, 0.10);
+  --status-active-border: rgba(37, 99, 235, 0.20);
+
+  --status-pending:       #D97706;
+  --status-pending-bg:    rgba(217, 119, 6, 0.10);
+  --status-pending-border: rgba(217, 119, 6, 0.20);
+
+  --status-completed:     #6B7280;
+  --status-completed-bg:  rgba(107, 114, 128, 0.10);
+  --status-completed-border: rgba(107, 114, 128, 0.20);
+
+  --status-cancelled:     #DC2626;
+  --status-cancelled-bg:  rgba(220, 38, 38, 0.10);
+  --status-cancelled-border: rgba(220, 38, 38, 0.20);
+
+  /* ── SECTION COLORS - Premium Feel ──────────────────────── */
+  --section-primary:      #EEF2FF;
+  --section-secondary:    #FFFBEB;
+  --section-success:      #ECFDF5;
+  --section-danger:       #FEF2F2;
+  --section-warm:         #FFF7ED;
+
+  /* ── SHADOWS - Warm & Dimensional ──────────────────────── */
+  --shadow-xs:  0 1px 2px 0 rgba(44, 38, 32, 0.04);
+  --shadow-sm:  0 1px 3px 0 rgba(44, 38, 32, 0.06), 0 1px 2px -1px rgba(44, 38, 32, 0.04);
+  --shadow-md:  0 4px 12px -2px rgba(44, 38, 32, 0.08), 0 2px 4px -2px rgba(44, 38, 32, 0.04);
+  --shadow-lg:  0 12px 24px -4px rgba(44, 38, 32, 0.10), 0 4px 6px -4px rgba(44, 38, 32, 0.05);
+  --shadow-xl:  0 20px 32px -6px rgba(44, 38, 32, 0.12), 0 8px 12px -6px rgba(44, 38, 32, 0.06);
+  --shadow-2xl: 0 25px 50px -12px rgba(44, 38, 32, 0.20);
+
+  --shadow-card:     0 1px 3px 0 rgba(44, 38, 32, 0.06), 0 1px 2px -1px rgba(44, 38, 32, 0.04);
+  --shadow-card-hover: 0 8px 25px -8px rgba(124, 58, 237, 0.12), 0 1px 3px 0 rgba(44, 38, 32, 0.08);
+  --shadow-glow:     0 0 40px rgba(124, 58, 237, 0.06);
+  --shadow-glow-gold: 0 0 40px rgba(217, 119, 6, 0.06);
+
+  --shadow-focus:    0 0 0 2px #FFFFFF, 0 0 0 4px #7C3AED;
+  --shadow-focus-ring: 0 0 0 3px rgba(124, 58, 237, 0.25);
+
+  /* ── RADIUS ──────────────────────────────────────────────── */
+  --radius-xs:   0.125rem;
+  --radius-sm:   0.375rem;
+  --radius-md:   0.5rem;
+  --radius-lg:   0.75rem;
+  --radius-xl:   1rem;
+  --radius-2xl:  1.25rem;
+  --radius-3xl:  1.5rem;
+  --radius-full: 9999px;
+
+  /* ── MOTION ────────────────────────────────────────────── */
+  --ease-spring: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ══════════════════════════════════════════════════════════
+   🌙 DARK MODE - VS Code Premium
+   ═══════════════════════════════════════════════════════════ */
+
+.dark {
+  /* ── PRIMARY - Glowing Purple ──────────────────────────── */
+  --color-primary:        #A78BFA;
+  --color-primary-hover:  #8B5CF6;
+  --color-primary-active: #7C3AED;
+  --color-primary-muted:  rgba(167, 139, 250, 0.15);
+  --color-primary-subtle: rgba(167, 139, 250, 0.06);
+  --color-primary-text:   #A78BFA;
+  --color-primary-glow:   rgba(167, 139, 250, 0.20);
+  --color-primary-gradient: linear-gradient(135deg, #A78BFA 0%, #7C3AED 100%);
+  --color-primary-gradient-light: linear-gradient(135deg, #C4B5FD 0%, #A78BFA 100%);
+
+  /* ── SECONDARY - Warm Gold Glow ────────────────────────── */
+  --color-secondary:      #F59E0B;
+  --color-secondary-hover: #D97706;
+  --color-secondary-light: #FBBF24;
+  --color-secondary-muted: rgba(245, 158, 11, 0.12);
+  --color-secondary-gradient: linear-gradient(135deg, #FBBF24 0%, #F59E0B 50%, #D97706 100%);
+  --color-secondary-gradient-light: linear-gradient(135deg, #FDE68A 0%, #FBBF24 100%);
+
+  /* ── SURFACES - Deep & Warm ────────────────────────────── */
+  --color-bg:             #0E0C0A;
+  --color-bg-elevated:    #1A1714;
+  --color-bg-gradient:    linear-gradient(160deg, #0E0C0A 0%, #1A1714 50%, #221F1B 100%);
+
+  --color-surface:        #1A1714;
+  --color-surface-warm:   #221F1B;
+  --color-surface-hover:  #2C2823;
+  --color-surface-active: #332F29;
+  --color-surface-sunken: #12100E;
+
+  --color-surface-border:        rgba(255, 248, 240, 0.06);
+  --color-surface-border-strong: rgba(255, 248, 240, 0.10);
+  --color-surface-border-subtle: rgba(255, 248, 240, 0.03);
+
+  /* ── INK - Crisp White ──────────────────────────────────── */
+  --color-ink-primary:    #F5F0EB !important;
+  --color-ink-secondary:  #E8E4DE !important;
+  --color-ink-muted:      #A8A39E !important;
+  --color-ink-subtle:     #78716C !important;
+  --color-ink-faint:      #57534E !important;
+  --color-ink-inverse:    #1C1917;
+
+  /* ── STATUS BADGES - Bright & Glowing ──────────────────── */
+  --status-confirmed:     #34D399;
+  --status-confirmed-bg:  rgba(52, 211, 153, 0.15);
+  --status-confirmed-border: rgba(52, 211, 153, 0.25);
+
+  --status-active:        #60A5FA;
+  --status-active-bg:     rgba(96, 165, 250, 0.15);
+  --status-active-border: rgba(96, 165, 250, 0.25);
+
+  --status-pending:       #FBBF24;
+  --status-pending-bg:    rgba(251, 191, 36, 0.15);
+  --status-pending-border: rgba(251, 191, 36, 0.25);
+
+  --status-completed:     #9CA3AF;
+  --status-completed-bg:  rgba(156, 163, 175, 0.15);
+  --status-completed-border: rgba(156, 163, 175, 0.25);
+
+  --status-cancelled:     #F87171;
+  --status-cancelled-bg:  rgba(248, 113, 113, 0.15);
+  --status-cancelled-border: rgba(248, 113, 113, 0.25);
+
+  /* ── SECTION COLORS - Dark Mode Premium ─────────────────── */
+  --section-primary:      rgba(167, 139, 250, 0.08);
+  --section-secondary:    rgba(245, 158, 11, 0.08);
+  --section-success:      rgba(52, 211, 153, 0.08);
+  --section-danger:       rgba(248, 113, 113, 0.08);
+  --section-warm:         rgba(245, 158, 11, 0.05);
+
+  /* ── SHADOWS - Deep & Atmospheric ──────────────────────── */
+  --shadow-xs:  0 1px 2px 0 rgba(0, 0, 0, 0.5);
+  --shadow-sm:  0 1px 3px 0 rgba(0, 0, 0, 0.6), 0 1px 2px -1px rgba(0, 0, 0, 0.4);
+  --shadow-md:  0 4px 12px -2px rgba(0, 0, 0, 0.7), 0 2px 4px -2px rgba(0, 0, 0, 0.4);
+  --shadow-lg:  0 12px 24px -4px rgba(0, 0, 0, 0.8), 0 4px 6px -4px rgba(0, 0, 0, 0.4);
+  --shadow-xl:  0 20px 32px -6px rgba(0, 0, 0, 0.9), 0 8px 12px -6px rgba(0, 0, 0, 0.5);
+  --shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.95);
+
+  --shadow-card:     0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 1px 2px -1px rgba(0, 0, 0, 0.4);
+  --shadow-card-hover: 0 8px 25px -8px rgba(0, 0, 0, 0.7), 0 1px 3px 0 rgba(0, 0, 0, 0.4);
+  --shadow-glow:     0 0 40px rgba(167, 139, 250, 0.06);
+  --shadow-glow-gold: 0 0 40px rgba(245, 158, 11, 0.06);
+
+  --shadow-focus:    0 0 0 2px #1A1714, 0 0 0 4px #A78BFA;
+  --shadow-focus-ring: 0 0 0 3px rgba(167, 139, 250, 0.30);
+}
+
+/* ══════════════════════════════════════════════════════════
+   🎯 PREMIUM UTILITY CLASSES
+   ═══════════════════════════════════════════════════════════ */
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* ── TEXT COLORS ────────────────────────────────────────── */
+  .text-ink { color: var(--color-ink-primary) !important; }
+  .text-ink-secondary { color: var(--color-ink-secondary) !important; }
   .text-ink-muted { color: var(--color-ink-muted) !important; }
-  .text-ink { color: var(--color-ink) !important; }
+  .text-ink-subtle { color: var(--color-ink-subtle) !important; }
+  .text-ink-faint { color: var(--color-ink-faint) !important; }
   .text-primary { color: var(--color-primary) !important; }
+  .text-secondary { color: var(--color-secondary) !important; }
+
+  /* ── STATUS BADGE TEXT ──────────────────────────────────── */
+  .text-status-confirmed { color: var(--status-confirmed) !important; }
+  .text-status-active { color: var(--status-active) !important; }
+  .text-status-pending { color: var(--status-pending) !important; }
+  .text-status-completed { color: var(--status-completed) !important; }
+  .text-status-cancelled { color: var(--status-cancelled) !important; }
+
+  /* ── STATUS BADGE BACKGROUNDS ───────────────────────────── */
+  .bg-status-confirmed { 
+    background: var(--status-confirmed-bg) !important; 
+    border-color: var(--status-confirmed-border) !important;
+  }
+  .bg-status-active { 
+    background: var(--status-active-bg) !important; 
+    border-color: var(--status-active-border) !important;
+  }
+  .bg-status-pending { 
+    background: var(--status-pending-bg) !important; 
+    border-color: var(--status-pending-border) !important;
+  }
+  .bg-status-completed { 
+    background: var(--status-completed-bg) !important; 
+    border-color: var(--status-completed-border) !important;
+  }
+  .bg-status-cancelled { 
+    background: var(--status-cancelled-bg) !important; 
+    border-color: var(--status-cancelled-border) !important;
+  }
+
+  /* ── BUTTONS - Premium Gradients ────────────────────────── */
+  .btn-primary {
+    background: var(--color-primary-gradient) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.30) !important;
+    transition: all 0.2s ease !important;
+  }
+  .btn-primary:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 16px rgba(124, 58, 237, 0.40) !important;
+  }
+  .btn-primary:active {
+    transform: translateY(0) !important;
+  }
+
+  .btn-secondary {
+    background: var(--color-secondary-gradient) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(217, 119, 6, 0.30) !important;
+    transition: all 0.2s ease !important;
+  }
+  .btn-secondary:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 16px rgba(217, 119, 6, 0.40) !important;
+  }
+
+  .btn-outline {
+    background: transparent !important;
+    color: var(--color-primary) !important;
+    border: 1.5px solid var(--color-primary) !important;
+    transition: all 0.2s ease !important;
+  }
+  .btn-outline:hover {
+    background: var(--color-primary-muted) !important;
+    transform: translateY(-1px) !important;
+  }
+
+  .btn-ghost {
+    background: transparent !important;
+    color: var(--color-ink-muted) !important;
+    border: none !important;
+    transition: all 0.2s ease !important;
+  }
+  .btn-ghost:hover {
+    background: var(--color-surface-hover) !important;
+    color: var(--color-ink-primary) !important;
+  }
+
+  .btn-success {
+    background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(5, 150, 105, 0.30) !important;
+  }
+  .btn-success:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 16px rgba(5, 150, 105, 0.40) !important;
+  }
+
+  .btn-danger {
+    background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%) !important;
+    color: white !important;
+    border: none !important;
+    box-shadow: 0 2px 8px rgba(220, 38, 38, 0.30) !important;
+  }
+  .btn-danger:hover {
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 16px rgba(220, 38, 38, 0.40) !important;
+  }
+
+  /* ── SECTION BACKGROUNDS ────────────────────────────────── */
+  .section-primary { background: var(--section-primary) !important; }
+  .section-secondary { background: var(--section-secondary) !important; }
+  .section-success { background: var(--section-success) !important; }
+  .section-danger { background: var(--section-danger) !important; }
+  .section-warm { background: var(--section-warm) !important; }
+
+  /* ── SURFACES ────────────────────────────────────────────── */
+  .bg-surface { background: var(--color-surface) !important; }
+  .bg-surface-warm { background: var(--color-surface-warm) !important; }
+  .bg-surface-hover { background: var(--color-surface-hover) !important; }
+  .bg-bg { background: var(--color-bg) !important; }
+  .bg-bg-elevated { background: var(--color-bg-elevated) !important; }
+
+  /* ── BORDERS ────────────────────────────────────────────── */
+  .border-surface { border-color: var(--color-surface-border) !important; }
+  .border-surface-strong { border-color: var(--color-surface-border-strong) !important; }
+  .border-surface-subtle { border-color: var(--color-surface-border-subtle) !important; }
+
+  /* ── GRADIENTS ──────────────────────────────────────────── */
+  .bg-gradient-brand { background: var(--color-primary-gradient) !important; }
+  .bg-gradient-brand-light { background: var(--color-primary-gradient-light) !important; }
+  .bg-gradient-gold { background: var(--color-secondary-gradient) !important; }
+  .bg-gradient-gold-light { background: var(--color-secondary-gradient-light) !important; }
+  .bg-gradient-surface { background: var(--gradient-surface) !important; }
+  .bg-gradient-bg { background: var(--gradient-bg) !important; }
+
+  /* ── SHADOWS ────────────────────────────────────────────── */
+  .shadow-card { box-shadow: var(--shadow-card) !important; }
+  .shadow-card-hover { box-shadow: var(--shadow-card-hover) !important; }
+  .shadow-glow { box-shadow: var(--shadow-glow) !important; }
+  .shadow-glow-gold { box-shadow: var(--shadow-glow-gold) !important; }
+
+  .focus-ring { outline: none; box-shadow: var(--shadow-focus-ring); }
+  .focus-ring:focus { box-shadow: var(--shadow-focus-ring); }
 }
 
-/* ============================================================
-   PDF CONTRACT PRINT RULES (used by contract_premium.html)
-   ============================================================ */
-.contract-section {
-    break-inside: auto;
-    margin-bottom: 14pt;
+/* ══════════════════════════════════════════════════════════
+   🔧 AUTH PAGE FIX - Force dark text on white background
+   ═══════════════════════════════════════════════════════════ */
+
+/* This forces text-ink classes to always be dark when inside a white background */
+.bg-white .text-ink,
+.bg-white .text-ink-secondary,
+.bg-white h1.text-ink,
+.bg-white h2.text-ink,
+.bg-white h3.text-ink,
+.bg-white h4.text-ink,
+.bg-white h5.text-ink,
+.bg-white h6.text-ink {
+  color: #1C1917 !important;
 }
 
-.section-title {
-    break-after: avoid;
-    page-break-after: avoid;
+.bg-white .text-ink-muted {
+  color: #57534E !important;
 }
 
-.signature-box, .audit-stamp, .charges-table {
-    break-inside: avoid;
-    page-break-inside: avoid;
+.bg-white .text-ink-subtle {
+  color: #78716C !important;
 }
 
-/* ✅ Hide scrollbar for cleaner UI */
-.no-scrollbar::-webkit-scrollbar {
+.bg-white .text-ink-faint {
+  color: #A8A39E !important;
+}
+
+/* Fix for auth page headings that might not have text-ink class */
+.bg-white h1,
+.bg-white h2,
+.bg-white h3,
+.bg-white h4,
+.bg-white h5,
+.bg-white h6 {
+  color: #1C1917 !important;
+}
+
+/* Fix for auth page body text */
+.bg-white p,
+.bg-white span,
+.bg-white label,
+.bg-white div:not(.bg-white) {
+  color: #1C1917;
+}
+
+.bg-white .text-sm,
+.bg-white .text-base {
+  color: #1C1917;
+}
+
+/* But keep muted text as muted */
+.bg-white .text-ink-muted,
+.bg-white p.text-ink-muted,
+.bg-white span.text-ink-muted {
+  color: #57534E !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   📄 PRINT STYLES
+   ═══════════════════════════════════════════════════════════ */
+
+@media print {
+  .contract-section { break-inside: auto; margin-bottom: 14pt; }
+  .section-title { break-after: avoid; page-break-after: avoid; }
+  .signature-box, .audit-stamp, .charges-table { break-inside: avoid; page-break-inside: avoid; }
+  
+  * {
+    color: #1C1917 !important;
+    background-color: #FFFFFF !important;
+    border-color: rgba(44, 38, 32, 0.08) !important;
+  }
+}
+
+/* ── Premium Animations ────────────────────────────────────── */
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+@keyframes pulse-slower {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.15); }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(2deg); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(200%) skewX(-15deg); }
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ── Utility Classes ────────────────────────────────────────── */
+.animate-pulse-slow {
+  animation: pulse-slow 8s ease-in-out infinite;
+}
+
+.animate-pulse-slower {
+  animation: pulse-slower 12s ease-in-out infinite;
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 3s ease-in-out infinite;
+}
+
+.animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: gradient-shift 6s ease-in-out infinite;
+}
+
+/* ── Premium Text Gradients ────────────────────────────────── */
+.text-gradient-primary {
+  background: linear-gradient(135deg, #A78BFA, #7C3AED, #A78BFA);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 6s ease-in-out infinite;
+}
+
+.text-gradient-gold {
+  background: linear-gradient(135deg, #FBBF24, #F59E0B, #D97706);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradient-shift 6s ease-in-out infinite;
+}
+
+/* ── Glassmorphism Enhancements ────────────────────────────── */
+.glass-premium {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glass-premium-hover:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(167, 139, 250, 0.15);
+  transition: all 0.3s ease;
+}
+
+
+/* ══════════════════════════════════════════════════════════
+   🔐 AUTH SPLIT-SCREEN THEME LOCK
+   Left panel is ALWAYS dark, right panel is ALWAYS light.
+   ═══════════════════════════════════════════════════════════ */
+.auth-dark {
+  --color-ink-primary:   #F5F0EB;
+  --color-ink-secondary: #E8E4DE;
+  --color-ink-muted:     #A8A39E;
+  --color-ink-subtle:    #78716C;
+  --color-ink-faint:     #57534E;
+  --color-surface:       #1A1714;
+  --color-surface-hover: #2C2823;
+  --color-surface-border: rgba(255, 248, 240, 0.06);
+  --color-primary:       #A78BFA;
+  --color-primary-text:  #A78BFA;
+}
+
+.auth-light {
+  --color-ink-primary:   #1C1917;
+  --color-ink-secondary: #292524;
+  --color-ink-muted:     #57534E;
+  --color-ink-subtle:    #78716C;
+  --color-ink-faint:     #A8A39E;
+  --color-bg:            #FFFFFF;
+  --color-surface:       #FFFFFF;
+  --color-surface-hover: #FAF8F5;
+  --color-surface-active:#F5F2ED;
+  --color-surface-border: rgba(44, 38, 32, 0.08);
+  --color-primary:       #7C3AED;
+  --color-primary-hover: #6D28D9;
+  --color-primary-text:  #6D28D9;
+  --color-primary-muted: rgba(124, 58, 237, 0.10);
+}
+
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
 
-.no-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
 }

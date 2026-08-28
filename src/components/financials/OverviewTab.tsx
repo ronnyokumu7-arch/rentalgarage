@@ -121,10 +121,8 @@ export default function OverviewTab() {
             </div>
           </div>
 
-          {/* ✅ SCROLL WINDOW: ~3 cards visible (320px); extra cards scroll inside */}
-          <div className="max-h-80 overflow-y-auto custom-scrollbar">
-            <ActivityFeed activities={filteredActivities} />
-          </div>
+          {/* ✅ ActivityFeed handles its own scrolling - shows 3 full cards + half of 4th */}
+          <ActivityFeed activities={filteredActivities} />
         </div>
 
         {/* ✅ Quick Actions Container with Premium Header */}

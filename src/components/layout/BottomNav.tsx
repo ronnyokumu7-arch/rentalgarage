@@ -109,7 +109,8 @@ export default function BottomNav({ navItems }: BottomNavProps) {
       </nav>
 
       {/* 
-        ✅ "MORE" DRAWER - Tile Grid (Logout removed)
+        ✅ "MORE" DRAWER - CLEAN PREMIUM ICON GRID
+        - Tightly wrapped premium icon boxes with text below.
       */}
       {mounted && showMoreDrawer && (
         <div
@@ -121,19 +122,19 @@ export default function BottomNav({ navItems }: BottomNavProps) {
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-surface-border)]">
-              <span className="text-sm font-semibold text-[var(--color-ink)]">More</span>
+            <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-surface-border)]">
+              <span className="text-base font-bold text-[var(--color-ink)]">More</span>
               <button
                 onClick={() => setShowMoreDrawer(false)}
-                className="p-1.5 rounded-lg hover:bg-[var(--color-surface-hover)] transition-colors"
+                className="p-2 rounded-full bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-border)] transition-all active:scale-95"
                 aria-label="Close"
               >
                 <X size={18} strokeWidth={2} className="text-[var(--color-ink-muted)]" />
               </button>
             </div>
 
-            {/* Tile Grid - Using ORIGINAL icons from navItems */}
-            <div className="p-4 grid grid-cols-4 gap-3">
+            {/* ✅ CLEAN PREMIUM ICON GRID (No bulky outer container) */}
+            <div className="p-5 grid grid-cols-3 gap-y-6 gap-x-4">
               {moreItems.map((item) => {
                 const active = isActive(item.href);
                 const Icon = item.icon as LucideIcon;
@@ -142,14 +143,18 @@ export default function BottomNav({ navItems }: BottomNavProps) {
                     key={item.label}
                     href={item.href || "#"}
                     onClick={() => setShowMoreDrawer(false)}
-                    className={`flex flex-col items-center justify-center gap-1.5 p-3 rounded-2xl transition-all duration-200 ${
-                      active
-                        ? "bg-[var(--color-primary-muted)]/50 text-[var(--color-primary)]"
-                        : "text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"
-                    }`}
+                    className="group flex flex-col items-center justify-center gap-2 active:scale-95 transition-transform"
                   >
-                    <Icon size={24} strokeWidth={active ? 2.2 : 1.8} />
-                    <span className={`text-[11px] font-medium text-center leading-tight ${active ? "font-semibold" : ""}`}>
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-200 ${
+                      active
+                        ? "bg-[var(--color-primary)] text-white shadow-md shadow-[var(--color-primary)]/20"
+                        : "bg-[var(--color-surface-hover)]/80 border border-[var(--color-surface-border)] text-[var(--color-primary)] group-hover:bg-[var(--color-surface-hover)] group-hover:scale-105 group-hover:border-[var(--color-primary)]/20"
+                    }`}>
+                      <Icon size={24} strokeWidth={active ? 2.2 : 1.8} />
+                    </div>
+                    <span className={`text-[11px] font-semibold text-center leading-tight ${
+                      active ? "text-[var(--color-primary)]" : "text-[var(--color-ink-muted)] group-hover:text-[var(--color-ink)]"
+                    }`}>
                       {item.label}
                     </span>
                   </Link>

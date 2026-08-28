@@ -5,18 +5,44 @@ import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ChevronRight, LogOut, Settings, type LucideIcon } from "lucide-react";
+import { 
+  ChevronRight, LogOut, Settings, X, type LucideIcon,
+  Sparkles, Shield, LayoutDashboard, Users, Car,
+  Calendar, FileText, HelpCircle, BarChart3
+} from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import type { NavItem } from "@/lib/nav-config";
 
 interface SidebarProps {
   navItems: NavItem[];
+  isMobile?: boolean;
+  onClose?: () => void;
 }
 
-export default function Sidebar({ navItems }: SidebarProps) {
+// ── Icon mapping for consistent icons ──────────────────────────
+const iconMap: Record<string, LucideIcon> = {
+  dashboard: LayoutDashboard,
+  users: Users,
+  clients: Users,
+  vehicles: Car,
+  bookings: Calendar,
+  calendar: Calendar,
+  invoices: FileText,
+  settings: Settings,
+  help: HelpCircle,
+  analytics: BarChart3,
+  shield: Shield,
+};
+
+function getIcon(iconName?: string): LucideIcon | null {
+  if (!iconName) return null;
+  return iconMap[iconName] || null;
+}
+
+export default function Sidebar({ navItems, isMobile = false, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { logout } = useAuth();
+  const { user, tenant, logout } = useAuth(); // ✅ Added user & tenant
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [flyoutPos, setFlyoutPos] = useState<number>(0);
   const [hoveredItem, setHoveredItem] = useState<{ label: string; top: number } | null>(null);
@@ -76,34 +102,53 @@ export default function Sidebar({ navItems }: SidebarProps) {
   const settingsItem = navItems.find((item) => item.label === "Settings");
   const regularNavItems = navItems.filter((item) => item.label !== "Settings");
 
+  // ✅ User info for profile card
+  const fullName = user?.full_name || user?.email || "User";
+  const userInitial = fullName.charAt(0).toUpperCase();
+  const companyName = tenant?.name || "Agency";
+
   return (
     <>
-      {/* 
-        ✅ MOBILE HIDING: Sidebar is desktop-only (<1024px hidden)
-        - Already handled by DashboardShell.tsx via "hidden lg:block"
-        - This component remains unchanged for desktop behavior
-        - No mobile-specific code added here (per navigation paradigm: BottomNav only on mobile)
-      */}
       <aside
         ref={sidebarRef}
-        className="relative z-30 h-full w-20 flex flex-col flex-shrink-0 
+        className={`relative z-30 flex flex-col flex-shrink-0 
                    bg-[var(--color-bg)] 
                    border-r border-[var(--color-surface-border)] 
-                   transition-colors duration-300"
+                   transition-colors duration-300
+                   ${isMobile ? 'w-72 h-full' : 'h-full w-20'}`}
       >
-        {/* Logo */}
-        <div className="h-16 flex items-center justify-center flex-shrink-0">
-          <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-[11px] text-white tracking-tight select-none bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary-hover)] shadow-[0_0_15px_rgba(99,102,241,0.3)]">
-            RM
-          </div>
+        {/* ── Logo & Mobile Close Button ──────────────────────────────────── */}
+        <div className="h-16 flex items-center justify-between px-4 flex-shrink-0 border-b border-[var(--color-surface-border)]">
+          <Link href="/dashboard" className="group" onClick={() => isMobile && onClose?.()}>
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-[11px] text-white tracking-tight select-none bg-gradient-brand shadow-lg shadow-primary/30 transition-all duration-300 group-hover:scale-105 group-hover:shadow-primary/40">
+              RG
+            </div>
+          </Link>
+          
+          {/* Mobile Close Button */}
+          {isMobile && onClose && (
+            <button
+              onClick={onClose}
+              className="p-2 rounded-lg text-[var(--color-ink-muted)] hover:text-[var(--color-ink-primary)] hover:bg-[var(--color-surface-hover)] transition-all"
+            >
+              <X size={20} />
+            </button>
+          )}
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 flex flex-col gap-2 px-3 py-6 overflow-y-auto custom-scrollbar">
+        {/* ── Navigation ──────────────────────────────────────────────────── */}
+        <nav className="flex-1 flex flex-col gap-1.5 px-3 py-4 overflow-y-auto custom-scrollbar">
           {regularNavItems.map((item) => {
             const active = isActive(item.href, item.children);
             const isGroupOpen = openGroup === item.label;
-            const Icon = item.icon as LucideIcon;
+            
+            // ✅ Fixed: Handle both string icons and LucideIcon components
+            let Icon: LucideIcon | null = null;
+            if (typeof item.icon === 'string') {
+              Icon = getIcon(item.icon);
+            } else if (item.icon) {
+              Icon = item.icon as LucideIcon;
+            }
 
             return (
               <div key={item.label} className="relative group/nav">
@@ -111,57 +156,84 @@ export default function Sidebar({ navItems }: SidebarProps) {
                   <Link
                     href={item.href}
                     onMouseEnter={(e) => {
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      setHoveredItem({ label: item.label, top: rect.top });
+                      if (!isMobile) {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setHoveredItem({ label: item.label, top: rect.top });
+                      }
                     }}
-                    onMouseLeave={() => setHoveredItem(null)}
-                    className={`relative flex items-center justify-center w-full h-12 rounded-xl transition-all duration-200 outline-none group/btn ${
+                    onMouseLeave={() => !isMobile && setHoveredItem(null)}
+                    onClick={() => isMobile && onClose?.()}
+                    className={`relative flex items-center justify-center ${
+                      isMobile ? 'justify-start gap-3 px-4 h-12' : 'w-full h-12'
+                    } rounded-xl transition-all duration-200 outline-none group/btn ${
                       active
-                        ? "text-[var(--color-primary)]"
-                        : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"
+                        ? "text-[var(--color-primary)] bg-[var(--color-primary-muted)]"
+                        : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink-primary)] hover:bg-[var(--color-surface-hover)]"
                     }`}
                   >
-                    {active && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full bg-[var(--color-primary)]" />
+                    {!isMobile && active && (
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full bg-[var(--color-primary)] shadow-lg shadow-primary/30" />
                     )}
-                    <Icon
-                      size={20}
-                      strokeWidth={active ? 1.5 : 1.8}
-                      className="transition-all duration-200"
-                    />
+                    {Icon && (
+                      <Icon
+                        size={20}
+                        strokeWidth={active ? 2 : 1.8}
+                        className={`transition-all duration-200 ${isMobile ? 'flex-shrink-0' : ''}`}
+                      />
+                    )}
+                    {isMobile && (
+                      <span className="text-sm font-medium">{item.label}</span>
+                    )}
+                    {!isMobile && active && (
+                      <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[var(--color-primary)] ring-2 ring-[var(--color-bg)]" />
+                    )}
                   </Link>
                 ) : (
                   <button
                     ref={(el) => {
                       buttonRefs.current[item.label] = el;
                     }}
-                    onClick={() => handleGroupClick(item.label, buttonRefs.current[item.label])}
+                    onClick={() => isMobile ? router.push(item.children?.[0]?.href || '#') : handleGroupClick(item.label, buttonRefs.current[item.label])}
                     onMouseEnter={(e) => {
-                      const rect = e.currentTarget.getBoundingClientRect();
-                      setHoveredItem({ label: item.label, top: rect.top });
+                      if (!isMobile) {
+                        const rect = e.currentTarget.getBoundingClientRect();
+                        setHoveredItem({ label: item.label, top: rect.top });
+                      }
                     }}
-                    onMouseLeave={() => setHoveredItem(null)}
-                    className={`relative flex items-center justify-center w-full h-12 rounded-xl transition-all duration-200 outline-none group/btn ${
+                    onMouseLeave={() => !isMobile && setHoveredItem(null)}
+                    className={`relative flex items-center justify-center ${
+                      isMobile ? 'justify-start gap-3 px-4 h-12' : 'w-full h-12'
+                    } rounded-xl transition-all duration-200 outline-none group/btn ${
                       isGroupOpen || active
-                        ? "text-[var(--color-primary)]"
-                        : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"
+                        ? "text-[var(--color-primary)] bg-[var(--color-primary-muted)]"
+                        : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink-primary)] hover:bg-[var(--color-surface-hover)]"
                     }`}
                   >
-                    {(isGroupOpen || active) && (
-                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full bg-[var(--color-primary)]" />
+                    {!isMobile && (isGroupOpen || active) && (
+                      <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full bg-[var(--color-primary)] shadow-lg shadow-primary/30" />
                     )}
-                    <Icon
-                      size={20}
-                      strokeWidth={isGroupOpen || active ? 1.5 : 1.8}
-                      className="transition-all duration-200"
-                    />
-                    <span
-                      className={`absolute bottom-2 right-2 w-[5px] h-[5px] rounded-full transition-all ${
-                        isGroupOpen || active
-                          ? "bg-[var(--color-primary)]"
-                          : "bg-[var(--color-ink-subtle)]"
-                      }`}
-                    />
+                    {Icon && (
+                      <Icon
+                        size={20}
+                        strokeWidth={isGroupOpen || active ? 2 : 1.8}
+                        className={`transition-all duration-200 ${isMobile ? 'flex-shrink-0' : ''}`}
+                      />
+                    )}
+                    {isMobile && (
+                      <>
+                        <span className="text-sm font-medium">{item.label}</span>
+                        <ChevronRight size={16} className="ml-auto text-[var(--color-ink-subtle)]" />
+                      </>
+                    )}
+                    {!isMobile && (
+                      <span
+                        className={`absolute bottom-1.5 right-1.5 w-[5px] h-[5px] rounded-full transition-all ${
+                          isGroupOpen || active
+                            ? "bg-[var(--color-primary)]"
+                            : "bg-[var(--color-ink-subtle)]"
+                        }`}
+                      />
+                    )}
                   </button>
                 )}
               </div>
@@ -169,109 +241,175 @@ export default function Sidebar({ navItems }: SidebarProps) {
           })}
         </nav>
 
-        {/* Settings & Logout Section */}
-        <div className="px-3 pb-6 flex-shrink-0 space-y-2">
+        {/* ── Bottom Section: User Profile (Mobile Only) + Settings & Logout ── */}
+        <div className={`px-3 pb-4 flex-shrink-0 space-y-1.5 border-t border-[var(--color-surface-border)] pt-3`}>
+          
+          {/* ✅ USER PROFILE CARD (Mobile Only, Above Settings) */}
+          {isMobile && (
+            <div className="mb-2">
+              <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--color-surface-hover)]/50 border border-[var(--color-surface-border)]">
+                {/* Clean Avatar - No outer circle */}
+                <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white bg-gradient-to-br from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20 flex-shrink-0">
+                  {userInitial}
+                </div>
+                
+                {/* User Info */}
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-bold text-[var(--color-ink)] truncate leading-tight">
+                    {fullName}
+                  </p>
+                  <p className="text-[10px] font-medium text-[var(--color-ink-muted)] truncate">
+                    {companyName}
+                  </p>
+                </div>
+                
+                {/* Arrow to Profile */}
+                <Link 
+                  href={user?.role === "super_admin" ? `/super-admin/users/${user?.id}` : `/dashboard/users/${user?.id}`}
+                  onClick={() => isMobile && onClose?.()}
+                  className="p-1.5 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-primary)] transition-all"
+                >
+                  <ChevronRight size={16} />
+                </Link>
+              </div>
+            </div>
+          )}
+
           {settingsItem && (
             <Link
               href={settingsItem.href || "#"}
               onMouseEnter={(e) => {
-                const rect = e.currentTarget.getBoundingClientRect();
-                setHoveredItem({ label: settingsItem.label, top: rect.top });
+                if (!isMobile) {
+                  const rect = e.currentTarget.getBoundingClientRect();
+                  setHoveredItem({ label: settingsItem.label, top: rect.top });
+                }
               }}
-              onMouseLeave={() => setHoveredItem(null)}
-              className={`relative flex items-center justify-center w-full h-12 rounded-xl transition-all duration-200 outline-none group/btn ${
+              onMouseLeave={() => !isMobile && setHoveredItem(null)}
+              onClick={() => isMobile && onClose?.()}
+              className={`relative flex items-center justify-center ${
+                isMobile ? 'justify-start gap-3 px-4' : 'w-full'
+              } h-11 rounded-xl transition-all duration-200 outline-none group/btn ${
                 isActive(settingsItem.href)
-                  ? "text-[var(--color-primary)]"
-                  : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"
+                  ? "text-[var(--color-primary)] bg-[var(--color-primary-muted)]"
+                  : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink-primary)] hover:bg-[var(--color-surface-hover)]"
               }`}
             >
               <Settings
-                size={20}
-                strokeWidth={isActive(settingsItem.href) ? 1.5 : 1.8}
-                className="transition-all duration-500 group-hover/btn:rotate-[180deg] group-hover/btn:scale-110"
+                size={18}
+                strokeWidth={isActive(settingsItem.href) ? 2 : 1.8}
+                className={`transition-all duration-500 ${!isMobile && 'group-hover/btn:rotate-[180deg] group-hover/btn:scale-110'}`}
               />
+              {isMobile && <span className="text-sm font-medium">Settings</span>}
             </Link>
           )}
 
           <button
             onClick={handleLogout}
-            className="group/logout relative flex items-center justify-center w-full h-12 rounded-xl text-[var(--color-ink-muted)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-bg)] transition-all duration-300"
+            className={`group/logout relative flex items-center justify-center ${
+              isMobile ? 'justify-start gap-3 px-4' : 'w-full'
+            } h-11 rounded-xl text-[var(--color-ink-muted)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-bg)] transition-all duration-300`}
             title="Sign out"
           >
-            <LogOut size={20} strokeWidth={1.8} className="relative z-10 transition-transform duration-300 group-hover/logout:translate-x-1" />
+            <LogOut 
+              size={18} 
+              strokeWidth={1.8} 
+              className={`relative z-10 transition-transform duration-300 ${!isMobile && 'group-hover/logout:translate-x-0.5'}`}
+            />
+            {isMobile && <span className="text-sm font-medium">Sign out</span>}
+            {!isMobile && (
+              <span className="absolute inset-x-3 bottom-0 h-0.5 rounded-full bg-[var(--color-danger)] scale-x-0 transition-transform duration-300 group-hover/logout:scale-x-100" />
+            )}
           </button>
         </div>
       </aside>
 
-      {/* PORTAL-DRIVEN TOOLTIP */}
-      {mounted && hoveredItem && !openGroup && createPortal(
+      {/* ── PORTAL: Tooltip (Desktop Only) ────────────────────────────────── */}
+      {!isMobile && mounted && hoveredItem && !openGroup && createPortal(
         <div
-          className="pointer-events-none fixed whitespace-nowrap text-[12px] font-bold px-3 py-1.5 rounded-lg z-[9999] 
-                     bg-[var(--color-ink)] text-[var(--color-surface)]
+          className="pointer-events-none fixed whitespace-nowrap text-[11px] font-bold px-3 py-1.5 rounded-lg z-[9999] 
+                     bg-[var(--color-ink-primary)] text-[var(--color-surface)]
                      shadow-[var(--shadow-dropdown)] animate-in fade-in zoom-in-95 duration-150"
           style={{
-            left: "88px",
+            left: "84px",
             top: `${hoveredItem.top}px`,
             transform: "translateY(-50%)",
           }}
         >
-          <span className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-[var(--color-ink)]" />
+          <span className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-[var(--color-ink-primary)]" />
           {hoveredItem.label}
         </div>,
         document.body
       )}
 
-      {/* PORTAL-DRIVEN FLYOUT PANEL */}
-      {mounted && openGroup && openGroupItem?.children && createPortal(
+      {/* ── PORTAL: Flyout Panel (Desktop Only) ───────────────────────────── */}
+      {!isMobile && mounted && openGroup && openGroupItem?.children && createPortal(
         <>
           <div className="fixed inset-0 z-[9998]" onClick={() => setOpenGroup(null)} />
           <div
             ref={flyoutRef}
-            className="fixed z-[9999] w-[260px] overflow-y-auto animate-in slide-in-from-left-2 fade-in duration-200 custom-scrollbar"
+            className="fixed z-[9999] w-[280px] overflow-y-auto animate-in slide-in-from-left-2 fade-in duration-200 custom-scrollbar"
             style={{
-              left: "88px",
+              left: "84px",
               top: `${flyoutPos}px`,
               maxHeight: "calc(100vh - 4rem)",
             }}
           >
             <div className="p-4 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-[var(--shadow-dropdown)] backdrop-blur-xl">
+              {/* Flyout Header */}
               <div className="flex items-center gap-3 mb-4 pb-3 border-b border-[var(--color-surface-border)]">
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20">
-                  {openGroupItem.icon && (
-                    <openGroupItem.icon
-                      size={16}
-                      strokeWidth={1.5}
-                      className="text-[var(--color-primary)]"
-                    />
-                  )}
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-[var(--color-primary-muted)] border border-[var(--color-primary)]/20">
+                  {/* ✅ Fixed: Handle both string icons and LucideIcon components */}
+                  {openGroupItem.icon && (() => {
+                    let Icon: LucideIcon | null = null;
+                    if (typeof openGroupItem.icon === 'string') {
+                      Icon = getIcon(openGroupItem.icon);
+                    } else {
+                      Icon = openGroupItem.icon as LucideIcon;
+                    }
+                    return Icon ? <Icon size={16} strokeWidth={1.5} className="text-[var(--color-primary)]" /> : null;
+                  })()}
                 </div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--color-primary)]">
+                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--color-primary)]">
                   {openGroupItem.label}
                 </p>
+                <Sparkles size={12} className="text-[var(--color-primary)] ml-auto opacity-40" />
               </div>
 
+              {/* Flyout Items */}
               <div className="space-y-1">
                 {openGroupItem.children.map((child) => {
                   const childActive = pathname === child.href || pathname.startsWith(child.href + "/");
+                  // ✅ Fixed: Handle both string icons and LucideIcon components for children
+                  let ChildIcon: LucideIcon | null = null;
+                  if (typeof (child as any).icon === 'string') {
+                    ChildIcon = getIcon((child as any).icon);
+                  } else if ((child as any).icon) {
+                    ChildIcon = (child as any).icon as LucideIcon;
+                  }
+                  
                   return (
                     <Link
                       key={child.href}
                       href={child.href}
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-150 group/child ${
                         childActive
-                          ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)]"
-                          : "text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)]"
+                          ? "bg-[var(--color-primary-muted)] text-[var(--color-primary)]"
+                          : "text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink-primary)]"
                       }`}
                     >
-                      <span
-                        className={`w-1.5 h-1.5 rounded-full flex-shrink-0 transition-all ${
-                          childActive
-                            ? "bg-[var(--color-primary)]"
-                            : "bg-[var(--color-ink-subtle)]"
-                        }`}
-                      />
+                      {ChildIcon && (
+                        <ChildIcon
+                          size={16}
+                          strokeWidth={1.5}
+                          className={`flex-shrink-0 ${
+                            childActive ? "text-[var(--color-primary)]" : "text-[var(--color-ink-subtle)]"
+                          }`}
+                        />
+                      )}
                       <span className="flex-1">{child.label}</span>
-                      {childActive && <ChevronRight size={14} strokeWidth={2.5} className="text-[var(--color-primary)]" />}
+                      {childActive && (
+                        <ChevronRight size={14} strokeWidth={2.5} className="text-[var(--color-primary)]" />
+                      )}
                     </Link>
                   );
                 })}

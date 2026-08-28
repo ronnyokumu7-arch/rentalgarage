@@ -1,5 +1,5 @@
 // src/components/financials/overview/QuickActions.tsx
-import { Plus, DollarSign, FileText } from "lucide-react";
+import { Plus, CreditCard, FileText, ChevronRight } from "lucide-react";
 
 interface QuickActionsProps {
   onCreateInvoice: () => void;
@@ -7,50 +7,67 @@ interface QuickActionsProps {
   onGenerateContract: () => void;
 }
 
-export default function QuickActions({ onCreateInvoice, onRecordPayment, onGenerateContract }: QuickActionsProps) {
-  return (
-    <div className="space-y-3">
-      {/* Create Invoice */}
-      <button 
-        onClick={onCreateInvoice}
-        className="w-full flex items-center gap-3 p-3 rounded-xl bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 hover:bg-[var(--color-primary)]/10 transition-colors text-left group"
-      >
-        <div className="w-9 h-9 rounded-lg bg-[var(--color-surface)] border border-[var(--color-surface-border)] flex items-center justify-center text-[var(--color-primary)] shadow-sm transition-transform group-hover:scale-105">
-          <Plus size={16} />
-        </div>
-        <div>
-          <p className="text-sm font-bold text-[var(--color-ink)]">Create Invoice</p>
-          <p className="text-xs text-[var(--color-ink-muted)]">Bill a client instantly</p>
-        </div>
-      </button>
-      
-      {/* Record Payment */}
-      <button 
-        onClick={onRecordPayment}
-        className="w-full flex items-center gap-3 p-3 rounded-xl bg-[var(--color-success-bg)]/30 border border-[var(--color-success-bg)] hover:bg-[var(--color-success-bg)]/50 transition-colors text-left group"
-      >
-        <div className="w-9 h-9 rounded-lg bg-[var(--color-surface)] border border-[var(--color-surface-border)] flex items-center justify-center text-[var(--color-success-text)] shadow-sm transition-transform group-hover:scale-105">
-          <DollarSign size={16} />
-        </div>
-        <div>
-          <p className="text-sm font-bold text-[var(--color-ink)]">Record Payment</p>
-          <p className="text-xs text-[var(--color-ink-muted)]">Log offline transactions</p>
-        </div>
-      </button>
+export default function QuickActions({ 
+  onCreateInvoice, 
+  onRecordPayment, 
+  onGenerateContract 
+}: QuickActionsProps) {
+  const actions = [
+    {
+      icon: Plus,
+      label: "Create Invoice",
+      description: "Bill a client instantly",
+      onClick: onCreateInvoice,
+      color: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+      hoverBg: "hover:bg-emerald-500/5"
+    },
+    {
+      icon: CreditCard,
+      label: "Record Payment",
+      description: "Log offline transactions",
+      onClick: onRecordPayment,
+      color: "text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20",
+      hoverBg: "hover:bg-blue-500/5"
+    },
+    {
+      icon: FileText,
+      label: "Generate Contract",
+      description: "Create rental agreement",
+      onClick: onGenerateContract,
+      color: "text-violet-600 dark:text-violet-400 bg-violet-500/10 border-violet-500/20",
+      hoverBg: "hover:bg-violet-500/5"
+    }
+  ];
 
-      {/* ✅ Generate Contract */}
-      <button 
-        onClick={onGenerateContract}
-        className="w-full flex items-center gap-3 p-3 rounded-xl bg-violet-500/5 border border-violet-500/20 hover:bg-violet-500/10 transition-colors text-left group"
-      >
-        <div className="w-9 h-9 rounded-lg bg-[var(--color-surface)] border border-[var(--color-surface-border)] flex items-center justify-center text-violet-600 dark:text-violet-400 shadow-sm transition-transform group-hover:scale-105">
-          <FileText size={16} />
-        </div>
-        <div>
-          <p className="text-sm font-bold text-[var(--color-ink)]">Generate Contract</p>
-          <p className="text-xs text-[var(--color-ink-muted)]">Create rental agreement</p>
-        </div>
-      </button>
+  return (
+    <div className="space-y-2.5">
+      {actions.map((action, index) => {
+        const Icon = action.icon;
+        return (
+          <button
+            key={index}
+            onClick={action.onClick}
+            className="group w-full flex items-center gap-3 p-3 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] hover:border-[var(--color-primary)]/20 transition-all duration-200 hover:shadow-sm text-left"
+          >
+            {/* Icon with gradient background matching Activity Feed style */}
+            <div className={`relative flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center transition-all ${action.color} border`}>
+              <Icon size={15} />
+            </div>
+            
+            {/* Text content */}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-bold text-[var(--color-ink)]">{action.label}</p>
+              <p className="text-[11px] text-[var(--color-ink-muted)] truncate">{action.description}</p>
+            </div>
+            
+            {/* Chevron indicator matching Activity Feed */}
+            <ChevronRight 
+              size={14} 
+              className="text-[var(--color-ink-faint)] group-hover:text-[var(--color-primary)] group-hover:translate-x-0.5 transition-all flex-shrink-0" 
+            />
+          </button>
+        );
+      })}
     </div>
   );
 }

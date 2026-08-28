@@ -14,6 +14,7 @@ import {
   PenLine,
   CheckCircle2,
   ChevronRight,
+  ArrowUpRight,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import DataTable, { RowAction } from "@/components/ui/DataTable";
@@ -141,16 +142,44 @@ export default function ContractsTable({
     return actions;
   };
 
+  // ✅ Helper to get the Primary Action Button based on status
+  const getPrimaryAction = (contract: ContractItem) => {
+    if (contract.status === "draft") {
+      return {
+        label: "Send Contract",
+        icon: Send,
+        onClick: () => onSend(contract.id),
+      };
+    }
+    if (contract.status === "sent") {
+      return {
+        label: "Download PDF",
+        icon: Download,
+        onClick: () => onDownload(contract.id),
+      };
+    }
+    if (contract.status === "void") {
+      return null;
+    }
+    // Signed
+    return {
+      label: "Download PDF",
+      icon: Download,
+      onClick: () => onDownload(contract.id),
+    };
+  };
+
   return (
     <div className="w-full">
-      {/* ✅ MOBILE: Premium Contract CardGrid */}
+      {/* ✅ MOBILE: Premium Contract CardGrid with Glass Effect */}
       <div className="block md:hidden">
         <CardGrid
           data={mobileItems}
           getCardId={(c) => c.id}
           compact={true}
-          cardClassName="!p-2.5 hover:!border-[var(--color-primary)]/30 hover:shadow-md transition-all duration-200"
-          containerClassName="px-2 pb-2"
+          showGlassEffect={true}
+          cardClassName="!p-3 hover:!border-[var(--color-primary)]/40 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] transition-all duration-300"
+          containerClassName="px-2 pb-4"
           maxHeight="calc(100vh - 160px)"
           
           renderCardHeader={({ item }) => {
@@ -163,102 +192,103 @@ export default function ContractsTable({
                   }
                 }}
               >
-                <div className="flex items-center gap-2 min-w-0 flex-1">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  {/* Premium Icon Container with Glow */}
                   <div className="relative flex-shrink-0">
-                    <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center">
-                      <FileText size={14} className="text-[var(--color-primary)]" />
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center shadow-md">
+                      <FileText size={16} className="text-[var(--color-primary)]" />
                     </div>
+                    {/* Live Status Indicator */}
                     <div className="absolute -top-0.5 -right-0.5">
-                      <div className={`w-2 h-2 rounded-full ${
+                      <div className={`w-3 h-3 rounded-full ${
                         item.status === 'signed' ? 'bg-emerald-500' :
                         item.status === 'sent' ? 'bg-blue-500' :
                         item.status === 'draft' ? 'bg-amber-500' :
                         'bg-red-500'
-                      } ring-1 ring-[var(--color-surface)]`} />
+                      } ring-2 ring-[var(--color-surface)] shadow-sm`} />
                     </div>
                   </div>
                   
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-bold text-[var(--color-ink)] truncate">
+                      <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
                         {item.contract_number || `C20260${item.id}`}
                       </span>
                     </div>
-                    <div className="flex items-center gap-0.5 mt-0.5">
-                      <User size={9} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                      <span className="text-[9px] text-[var(--color-ink-muted)] truncate">
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <User size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                      <span className="text-[10px] text-[var(--color-ink-muted)] truncate">
                         {item.client_name || "Unassigned Client"}
                       </span>
                     </div>
                   </div>
                 </div>
                 
-                <ChevronRight size={14} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <ChevronRight size={16} className="text-[var(--color-ink-subtle)]" />
+                </div>
               </div>
             );
           }}
           
           renderCardBody={({ item }) => {
-            const isVoid = item.status === "void";
+            const primaryAction = getPrimaryAction(item);
             
             return (
-              <div className="mt-1.5 pt-1.5 border-t border-[var(--color-surface-border)]/50">
-                <div className="flex items-center gap-2">
-                  {/* Booking Reference */}
-                  <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                    <span className="text-[10px] font-bold text-[var(--color-ink-muted)] flex-shrink-0">BK</span>
-                    <div className="min-w-0">
-                      <p className="text-[11px] font-semibold text-[var(--color-ink)] truncate leading-tight font-mono">
-                        {item.booking_number ? `#${item.booking_number}` : "—"}
-                      </p>
-                      <span className="text-[8px] text-[var(--color-ink-muted)] font-medium">
-                        Booking Ref
-                      </span>
-                    </div>
+              <div className="mt-3 pt-3 border-t border-[var(--color-surface-border)]/60">
+                
+                {/* Key Details Section */}
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <span className="text-[9px] font-semibold text-[var(--color-ink-subtle)] uppercase tracking-wider mb-0.5">
+                      Booking Ref
+                    </span>
+                    <p className="text-xs font-bold text-[var(--color-ink)] truncate font-mono">
+                      {item.booking_number ? `#${item.booking_number}` : "—"}
+                    </p>
                   </div>
 
-                  {/* Date */}
-                  <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                    <CalendarDays size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-[11px] font-semibold text-[var(--color-ink)] truncate leading-tight">
-                        {item.signed_at ? formatDateShort(item.signed_at) : formatDateShort(item.created_at)}
-                      </p>
-                      <span className="text-[8px] text-[var(--color-ink-muted)] font-medium">
-                        {item.signed_at ? 'Signed' : 'Created'}
-                      </span>
-                    </div>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <CalendarDays size={11} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                    <span className="text-[10px] font-semibold text-[var(--color-ink-muted)]">
+                      {item.signed_at ? formatDateShort(item.signed_at) : formatDateShort(item.created_at)}
+                    </span>
+                    <span className="text-[8px] text-[var(--color-ink-subtle)]">
+                      ({item.signed_at ? 'Signed' : 'Created'})
+                    </span>
                   </div>
                 </div>
 
-                {/* Status + Actions */}
-                <div className="mt-1.5 pt-1.5 border-t border-[var(--color-surface-border)]/50 flex items-center justify-between">
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-bold uppercase ${
+                {/* Status Pill */}
+                <div className="flex items-center justify-between mb-3">
+                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wide ${
                     item.status === 'signed' ? 'bg-[var(--color-success-bg)] text-[var(--color-success-text)]' :
                     item.status === 'sent' ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400' :
                     item.status === 'draft' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' :
                     'bg-[var(--color-danger-bg)] text-[var(--color-danger-text)]'
-                  }`}>
-                    {item.status === 'signed' && <CheckCircle2 size={8} className="flex-shrink-0" />}
-                    {item.status === 'sent' && <Send size={8} className="flex-shrink-0" />}
-                    {item.status === 'draft' && <PenLine size={8} className="flex-shrink-0" />}
-                    {item.status === 'void' && <Ban size={8} className="flex-shrink-0" />}
+                  } shadow-sm`}>
+                    {item.status === 'signed' && <CheckCircle2 size={9} className="flex-shrink-0 opacity-90" />}
+                    {item.status === 'sent' && <Send size={9} className="flex-shrink-0 opacity-90" />}
+                    {item.status === 'draft' && <PenLine size={9} className="flex-shrink-0 opacity-90" />}
+                    {item.status === 'void' && <Ban size={9} className="flex-shrink-0 opacity-90" />}
                     {statusLabels[item.status]}
                   </span>
-                  
-                  {!isVoid && (
-                    <button
-                      onClick={(e) => { 
-                        e.stopPropagation(); 
-                        onDownload(item.id); 
-                      }}
-                      className="text-[10px] font-semibold text-[var(--color-primary)] hover:underline flex items-center gap-1"
-                    >
-                      <Download size={11} />
-                      PDF
-                    </button>
-                  )}
                 </div>
+
+                {/* Premium Primary Action Button */}
+                {primaryAction && (
+                  <button
+                    onClick={(e) => { 
+                      e.stopPropagation(); 
+                      primaryAction.onClick(); 
+                    }}
+                    className="w-full mt-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 border border-[var(--color-primary)]/20 text-[var(--color-primary-text)] transition-all active:scale-[0.98] text-[11px] font-bold"
+                  >
+                    {primaryAction.icon && <primaryAction.icon size={13} />}
+                    {primaryAction.label}
+                    <ArrowUpRight size={13} className="opacity-70" />
+                  </button>
+                )}
               </div>
             );
           }}

@@ -83,7 +83,7 @@ const formatTimeAgo = (dateString: string) => {
 /**
  * ✅ CHROME-FREE FEED: renders ONLY the cards (and footer).
  * The parent container (OverviewTab) owns the card chrome.
- * ✅ VIEWPORT: shows ~3 cards max; extra cards scroll inside the container.
+ * ✅ VIEWPORT: shows 3 full cards + half of the 4th card to indicate scrollability.
  */
 export default function ActivityFeed({ activities, limit = 10 }: ActivityFeedProps) {
   const router = useRouter();
@@ -103,84 +103,87 @@ export default function ActivityFeed({ activities, limit = 10 }: ActivityFeedPro
     );
   }
 
-  // ✅ CARDS ONLY — 3-card visible window, scroll for the rest
+  // ✅ CARDS ONLY — 3 full cards + half of 4th card visible, scroll for the rest
   return (
     <>
-      <div className="p-2">
-        <CardGrid
-          data={displayedActivities}
-          getCardId={(activity) => activity.id}
-          compact={true}
-          cardClassName="!p-2.5 hover:!border-[var(--color-primary)]/30 hover:shadow-md transition-all duration-200"
-          /* ✅ ~3 compact cards visible (≈300px); anything beyond scrolls */
-          containerClassName="max-h-[300px] overflow-y-auto custom-scrollbar"
-          
-          renderCardHeader={({ item }) => {
-            const Icon = getActivityIcon(item.type);
-            const colorClass = getActivityColor(item.type);
-            const emoji = getActivityEmoji(item.type);
+      {/* ✅ Wrapper with fixed height and scrolling */}
+      <div className="max-h-[260px] overflow-y-auto custom-scrollbar">
+        <div className="p-2">
+          <CardGrid
+            data={displayedActivities}
+            getCardId={(activity) => activity.id}
+            compact={true}
+            cardClassName="!p-2.5 hover:!border-[var(--color-primary)]/30 hover:shadow-md transition-all duration-200"
+            // ✅ Remove container height constraint - let the wrapper control it
+            containerClassName="[&>div]:space-y-1.5"
             
-            return (
-              <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                <div className={`relative flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all ${colorClass} border`}>
-                  <Icon size={15} />
+            renderCardHeader={({ item }) => {
+              const Icon = getActivityIcon(item.type);
+              const colorClass = getActivityColor(item.type);
+              const emoji = getActivityEmoji(item.type);
+              
+              return (
+                <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                  <div className={`relative flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all ${colorClass} border`}>
+                    <Icon size={15} />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm font-bold text-[var(--color-ink)] truncate">
+                        {item.title}
+                      </span>
+                      <span className="text-xs sm:hidden">{emoji}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 mt-0.5">
+                      <span className="text-xs text-[var(--color-ink-muted)] truncate">
+                        {item.description}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="min-w-0 flex-1">
+              );
+            }}
+            
+            renderCardBody={({ item }) => {
+              return (
+                <div className="mt-1.5 pt-1.5 border-t border-[var(--color-surface-border)]/50 flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-sm font-bold text-[var(--color-ink)] truncate">
-                      {item.title}
-                    </span>
-                    <span className="text-xs sm:hidden">{emoji}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="text-xs text-[var(--color-ink-muted)] truncate">
-                      {item.description}
+                    <Clock size={11} className="text-[var(--color-ink-subtle)]" />
+                    <span className="text-[10px] font-medium text-[var(--color-ink-muted)]">
+                      {formatTimeAgo(item.timestamp)}
                     </span>
                   </div>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(item.link);
+                    }}
+                    className="inline-flex items-center gap-0.5 text-[10px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity group"
+                  >
+                    View
+                    <ChevronRight size={11} className="group-hover:translate-x-0.5 transition-transform" />
+                  </button>
                 </div>
-              </div>
-            );
-          }}
-          
-          renderCardBody={({ item }) => {
-            return (
-              <div className="mt-1.5 pt-1.5 border-t border-[var(--color-surface-border)]/50 flex items-center justify-between">
-                <div className="flex items-center gap-1.5">
-                  <Clock size={11} className="text-[var(--color-ink-subtle)]" />
-                  <span className="text-[10px] font-medium text-[var(--color-ink-muted)]">
-                    {formatTimeAgo(item.timestamp)}
-                  </span>
-                </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    router.push(item.link);
-                  }}
-                  className="inline-flex items-center gap-0.5 text-[10px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity group"
-                >
-                  View
-                  <ChevronRight size={11} className="group-hover:translate-x-0.5 transition-transform" />
-                </button>
-              </div>
-            );
-          }}
-          
-          onCardClick={(item) => router.push(item.link)}
-        />
-      </div>
-
-      {/* Footer - Only show if there are more activities than the scroll window holds */}
-      {activities.length > limit && (
-        <div className="px-4 py-2.5 border-t border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/30 text-center">
-          <button
-            onClick={() => router.push("/dashboard/activity")}
-            className="inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity"
-          >
-            View all {activities.length} activities
-            <ChevronRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
-          </button>
+              );
+            }}
+            
+            onCardClick={(item) => router.push(item.link)}
+          />
         </div>
-      )}
+
+        {/* Footer - Only show if there are more activities than the scroll window holds */}
+        {activities.length > limit && (
+          <div className="px-4 py-2.5 border-t border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/30 text-center">
+            <button
+              onClick={() => router.push("/dashboard/activity")}
+              className="inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity"
+            >
+              View all {activities.length} activities
+              <ChevronRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+            </button>
+          </div>
+        )}
+      </div>
     </>
   );
 }

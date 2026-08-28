@@ -32,9 +32,11 @@ export default function BookingsListMobile({
         data={bookings}
         getCardId={(booking) => booking.id}
         compact={true}
-        cardClassName="!p-2.5 hover:!border-[var(--color-primary)]/30 hover:shadow-md transition-all duration-200"
-        containerClassName="px-2 pb-2"
+        showGlassEffect={true}
+        cardClassName="!p-3 hover:!border-[var(--color-primary)]/40 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] transition-all duration-300"
+        containerClassName="px-2 pb-4"
         maxHeight="calc(100vh - 160px)"
+        
         renderCardHeader={({ item }) => {
           const statusColor = statusDotColors[item.status] || "bg-gray-400";
           const isPulsing = item.status === "confirmed" || item.status === "active";
@@ -45,13 +47,14 @@ export default function BookingsListMobile({
               className="flex items-center justify-between w-full cursor-pointer"
               onClick={() => router.push(`/dashboard/bookings/${item.id}`)}
             >
-              <div className="flex items-center gap-2 min-w-0 flex-1">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                {/* Premium Icon Container */}
                 <div className="relative flex-shrink-0">
-                  <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center">
-                    <CalendarDays size={14} className="text-[var(--color-primary)]" />
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center shadow-md">
+                    <CalendarDays size={16} className="text-[var(--color-primary)]" />
                   </div>
                   <div className="absolute -top-0.5 -right-0.5">
-                    <div className={`w-2 h-2 rounded-full ${statusColor} ring-1 ring-[var(--color-surface)] ${
+                    <div className={`w-3 h-3 rounded-full ${statusColor} ring-2 ring-[var(--color-surface)] shadow-sm ${
                       isPulsing ? "animate-pulse" : ""
                     }`} />
                   </div>
@@ -59,45 +62,53 @@ export default function BookingsListMobile({
                 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-bold text-[var(--color-ink)] truncate">
+                    <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
                       {item.booking_number || `BK-${item.id}`}
                     </span>
-                    <span className="text-[8px] font-medium text-[var(--color-ink-muted)] px-1.5 py-0.5 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] whitespace-nowrap">
+                    <span className="text-[8px] font-bold text-[var(--color-ink-muted)] px-1.5 py-0.5 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] whitespace-nowrap uppercase tracking-wide">
                       {statusLabel}
                     </span>
                   </div>
                   <div className="flex items-center gap-1 mt-0.5">
-                    <span className="text-[9px] text-[var(--color-ink-muted)] font-medium">
+                    <CalendarDays size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                    <span className="text-[10px] text-[var(--color-ink-muted)] font-medium">
                       {formatDateShort(item.start_date)}
                     </span>
-                    <span className="text-[8px] text-[var(--color-ink-subtle)]">→</span>
-                    <span className="text-[9px] text-[var(--color-ink-muted)] font-medium">
+                    <span className="text-[9px] text-[var(--color-ink-subtle)]">→</span>
+                    <span className="text-[10px] text-[var(--color-ink-muted)] font-medium">
                       {formatDateShort(item.end_date)}
                     </span>
                   </div>
                 </div>
               </div>
               
-              <ChevronRight size={14} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
+              {/* Smooth Chevron */}
+              <ChevronRight size={16} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
             </div>
           );
         }}
+        
         renderCardBody={({ item }) => {
           const client = getClient(clientMap, item.client_id);
           const vehicle = getVehicle(vehicleMap, item.vehicle_id);
           
           return (
-            <div className="mt-1.5 pt-1.5 border-t border-[var(--color-surface-border)]/50">
-              <div className="flex items-center gap-3">
+            <div className="mt-3 pt-3 border-t border-[var(--color-surface-border)]/60">
+              
+              {/* Client & Vehicle Section - Compact, Clean */}
+              <div className="flex items-center justify-between gap-4">
+                
                 {/* Client */}
-                <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                  <Phone size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                <div className="flex items-center gap-2 min-w-0 flex-1">
+                  <div className="w-7 h-7 rounded-lg bg-[var(--color-surface-hover)]/80 flex items-center justify-center flex-shrink-0">
+                    <Phone size={12} className="text-[var(--color-ink-subtle)]" />
+                  </div>
                   <div className="min-w-0">
-                    <p className="text-[11px] font-semibold text-[var(--color-ink)] truncate leading-tight">
+                    <p className="text-xs font-semibold text-[var(--color-ink)] truncate leading-tight">
                       {client?.full_name || `Client #${item.client_id}`}
                     </p>
                     {client?.phone && (
-                      <span className="text-[8px] text-[var(--color-ink-muted)] font-medium">
+                      <span className="text-[9px] text-[var(--color-ink-muted)] font-medium">
                         {client.phone}
                       </span>
                     )}
@@ -105,33 +116,37 @@ export default function BookingsListMobile({
                 </div>
 
                 {/* Vehicle */}
-                <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                  <Car size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-[11px] font-semibold text-[var(--color-ink)] truncate leading-tight">
+                <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
+                  <div className="min-w-0 text-right">
+                    <p className="text-xs font-semibold text-[var(--color-ink)] truncate leading-tight">
                       {vehicle ? `${vehicle.make} ${vehicle.model}` : `Vehicle #${item.vehicle_id}`}
                     </p>
                     {vehicle?.plate_number && (
-                      <span className="text-[8px] font-mono font-bold text-[var(--color-ink-muted)]">
+                      <span className="text-[9px] font-mono font-bold text-[var(--color-ink-muted)]">
                         {vehicle.plate_number}
                       </span>
                     )}
                   </div>
+                  <div className="w-7 h-7 rounded-lg bg-[var(--color-surface-hover)]/80 flex items-center justify-center flex-shrink-0">
+                    <Car size={12} className="text-[var(--color-ink-subtle)]" />
+                  </div>
                 </div>
               </div>
 
-              {/* Cost - with "Trip Total" label */}
-              <div className="mt-1.5 pt-1.5 border-t border-[var(--color-surface-border)]/50 flex items-center justify-between">
-                <span className="text-[8px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)]">
+              {/* Cost Section - Clean and Minimal */}
+              <div className="mt-3 pt-3 border-t border-[var(--color-surface-border)]/50 flex items-center justify-between">
+                <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)]">
                   Trip Total
                 </span>
-                <p className="text-xs font-bold text-[var(--color-primary-text)] tabular-nums">
+                <p className="text-base font-extrabold text-[var(--color-primary-text)] tabular-nums tracking-tight">
                   {item.currency_code} {Number(item.total_amount).toLocaleString()}
                 </p>
               </div>
+              
             </div>
           );
         }}
+        
         rowActions={getRowActions}
       />
     </div>

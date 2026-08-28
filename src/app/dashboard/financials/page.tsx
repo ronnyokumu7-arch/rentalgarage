@@ -1,7 +1,7 @@
 // src/app/dashboard/financials/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   FileText,
@@ -16,38 +16,10 @@ import PaymentsTab from "@/components/financials/PaymentsTab";
 import OverviewTab from "@/components/financials/OverviewTab";
 
 const TABS = [
-  { 
-    id: "overview", 
-    label: "Overview", 
-    icon: LayoutDashboard,
-    color: "from-blue-500/20 to-indigo-500/10",
-    borderColor: "border-blue-500/20",
-    textColor: "text-blue-600 dark:text-blue-400",
-  },
-  { 
-    id: "invoices", 
-    label: "Invoices", 
-    icon: Receipt,
-    color: "from-emerald-500/20 to-teal-500/10",
-    borderColor: "border-emerald-500/20",
-    textColor: "text-emerald-600 dark:text-emerald-400",
-  },
-  { 
-    id: "contracts", 
-    label: "Contracts", 
-    icon: FileText,
-    color: "from-violet-500/20 to-purple-500/10",
-    borderColor: "border-violet-500/20",
-    textColor: "text-violet-600 dark:text-violet-400",
-  },
-  { 
-    id: "payments", 
-    label: "Payments", 
-    icon: DollarSign,
-    color: "from-amber-500/20 to-orange-500/10",
-    borderColor: "border-amber-500/20",
-    textColor: "text-amber-600 dark:text-amber-400",
-  },
+  { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "invoices", label: "Invoices", icon: Receipt },
+  { id: "contracts", label: "Contracts", icon: FileText },
+  { id: "payments", label: "Payments", icon: DollarSign },
 ];
 
 // Quick stats for each tab
@@ -73,6 +45,89 @@ const TAB_STATS: Record<string, { label: string; value: string; change: string; 
     { label: "Failed", value: "KES 2,000", change: "-2", positive: true },
   ],
 };
+
+// ✅ REUSABLE: Premium Sliding Tab Switcher (Matches all other pages)
+function PremiumTabSwitcher({ activeTab, setActiveTab }: { activeTab: string; setActiveTab: (tab: string) => void }) {
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number; top: number; height: number } | null>(null);
+
+  useEffect(() => {
+    const updateIndicator = () => {
+      const activeEl = tabRefs.current[activeTab];
+      if (activeEl) {
+        const rect = activeEl.getBoundingClientRect();
+        const containerRect = activeEl.parentElement?.getBoundingClientRect();
+        if (containerRect) {
+          setIndicatorStyle({
+            left: rect.left - containerRect.left,
+            width: rect.width,
+            top: rect.top - containerRect.top,
+            height: rect.height,
+          });
+        }
+      }
+    };
+
+    updateIndicator();
+    window.addEventListener("resize", updateIndicator);
+    return () => window.removeEventListener("resize", updateIndicator);
+  }, [activeTab]);
+
+  return (
+    <div className="relative w-full sm:w-auto">
+      {/* Sliding Indicator Pill */}
+      {indicatorStyle && (
+        <div
+          className="absolute z-0 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 shadow-lg shadow-[var(--color-primary)]/10 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          style={{
+            left: indicatorStyle.left,
+            width: indicatorStyle.width,
+            top: indicatorStyle.top,
+            height: indicatorStyle.height,
+          }}
+        />
+      )}
+
+      {/* Tab Container - No Scrollbar, Snap Centering */}
+      <div 
+        className="relative z-10 flex items-center gap-1 overflow-x-auto pb-0.5 pt-0.5 scrollbar-hide snap-x snap-mandatory"
+        style={{
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
+      >
+        {TABS.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          
+          return (
+            <button
+              key={tab.id}
+              ref={(el) => { tabRefs.current[tab.id] = el; }}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`
+                relative flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all duration-300 
+                whitespace-nowrap touch-manipulation cursor-pointer snap-center flex-shrink-0
+                ${isActive 
+                  ? "text-[var(--color-ink)]" 
+                  : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]/50"
+                }
+              `}
+            >
+              <Icon size={isActive ? 16 : 14} className={`transition-all duration-300 ${isActive ? "text-[var(--color-primary)]" : "opacity-70"}`} />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
+      
+      {/* Subtle bottom border line */}
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-[var(--color-surface-border)]/50 -z-10" />
+    </div>
+  );
+}
 
 export default function FinancialsPage() {
   const router = useRouter();
@@ -103,7 +158,7 @@ export default function FinancialsPage() {
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            <div className={`w-11 h-11 rounded-2xl bg-gradient-to-br ${currentTab.color} border ${currentTab.borderColor} flex items-center justify-center ${currentTab.textColor} flex-shrink-0`}>
+            <div className="w-11 h-11 rounded-2xl bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)] flex-shrink-0">
               <currentTab.icon size={22} />
             </div>
             <div>
@@ -137,40 +192,11 @@ export default function FinancialsPage() {
         </div>
       </div>
 
-      {/* Premium Tab Navigation - No Restraining Container */}
-      <div className="flex items-center gap-1 overflow-x-auto pb-1 custom-scrollbar">
-        {TABS.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => handleTabChange(tab.id)}
-              className={`
-                relative flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 
-                whitespace-nowrap touch-manipulation cursor-pointer flex-shrink-0
-                ${isActive 
-                  ? `bg-gradient-to-br ${tab.color} text-[var(--color-ink)] shadow-sm border ${tab.borderColor}` 
-                  : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]/50"
-                }
-              `}
-            >
-              <Icon size={isActive ? 16 : 14} className={`transition-all duration-300 ${isActive ? tab.textColor : ""}`} />
-              <span>{tab.label}</span>
-              
-              {/* Active indicator dot */}
-              {isActive && (
-                <span className="absolute -bottom-0.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]" />
-              )}
-            </button>
-          );
-        })}
-      </div>
+      {/* ✅ Premium Sliding Tab Switcher */}
+      <PremiumTabSwitcher activeTab={activeTab} setActiveTab={handleTabChange} />
 
       {/* Tab Content Area */}
-      <div className="animate-in fade-in duration-200 min-h-[400px]">
+      <div className="animate-in fade-in duration-200 min-h-[400px] pt-2">
         {activeTab === "overview" && <OverviewTab />}
         {activeTab === "invoices" && <InvoicesTab />}
         {activeTab === "contracts" && <ContractsTab />}

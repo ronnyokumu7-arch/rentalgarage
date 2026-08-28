@@ -2,7 +2,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FileText, Download, Copy, DollarSign, XCircle, ExternalLink, Banknote, CalendarDays, User, PenLine, Send, CheckCircle2, AlertCircle, ChevronRight } from "lucide-react";
+import { FileText, Download, Copy, DollarSign, XCircle, ExternalLink, Banknote, CalendarDays, User, PenLine, Send, CheckCircle2, AlertCircle, ChevronRight, ArrowUpRight } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import DataTable, { RowAction } from "@/components/ui/DataTable";
 import CardGrid from "@/components/ui/CardGrid";
@@ -45,7 +45,7 @@ const statusLabels: Record<string, string> = {
   void: "Void",
 };
 
-// ✅ Solid, saturated dot colors so the status pops on dark mode
+// ✅ Solid, saturated dot colors so the status pops
 const getStatusDotColor = (status: string) => {
   switch (status) {
     case "paid": return "bg-emerald-500";
@@ -121,14 +121,15 @@ export default function InvoicesTable({
 
   return (
     <div className="w-full">
-      {/* ✅ MOBILE: Premium Invoice CardGrid */}
+      {/* ✅ MOBILE: Premium Money-Magnet CardGrid */}
       <div className="block md:hidden">
         <CardGrid
           data={data}
           getCardId={(invoice) => invoice.id}
           compact={true}
-          cardClassName="!p-2.5 hover:!border-[var(--color-primary)]/30 hover:shadow-md transition-all duration-200"
-          containerClassName="px-2 pb-2"
+          showGlassEffect={true} // ✅ Enable the premium glass effect
+          cardClassName="!p-3 hover:!border-[var(--color-primary)]/40 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] transition-all duration-300"
+          containerClassName="px-2 pb-4"
           maxHeight="calc(100vh - 160px)"
           
           renderCardHeader={({ item }) => {
@@ -145,32 +146,36 @@ export default function InvoicesTable({
                   }
                 }}
               >
-                <div className="flex items-center gap-2 min-w-0 flex-1">
+                <div className="flex items-center gap-3 min-w-0 flex-1">
+                  {/* Premium Icon Container with Glow */}
                   <div className="relative flex-shrink-0">
-                    <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center">
-                      <FileText size={14} className="text-[var(--color-primary)]" />
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center shadow-md">
+                      <FileText size={16} className="text-[var(--color-primary)]" />
                     </div>
+                    {/* Live Status Indicator */}
                     <div className="absolute -top-0.5 -right-0.5">
-                      <div className={`w-2 h-2 rounded-full ${dotColor} ring-1 ring-[var(--color-surface)]`} />
+                      <div className={`w-3 h-3 rounded-full ${dotColor} ring-2 ring-[var(--color-surface)] shadow-sm`} />
                     </div>
                   </div>
                   
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-xs font-bold text-[var(--color-ink)] truncate">
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
                         {item.invoice_number}
                       </span>
                     </div>
-                    <div className="flex items-center gap-0.5 mt-0.5">
-                      <User size={9} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                      <span className="text-[9px] text-[var(--color-ink-muted)] truncate">
+                    <div className="flex items-center gap-1 mt-0.5">
+                      <User size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                      <span className="text-[10px] text-[var(--color-ink-muted)] truncate">
                         {clientName}
                       </span>
                     </div>
                   </div>
                 </div>
                 
-                <ChevronRight size={14} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <ChevronRight size={16} className="text-[var(--color-ink-subtle)]" />
+                </div>
               </div>
             );
           }}
@@ -191,61 +196,64 @@ export default function InvoicesTable({
               : statusLabels[item.status];
 
             return (
-              <div className="mt-1.5 pt-1.5 border-t border-[var(--color-surface-border)]/50">
-                <div className="flex items-center gap-2">
-                  {/* Booking Reference */}
-                  <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                    <span className="text-[10px] font-bold text-[var(--color-ink-muted)] flex-shrink-0">BK</span>
-                    <div className="min-w-0">
-                      <p className="text-[11px] font-semibold text-[var(--color-ink)] truncate leading-tight font-mono">
+              <div className="mt-3 pt-3 border-t border-[var(--color-surface-border)]/60">
+                
+                {/* Big Money Section */}
+                <div className="flex items-center justify-between mb-2">
+                  <div className="min-w-0">
+                    <p className="text-[9px] font-semibold text-[var(--color-ink-subtle)] uppercase tracking-wider mb-0.5">
+                      Amount Due
+                    </p>
+                    <p className="text-lg font-extrabold text-[var(--color-ink)] leading-none tabular-nums tracking-tight">
+                      {currency} {amountDue.toLocaleString()}
+                    </p>
+                    {isPartiallyPaid && (
+                      <p className="text-[10px] font-bold text-[var(--color-warning-text)] mt-1 tabular-nums">
+                        Balance: {remaining.toLocaleString()}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Booking Reference Pill */}
+                  <div className="flex flex-col items-end gap-1">
+                    <div className="flex items-center gap-1.5 bg-[var(--color-surface-hover)] px-2.5 py-1 rounded-full border border-[var(--color-surface-border)]/50">
+                      <span className="text-[9px] font-bold text-[var(--color-ink-muted)]">BK</span>
+                      <span className="text-[10px] font-semibold text-[var(--color-ink)] font-mono">
                         {bookingRef}
-                      </p>
-                      <span className="text-[8px] text-[var(--color-ink-muted)] font-medium">
-                        Booking Ref
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Amount */}
-                  <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                    <DollarSign size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-[11px] font-semibold text-[var(--color-ink)] truncate leading-tight tabular-nums">
-                        {currency} {amountDue.toLocaleString()}
-                      </p>
-                      <span className="text-[8px] text-[var(--color-ink-muted)] font-medium">
-                        {isPartiallyPaid ? `Bal: ${remaining.toLocaleString()}` : 'Amount Due'}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                {/* Due Date */}
-                <div className="mt-1 flex items-center gap-1.5">
-                  <CalendarDays size={9} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                  <span className={`text-[9px] font-medium ${item.status === 'overdue' ? 'text-[var(--color-danger-text)] font-semibold' : 'text-[var(--color-ink-muted)]'}`}>
-                    {formatDate(item.due_date)}
-                  </span>
-                </div>
+                {/* Due Date & Status Row */}
+                <div className="flex items-center justify-between mt-2">
+                  {/* Due Date */}
+                  <div className="flex items-center gap-1.5">
+                    <CalendarDays size={11} className={item.status === 'overdue' ? 'text-[var(--color-danger-text)]' : 'text-[var(--color-ink-subtle)]'} />
+                    <span className={`text-[10px] font-medium ${item.status === 'overdue' ? 'text-[var(--color-danger-text)] font-bold' : 'text-[var(--color-ink-muted)]'}`}>
+                      {formatDate(item.due_date)}
+                    </span>
+                  </div>
 
-                {/* Status + Actions */}
-                <div className="mt-1.5 pt-1.5 border-t border-[var(--color-surface-border)]/50 flex items-center justify-between">
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-bold uppercase ${style.bg} ${style.text}`}>
-                    <StatusIcon size={8} className="flex-shrink-0 opacity-80" />
+                  {/* Status Pill */}
+                  <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wide ${style.bg} ${style.text} shadow-sm`}>
+                    <StatusIcon size={9} className="flex-shrink-0 opacity-90" />
                     {statusLabel}
                   </span>
-                  
-                  <button
-                    onClick={(e) => { 
-                      e.stopPropagation(); 
-                      onDownload(item.id); 
-                    }}
-                    className="text-[10px] font-semibold text-[var(--color-primary)] hover:underline flex items-center gap-1"
-                  >
-                    <Download size={11} />
-                    PDF
-                  </button>
                 </div>
+
+                {/* Premium Action Button (Download) */}
+                <button
+                  onClick={(e) => { 
+                    e.stopPropagation(); 
+                    onDownload(item.id); 
+                  }}
+                  className="w-full mt-3 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 border border-[var(--color-primary)]/20 text-[var(--color-primary-text)] transition-all active:scale-[0.98] text-[11px] font-bold"
+                >
+                  <Download size={13} />
+                  Download Invoice
+                  <ArrowUpRight size={13} className="opacity-70" />
+                </button>
               </div>
             );
           }}

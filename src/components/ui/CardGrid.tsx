@@ -38,6 +38,8 @@ interface CardGridProps<T> {
   onCardClick?: (item: T) => void;
   maxHeight?: string | number;
   containerClassName?: string;
+  // ✅ NEW: Premium glassmorphism effect
+  showGlassEffect?: boolean;
 }
 
 export default function CardGrid<T>({
@@ -59,9 +61,12 @@ export default function CardGrid<T>({
   onCardClick,
   maxHeight = "calc(100vh - 200px)",
   containerClassName = "",
+  // ✅ NEW: Default to false for backward compatibility
+  showGlassEffect = false,
 }: CardGridProps<T>) {
   const [openActionId, setOpenActionId] = useState<string | number | null>(null);
   const [dropdownPos, setDropdownPos] = useState<{ top: number; right: number } | null>(null);
+  const [touchAnchor, setTouchAnchor] = useState<{ x: number; y: number } | null>(null);
   const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const actionButtonRef = useRef<HTMLButtonElement | null>(null);
@@ -173,7 +178,12 @@ export default function CardGrid<T>({
     return { top, right };
   }, [data, getCardId, openActionId, rowActions]);
 
-  const handleToggleActions = useCallback((e: React.MouseEvent | React.TouchEvent, item: T) => {
+  // ✅ FIXED: Added touchPoint parameter to bypass e.touches bug
+  const handleToggleActions = useCallback((
+    e: React.MouseEvent | React.TouchEvent, 
+    item: T, 
+    touchPoint?: { x: number; y: number }
+  ) => {
     e.stopPropagation();
     e.preventDefault();
     
@@ -182,19 +192,24 @@ export default function CardGrid<T>({
     if (openActionId === id) {
       setOpenActionId(null);
       setDropdownPos(null);
+      setTouchAnchor(null);
       return;
     }
 
-    // On mobile, we don't need to calculate position - just open the bottom sheet
+    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+
+    // ✅ Mobile: Anchor the animation to click coordinates (using passed touchPoint)
     if (isMobile) {
+      const clientX = touchPoint?.x ?? rect.left + rect.width / 2;
+      const clientY = touchPoint?.y ?? rect.top + rect.height / 2;
+      
+      setTouchAnchor({ x: clientX, y: clientY });
       setOpenActionId(id);
       setDropdownPos(null);
       return;
     }
 
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
     const position = calculateDropdownPosition(rect);
-    
     setOpenActionId(id);
     setDropdownPos(position);
   }, [getCardId, openActionId, calculateDropdownPosition, isMobile]);
@@ -260,6 +275,7 @@ export default function CardGrid<T>({
           onClick={() => {
             setOpenActionId(null);
             setDropdownPos(null);
+            setTouchAnchor(null);
             
             if (typeof action.onClick === "function") {
               action.onClick(item);
@@ -267,8 +283,8 @@ export default function CardGrid<T>({
           }}
           disabled={action.disabled}
           className={`
-            w-full flex items-center gap-3 px-4 py-3.5 text-sm font-medium rounded-xl transition-colors
-            touch-manipulation min-h-[48px]
+            w-full flex items-center gap-3 px-4 py-4 text-sm font-medium rounded-xl transition-colors
+            touch-manipulation min-h-[52px]
             ${action.disabled
               ? "text-[var(--color-ink-subtle)] cursor-not-allowed"
               : action.variant === "danger"
@@ -318,8 +334,11 @@ export default function CardGrid<T>({
                 <div
                   key={id}
                   className={`
-                    rounded-xl bg-[var(--color-surface-hover)]/40 
-                    border border-[var(--color-surface-border)] 
+                    rounded-xl 
+                    ${showGlassEffect 
+                      ? 'bg-[var(--color-surface)]/80 backdrop-blur-xl border border-[var(--color-surface-border)]/70 shadow-[0_8px_32px_rgba(0,0,0,0.08)]' 
+                      : 'bg-[var(--color-surface-hover)]/40 border border-[var(--color-surface-border)]'
+                    }
                     hover:border-[var(--color-primary)]/30 
                     transition-all shadow-sm
                     ${onCardClick ? 'cursor-pointer hover:shadow-md' : ''}
@@ -372,7 +391,11 @@ export default function CardGrid<T>({
                                 if (e.cancelable) {
                                   e.preventDefault();
                                 }
-                                handleToggleActions(e, item);
+                                // ✅ Pass the saved coordinates from touchStart to avoid crash
+                                handleToggleActions(e, item, {
+                                  x: touchStartPos.current.x,
+                                  y: touchStartPos.current.y,
+                                });
                               }
                             }
                             touchStartPos.current = null;
@@ -424,68 +447,95 @@ export default function CardGrid<T>({
         const actions = typeof rowActions === "function" ? rowActions(item) : rowActions || [];
         if (actions.length === 0) return null;
         
-        // Mobile: Bottom Sheet (similar to BottomNav's "More" drawer)
+        // Mobile: Premium Bottom Sheet (with anchor animation)
         if (isMobile) {
           return createPortal(
             <>
               {/* Backdrop */}
               <div 
-                className="fixed inset-0 z-[9998] bg-black/50 backdrop-blur-sm"
+                className="fixed inset-0 z-[9990] bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
                 onClick={() => {
                   setOpenActionId(null);
                   setDropdownPos(null);
+                  setTouchAnchor(null);
                 }}
                 onTouchStart={() => {
                   setOpenActionId(null);
                   setDropdownPos(null);
+                  setTouchAnchor(null);
                 }}
               />
               
               {/* Bottom Sheet */}
               <div
-                className="fixed bottom-0 left-0 right-0 z-[9999] bg-[var(--color-surface)] rounded-t-2xl border-t border-[var(--color-surface-border)] pb-[env(safe-area-inset-bottom,16px)] animate-in slide-in-from-bottom duration-300"
+                className="fixed left-0 right-0 z-[9999] bg-[var(--color-surface)] rounded-t-[28px] border-t border-[var(--color-surface-border)] 
+                shadow-[0_-20px_60px_rgba(0,0,0,0.3)] 
+                pb-[calc(env(safe-area-inset-bottom,16px)+16px)]"
+                style={{
+                  bottom: 0,
+                  animation: `sheetUp 350ms cubic-bezier(0.16, 1, 0.3, 1) forwards`,
+                  transformOrigin: touchAnchor ? `${touchAnchor.x}px ${touchAnchor.y}px` : 'center bottom',
+                }}
                 onClick={(e) => e.stopPropagation()}
                 onTouchStart={(e) => e.stopPropagation()}
                 role="dialog"
                 aria-label="Action menu"
               >
-                {/* Handle bar */}
-                <div className="flex justify-center pt-2 pb-1">
-                  <div className="w-12 h-1 rounded-full bg-[var(--color-surface-border)]" />
+                {/* Premium Handle Bar */}
+                <div className="flex justify-center pt-3 pb-2">
+                  <div className="w-12 h-1.5 rounded-full bg-[var(--color-surface-border)] opacity-60" />
                 </div>
                 
                 {/* Header */}
-                <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-surface-border)]">
-                  <span className="text-sm font-semibold text-[var(--color-ink)]">Actions</span>
+                <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--color-surface-border)]">
+                  <span className="text-base font-bold text-[var(--color-ink)]">Quick Actions</span>
                   <button
                     onClick={() => {
                       setOpenActionId(null);
                       setDropdownPos(null);
+                      setTouchAnchor(null);
                     }}
-                    className="p-1.5 rounded-lg hover:bg-[var(--color-surface-hover)] transition-colors"
+                    className="p-2 rounded-full bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-border)] transition-all active:scale-95"
                     aria-label="Close"
                   >
                     <X size={18} className="text-[var(--color-ink-muted)]" />
                   </button>
                 </div>
                 
-                {/* Actions List */}
-                <div className="p-2 max-h-[50vh] overflow-y-auto">
+                {/* Premium Actions List */}
+                <div className="p-3 max-h-[55vh] overflow-y-auto overscroll-contain">
                   {renderActionItems(item, true)}
                 </div>
               </div>
+              
+              {/* ✅ Inline style for spring animation */}
+              <style>{`
+                @keyframes sheetUp {
+                  0% { 
+                    transform: translateY(100%) scale(0.9); 
+                    opacity: 0.5;
+                  }
+                  60% {
+                    transform: translateY(-5px) scale(1.01);
+                  }
+                  100% { 
+                    transform: translateY(0) scale(1); 
+                    opacity: 1;
+                  }
+                }
+              `}</style>
             </>,
             document.body
           );
         }
         
-        // Desktop: Dropdown Menu
+        // Desktop: Premium Dropdown Menu
         if (dropdownPos) {
           return createPortal(
             <>
               {/* Backdrop */}
               <div 
-                className="fixed inset-0 z-[9998]" 
+                className="fixed inset-0 z-[9990]" 
                 onClick={() => {
                   setOpenActionId(null);
                   setDropdownPos(null);

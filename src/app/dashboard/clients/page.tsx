@@ -2,7 +2,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import {
   Users,
   Building2,
@@ -36,6 +36,97 @@ const TABS = [
   { id: "corporate", label: "Corporate", icon: Building2 },
   { id: "invites", label: "Invites", icon: Link2 },
 ];
+
+// ✅ GLOBAL: Shared status styles for both mobile and desktop
+const CLIENT_STATUS_STYLES: Record<string, { bg: string; text: string; dot: string; label: string }> = {
+  active: { bg: "bg-emerald-500/10", text: "text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500", label: "Active" },
+  pending: { bg: "bg-amber-500/10", text: "text-amber-600 dark:text-amber-400", dot: "bg-amber-500", label: "Pending" },
+  suspended: { bg: "bg-red-500/10", text: "text-red-600 dark:text-red-400", dot: "bg-red-500", label: "Suspended" },
+  inactive: { bg: "bg-gray-500/10", text: "text-gray-600 dark:text-gray-400", dot: "bg-gray-500", label: "Inactive" },
+};
+
+// ✅ REUSABLE: Premium Sliding Tab Switcher (Matches Financials page)
+function PremiumTabSwitcher({ activeTab, setActiveTab }: { activeTab: ClientSegment; setActiveTab: (tab: ClientSegment) => void }) {
+  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number; top: number; height: number } | null>(null);
+
+  useEffect(() => {
+    const updateIndicator = () => {
+      const activeEl = tabRefs.current[activeTab];
+      if (activeEl) {
+        const rect = activeEl.getBoundingClientRect();
+        const containerRect = activeEl.parentElement?.getBoundingClientRect();
+        if (containerRect) {
+          setIndicatorStyle({
+            left: rect.left - containerRect.left,
+            width: rect.width,
+            top: rect.top - containerRect.top,
+            height: rect.height,
+          });
+        }
+      }
+    };
+
+    updateIndicator();
+    window.addEventListener("resize", updateIndicator);
+    return () => window.removeEventListener("resize", updateIndicator);
+  }, [activeTab]);
+
+  return (
+    <div className="relative">
+      {/* Sliding Indicator Pill */}
+      {indicatorStyle && (
+        <div
+          className="absolute z-0 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 shadow-lg shadow-[var(--color-primary)]/10 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          style={{
+            left: indicatorStyle.left,
+            width: indicatorStyle.width,
+            top: indicatorStyle.top,
+            height: indicatorStyle.height,
+          }}
+        />
+      )}
+
+      {/* Tab Container - No Scrollbar, Snap Centering */}
+      <div 
+        className="relative z-10 flex items-center gap-1 overflow-x-auto pb-0.5 pt-0.5 scrollbar-hide snap-x snap-mandatory"
+        style={{
+          WebkitOverflowScrolling: 'touch',
+          scrollbarWidth: 'none',
+          msOverflowStyle: 'none',
+        }}
+      >
+        {TABS.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          
+          return (
+            <button
+              key={tab.id}
+              ref={(el) => { tabRefs.current[tab.id] = el; }}
+              type="button"
+              onClick={() => setActiveTab(tab.id as ClientSegment)}
+              className={`
+                relative flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all duration-300 
+                whitespace-nowrap touch-manipulation cursor-pointer snap-center flex-shrink-0
+                ${isActive 
+                  ? "text-[var(--color-ink)]" 
+                  : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]/50"
+                }
+              `}
+            >
+              <Icon size={isActive ? 16 : 14} className={`transition-all duration-300 ${isActive ? "text-[var(--color-primary)]" : "opacity-70"}`} />
+              <span>{tab.label}</span>
+            </button>
+          );
+        })}
+      </div>
+      
+      {/* Subtle bottom border line */}
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-[var(--color-surface-border)]/50 -z-10" />
+    </div>
+  );
+}
 
 export default function ClientsPage() {
   const router = useRouter();
@@ -137,25 +228,10 @@ export default function ClientsPage() {
               {currentTabInfo.description}
             </p>
           </div>
-          <div className="flex items-center gap-1 p-1 bg-[var(--color-surface)] rounded-xl border border-[var(--color-surface-border)] shadow-sm self-start sm:self-auto">
-            {TABS.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as ClientSegment)}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
-                    isActive
-                      ? "bg-[var(--color-primary)] text-white shadow-sm"
-                      : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"
-                  }`}
-                >
-                  <Icon size={14} />
-                  {tab.label}
-                </button>
-              );
-            })}
+          
+          {/* ✅ Premium Tab Switcher */}
+          <div className="self-start sm:self-auto">
+            <PremiumTabSwitcher activeTab={activeTab} setActiveTab={setActiveTab} />
           </div>
         </div>
         <ClientInvitesPanel />
@@ -178,25 +254,10 @@ export default function ClientsPage() {
               {currentTabInfo.description}
             </p>
           </div>
-          <div className="flex items-center gap-1 p-1 bg-[var(--color-surface)] rounded-xl border border-[var(--color-surface-border)] shadow-sm self-start sm:self-auto">
-            {TABS.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as ClientSegment)}
-                  className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
-                    isActive
-                      ? "bg-[var(--color-primary)] text-white shadow-sm"
-                      : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"
-                  }`}
-                >
-                  <Icon size={14} />
-                  {tab.label}
-                </button>
-              );
-            })}
+          
+          {/* ✅ Premium Tab Switcher */}
+          <div className="self-start sm:self-auto">
+            <PremiumTabSwitcher activeTab={activeTab} setActiveTab={setActiveTab} />
           </div>
         </div>
 
@@ -295,68 +356,65 @@ export default function ClientsPage() {
             </div>
           ) : (
             <>
-              {/* ✅ MOBILE: Premium Client CardGrid */}
+              {/* ✅ MOBILE: Premium Client CardGrid with Glass Effect */}
               <div className="block md:hidden">
                 <CardGrid
                   data={paginatedClients}
                   getCardId={(client) => client.id}
                   compact={true}
-                  cardClassName="!p-2.5 hover:!border-[var(--color-primary)]/30 hover:shadow-md transition-all duration-200"
-                  containerClassName="px-2 pb-2"
+                  showGlassEffect={true}
+                  cardClassName="!p-3 hover:!border-[var(--color-primary)]/40 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] transition-all duration-300"
+                  containerClassName="px-2 pb-4"
                   maxHeight="calc(100vh - 160px)"
                   
                   renderCardHeader={({ item }) => {
-                    const statusStyles: Record<string, { bg: string; label: string; dot: string }> = {
-                      pending: { bg: "bg-amber-500/10", label: "Pending", dot: "bg-amber-500" },
-                      suspended: { bg: "bg-red-500/10", label: "Suspended", dot: "bg-red-500" },
-                      inactive: { bg: "bg-gray-500/10", label: "Inactive", dot: "bg-gray-500" },
-                      active: { bg: "bg-emerald-500/10", label: "Active", dot: "bg-emerald-500" },
-                    };
-                    const style = statusStyles[item.status] || statusStyles.inactive;
+                    const style = CLIENT_STATUS_STYLES[item.status] || CLIENT_STATUS_STYLES.inactive;
                     
                     return (
                       <div 
                         className="flex items-center justify-between w-full cursor-pointer"
                         onClick={() => router.push(`/dashboard/clients/${item.id}`)}
                       >
-                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          {/* Premium Avatar with Glow */}
                           <div className="relative flex-shrink-0">
-                            <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center overflow-hidden">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center overflow-hidden shadow-md">
                               <SecureImage
                                 src={item.avatar_image}
                                 alt={item.full_name}
                                 className="w-full h-full object-cover"
-                                fallback={<UserIcon size={14} className="text-[var(--color-primary)]" />}
+                                fallback={<UserIcon size={16} className="text-[var(--color-primary)]" />}
                               />
                             </div>
+                            {/* Live Status Indicator */}
                             <div className="absolute -top-0.5 -right-0.5">
-                              <div className={`w-2 h-2 rounded-full ${style.dot} ring-1 ring-[var(--color-surface)]`} />
+                              <div className={`w-3 h-3 rounded-full ${style.dot} ring-2 ring-[var(--color-surface)] shadow-sm`} />
                             </div>
                           </div>
                           
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-1.5">
-                              <span className="text-xs font-bold text-[var(--color-ink)] truncate">
+                              <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
                                 {item.full_name}
                               </span>
                               {item.status === "active" && (
-                                <ShieldCheck size={12} className="text-emerald-500 flex-shrink-0" />
+                                <ShieldCheck size={14} className="text-emerald-500 flex-shrink-0" />
                               )}
                             </div>
                             {item.email ? (
-                              <div className="flex items-center gap-0.5 mt-0.5">
-                                <Mail size={9} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                                <span className="text-[9px] text-[var(--color-ink-muted)] truncate">
+                              <div className="flex items-center gap-1 mt-0.5">
+                                <Mail size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                                <span className="text-[10px] text-[var(--color-ink-muted)] truncate">
                                   {item.email}
                                 </span>
                               </div>
                             ) : (
-                              <span className="text-[9px] text-[var(--color-ink-subtle)] italic">No email</span>
+                              <span className="text-[10px] text-[var(--color-ink-subtle)] italic">No email</span>
                             )}
                           </div>
                         </div>
                         
-                        <ChevronRight size={14} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
+                        <ChevronRight size={16} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
                       </div>
                     );
                   }}
@@ -364,63 +422,79 @@ export default function ClientsPage() {
                   renderCardBody={({ item }) => {
                     const dlExpiryDate = (item as any).dl_expiry_date;
                     const isDLValid = dlExpiryDate ? new Date(dlExpiryDate) > new Date() : false;
+                    const style = CLIENT_STATUS_STYLES[item.status] || CLIENT_STATUS_STYLES.inactive;
                     
                     return (
-                      <div className="mt-1.5 pt-1.5 border-t border-[var(--color-surface-border)]/50">
-                        <div className="flex items-center gap-2">
+                      <div className="mt-3 pt-3 border-t border-[var(--color-surface-border)]/60">
+                        
+                        {/* Contact & ID Section - Clean & Minimal */}
+                        <div className="flex items-center gap-3 mb-3">
                           {/* Phone */}
-                          <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                            <Phone size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                            <div className="w-7 h-7 rounded-lg bg-[var(--color-surface-hover)]/80 flex items-center justify-center flex-shrink-0">
+                              <Phone size={12} className="text-[var(--color-ink-subtle)]" />
+                            </div>
                             <div className="min-w-0">
-                              <p className="text-[11px] font-semibold text-[var(--color-ink)] truncate leading-tight">
+                              <p className="text-xs font-semibold text-[var(--color-ink)] truncate leading-tight">
                                 {item.phone || "No phone"}
                               </p>
-                              <span className="text-[8px] text-[var(--color-ink-muted)] font-medium">
+                              <span className="text-[9px] text-[var(--color-ink-muted)] font-medium">
                                 Contact
                               </span>
                             </div>
                           </div>
 
                           {/* ID */}
-                          <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                            <span className="text-[10px] font-bold text-[var(--color-ink-muted)] flex-shrink-0">ID</span>
-                            <div className="min-w-0">
-                              <p className="text-[11px] font-semibold text-[var(--color-ink)] truncate leading-tight font-mono">
+                          <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
+                            <div className="min-w-0 text-right">
+                              <p className="text-xs font-semibold text-[var(--color-ink)] truncate leading-tight font-mono">
                                 {item.id_number || "N/A"}
                               </p>
-                              <span className="text-[8px] text-[var(--color-ink-muted)] font-medium">
+                              <span className="text-[9px] text-[var(--color-ink-muted)] font-medium">
                                 National ID
                               </span>
+                            </div>
+                            <div className="w-7 h-7 rounded-lg bg-[var(--color-surface-hover)]/80 flex items-center justify-center flex-shrink-0">
+                              <span className="text-[9px] font-bold text-[var(--color-ink-subtle)]">ID</span>
                             </div>
                           </div>
                         </div>
 
-                        {/* DL + Status */}
-                        <div className="mt-1.5 pt-1.5 border-t border-[var(--color-surface-border)]/50 flex items-center justify-between">
-                          <div className="flex items-center gap-2">
-                            <span className="text-[10px] font-bold text-[var(--color-ink-muted)]">DL</span>
-                            <span className="text-[11px] font-semibold font-mono text-[var(--color-ink)]">
-                              {item.dl_number?.replace(/^DL[-\s]?/i, '') || "N/A"}
-                            </span>
-                            {dlExpiryDate && (
-                              <span className={`text-[8px] font-bold ${isDLValid ? 'text-emerald-500' : 'text-rose-500'}`}>
-                                {isDLValid ? '✓ VALID' : '✗ EXPIRED'}
-                              </span>
-                            )}
-                          </div>
+                        {/* Unified Bottom Status Section - Clean & Minimal */}
+                        <div className={`rounded-xl px-3 py-2.5 border ${
+                          item.status === 'suspended'
+                            ? 'bg-red-500/10 border-red-500/20'
+                            : item.status === 'pending'
+                            ? 'bg-amber-500/10 border-amber-500/20'
+                            : 'bg-[var(--color-surface-hover)]/50 border-[var(--color-surface-border)]/50'
+                        }`}>
                           
-                          {/* Status badge */}
-                          <span className={`text-[8px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-                            item.status === 'active' ? 'bg-emerald-500/10 text-emerald-600' :
-                            item.status === 'pending' ? 'bg-amber-500/10 text-amber-600' :
-                            item.status === 'suspended' ? 'bg-red-500/10 text-red-600' :
-                            'bg-gray-500/10 text-gray-600'
-                          }`}>
-                            {item.status === 'active' ? '● Active' :
-                             item.status === 'pending' ? '⏳ Pending' :
-                             item.status === 'suspended' ? '⊗ Suspended' :
-                             '○ Inactive'}
-                          </span>
+                          <div className="flex items-center justify-between">
+                            {/* DL Info */}
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)]">
+                                DL
+                              </span>
+                              <span className="text-[10px] font-semibold font-mono text-[var(--color-ink)] truncate">
+                                {item.dl_number?.replace(/^DL[-\s]?/i, '') || "N/A"}
+                              </span>
+                              {dlExpiryDate && (
+                                <span className={`text-[8px] font-bold ${
+                                  isDLValid ? 'text-emerald-500' : 'text-red-500'
+                                }`}>
+                                  {isDLValid ? 'VALID' : 'EXPIRED'}
+                                </span>
+                              )}
+                            </div>
+
+                            {/* Status Label */}
+                            <div className="flex items-center gap-1.5 flex-shrink-0">
+                              <span className={`w-2 h-2 rounded-full ${style.dot} flex-shrink-0`} />
+                              <span className={`text-[9px] font-bold uppercase tracking-wide ${style.text}`}>
+                                {style.label}
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     );
@@ -464,7 +538,7 @@ export default function ClientsPage() {
                                 </button>
                                 {client.status === "active" && (
                                   <span title="Verified Account" className="inline-flex flex-shrink-0">
-                                    <Shield size={14} className="text-[var(--color-success)]" />
+                                    <ShieldCheck size={14} className="text-emerald-500" />
                                   </span>
                                 )}
                               </div>
@@ -524,17 +598,11 @@ export default function ClientsPage() {
                       accessorKey: "status",
                       cell: ({ row }) => {
                         const client = row.original;
-                        const statusLabel = client.status === "pending" ? "Pending" : client.status;
-                        const statusStyles: Record<string, { bg: string; text: string }> = {
-                          active: { bg: "bg-[var(--color-success-bg)]", text: "text-[var(--color-success-text)]" },
-                          pending: { bg: "bg-amber-500/10", text: "text-amber-600 dark:text-amber-400" },
-                          suspended: { bg: "bg-[var(--color-danger-bg)]", text: "text-[var(--color-danger-text)]" },
-                          inactive: { bg: "bg-[var(--color-surface-hover)]", text: "text-[var(--color-ink-muted)]" },
-                        };
-                        const style = statusStyles[client.status] || statusStyles.inactive;
+                        const style = CLIENT_STATUS_STYLES[client.status] || CLIENT_STATUS_STYLES.inactive;
+                        
                         return (
                           <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${style.bg} ${style.text}`}>
-                            {statusLabel}
+                            {style.label}
                           </span>
                         );
                       },
@@ -575,25 +643,10 @@ export default function ClientsPage() {
             {currentTabInfo.description}
           </p>
         </div>
-        <div className="flex items-center gap-1 p-1 bg-[var(--color-surface)] rounded-xl border border-[var(--color-surface-border)] shadow-sm self-start sm:self-auto">
-          {TABS.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
-            return (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as ClientSegment)}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
-                  isActive
-                    ? "bg-[var(--color-primary)] text-white shadow-sm"
-                    : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"
-                }`}
-              >
-                <Icon size={14} />
-                {tab.label}
-              </button>
-            );
-          })}
+        
+        {/* ✅ Premium Tab Switcher */}
+        <div className="self-start sm:self-auto">
+          <PremiumTabSwitcher activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
       </div>
 
