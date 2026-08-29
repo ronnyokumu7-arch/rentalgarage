@@ -2,7 +2,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Loader2, AlertCircle, Clock, Calendar, CalendarDays, Rocket, Zap } from "lucide-react";
 import { useFinancialOverview } from "@/hooks/financials/useFinancialOverview";
 
@@ -12,12 +11,22 @@ import ContractHealthWidget from "./overview/ContractHealthWidget";
 import ActivityFeed from "./overview/ActivityFeed";
 import QuickActions from "./overview/QuickActions";
 
+// ✅ NEW: Import the modals
+import CreateInvoiceModal from "./invoices/CreateInvoiceModal";
+import RecordPaymentModal from "./invoices/RecordPaymentModal";
+import GenerateContractModal from "./contracts/GenerateContractModal";
+
 type TimeFilter = "today" | "week" | "month";
 
 export default function OverviewTab() {
-  const router = useRouter();
+  // ✅ REMOVED: useRouter (no longer needed for quick actions)
   const [timeFilter, setTimeFilter] = useState<TimeFilter>("today");
   const { data, loading, error, refetch } = useFinancialOverview();
+
+  // ✅ NEW: Modal State
+  const [isInvoiceModalOpen, setIsInvoiceModalOpen] = useState(false);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+  const [isContractModalOpen, setIsContractModalOpen] = useState(false);
 
   if (loading) {
     return (
@@ -51,7 +60,8 @@ export default function OverviewTab() {
     const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
 
     return activities.filter(activity => {
-      const activityDate = new Date(activity.timestamp);
+      // ✅ FIXED: Use activity.created_at (raw ActivityLog field)
+      const activityDate = new Date(activity.created_at);
       if (timeFilter === "today") return activityDate >= today;
       if (timeFilter === "week") return activityDate >= weekAgo;
       if (timeFilter === "month") return activityDate >= monthAgo;
@@ -60,6 +70,22 @@ export default function OverviewTab() {
   };
 
   const filteredActivities = filterActivitiesByTime(data.recent_activity);
+
+  // ✅ Modal callbacks - These refetch the data after an action is completed
+  const handleInvoiceCreated = () => {
+    setIsInvoiceModalOpen(false);
+    refetch();
+  };
+
+  const handlePaymentRecorded = () => {
+    setIsPaymentModalOpen(false);
+    refetch();
+  };
+
+  const handleContractGenerated = () => {
+    setIsContractModalOpen(false);
+    refetch();
+  };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 animate-in fade-in duration-500">
@@ -136,13 +162,35 @@ export default function OverviewTab() {
               <p className="text-[10px] text-[var(--color-ink-subtle)]">Common tasks at your fingertips</p>
             </div>
           </div>
+          
+          {/* ✅ NEW: Open modals instead of redirecting to tabs */}
           <QuickActions 
-            onCreateInvoice={() => router.push("/dashboard/financials?tab=invoices")}
-            onRecordPayment={() => router.push("/dashboard/financials?tab=payments")}
-            onGenerateContract={() => router.push("/dashboard/financials?tab=contracts")}
+            onOpenCreateInvoice={() => setIsInvoiceModalOpen(true)}
+            onOpenRecordPayment={() => setIsPaymentModalOpen(true)}
+            onOpenGenerateContract={() => setIsContractModalOpen(true)}
           />
         </div>
       </div>
+
+      {/* ✅ NEW: Render Modals at the bottom */}
+      <CreateInvoiceModal
+        open={isInvoiceModalOpen}
+        onClose={() => setIsInvoiceModalOpen(false)}
+        onCreated={handleInvoiceCreated}
+      />
+
+      <RecordPaymentModal
+        open={isPaymentModalOpen}
+        onClose={() => setIsPaymentModalOpen(false)}
+        onPaymentRecorded={handlePaymentRecorded}
+        invoice={null} // ✅ Default to no invoice; user selects one inside the modal
+      />
+
+      <GenerateContractModal
+        open={isContractModalOpen}
+        onClose={() => setIsContractModalOpen(false)}
+        onGenerated={handleContractGenerated}
+      />
     </div>
   );
 }

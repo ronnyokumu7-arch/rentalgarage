@@ -1,3 +1,4 @@
+// src/hooks/useDashboard.ts
 import { useState, useEffect, useMemo } from "react";
 import { bookingsApi } from "@/lib/api/bookings";
 import { clientsApi } from "@/lib/api/clients";
@@ -114,22 +115,13 @@ export function useDashboard() {
       .slice(0, 5);
   }, [bookings]);
 
-  const recentActivity = useMemo(() => {
-    return bookings.slice(0, 5).map((b, i) => ({
-      id: b.id,
-      icon: b.status === "completed" ? "CheckCircle2" : "Calendar",
-      title: `Booking #${b.id} ${b.status === "completed" ? "completed" : "created"}`,
-      description: `Client ID: ${b.client_id} • Vehicle ID: ${b.vehicle_id}`,
-      time: `${i + 1}h ago`,
-    }));
-  }, [bookings]);
+  // ❌ REMOVED: Fake recentActivity (use useActivityTab instead)
 
   return {
     loading,
     stats,
     alerts,
     upcomingBookings,
-    recentActivity,
     tasks,
     vehicles,
   };

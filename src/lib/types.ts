@@ -409,6 +409,12 @@ export interface Booking {
   contract?: Contract | null;
   invoices?: Invoice[];
   total_price?: string | number | null;
+
+  // ✅ NEW: Denormalized UI fields (prevents MissingGreenlet errors)
+  client_name?: string | null;
+  client_phone?: string | null;
+  vehicle_plate?: string | null;
+  vehicle_name?: string | null;
 }
 
 export interface BookingCreate {
@@ -577,6 +583,11 @@ export interface Invoice {
   booking_number?: string | null;
   client_id?: number | null;
   client_name?: string | null;
+
+  // ✅ NEW: Denormalized UI fields (prevents MissingGreenlet errors)
+  client_phone?: string | null;
+  vehicle_plate?: string | null;
+  vehicle_name?: string | null;
 }
 
 export interface InvoiceCreate {

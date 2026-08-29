@@ -1,15 +1,18 @@
-// src/app/dashboard/financials/ContractsTab.tsx
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
 import { Search, FileText, Filter, FileSignature } from "lucide-react";
+import { useSearchParams, useRouter } from "next/navigation"; // ✅ NEW
 import FilterDropdown from "@/components/ui/FilterDropdown";
 import { useContracts } from "@/hooks/financials/useContracts";
 import ContractsTable from "./contracts/ContractsTable";
 import GenerateContractModal from "./contracts/GenerateContractModal";
-import type { ContractStatus } from "@/lib/types"; // ✅ FIXED: Added missing type import
+import type { ContractStatus } from "@/lib/types";
 
 export default function ContractsTab() {
+  const router = useRouter(); // ✅ NEW
+  const searchParams = useSearchParams(); // ✅ NEW
+
   const {
     contracts,
     loading,
@@ -30,6 +33,24 @@ export default function ContractsTab() {
   const [_generateForId, setGenerateForId] = useState<number | null>(null);
 
   const pageSize = 7;
+
+  // ✅ NEW: Sync statusFilter with URL query parameter
+  useEffect(() => {
+    const statusFromUrl = searchParams.get("status");
+    if (statusFromUrl && statusFromUrl !== statusFilter) {
+      setStatusFilter(statusFromUrl as ContractStatus | "all");
+    }
+    // Only run when URL changes
+  }, [searchParams]);
+
+  // ✅ NEW: Update URL when statusFilter changes (so users can share/deep-link)
+  useEffect(() => {
+    if (statusFilter !== "all") {
+      router.replace(`/dashboard/financials?tab=contracts&status=${statusFilter}`, { scroll: false });
+    } else {
+      router.replace(`/dashboard/financials?tab=contracts`, { scroll: false });
+    }
+  }, [statusFilter, router]);
 
   const searchFilteredContracts = useMemo(() => {
     const searchLower = search.trim().toLowerCase();

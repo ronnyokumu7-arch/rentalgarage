@@ -2,8 +2,9 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Loader2, FileText, AlertCircle } from "lucide-react";
+import { Loader2, FileText, AlertCircle, CalendarDays, User, Car } from "lucide-react";
 import Modal from "@/components/ui/Modal";
+import PremiumEntitySelector from "@/components/financials/shared/PremiumEntitySelector";
 import { bookingsApi } from "@/lib/api/bookings";
 import { invoicesApi } from "@/lib/api/invoices";
 import type { Booking, Invoice } from "@/lib/types";
@@ -20,39 +21,36 @@ const inputClass = "w-full px-4 py-3 rounded-xl border border-[var(--color-surfa
 const labelClass = "block text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)] mb-2";
 
 export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateInvoiceModalProps) {
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null);
+  const [selectedBookingObj, setSelectedBookingObj] = useState<Booking | null>(null);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
 
   const [customAmount, setCustomAmount] = useState<string>("");
   const [customRate, setCustomRate] = useState<string>("");
   const [dueDate, setDueDate] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
-  const [rateLocked, setRateLocked] = useState(false); // true = amount drives rate, false = rate drives amount
+  const [rateLocked, setRateLocked] = useState(false);
 
   const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(false);
 
+  // ✅ Fetch invoices when modal opens (for existing invoice lookup)
   useEffect(() => {
     if (open) {
-      setFetching(true);
-      Promise.all([
-        bookingsApi.list(),
-        invoicesApi.list()
-      ])
-        .then(([bData, iData]) => {
-          setBookings(bData);
-          setInvoices(iData);
-        })
-        .catch(() => toast.error("Failed to load data"))
-        .finally(() => setFetching(false));
+      invoicesApi.list().then(setInvoices).catch(() => toast.error("Failed to load invoices"));
     }
   }, [open]);
 
-  const eligibleBookings = useMemo(() => {
-    const invoiceMap = new Map(invoices.map(inv => [inv.booking_id, inv]));
+  // ✅ Use the reusable hook to fetch eligible bookings
+  const fetchEligibleBookings = async () => {
+    const [bData, iData] = await Promise.all([
+      bookingsApi.list(),
+      invoicesApi.list()
+    ]);
 
-    return bookings.filter(b => {
+    const invoiceMap = new Map(iData.map((inv: any) => [inv.booking_id, inv]));
+
+    // Filter to only eligible bookings
+    return bData.filter((b: any) => {
       const isBookingActive = ['pending', 'confirmed', 'active'].includes(b.status);
       if (!isBookingActive) return false;
 
@@ -61,59 +59,52 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
 
       return invoice.status !== 'paid' && invoice.status !== 'void';
     });
-  }, [bookings, invoices]);
+  };
 
-  const selectedBooking = bookings.find(b => b.id === selectedBookingId);
-  const existingInvoice = invoices.find(inv => inv.booking_id === selectedBookingId);
+  // ❌ REMOVED: useEntitySelector (no longer needed)
+  // const { getById } = useEntitySelector<any>({ ... });
+
+  const existingInvoice = invoices.find((inv) => inv.booking_id === selectedBookingId);
 
   // ✅ ENGINE RULE (matches backend): ceil(duration / 24h), min 1 day.
-  // Uses pickup_at / scheduled_return_at when available, falls back to dates.
   const billableDays = useMemo(() => {
-    if (!selectedBooking) return 1;
-    const startStr = selectedBooking.pickup_at || selectedBooking.start_date;
-    const endStr = selectedBooking.scheduled_return_at || selectedBooking.end_date;
+    if (!selectedBookingObj) return 1;
+    const startStr = selectedBookingObj.pickup_at || selectedBookingObj.start_date;
+    const endStr = selectedBookingObj.scheduled_return_at || selectedBookingObj.end_date;
     if (!startStr || !endStr) return 1;
     const start = new Date(startStr);
     const end = new Date(endStr);
     const hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
     if (!isFinite(hours) || hours <= 0) return 1;
     return Math.max(1, Math.ceil(hours / 24));
-  }, [selectedBooking]);
+  }, [selectedBookingObj]);
 
-  // ✅ Source of truth: booking.daily_rate ONLY.
-  // ❌ Removed: total_amount / billableDays fallback.
-  // The backend engine used daily_rate × days to compute total_amount, so
-  // reversing that division is lossy and produces ghost numbers (e.g. 0.50).
-  // If daily_rate is missing, we have no reliable source — return 0 and
-  // require the user to enter a rate explicitly.
   const effectiveDailyRate = useMemo(() => {
-    if (!selectedBooking) return 0;
-    return Number(selectedBooking.daily_rate) || 0;
-  }, [selectedBooking]);
+    if (!selectedBookingObj) return 0;
+    return Number(selectedBookingObj.daily_rate) || 0;
+  }, [selectedBookingObj]);
 
   // ✅ Pre-fill form when booking changes
   useEffect(() => {
-    if (selectedBooking) {
+    if (selectedBookingObj) {
       const rate = effectiveDailyRate;
       const amount = existingInvoice
         ? Number(existingInvoice.amount_due)
-        : (effectiveDailyRate > 0 ? effectiveDailyRate * billableDays : Number(selectedBooking.total_amount));
+        : (effectiveDailyRate > 0 ? effectiveDailyRate * billableDays : Number(selectedBookingObj.total_amount));
 
       setCustomRate(rate > 0 ? rate.toFixed(2) : "");
       setCustomAmount(amount > 0 ? amount.toFixed(2) : "");
-      setDueDate((existingInvoice?.due_date || selectedBooking.end_date).split('T')[0]);
-      setNotes(existingInvoice?.notes || `Auto-generated for Booking #${selectedBooking.booking_number}`);
-      setRateLocked(false); // default: rate drives amount
+      setDueDate((existingInvoice?.due_date || selectedBookingObj.end_date).split('T')[0]);
+      setNotes(existingInvoice?.notes || `Auto-generated for Booking #${selectedBookingObj.booking_number}`);
+      setRateLocked(false);
     } else {
       setCustomRate("");
       setCustomAmount("");
       setDueDate("");
       setNotes("");
     }
-  }, [selectedBookingId, selectedBooking, existingInvoice, effectiveDailyRate, billableDays]);
+  }, [selectedBookingObj, existingInvoice, effectiveDailyRate, billableDays]);
 
-  // ✅ Rate → Amount auto-recompute (when rate is the driver)
-  // Guards: only compute when rate is a valid positive number.
   const handleRateChange = (value: string) => {
     setCustomRate(value);
     if (!rateLocked && value && billableDays > 0) {
@@ -124,8 +115,6 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
     }
   };
 
-  // ✅ Amount → Rate auto-recompute (when amount is the driver)
-  // Guards: only compute when amount is a valid positive number.
   const handleAmountChange = (value: string) => {
     setCustomAmount(value);
     if (rateLocked && value && billableDays > 0) {
@@ -136,7 +125,6 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
     }
   };
 
-  // ✅ Unified submit — always uses generate-invoice (handles create AND update, writes rate to booking)
   const handleSubmit = async () => {
     if (!selectedBookingId || !customAmount || !dueDate) return;
 
@@ -154,7 +142,6 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
         notes: notes,
       };
 
-      // ✅ Only send rate if it differs from effective (prevents noise on no-op updates)
       const rateNum = customRate ? parseFloat(customRate) : NaN;
       if (!isNaN(rateNum) && rateNum > 0 && rateNum !== effectiveDailyRate) {
         payload.custom_rate = rateNum;
@@ -179,6 +166,7 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
 
   const handleClose = () => {
     setSelectedBookingId(null);
+    setSelectedBookingObj(null);
     onClose();
   };
 
@@ -192,47 +180,82 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
     }
   };
 
+  // ✅ Render premium booking card for the selector (Uses enriched fields)
+  const renderBookingCard = (booking: any) => {
+    const invoice = invoices.find((inv) => inv.booking_id === booking.id);
+    const statusLabel = invoice ? `Invoice: ${invoice.status}` : "No Invoice Yet";
+    const statusStyle = invoice ? getStatusStyle(invoice.status) : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)]";
+    const clientName = booking.client_name || booking.client?.full_name || "Unknown Client";
+    const vehiclePlate = booking.vehicle_plate || booking.vehicle?.plate_number || "N/A";
+
+    return (
+      <div className="flex items-center gap-3 min-w-0 flex-1">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center flex-shrink-0">
+          <FileText size={16} className="text-[var(--color-primary)]" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-bold text-[var(--color-ink)] truncate">
+              {booking.booking_number || `Booking #${booking.id}`}
+            </p>
+            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${statusStyle}`}>
+              {statusLabel}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-[10px] text-[var(--color-ink-muted)] flex items-center gap-1">
+              <User size={10} />
+              {clientName}
+            </span>
+            <span className="text-[10px] text-[var(--color-ink-subtle)]">•</span>
+            <span className="text-[10px] font-mono text-[var(--color-ink-muted)] flex items-center gap-1">
+              <Car size={10} />
+              {vehiclePlate}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-[10px] text-[var(--color-ink-muted)] flex items-center gap-1">
+              <CalendarDays size={10} />
+              {new Date(booking.start_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })} → {new Date(booking.end_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+            </span>
+            <span className="text-[10px] text-[var(--color-ink-subtle)]">•</span>
+            <span className="text-[10px] font-bold text-[var(--color-primary)]">
+              {booking.currency_code} {Number(booking.total_amount).toLocaleString()}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Modal open={open} onClose={handleClose} title="Customize Invoice" subtitle="Override rates, amounts, or due dates" size="md">
       <div className="space-y-6">
 
-        {/* Booking Selection */}
-        <div>
-          <label className={labelClass}>
-            Select Booking <span className="text-[var(--color-danger)]">*</span>
-          </label>
-          <select
-            value={selectedBookingId || ""}
-            onChange={(e) => setSelectedBookingId(Number(e.target.value))}
-            className={inputClass}
-            disabled={fetching}
-          >
-            <option value="">
-              {fetching ? "Loading bookings..." : eligibleBookings.length === 0 ? "No eligible bookings" : "Select a booking..."}
-            </option>
-            {eligibleBookings.map(b => {
-              const invoice = invoices.find(inv => inv.booking_id === b.id);
-              const statusLabel = invoice ? `Invoice: ${invoice.status}` : `No Invoice Yet`;
-              return (
-                <option key={b.id} value={b.id}>
-                  {b.booking_number || `Booking #${b.id}`} — {statusLabel}
-                </option>
-              );
-            })}
-          </select>
-
-          {eligibleBookings.length === 0 && !fetching && (
-            <div className="mt-3 p-4 rounded-xl bg-[var(--color-warning-bg)]/30 border border-[var(--color-warning-bg)] flex items-start gap-3">
-              <AlertCircle size={16} className="text-[var(--color-warning-text)] mt-0.5 flex-shrink-0" />
-              <p className="text-xs text-[var(--color-warning-text)] font-medium">
-                No bookings are eligible. Ensure bookings are &apos;Pending/Active&apos; and invoices are not &apos;Paid&apos;.
-              </p>
-            </div>
-          )}
-        </div>
+        {/* ✅ Premium Entity Selector */}
+        <PremiumEntitySelector
+          fetcher={fetchEligibleBookings}
+          // ✅ FIXED: Removed nested keys (client.full_name, vehicle.plate_number)
+          searchKeys={["booking_number", "client_name", "id"]}
+          placeholder="Select a booking..."
+          emptyMessage="No eligible bookings. Ensure bookings are Pending/Active and invoices are not Paid."
+          renderEntityCard={renderBookingCard}
+          selectedId={selectedBookingId}
+          onSelect={(id) => {
+            setSelectedBookingId(id);
+            // ✅ This is still called, but we'll use onSelectEntity for the full object
+            setSelectedBookingObj((prev) => prev);
+          }}
+          onSelectEntity={(booking) => {
+            // ✅ NEW: Get the full booking object directly from the selector
+            setSelectedBookingObj(booking as Booking);
+          }}
+          label="Select Booking"
+          required
+        />
 
         {/* Booking & Invoice Preview */}
-        {selectedBooking && (
+        {selectedBookingObj && (
           <div className="p-5 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] space-y-4">
             <div className="flex items-center justify-between">
               <span className="text-[10px] font-bold text-[var(--color-ink-muted)] uppercase tracking-wider">Booking Details</span>
@@ -251,19 +274,19 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
               <div>
                 <p className="text-[10px] font-bold text-[var(--color-ink-muted)] uppercase tracking-wider mb-1">Start</p>
                 <p className="text-sm font-bold text-[var(--color-ink)]">
-                  {new Date(selectedBooking.start_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                  {new Date(selectedBookingObj.start_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                 </p>
               </div>
               <div>
                 <p className="text-[10px] font-bold text-[var(--color-ink-muted)] uppercase tracking-wider mb-1">End</p>
                 <p className="text-sm font-bold text-[var(--color-ink)]">
-                  {new Date(selectedBooking.end_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                  {new Date(selectedBookingObj.end_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
                 </p>
               </div>
               <div>
                 <p className="text-[10px] font-bold text-[var(--color-ink-muted)] uppercase tracking-wider mb-1">Current Total</p>
                 <p className="text-sm font-bold text-[var(--color-ink)]">
-                  {selectedBooking.currency_code} {Number(selectedBooking.total_amount).toLocaleString()}
+                  {selectedBookingObj.currency_code} {Number(selectedBookingObj.total_amount).toLocaleString()}
                 </p>
               </div>
             </div>
@@ -271,9 +294,9 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
         )}
 
         {/* Customization Form */}
-        {selectedBooking && (
+        {selectedBookingObj && (
           <div className="space-y-4">
-            {/* ✅ Driver Toggle — Rate drives Amount, or Amount drives Rate */}
+            {/* ✅ Driver Toggle */}
             <div>
               <label className={labelClass}>Edit Mode</label>
               <div className="grid grid-cols-2 gap-2">
@@ -307,11 +330,11 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
               </p>
             </div>
 
-            {/* ✅ Daily Rate Field */}
+            {/* ✅ Daily Rate & Amount Fields */}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className={labelClass}>
-                  Daily Rate ({selectedBooking.currency_code}) <span className="text-[var(--color-danger)]">*</span>
+                  Daily Rate ({selectedBookingObj.currency_code}) <span className="text-[var(--color-danger)]">*</span>
                 </label>
                 <input
                   type="number"
@@ -326,7 +349,7 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
               </div>
               <div>
                 <label className={labelClass}>
-                  Total Amount ({selectedBooking.currency_code}) <span className="text-[var(--color-danger)]">*</span>
+                  Total Amount ({selectedBookingObj.currency_code}) <span className="text-[var(--color-danger)]">*</span>
                 </label>
                 <input
                   type="number"
@@ -371,7 +394,6 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
               />
             </div>
 
-            {/* ✅ Regenerate hint */}
             {existingInvoice && (
               <div className="p-3 rounded-xl bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-start gap-2">
                 <AlertCircle size={14} className="text-[var(--color-primary)] mt-0.5 flex-shrink-0" />

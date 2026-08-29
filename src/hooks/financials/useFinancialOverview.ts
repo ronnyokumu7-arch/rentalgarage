@@ -1,15 +1,15 @@
 // src/hooks/financials/useFinancialOverview.ts
 import { useState, useEffect, useCallback } from "react";
 import toast from "react-hot-toast";
-// Adjust this import to match your actual API client setup
 import apiClient from "@/lib/api-client"; 
+import { activityLogsApi, type ActivityLog } from "@/lib/api/activityLogs"; 
 
 // =====================================================
-// 1. TYPE DEFINITIONS (Matching Backend Schema)
+// 1. TYPE DEFINITIONS
 // =====================================================
 
 export interface MonthlyRevenueItem {
-  month: string; // e.g., "Jan", "Feb"
+  month: string;
   amount: number;
 }
 
@@ -40,14 +40,8 @@ export interface ContractHealth {
   total_active: number;
 }
 
-export interface ActivityItem {
-  id: string;
-  type: string; // "payment_received", "contract_signed"
-  title: string;
-  description: string;
-  timestamp: string;
-  link: string;
-}
+// ✅ CHANGED: Use raw ActivityLog (ActivityFeed will map them)
+export type ActivityItem = ActivityLog;
 
 export interface FinancialOverviewData {
   revenue_overview: RevenueOverview;
@@ -69,9 +63,22 @@ export function useFinancialOverview() {
     setLoading(true);
     setError(null);
     try {
-      // Replace with your actual API call logic
+      // ✅ 1. Fetch main financial overview
       const response = await apiClient.get<FinancialOverviewData>("/financials/overview");
-      setData(response.data);
+      const overviewData = response.data;
+
+      // ✅ 2. Fetch recent activity from our new activityLogsApi
+      const activityResponse = await activityLogsApi.list({
+        page: 1,
+        page_size: 10,
+        sort_by_priority: false,
+      });
+
+      // ✅ 3. Set RAW ActivityLog objects (ActivityFeed will map them)
+      setData({
+        ...overviewData,
+        recent_activity: activityResponse.items || [],
+      });
     } catch (err: any) {
       console.error("Failed to fetch financial overview:", err);
       setError(err.response?.data?.detail || "Failed to load dashboard data");

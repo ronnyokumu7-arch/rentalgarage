@@ -2,22 +2,22 @@
 import { Plus, CreditCard, FileText, ChevronRight } from "lucide-react";
 
 interface QuickActionsProps {
-  onCreateInvoice: () => void;
-  onRecordPayment: () => void;
-  onGenerateContract: () => void;
+  onOpenCreateInvoice: () => void;
+  onOpenRecordPayment: () => void;
+  onOpenGenerateContract: () => void;
 }
 
 export default function QuickActions({ 
-  onCreateInvoice, 
-  onRecordPayment, 
-  onGenerateContract 
+  onOpenCreateInvoice, 
+  onOpenRecordPayment, 
+  onOpenGenerateContract 
 }: QuickActionsProps) {
   const actions = [
     {
       icon: Plus,
       label: "Create Invoice",
       description: "Bill a client instantly",
-      onClick: onCreateInvoice,
+      onClick: onOpenCreateInvoice,
       color: "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
       hoverBg: "hover:bg-emerald-500/5"
     },
@@ -25,7 +25,7 @@ export default function QuickActions({
       icon: CreditCard,
       label: "Record Payment",
       description: "Log offline transactions",
-      onClick: onRecordPayment,
+      onClick: onOpenRecordPayment,
       color: "text-blue-600 dark:text-blue-400 bg-blue-500/10 border-blue-500/20",
       hoverBg: "hover:bg-blue-500/5"
     },
@@ -33,7 +33,7 @@ export default function QuickActions({
       icon: FileText,
       label: "Generate Contract",
       description: "Create rental agreement",
-      onClick: onGenerateContract,
+      onClick: onOpenGenerateContract,
       color: "text-violet-600 dark:text-violet-400 bg-violet-500/10 border-violet-500/20",
       hoverBg: "hover:bg-violet-500/5"
     }

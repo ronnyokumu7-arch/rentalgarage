@@ -85,7 +85,8 @@ export default function ActivityLogCard({ logs }: ActivityLogCardProps) {
                   <div className="flex-1 pb-6 last:pb-0 pt-1">
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 mb-1">
                       <p className="text-sm font-semibold text-[var(--color-ink)]">
-                        {formatAction(log.action)}
+                        {/* ✅ FIXED: Use log.label (human-readable) instead of log.action */}
+                        {log.label || formatAction(log.action)}
                         {log.target_id && (
                           <span className="ml-1.5 text-xs font-mono text-[var(--color-ink-subtle)] bg-[var(--color-surface-hover)] px-1.5 py-0.5 rounded">
                             #{log.target_id}
@@ -102,10 +103,13 @@ export default function ActivityLogCard({ logs }: ActivityLogCardProps) {
                       </time>
                     </div>
                     
-                    {/* Optional: Add metadata or user info here later */}
-                    {log.description && (
+                    {/* ✅ FIXED: Use log.summary (denormalized data) instead of log.description */}
+                    {log.summary && (
                       <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed mt-1 line-clamp-2">
-                        {log.description}
+                        {log.summary.client_name ? `Client: ${log.summary.client_name}` : ""}
+                        {log.summary.booking_number ? ` • Booking: ${log.summary.booking_number}` : ""}
+                        {log.summary.amount ? ` • Amount: ${log.summary.amount}` : ""}
+                        {log.summary.reason ? ` • Reason: ${log.summary.reason}` : ""}
                       </p>
                     )}
                   </div>

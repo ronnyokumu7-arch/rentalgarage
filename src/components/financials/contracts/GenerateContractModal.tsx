@@ -1,9 +1,10 @@
 // src/components/financials/contracts/GenerateContractModal.tsx
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { Loader2, FileText, AlertCircle, Link2, CheckCircle2, RotateCcw } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Loader2, FileText, AlertCircle, Link2, CheckCircle2, RotateCcw, CalendarDays, FileSignature, User, Car } from "lucide-react";
 import Modal from "@/components/ui/Modal";
+import PremiumEntitySelector from "@/components/financials/shared/PremiumEntitySelector";
 import { bookingsApi } from "@/lib/api/bookings";
 import { contractsApi } from "@/lib/api/contracts";
 import type { Booking, Contract } from "@/lib/types";
@@ -15,59 +16,52 @@ interface GenerateContractModalProps {
   onGenerated: () => void;
 }
 
-const inputClass = "w-full px-4 py-3 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all duration-200 text-sm";
-const labelClass = "block text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)] mb-2";
-
 export default function GenerateContractModal({ open, onClose, onGenerated }: GenerateContractModalProps) {
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [contracts, setContracts] = useState<Contract[]>([]);
-  const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(false);
 
+  // ✅ Fetch contracts when modal opens (for lookup)
   useEffect(() => {
     if (open) {
-      setFetching(true);
-      Promise.all([
-        bookingsApi.list(),
-        contractsApi.list()
-      ])
-        .then(([bData, cData]) => {
-          setBookings(bData);
-          setContracts(cData);
-        })
-        .catch(() => toast.error("Failed to load data"))
-        .finally(() => setFetching(false));
+      contractsApi.list().then(setContracts).catch(() => toast.error("Failed to load contracts"));
     }
   }, [open]);
 
-  const eligibleBookings = useMemo(() => {
-    const contractMap = new Map(contracts.map(c => [c.booking_id, c]));
+  // ✅ Fetch eligible bookings (pending/confirmed OR has void contract)
+  const fetchEligibleBookings = async () => {
+    const [bData, cData] = await Promise.all([
+      bookingsApi.list(),
+      contractsApi.list()
+    ]);
     
-    return bookings.filter(b => {
+    const contractMap = new Map(cData.map((c: any) => [c.booking_id, c]));
+
+    return bData.filter((b: any) => {
       const contract = contractMap.get(b.id);
       if (contract) {
-        // ✅ FIXED: Allow void contracts to be regenerated (excludes only signed)
+        // ✅ Allow void contracts to be regenerated (excludes only signed)
         return contract.status !== "signed";
       }
       return b.status === "pending" || b.status === "confirmed";
     });
-  }, [bookings, contracts]);
+  };
 
-  const selectedBooking = bookings.find(b => b.id === selectedBookingId);
-  const existingContract = contracts.find(c => c.booking_id === selectedBookingId);
+  const existingContract = selectedBooking
+    ? contracts.find((c: any) => c.booking_id === selectedBooking.id)
+    : null;
   const isVoidContract = existingContract?.status === "void";
 
   const handleGenerateOrCopy = async () => {
-    if (!selectedBookingId) return;
+    if (!selectedBooking) return;
     setLoading(true);
     
     try {
       if (existingContract) {
         if (isVoidContract) {
-          // ✅ NEW: Regenerate void contract (deletes old, creates new draft)
+          // ✅ Regenerate void contract (deletes old, creates new draft)
           toast.loading("Regenerating contract...", { duration: 1000 });
-          await contractsApi.regenerate(selectedBookingId);
+          await contractsApi.regenerate(selectedBooking.id);
           toast.dismiss();
           toast.success("Contract regenerated successfully!");
         } else {
@@ -88,7 +82,7 @@ export default function GenerateContractModal({ open, onClose, onGenerated }: Ge
       } else {
         // Generate new contract for orphan bookings
         toast.loading("Generating contract...", { duration: 1000 });
-        await contractsApi.generateForBooking(selectedBookingId);
+        await contractsApi.generateForBooking(selectedBooking.id);
         toast.dismiss();
         toast.success("Contract generated successfully!");
         onGenerated();
@@ -103,47 +97,84 @@ export default function GenerateContractModal({ open, onClose, onGenerated }: Ge
   };
 
   const handleClose = () => {
-    setSelectedBookingId(null);
+    setSelectedBooking(null);
     onClose();
+  };
+
+  // ✅ Render premium booking card for the selector (Uses enriched fields)
+  const renderBookingCard = (booking: any) => {
+    const contract = contracts.find((c: any) => c.booking_id === booking.id);
+    const statusLabel = contract ? `Contract: ${contract.status}` : `Booking: ${booking.status}`;
+    const statusStyle = 
+      contract?.status === "signed" ? "bg-[var(--color-success-bg)] text-[var(--color-success-text)]" :
+      contract?.status === "void" ? "bg-[var(--color-danger-bg)] text-[var(--color-danger-text)]" :
+      contract?.status === "sent" ? "bg-[var(--color-primary-muted)] text-[var(--color-primary-text)]" :
+      "bg-[var(--color-warning-bg)] text-[var(--color-warning-text)]";
+    const clientName = booking.client_name || booking.client?.full_name || "Unknown Client";
+    const vehiclePlate = booking.vehicle_plate || booking.vehicle?.plate_number || "N/A";
+
+    return (
+      <div className="flex items-center gap-3 min-w-0 flex-1">
+        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/20 to-violet-500/5 border border-violet-500/20 flex items-center justify-center flex-shrink-0">
+          <FileSignature size={16} className="text-violet-600 dark:text-violet-400" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-bold text-[var(--color-ink)] truncate">
+              {booking.booking_number || `Booking #${booking.id}`}
+            </p>
+            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase ${statusStyle}`}>
+              {statusLabel}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-[10px] text-[var(--color-ink-muted)] flex items-center gap-1">
+              <User size={10} />
+              {clientName}
+            </span>
+            <span className="text-[10px] text-[var(--color-ink-subtle)]">•</span>
+            <span className="text-[10px] font-mono text-[var(--color-ink-muted)] flex items-center gap-1">
+              <Car size={10} />
+              {vehiclePlate}
+            </span>
+          </div>
+          <div className="flex items-center gap-2 mt-0.5">
+            <span className="text-[10px] text-[var(--color-ink-muted)] flex items-center gap-1">
+              <CalendarDays size={10} />
+              {new Date(booking.start_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })} → {new Date(booking.end_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+            </span>
+            <span className="text-[10px] text-[var(--color-ink-subtle)]">•</span>
+            <span className="text-[10px] font-bold text-[var(--color-primary)]">
+              {booking.currency_code} {Number(booking.total_amount).toLocaleString()}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   return (
     <Modal open={open} onClose={handleClose} title="Contract Management" subtitle="Generate contract or copy share link" size="md">
       <div className="space-y-6">
         
-        <div>
-          <label className={labelClass}>
-            Select Booking <span className="text-[var(--color-danger)]">*</span>
-          </label>
-          <select
-            value={selectedBookingId || ""}
-            onChange={(e) => setSelectedBookingId(Number(e.target.value))}
-            className={inputClass}
-            disabled={fetching}
-          >
-            <option value="">
-              {fetching ? "Loading bookings..." : eligibleBookings.length === 0 ? "No eligible bookings" : "Select a booking..."}
-            </option>
-            {eligibleBookings.map(b => {
-              const contract = contracts.find(c => c.booking_id === b.id);
-              const statusLabel = contract ? `Contract: ${contract.status}` : `Booking: ${b.status}`;
-              return (
-                <option key={b.id} value={b.id}>
-                  {b.booking_number || `Booking #${b.id}`} — {statusLabel}
-                </option>
-              );
-            })}
-          </select>
-          
-          {eligibleBookings.length === 0 && !fetching && (
-            <div className="mt-3 p-4 rounded-xl bg-[var(--color-warning-bg)]/30 border border-[var(--color-warning-bg)] flex items-start gap-3">
-              <AlertCircle size={16} className="text-[var(--color-warning-text)] mt-0.5 flex-shrink-0" />
-              <p className="text-xs text-[var(--color-warning-text)] font-medium">
-                No bookings are currently eligible. Ensure bookings are at least 'Pending' or have a 'Draft' contract.
-              </p>
-            </div>
-          )}
-        </div>
+        {/* ✅ Premium Entity Selector for Bookings */}
+        <PremiumEntitySelector
+          fetcher={fetchEligibleBookings}
+          searchKeys={["booking_number", "client_name", "id"]}
+          placeholder="Select a booking..."
+          emptyMessage="No eligible bookings. Ensure bookings are Pending/Confirmed or have a Draft/Void contract."
+          renderEntityCard={renderBookingCard}
+          selectedId={selectedBooking?.id || null}
+          onSelect={() => {
+            // ✅ FIXED: Removed unused 'id' parameter
+            setSelectedBooking((prev) => prev);
+          }}
+          onSelectEntity={(booking) => {
+            setSelectedBooking(booking as Booking);
+          }}
+          label="Select Booking"
+          required
+        />
 
         {selectedBooking && (
           <div className="p-5 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)]">
@@ -213,7 +244,7 @@ export default function GenerateContractModal({ open, onClose, onGenerated }: Ge
           </button>
           <button 
             onClick={handleGenerateOrCopy} 
-            disabled={loading || !selectedBookingId} 
+            disabled={loading || !selectedBooking} 
             className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-lg)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (

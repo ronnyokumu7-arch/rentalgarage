@@ -1,6 +1,7 @@
 "use client";
 
 import { FileText, CheckCircle2, Send, PenLine, TrendingUp } from "lucide-react";
+import { useRouter } from "next/navigation"; // ✅ NEW
 import type { ContractHealth } from "@/hooks/financials/useFinancialOverview";
 
 interface Props {
@@ -8,6 +9,8 @@ interface Props {
 }
 
 export default function ContractHealthWidget({ data }: Props) {
+  const router = useRouter(); // ✅ NEW: For navigation
+
   // SVG Gauge Math - Optimized for mobile
   const radius = 40;
   const circumference = 2 * Math.PI * radius;
@@ -31,6 +34,11 @@ export default function ContractHealthWidget({ data }: Props) {
   };
 
   const health = getHealthStatus();
+
+  // ✅ NEW: Navigation handlers
+  const goToContracts = (status: string) => {
+    router.push(`/dashboard/financials?tab=contracts&status=${status}`);
+  };
 
   return (
     <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden h-full">
@@ -125,8 +133,11 @@ export default function ContractHealthWidget({ data }: Props) {
 
           {/* Stats List - Full width, stacked on mobile */}
           <div className="space-y-2 w-full">
-            {/* Signed */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20 active:bg-emerald-500/15 hover:bg-emerald-500/10 transition-colors">
+            {/* Signed - Clickable */}
+            <button
+              onClick={() => goToContracts("signed")}
+              className="w-full flex items-center justify-between p-3 rounded-lg bg-emerald-500/5 border border-emerald-500/20 active:bg-emerald-500/15 hover:bg-emerald-500/10 transition-colors cursor-pointer"
+            >
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 flex-shrink-0">
                   <CheckCircle2 size={14} />
@@ -137,10 +148,13 @@ export default function ContractHealthWidget({ data }: Props) {
                 <span className="text-base font-extrabold text-emerald-600 dark:text-emerald-400 tabular-nums">{data.signed_count}</span>
                 <span className="text-[10px] font-medium text-[var(--color-ink-muted)]">({data.signed_percentage}%)</span>
               </div>
-            </div>
+            </button>
 
-            {/* Draft */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-amber-500/5 border border-amber-500/20 active:bg-amber-500/15 hover:bg-amber-500/10 transition-colors">
+            {/* Draft - Clickable */}
+            <button
+              onClick={() => goToContracts("draft")}
+              className="w-full flex items-center justify-between p-3 rounded-lg bg-amber-500/5 border border-amber-500/20 active:bg-amber-500/15 hover:bg-amber-500/10 transition-colors cursor-pointer"
+            >
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 flex-shrink-0">
                   <PenLine size={14} />
@@ -151,10 +165,13 @@ export default function ContractHealthWidget({ data }: Props) {
                 <span className="text-base font-extrabold text-amber-600 dark:text-amber-400 tabular-nums">{data.draft_count}</span>
                 <span className="text-[10px] font-medium text-[var(--color-ink-muted)]">({data.draft_percentage}%)</span>
               </div>
-            </div>
+            </button>
 
-            {/* Sent */}
-            <div className="flex items-center justify-between p-3 rounded-lg bg-blue-500/5 border border-blue-500/20 active:bg-blue-500/15 hover:bg-blue-500/10 transition-colors">
+            {/* Sent - Clickable */}
+            <button
+              onClick={() => goToContracts("sent")}
+              className="w-full flex items-center justify-between p-3 rounded-lg bg-blue-500/5 border border-blue-500/20 active:bg-blue-500/15 hover:bg-blue-500/10 transition-colors cursor-pointer"
+            >
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400 flex-shrink-0">
                   <Send size={14} />
@@ -165,7 +182,7 @@ export default function ContractHealthWidget({ data }: Props) {
                 <span className="text-base font-extrabold text-blue-600 dark:text-blue-400 tabular-nums">{data.sent_count}</span>
                 <span className="text-[10px] font-medium text-[var(--color-ink-muted)]">({data.sent_percentage}%)</span>
               </div>
-            </div>
+            </button>
           </div>
         </div>
 
