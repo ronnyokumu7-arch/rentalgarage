@@ -10,20 +10,21 @@ interface BookingSummaryProps {
   startDate: string;
   endDate: string;
   totalAmount: number;
-  // ✅ MILESTONE 1 (optional → backward compatible with any other usage)
+  // ✅ MILESTONE 1 & 3: Updated for new pricing engines
   serviceType?: ServiceType;
   quote?: PricingResult | null;
   quoteLoading?: boolean;
 }
 
+// ✅ UPDATED: Aligned with new backend ServiceType constants
 const SERVICE_LABELS: Record<ServiceType, string> = {
   selfdrive: "Self Drive",
-  chauffeur_pro_driver: "Chauffeur · Pro Driver",
-  chauffeur_wedding: "Chauffeur · Wedding",
+  airport_transfer: "Airport Transfer",
+  wedding: "Wedding Car Hire",
+  pro_driver: "Chauffeur",
   chauffeur_hourly: "Chauffeur · Hourly",
   corporate: "Corporate Transport",
   city_excursion: "City Excursion",
-  airport_transfer: "Airport Transfer",
   chauffeur_taxi: "Taxi",
   route_stops_service: "Places-Visited Tour",
 };
@@ -79,11 +80,9 @@ const DRIVER_STATUS_LABELS: Record<string, string> = {
   on_trip: "On Trip",
 };
 
-// ✅ Billing-model-aware duration renderer — uses the engine's own output
-// so the display always matches what was actually charged.
+// ✅ UPDATED: Resilient duration renderer for new pure pricing engines
 const renderDuration = (quote: PricingResult | null, fallbackDays: number) => {
   if (!quote) {
-    // No quote yet — generic fallback
     if (fallbackDays <= 0) return null;
     return (
       <span className="font-semibold text-[var(--color-ink)]">
@@ -92,80 +91,82 @@ const renderDuration = (quote: PricingResult | null, fallbackDays: number) => {
     );
   }
 
-  const { billing_model, included_days, extra_hours, day_hours } = quote;
+  // New pure engines return extra_hours, base_rate, etc.
+  const { billing_model, included_days, extra_hours, day_hours } = quote as any; // Cast to any to safely access legacy fields if they exist
 
-  switch (billing_model) {
-    case "event_base":
-      return (
-        <span className="font-semibold text-[var(--color-ink)]">
-          1 event × {day_hours}h base
-          {extra_hours > 0 && ` + ${extra_hours}h add-on`}
-        </span>
-      );
-    case "hourly":
-      // For hourly, included_days isn't meaningful; total hours is what matters.
-      // We don't have raw hours on PricingResult, so use base_charge / per_hour proxy:
-      // (not reliable). Instead show the billed day-equivalent.
-      return (
-        <span className="font-semibold text-[var(--color-ink)]">
-          {included_days} block{included_days !== 1 ? "s" : ""} × {day_hours}h
-        </span>
-      );
-    case "package":
-      return (
-        <span className="font-semibold text-[var(--color-ink)]">
-          {day_hours <= 4 ? "Half-day" : "Full-day"} package
-          {extra_hours > 0 && ` + ${extra_hours}h extra`}
-        </span>
-      );
-    case "fixed_route":
-    case "distance_time":
-    case "route_stops":
-      // These models don't have a "duration" concept — show billing basis instead
-      return (
-        <span className="font-semibold text-[var(--color-ink)]">
-          Flat rate
-        </span>
-      );
-    case "rolling_24h":
-    default:
-      return (
-        <span className="font-semibold text-[var(--color-ink)]">
-          {included_days} day{included_days !== 1 ? "s" : ""} × {day_hours}h
-          {extra_hours > 0 && ` + ${extra_hours}h OT`}
-        </span>
-      );
-  }
-};
-
-// ✅ Billing-model-aware footer line — matches the duration display
-const renderFooter = (quote: PricingResult | null, serviceType: ServiceType, fallbackDays: number, vehicle?: Vehicle) => {
-  const label = quote?.service_label || SERVICE_LABELS[serviceType];
-
-  if (quote) {
-    const bits: string[] = [label];
-    const { billing_model, included_days, day_hours, driver_charge } = quote;
-
+  if (billing_model) {
     switch (billing_model) {
       case "event_base":
-        bits.push(`1 event × ${day_hours}h`);
-        break;
+        return (
+          <span className="font-semibold text-[var(--color-ink)]">
+            1 event × {day_hours || 12}h base
+            {extra_hours > 0 && ` + ${extra_hours}h add-on`}
+          </span>
+        );
       case "hourly":
       case "package":
-        bits.push(`${included_days} block${included_days !== 1 ? "s" : ""} × ${day_hours}h`);
-        break;
+        return (
+          <span className="font-semibold text-[var(--color-ink)]">
+            {included_days || 1} block{(included_days || 1) !== 1 ? "s" : ""} × {day_hours || 12}h
+            {extra_hours > 0 && ` + ${extra_hours}h extra`}
+          </span>
+        );
       case "fixed_route":
       case "distance_time":
       case "route_stops":
-        bits.push("flat/metered");
-        break;
+        return <span className="font-semibold text-[var(--color-ink)]">Flat rate</span>;
       case "rolling_24h":
       default:
-        bits.push(`${included_days} day(s) × ${day_hours}h`);
-        break;
+        return (
+          <span className="font-semibold text-[var(--color-ink)]">
+            {included_days || 1} day{(included_days || 1) !== 1 ? "s" : ""} × {day_hours || 24}h
+            {extra_hours > 0 && ` + ${extra_hours}h OT`}
+          </span>
+        );
+    }
+  }
+
+  // Fallback for new pure engines (Airport, Wedding, Pro Driver)
+  return (
+    <span className="font-semibold text-[var(--color-ink)]">
+      1 package
+      {extra_hours && extra_hours > 0 ? ` + ${extra_hours}h extra` : ""}
+    </span>
+  );
+};
+
+// ✅ UPDATED: Resilient footer line for new pure pricing engines
+const renderFooter = (quote: PricingResult | null, serviceType: ServiceType, fallbackDays: number, vehicle?: Vehicle) => {
+  const label = (quote as any)?.service_label || SERVICE_LABELS[serviceType];
+
+  if (quote) {
+    const bits: string[] = [label];
+    const { billing_model, included_days, day_hours, driver_subtotal } = quote as any;
+
+    if (billing_model) {
+      switch (billing_model) {
+        case "event_base":
+          bits.push(`1 event × ${day_hours || 12}h`);
+          break;
+        case "hourly":
+        case "package":
+          bits.push(`${included_days || 1} block${(included_days || 1) !== 1 ? "s" : ""} × ${day_hours || 12}h`);
+          break;
+        case "fixed_route":
+        case "distance_time":
+        case "route_stops":
+          bits.push("flat/metered");
+          break;
+        case "rolling_24h":
+        default:
+          bits.push(`${included_days || 1} day(s) × ${day_hours || 24}h`);
+          break;
+      }
+    } else {
+      bits.push("Package rate");
     }
 
-    if (Number(driver_charge) > 0) bits.push("includes driver fees");
+    if (driver_subtotal && Number(driver_subtotal) > 0) bits.push("includes driver fees");
     return <div className="text-[10px] text-[var(--color-ink-muted)] mt-1">{bits.join(" · ")}</div>;
   }
 
@@ -191,7 +192,6 @@ export default function BookingSummary({
   quote = null,
   quoteLoading = false,
 }: BookingSummaryProps) {
-  // ✅ Fallback aligned to the 24h rule (removed the inclusive "+1" overlap)
   const getDays = () => {
     if (!startDate || !endDate) return 0;
     const start = new Date(startDate);
@@ -199,18 +199,14 @@ export default function BookingSummary({
     return Math.max(1, Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)));
   };
 
-  // ✅ Engine is source of truth when quote is available
-  const days = quote ? quote.included_days : getDays();
-
+  const days = quote ? (quote as any).included_days || 1 : getDays();
   const driverStatusStyle = driver ? (DRIVER_STATUS_STYLES[driver.status] || DRIVER_STATUS_STYLES.available) : null;
 
-  // ✅ Resolve billing-model-aware labels + icon
-  const billingModel = quote?.billing_model || "rolling_24h";
+  const billingModel = (quote as any)?.billing_model || "rolling_24h";
   const PeriodIcon = BILLING_ICONS[billingModel] || CalendarDays;
   const periodLabels = PERIOD_LABELS[billingModel] || PERIOD_LABELS.rolling_24h;
 
-  // ✅ Use engine's own service_label when available (always up to date with catalog)
-  const serviceBadgeLabel = quote?.service_label || SERVICE_LABELS[serviceType];
+  const serviceBadgeLabel = (quote as any)?.service_label || SERVICE_LABELS[serviceType];
 
   return (
     <div className="bg-gradient-to-br from-[var(--color-surface)] to-[var(--color-surface-hover)] rounded-xl border border-[var(--color-surface-border)] p-4">
@@ -325,7 +321,7 @@ export default function BookingSummary({
         )}
       </div>
 
-      {/* ✅ MILESTONE 1: Live Pricing Breakdown (from /quote) */}
+      {/* ✅ MILESTONE 1 & 3: Live Pricing Breakdown (works perfectly with new pure engines) */}
       {quote && (
         <div className="mb-3 pb-3 border-b border-[var(--color-surface-border)]">
           <div className="flex items-center gap-2 mb-2">
@@ -344,13 +340,14 @@ export default function BookingSummary({
                 </span>
               </div>
             ))}
-            {quote.grace_used_minutes > 0 && (
+            {/* Legacy grace/overtime warnings (safe optional checks) */}
+            {(quote as any).grace_used_minutes > 0 && (
               <div className="flex items-center gap-1 text-[10px] text-emerald-600">
                 <ShieldCheck size={10} />
-                {quote.grace_used_minutes} min grace applied (free)
+                {(quote as any).grace_used_minutes} min grace applied (free)
               </div>
             )}
-            {quote.extra_hours > 0 && quote.overtime_waivable && (
+            {(quote as any).extra_hours > 0 && (quote as any).overtime_waivable && (
               <div className="text-[10px] text-[var(--color-ink-muted)]">
                 Extra hours may be forgiven as a discount at invoice time.
               </div>

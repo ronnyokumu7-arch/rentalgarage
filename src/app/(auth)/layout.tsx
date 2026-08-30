@@ -384,14 +384,15 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         </motion.div>
       </motion.div>
 
-      {/* ── RIGHT PANEL - Auth Form (ALWAYS LIGHT) ───────────────── */}
+      {/* ── RIGHT PANEL - Auth Form (ALWAYS LIGHT, full-bleed) ───────────────── */}
       <motion.div 
-        className="auth-light flex-1 flex items-center justify-center p-6 lg:p-12 bg-white"
+        className="auth-light flex-1 flex items-center justify-center p-6 lg:p-16 bg-white"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.2, duration: 0.6 }}
       >
-        <div className="w-full max-w-sm">
+        {/* ✅ max-w-md: proper desktop card width; mobile unchanged */}
+        <div className="w-full max-w-md">
           {/* Mobile Brand - FIXED: Using brand light mode colors */}
           <motion.div 
             className="lg:hidden flex items-center gap-3 mb-8"

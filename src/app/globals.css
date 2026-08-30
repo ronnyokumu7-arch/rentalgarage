@@ -1,11 +1,12 @@
-/* src/app/globals.css */
+/* src/app/globals.css - APP DASHBOARD ONLY */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 @import "tailwindcss";
 
 /* ══════════════════════════════════════════════════════════
-   🎨 BILLION DOLLAR BRAND SYSTEM
-   Premium, Cohesive, Luxurious
+   🎨 APP DESIGN SYSTEM
+   For authenticated dashboard & internal tools
+   Dark-mode aware, rich interactions
    ═══════════════════════════════════════════════════════════ */
 
 @layer base {
@@ -407,8 +408,7 @@
   .bg-gradient-brand-light { background: var(--color-primary-gradient-light) !important; }
   .bg-gradient-gold { background: var(--color-secondary-gradient) !important; }
   .bg-gradient-gold-light { background: var(--color-secondary-gradient-light) !important; }
-  .bg-gradient-surface { background: var(--gradient-surface) !important; }
-  .bg-gradient-bg { background: var(--gradient-bg) !important; }
+  .bg-gradient-bg { background: var(--color-bg-gradient) !important; }
 
   /* ── SHADOWS ────────────────────────────────────────────── */
   .shadow-card { box-shadow: var(--shadow-card) !important; }
@@ -421,80 +421,9 @@
 }
 
 /* ══════════════════════════════════════════════════════════
-   🔧 AUTH PAGE FIX - Force dark text on white background
+   ✨ APP ANIMATIONS
    ═══════════════════════════════════════════════════════════ */
 
-/* This forces text-ink classes to always be dark when inside a white background */
-.bg-white .text-ink,
-.bg-white .text-ink-secondary,
-.bg-white h1.text-ink,
-.bg-white h2.text-ink,
-.bg-white h3.text-ink,
-.bg-white h4.text-ink,
-.bg-white h5.text-ink,
-.bg-white h6.text-ink {
-  color: #1C1917 !important;
-}
-
-.bg-white .text-ink-muted {
-  color: #57534E !important;
-}
-
-.bg-white .text-ink-subtle {
-  color: #78716C !important;
-}
-
-.bg-white .text-ink-faint {
-  color: #A8A39E !important;
-}
-
-/* Fix for auth page headings that might not have text-ink class */
-.bg-white h1,
-.bg-white h2,
-.bg-white h3,
-.bg-white h4,
-.bg-white h5,
-.bg-white h6 {
-  color: #1C1917 !important;
-}
-
-/* Fix for auth page body text */
-.bg-white p,
-.bg-white span,
-.bg-white label,
-.bg-white div:not(.bg-white) {
-  color: #1C1917;
-}
-
-.bg-white .text-sm,
-.bg-white .text-base {
-  color: #1C1917;
-}
-
-/* But keep muted text as muted */
-.bg-white .text-ink-muted,
-.bg-white p.text-ink-muted,
-.bg-white span.text-ink-muted {
-  color: #57534E !important;
-}
-
-/* ══════════════════════════════════════════════════════════
-   📄 PRINT STYLES
-   ═══════════════════════════════════════════════════════════ */
-
-@media print {
-  .contract-section { break-inside: auto; margin-bottom: 14pt; }
-  .section-title { break-after: avoid; page-break-after: avoid; }
-  .signature-box, .audit-stamp, .charges-table { break-inside: avoid; page-break-inside: avoid; }
-  
-  * {
-    color: #1C1917 !important;
-    background-color: #FFFFFF !important;
-    border-color: rgba(44, 38, 32, 0.08) !important;
-  }
-}
-
-/* ── Premium Animations ────────────────────────────────────── */
 @keyframes pulse-slow {
   0%, 100% { opacity: 0.6; transform: scale(1); }
   50% { opacity: 1; transform: scale(1.1); }
@@ -521,7 +450,6 @@
   100% { background-position: 0% 50%; }
 }
 
-/* ── Utility Classes ────────────────────────────────────────── */
 .animate-pulse-slow {
   animation: pulse-slow 8s ease-in-out infinite;
 }
@@ -573,42 +501,6 @@
   border-color: rgba(167, 139, 250, 0.15);
   transition: all 0.3s ease;
 }
-
-
-/* ══════════════════════════════════════════════════════════
-   🔐 AUTH SPLIT-SCREEN THEME LOCK
-   Left panel is ALWAYS dark, right panel is ALWAYS light.
-   ═══════════════════════════════════════════════════════════ */
-.auth-dark {
-  --color-ink-primary:   #F5F0EB;
-  --color-ink-secondary: #E8E4DE;
-  --color-ink-muted:     #A8A39E;
-  --color-ink-subtle:    #78716C;
-  --color-ink-faint:     #57534E;
-  --color-surface:       #1A1714;
-  --color-surface-hover: #2C2823;
-  --color-surface-border: rgba(255, 248, 240, 0.06);
-  --color-primary:       #A78BFA;
-  --color-primary-text:  #A78BFA;
-}
-
-.auth-light {
-  --color-ink-primary:   #1C1917;
-  --color-ink-secondary: #292524;
-  --color-ink-muted:     #57534E;
-  --color-ink-subtle:    #78716C;
-  --color-ink-faint:     #A8A39E;
-  --color-bg:            #FFFFFF;
-  --color-surface:       #FFFFFF;
-  --color-surface-hover: #FAF8F5;
-  --color-surface-active:#F5F2ED;
-  --color-surface-border: rgba(44, 38, 32, 0.08);
-  --color-primary:       #7C3AED;
-  --color-primary-hover: #6D28D9;
-  --color-primary-text:  #6D28D9;
-  --color-primary-muted: rgba(124, 58, 237, 0.10);
-}
-
 
 /* Hide scrollbar for Chrome, Safari and Opera */
 .scrollbar-hide::-webkit-scrollbar {

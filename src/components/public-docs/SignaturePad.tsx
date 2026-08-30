@@ -53,8 +53,8 @@ const SignaturePad = forwardRef<SignaturePadRef>((_, ref) => {
     ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
-    ctx.strokeStyle = '#09090b';
-    ctx.fillStyle = '#09090b';
+    ctx.strokeStyle = '#1C1917';
+    ctx.fillStyle = '#1C1917';
   }, []);
 
   const getPoint = (e: React.PointerEvent<HTMLCanvasElement>): Point => {
@@ -157,8 +157,12 @@ const SignaturePad = forwardRef<SignaturePadRef>((_, ref) => {
         ref={canvasRef}
         width={800}
         height={250}
-        className="w-full h-48 border-2 border-dashed border-surface-border-strong rounded-xl cursor-crosshair touch-none"
-        style={{ backgroundColor: 'transparent', display: 'block' }}
+        className="w-full h-48 rounded-xl cursor-crosshair touch-none"
+        style={{
+          backgroundColor: '#FFFFFF',
+          display: 'block',
+          border: '2px dashed rgba(28, 25, 23, 0.18)',
+        }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -166,7 +170,12 @@ const SignaturePad = forwardRef<SignaturePadRef>((_, ref) => {
       />
       {!hasDrawn && (
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <span className="text-ink-subtle text-sm font-medium tracking-wide uppercase">Sign Here</span>
+          <span 
+            className="text-sm font-medium tracking-wide uppercase"
+            style={{ color: '#78716C' }}
+          >
+            Sign Here
+          </span>
         </div>
       )}
     </div>

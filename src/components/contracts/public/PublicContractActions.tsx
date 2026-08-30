@@ -15,11 +15,20 @@ export default function PublicContractActions({
   signed = false 
 }: Props) {
   return (
-    <div className="p-4 sm:px-8 sm:py-6 bg-slate-50 border-t border-slate-200">
+    <div 
+      className="p-4 sm:px-8 sm:py-6"
+      style={{
+        background: '#FAF9F7',
+        borderTop: '1px solid rgba(28, 25, 23, 0.10)',
+      }}
+    >
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         
         {/* Simple English confirmation text */}
-        <p className="text-xs text-slate-600 text-center sm:text-left max-w-md">
+        <p 
+          className="text-xs text-center sm:text-left max-w-md"
+          style={{ color: '#57534E' }}
+        >
           By clicking sign, you confirm you have read and agree to all terms above.
         </p>
         
@@ -28,12 +37,24 @@ export default function PublicContractActions({
           <button
             onClick={() => onSign("")} // Signature handled by parent via signature pad
             disabled={isSigning}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl 
-                      bg-blue-600 text-white text-sm font-bold 
-                      hover:bg-blue-700 transition-all 
-                      shadow-lg shadow-blue-200 
-                      disabled:opacity-50 disabled:cursor-not-allowed 
-                      shrink-0"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+            style={{
+              background: 'linear-gradient(135deg, #6D28D9 0%, #5B21B6 100%)',
+              color: '#FFFFFF',
+              boxShadow: '0 4px 12px rgba(109, 40, 217, 0.25)',
+              cursor: isSigning ? 'not-allowed' : 'pointer',
+              opacity: isSigning ? 0.5 : 1,
+            }}
+            onMouseEnter={(e) => {
+              if (!isSigning) {
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(109, 40, 217, 0.35)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 4px 12px rgba(109, 40, 217, 0.25)';
+            }}
           >
             {isSigning ? (
               <>
@@ -49,10 +70,15 @@ export default function PublicContractActions({
           </button>
         ) : (
           /* Success state - contract already signed */
-          <div className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl 
-                        bg-emerald-50 text-emerald-700 text-sm font-bold 
-                        border border-emerald-200 shrink-0">
-            <CheckCircle2 size={16} className="text-emerald-600" />
+          <div 
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold shrink-0"
+            style={{
+              background: 'rgba(4, 120, 87, 0.05)',
+              color: '#047857',
+              border: '1px solid rgba(4, 120, 87, 0.20)',
+            }}
+          >
+            <CheckCircle2 size={16} style={{ color: '#047857' }} />
             Contract Signed
           </div>
         )}

@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, CheckCircle2, Lock } from "lucide-react";
 import apiClient from "@/lib/api-client";
+import "@/app/login.css";
 
 function getPasswordStrength(pw: string) {
   let score = 0;
@@ -52,16 +53,35 @@ function ResetPasswordForm() {
   if (!token) {
     return (
       <div className="text-center py-8">
-        <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 bg-danger/10">
-          <Lock size={30} className="text-danger" strokeWidth={1.8} />
+        <div 
+          className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
+          style={{ backgroundColor: 'rgba(185, 28, 28, 0.10)' }}
+        >
+          <Lock size={30} style={{ color: '#B91C1C' }} strokeWidth={1.8} />
         </div>
-        <h2 className="text-2xl font-bold text-ink mb-2 tracking-tight">
+        <h2 className="text-2xl font-bold mb-2 tracking-tight" style={{ color: '#1C1917' }}>
           Invalid Reset Link
         </h2>
-        <p className="text-ink-muted text-sm mb-8">
+        <p className="text-sm mb-8" style={{ color: '#57534E' }}>
           This password reset link is invalid or has expired.
         </p>
-        <Link href="/login" className="btn-primary inline-flex h-10 px-6 rounded-xl items-center justify-center text-sm font-semibold">
+        <Link 
+          href="/login" 
+          className="inline-flex h-10 px-6 rounded-xl items-center justify-center text-sm font-semibold text-white"
+          style={{
+            background: 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)',
+            boxShadow: '0 2px 8px rgba(124, 58, 237, 0.30)',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-1px)';
+            e.currentTarget.style.boxShadow = '0 4px 16px rgba(124, 58, 237, 0.40)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.boxShadow = '0 2px 8px rgba(124, 58, 237, 0.30)';
+          }}
+        >
           Back to login
         </Link>
       </div>
@@ -74,19 +94,29 @@ function ResetPasswordForm() {
         <>
           {/* Header */}
           <div className="space-y-1.5">
-            <h1 className="text-2xl font-bold text-ink tracking-tight">
+            <h1 className="text-2xl font-bold tracking-tight" style={{ color: '#1C1917' }}>
               Create new password
             </h1>
-            <p className="text-ink-muted text-sm">
+            <p className="text-sm" style={{ color: '#57534E' }}>
               Your new password must be different from previously used passwords.
             </p>
           </div>
 
           {/* Error */}
           {error && (
-            <div className="p-3 rounded-xl bg-danger/10 border border-danger/20 text-danger text-sm flex items-start gap-2.5">
-              <div className="w-4 h-4 rounded-full bg-danger/20 flex items-center justify-center shrink-0 mt-0.5">
-                <span className="text-[10px] font-bold text-danger">!</span>
+            <div 
+              className="p-3 rounded-xl text-sm flex items-start gap-2.5"
+              style={{
+                backgroundColor: 'rgba(185, 28, 28, 0.10)',
+                border: '1px solid rgba(185, 28, 28, 0.20)',
+                color: '#B91C1C',
+              }}
+            >
+              <div 
+                className="w-4 h-4 rounded-full flex items-center justify-center shrink-0 mt-0.5"
+                style={{ backgroundColor: 'rgba(185, 28, 28, 0.20)' }}
+              >
+                <span className="text-[10px] font-bold" style={{ color: '#B91C1C' }}>!</span>
               </div>
               <p className="text-xs font-medium">{error}</p>
             </div>
@@ -96,24 +126,47 @@ function ResetPasswordForm() {
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Password */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5">
+              <label 
+                className="block text-xs font-semibold uppercase tracking-wider mb-1.5"
+                style={{ color: '#57534E' }}
+              >
                 New Password
               </label>
               <div className="relative group">
                 <input
                   type={showPassword ? "text" : "password"}
-                  className="w-full h-11 pl-10 pr-10 rounded-xl bg-surface border border-surface-border text-ink placeholder:text-ink-faint focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all text-sm"
+                  className="w-full h-11 pl-10 pr-10 rounded-xl border outline-none transition-all text-sm"
+                  style={{
+                    backgroundColor: '#F7F4F0',
+                    borderColor: '#E8E4DE',
+                    color: '#1C1917',
+                  }}
                   placeholder="Min. 8 characters"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   autoFocus
+                  onFocus={(e) => {
+                    e.currentTarget.style.borderColor = '#7C3AED';
+                    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(124, 58, 237, 0.20)';
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.borderColor = '#E8E4DE';
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
                 />
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-faint group-focus-within:text-primary transition-colors" size={17} />
+                <Lock 
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors" 
+                  size={17}
+                  style={{ color: '#A8A39E' }}
+                />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-ink-faint hover:text-ink-muted transition-colors focus:outline-none"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 transition-colors focus:outline-none"
+                  style={{ color: '#A8A39E' }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = '#57534E'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = '#A8A39E'}
                   tabIndex={-1}
                 >
                   {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
@@ -129,7 +182,7 @@ function ResetPasswordForm() {
                         key={i} 
                         className="h-1.5 flex-1 rounded-full transition-colors" 
                         style={{ 
-                          background: i <= strength ? strengthColors[strength] : 'var(--color-surface-border)'
+                          background: i <= strength ? strengthColors[strength] : '#E8E4DE'
                         }} 
                       />
                     ))}
@@ -143,40 +196,72 @@ function ResetPasswordForm() {
 
             {/* Confirm Password */}
             <div>
-              <label className="block text-xs font-semibold uppercase tracking-wider text-ink-muted mb-1.5">
+              <label 
+                className="block text-xs font-semibold uppercase tracking-wider mb-1.5"
+                style={{ color: '#57534E' }}
+              >
                 Confirm Password
               </label>
               <div className="relative group">
                 <input
                   type={showPassword ? "text" : "password"}
-                  className={`
-                    w-full h-11 pl-10 pr-3 rounded-xl bg-surface border text-ink placeholder:text-ink-faint focus:outline-none transition-all text-sm
-                    ${confirm.length > 0 && !isMatch 
-                      ? 'border-danger focus:ring-2 focus:ring-danger/20' 
+                  className="w-full h-11 pl-10 pr-3 rounded-xl border outline-none transition-all text-sm"
+                  style={{
+                    backgroundColor: '#F7F4F0',
+                    color: '#1C1917',
+                    borderColor: confirm.length > 0 && !isMatch 
+                      ? '#B91C1C' 
                       : confirm.length > 0 && isMatch
-                        ? 'border-success focus:ring-2 focus:ring-success/20'
-                        : 'border-surface-border focus:border-primary focus:ring-2 focus:ring-primary/20'
-                    }
-                  `}
+                        ? '#047857'
+                        : '#E8E4DE',
+                  }}
                   placeholder="Re-enter password"
                   value={confirm}
                   onChange={(e) => setConfirm(e.target.value)}
                   required
+                  onFocus={(e) => {
+                    if (confirm.length === 0 || isMatch) {
+                      e.currentTarget.style.borderColor = '#7C3AED';
+                      e.currentTarget.style.boxShadow = '0 0 0 3px rgba(124, 58, 237, 0.20)';
+                    }
+                  }}
+                  onBlur={(e) => {
+                    e.currentTarget.style.boxShadow = 'none';
+                  }}
                 />
-                <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-faint" size={17} />
+                <Lock 
+                  className="absolute left-3.5 top-1/2 -translate-y-1/2" 
+                  size={17}
+                  style={{ color: '#A8A39E' }}
+                />
               </div>
               {confirm.length > 0 && !isMatch && (
-                <p className="text-xs text-danger mt-1.5">Passwords do not match.</p>
+                <p className="text-xs mt-1.5" style={{ color: '#B91C1C' }}>Passwords do not match.</p>
               )}
               {confirm.length > 0 && isMatch && (
-                <p className="text-xs text-success mt-1.5">✓ Passwords match</p>
+                <p className="text-xs mt-1.5" style={{ color: '#047857' }}>✓ Passwords match</p>
               )}
             </div>
 
             <button
               type="submit"
               disabled={loading || !isMatch || strength < 3}
-              className="btn-primary w-full h-11 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full h-11 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                background: 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)',
+                boxShadow: '0 2px 8px rgba(124, 58, 237, 0.30)',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                if (!loading && isMatch && strength >= 3) {
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = '0 4px 16px rgba(124, 58, 237, 0.40)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(124, 58, 237, 0.30)';
+              }}
             >
               {loading ? (
                 <>
@@ -192,16 +277,35 @@ function ResetPasswordForm() {
       ) : (
         /* Success State */
         <div className="text-center py-8">
-          <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 bg-success/10">
-            <CheckCircle2 size={30} className="text-success" strokeWidth={1.8} />
+          <div 
+            className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
+            style={{ backgroundColor: 'rgba(4, 120, 87, 0.10)' }}
+          >
+            <CheckCircle2 size={30} style={{ color: '#047857' }} strokeWidth={1.8} />
           </div>
-          <h2 className="text-2xl font-bold text-ink mb-2 tracking-tight">
+          <h2 className="text-2xl font-bold mb-2 tracking-tight" style={{ color: '#1C1917' }}>
             Password Updated
           </h2>
-          <p className="text-ink-muted text-sm mb-8">
+          <p className="text-sm mb-8" style={{ color: '#57534E' }}>
             Your password has been successfully reset. You can now sign in with your new credentials.
           </p>
-          <Link href="/login" className="btn-primary inline-flex h-10 px-6 rounded-xl items-center justify-center text-sm font-semibold">
+          <Link 
+            href="/login" 
+            className="inline-flex h-10 px-6 rounded-xl items-center justify-center text-sm font-semibold text-white"
+            style={{
+              background: 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)',
+              boxShadow: '0 2px 8px rgba(124, 58, 237, 0.30)',
+              transition: 'all 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-1px)';
+              e.currentTarget.style.boxShadow = '0 4px 16px rgba(124, 58, 237, 0.40)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+              e.currentTarget.style.boxShadow = '0 2px 8px rgba(124, 58, 237, 0.30)';
+            }}
+          >
             Sign in now
           </Link>
         </div>
@@ -212,7 +316,13 @@ function ResetPasswordForm() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center bg-bg"><span className="text-ink-muted">Loading...</span></div>}>
+    <Suspense 
+      fallback={
+        <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#FFFFFF' }}>
+          <span style={{ color: '#57534E' }}>Loading...</span>
+        </div>
+      }
+    >
       <ResetPasswordForm />
     </Suspense>
   );

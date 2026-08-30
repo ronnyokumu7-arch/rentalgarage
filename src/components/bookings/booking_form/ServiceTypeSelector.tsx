@@ -25,7 +25,7 @@ export default function ServiceTypeSelector({
 
   const getIcon = (key: ServiceType) => {
     if (key === "selfdrive") return Car;
-    if (key === "chauffeur_wedding") return Heart;
+    if (key === "wedding") return Heart;
     if (key === "corporate") return Building2;
     if (key === "airport_transfer") return Plane;
     if (key === "city_excursion") return Map;

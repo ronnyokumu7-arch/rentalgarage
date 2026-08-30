@@ -1,3 +1,4 @@
+// src/components/public-docs/PublicRescheduleModal.tsx
 "use client";
 
 import { useState } from "react";
@@ -58,58 +59,122 @@ export default function PublicRescheduleModal({
     onSubmit(pickup.toISOString(), ret.toISOString());
   };
 
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    padding: '0.5rem 0.75rem',
+    borderRadius: '0.5rem',
+    border: '1px solid rgba(28, 25, 23, 0.15)',
+    fontSize: '0.875rem',
+    color: '#1C1917',
+    background: '#FFFFFF',
+    outline: 'none',
+    transition: 'all 0.2s ease',
+  };
+
+  const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.currentTarget.style.borderColor = '#6D28D9';
+    e.currentTarget.style.boxShadow = '0 0 0 3px rgba(109, 40, 217, 0.15)';
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    e.currentTarget.style.borderColor = 'rgba(28, 25, 23, 0.15)';
+    e.currentTarget.style.boxShadow = 'none';
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4" onClick={onClose}>
+    <div 
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(0, 0, 0, 0.50)' }}
+      onClick={onClose}
+    >
       <div
-        className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6"
+        className="rounded-2xl max-w-md w-full p-6"
+        style={{
+          background: '#FFFFFF',
+          boxShadow: '0 25px 50px -12px rgba(28, 25, 23, 0.20)',
+        }}
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Calendar size={18} className="text-blue-600" />
-            <h3 className="text-base font-bold text-slate-900">Reschedule Booking</h3>
+            <Calendar size={18} style={{ color: '#6D28D9' }} />
+            <h3 className="text-base font-bold" style={{ color: '#1C1917' }}>Reschedule Booking</h3>
           </div>
           <button
             type="button"
             onClick={onClose}
             disabled={isSubmitting}
-            className="p-1 rounded-lg hover:bg-slate-100 transition-colors disabled:opacity-50"
+            className="p-1 rounded-lg transition-colors disabled:opacity-50"
+            style={{ cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.5 : 1 }}
+            onMouseEnter={(e) => {
+              if (!isSubmitting) {
+                e.currentTarget.style.background = '#F5F3F0';
+              }
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'transparent';
+            }}
           >
-            <X size={18} className="text-slate-500" />
+            <X size={18} style={{ color: '#57534E' }} />
           </button>
         </div>
 
-        <p className="text-xs text-slate-500 mb-4">
+        <p className="text-xs mb-4" style={{ color: '#57534E' }}>
           Propose a new schedule. The quotation will be re-priced and you'll need to confirm again.
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1.5">New Pickup Date & Time *</label>
+            <label 
+              className="block text-xs font-semibold mb-1.5"
+              style={{ color: '#57534E' }}
+            >
+              New Pickup Date & Time *
+            </label>
             <input
               type="datetime-local"
               value={toLocalInput(pickupAt)}
               onChange={(e) => setPickupAt(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              style={inputStyle}
               required
               disabled={isSubmitting}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
             />
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1.5">New Return Date & Time *</label>
+            <label 
+              className="block text-xs font-semibold mb-1.5"
+              style={{ color: '#57534E' }}
+            >
+              New Return Date & Time *
+            </label>
             <input
               type="datetime-local"
               value={toLocalInput(returnAt)}
               onChange={(e) => setReturnAt(e.target.value)}
-              className="w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              style={inputStyle}
               required
               disabled={isSubmitting}
+              onFocus={handleFocus}
+              onBlur={handleBlur}
             />
           </div>
 
           {error && (
-            <div className="p-2 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-xs text-red-700 font-medium">{error}</p>
+            <div 
+              className="p-2 rounded-lg"
+              style={{
+                background: 'rgba(185, 28, 28, 0.05)',
+                border: '1px solid rgba(185, 28, 28, 0.20)',
+              }}
+            >
+              <p 
+                className="text-xs font-medium"
+                style={{ color: '#B91C1C' }}
+              >
+                {error}
+              </p>
             </div>
           )}
 
@@ -118,14 +183,46 @@ export default function PublicRescheduleModal({
               type="button"
               onClick={onClose}
               disabled={isSubmitting}
-              className="flex-1 px-4 py-2.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-all disabled:opacity-50"
+              className="flex-1 px-4 py-2.5 rounded-xl text-xs font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                background: '#FFFFFF',
+                border: '1px solid rgba(28, 25, 23, 0.10)',
+                color: '#44403C',
+                cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                opacity: isSubmitting ? 0.5 : 1,
+              }}
+              onMouseEnter={(e) => {
+                if (!isSubmitting) {
+                  e.currentTarget.style.background = '#F5F3F0';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = '#FFFFFF';
+              }}
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isSubmitting}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-xs font-bold hover:bg-blue-700 transition-all shadow-sm disabled:opacity-50"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{
+                background: 'linear-gradient(135deg, #6D28D9 0%, #5B21B6 100%)',
+                color: '#FFFFFF',
+                boxShadow: '0 2px 8px rgba(109, 40, 217, 0.25)',
+                cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                opacity: isSubmitting ? 0.5 : 1,
+              }}
+              onMouseEnter={(e) => {
+                if (!isSubmitting) {
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(109, 40, 217, 0.35)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 8px rgba(109, 40, 217, 0.25)';
+              }}
             >
               {isSubmitting ? (
                 <><Loader2 className="h-4 w-4 animate-spin" /> Updating...</>

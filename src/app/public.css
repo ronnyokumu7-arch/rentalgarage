@@ -1,0 +1,360 @@
+/* src/app/public.css - PUBLIC PORTALS & PDF DOCUMENTS ONLY */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ══════════════════════════════════════════════════════════
+   🏛️ PUBLIC PORTAL DESIGN SYSTEM
+   Light-first, immutable, conversion-focused
+   Used by: Property listings, Tenant portal, Payment pages, PDF docs
+   ═══════════════════════════════════════════════════════════ */
+
+.public-root {
+  /* Force light mode - NEVER inherits dark mode */
+  color-scheme: light;
+  
+  /* ── SURFACES (Clean, professional) ──────────────── */
+  --public-bg:             #FFFFFF;
+  --public-bg-elevated:    #FAF9F7;
+  --public-surface:        #FFFFFF;
+  --public-surface-warm:   #FDFCFA;
+  --public-surface-hover:  #F5F3F0;
+  --public-surface-border: rgba(28, 25, 23, 0.10);
+  --public-surface-border-strong: rgba(28, 25, 23, 0.18);
+  --public-surface-border-subtle: rgba(28, 25, 23, 0.04);
+
+  /* ── TEXT (Maximum contrast - never washed out) ──── */
+  --public-text-primary:   #1C1917;
+  --public-text-secondary: #44403C;
+  --public-text-muted:     #57534E;
+  --public-text-subtle:    #6B6560;
+  --public-text-faint:     #78716C;
+
+  /* ── BRAND COLORS ────────────────────────────────── */
+  --public-primary:        #6D28D9;
+  --public-primary-hover:  #5B21B6;
+  --public-primary-muted:  rgba(109, 40, 217, 0.08);
+  --public-primary-text:   #6D28D9;
+  
+  --public-secondary:      #D97706;
+  --public-secondary-hover: #B45309;
+  --public-secondary-muted: rgba(217, 119, 6, 0.08);
+
+  /* ── STATUS (Print-safe) ─────────────────────────── */
+  --public-success:        #047857;
+  --public-success-bg:     rgba(4, 120, 87, 0.10);
+  --public-success-border: rgba(4, 120, 87, 0.20);
+  --public-warning:        #B45309;
+  --public-warning-bg:     rgba(180, 83, 9, 0.10);
+  --public-warning-border: rgba(180, 83, 9, 0.20);
+  --public-danger:         #B91C1C;
+  --public-danger-bg:      rgba(185, 28, 28, 0.10);
+  --public-danger-border:  rgba(185, 28, 28, 0.20);
+  --public-info:           #1D4ED8;
+  --public-info-bg:        rgba(29, 78, 216, 0.10);
+  --public-info-border:    rgba(29, 78, 216, 0.20);
+
+  /* ── SHADOWS (Subtle for depth) ──────────────────── */
+  --public-shadow-card:      0 1px 3px rgba(28, 25, 23, 0.08);
+  --public-shadow-card-hover: 0 8px 24px rgba(28, 25, 23, 0.12);
+  --public-shadow-focus:     0 0 0 3px rgba(109, 40, 217, 0.15);
+
+  /* ── RADIUS ──────────────────────────────────────── */
+  --public-radius-sm: 0.375rem;
+  --public-radius-md: 0.5rem;
+  --public-radius-lg: 0.75rem;
+  --public-radius-xl: 1rem;
+  --public-radius-full: 9999px;
+
+  /* Apply base styles */
+  background: var(--public-bg);
+  color: var(--public-text-primary);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.public-root h1,
+.public-root h2,
+.public-root h3,
+.public-root h4,
+.public-root h5,
+.public-root h6 {
+  font-family: "Space Grotesk", "Inter", sans-serif !important;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  color: var(--public-text-primary);
+}
+
+.public-root code,
+.public-root pre,
+.public-root .font-mono,
+.public-root .mono,
+.public-root [class*="tabular-nums"],
+.public-root [class*="font-mono"],
+.public-root .plate-number,
+.public-root .id-number,
+.public-root .reference-code {
+  font-family: "JetBrains Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  letter-spacing: 0.02em;
+}
+
+.public-root p,
+.public-root span,
+.public-root div,
+.public-root label {
+  color: var(--public-text-primary);
+}
+
+.public-root ::selection {
+  background: #7C3AED;
+  color: white;
+}
+
+/* ── Muted Text ─────────────────────────────────────── */
+.public-root .muted {
+  color: var(--public-text-muted);
+}
+
+.public-root .subtle {
+  color: var(--public-text-subtle);
+}
+
+/* ── Cards ─────────────────────────────────────────── */
+.public-card {
+  background: var(--public-surface);
+  border: 1px solid var(--public-surface-border);
+  border-radius: var(--public-radius-lg);
+  box-shadow: var(--public-shadow-card);
+  transition: all 0.2s ease;
+}
+
+.public-card:hover {
+  box-shadow: var(--public-shadow-card-hover);
+  transform: translateY(-2px);
+}
+
+/* ── Buttons ───────────────────────────────────────── */
+.public-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.625rem 1.25rem;
+  border-radius: var(--public-radius-md);
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+}
+
+.public-btn-primary {
+  background: var(--public-primary);
+  color: #FFFFFF;
+}
+
+.public-btn-primary:hover {
+  background: var(--public-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(109, 40, 217, 0.25);
+}
+
+.public-btn-secondary {
+  background: var(--public-secondary);
+  color: #FFFFFF;
+}
+
+.public-btn-secondary:hover {
+  background: var(--public-secondary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(217, 119, 6, 0.25);
+}
+
+.public-btn-outline {
+  background: transparent;
+  color: var(--public-primary);
+  border: 1.5px solid var(--public-primary);
+}
+
+.public-btn-outline:hover {
+  background: var(--public-primary-muted);
+}
+
+/* ── Inputs ────────────────────────────────────────── */
+.public-input {
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--public-surface-border);
+  border-radius: var(--public-radius-md);
+  background: var(--public-surface);
+  color: var(--public-text-primary);
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.public-input:focus {
+  outline: none;
+  border-color: var(--public-primary);
+  box-shadow: var(--public-shadow-focus);
+}
+
+.public-input::placeholder {
+  color: var(--public-text-faint);
+}
+
+/* ── Tables ────────────────────────────────────────── */
+.public-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.public-table th {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--public-text-muted);
+  border-bottom: 2px solid var(--public-surface-border);
+}
+
+.public-table td {
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--public-text-primary);
+  border-bottom: 1px solid var(--public-surface-border);
+}
+
+.public-table tr:hover td {
+  background: var(--public-bg-elevated);
+}
+
+/* ── Status Badges ─────────────────────────────────── */
+.public-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--public-radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1rem;
+}
+
+.public-badge-success {
+  background: var(--public-success-bg);
+  color: var(--public-success);
+  border: 1px solid var(--public-success-border);
+}
+
+.public-badge-warning {
+  background: var(--public-warning-bg);
+  color: var(--public-warning);
+  border: 1px solid var(--public-warning-border);
+}
+
+.public-badge-danger {
+  background: var(--public-danger-bg);
+  color: var(--public-danger);
+  border: 1px solid var(--public-danger-border);
+}
+
+.public-badge-info {
+  background: var(--public-info-bg);
+  color: var(--public-info);
+  border: 1px solid var(--public-info-border);
+}
+
+/* ── Alerts ────────────────────────────────────────── */
+.public-alert {
+  padding: 1rem;
+  border-radius: var(--public-radius-md);
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}
+
+.public-alert-success {
+  background: rgba(4, 120, 87, 0.05);
+  border: 1px solid rgba(4, 120, 87, 0.20);
+  color: var(--public-success);
+}
+
+.public-alert-warning {
+  background: rgba(180, 83, 9, 0.05);
+  border: 1px solid rgba(180, 83, 9, 0.20);
+  color: var(--public-warning);
+}
+
+.public-alert-danger {
+  background: rgba(185, 28, 28, 0.05);
+  border: 1px solid rgba(185, 28, 28, 0.20);
+  color: var(--public-danger);
+}
+
+.public-alert-info {
+  background: rgba(29, 78, 216, 0.05);
+  border: 1px solid rgba(29, 78, 216, 0.20);
+  color: var(--public-info);
+}
+
+/* ══════════════════════════════════════════════════════════
+   📄 PRINT STYLES
+   For contracts, invoices, receipts, PDF generation
+   ═══════════════════════════════════════════════════════════ */
+
+@media print {
+  .public-root,
+  .public-root * {
+    color: #1C1917 !important;
+    background-color: #FFFFFF !important;
+    border-color: rgba(44, 38, 32, 0.08) !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  .public-card {
+    border: 1px solid rgba(28, 25, 23, 0.10);
+    box-shadow: none;
+    break-inside: avoid;
+  }
+
+  .public-btn {
+    display: none !important;
+  }
+
+  .public-table th {
+    border-bottom: 2px solid #1C1917;
+  }
+
+  .public-table td {
+    border-bottom: 1px solid rgba(28, 25, 23, 0.10);
+  }
+
+  .public-badge {
+    border: 1px solid currentColor;
+    background: none !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .contract-section {
+    break-inside: auto;
+    margin-bottom: 14pt;
+  }
+
+  .section-title {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  .signature-box,
+  .audit-stamp,
+  .charges-table {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+}

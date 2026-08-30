@@ -1,3 +1,4 @@
+// src/app/(public)/invite/[token]/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,6 +7,7 @@ import { CheckCircle2, AlertCircle, Loader2, Clock, ShieldCheck } from "lucide-r
 import toast, { Toaster } from "react-hot-toast";
 import NewClientForm from "@/components/client/NewClientForm";
 import { env } from "@/lib/env";
+import "@/app/public.css";
 
 type PageStatus = "loading" | "ready" | "invalid" | "expired" | "submitting" | "success";
 
@@ -172,10 +174,10 @@ const payload = {
 
   if (status === "loading") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--color-surface)] p-4">
+      <div className="public-root min-h-screen flex items-center justify-center p-4">
         <div className="flex flex-col items-center gap-4 text-center">
-          <Loader2 className="h-10 w-10 animate-spin text-[var(--color-primary)]" />
-          <p className="text-[var(--color-ink-muted)] font-medium text-sm">Verifying your invite link...</p>
+          <Loader2 className="h-10 w-10 animate-spin" style={{ color: '#6D28D9' }} />
+          <p className="font-medium text-sm" style={{ color: '#57534E' }}>Verifying your invite link...</p>
         </div>
       </div>
     );
@@ -183,13 +185,23 @@ const payload = {
 
   if (status === "invalid") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--color-surface)] p-4 sm:p-6">
-        <div className="max-w-md w-full bg-[var(--color-surface)] rounded-xl shadow-lg border border-[var(--color-surface-border)] p-8 text-center">
-          <div className="w-16 h-16 bg-rose-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="h-8 w-8 text-rose-500" />
+      <div className="public-root min-h-screen flex items-center justify-center p-4 sm:p-6">
+        <div 
+          className="max-w-md w-full rounded-xl p-8 text-center"
+          style={{
+            background: '#FFFFFF',
+            boxShadow: '0 12px 24px -4px rgba(28, 25, 23, 0.10)',
+            border: '1px solid rgba(28, 25, 23, 0.10)',
+          }}
+        >
+          <div 
+            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+            style={{ backgroundColor: 'rgba(185, 28, 28, 0.10)' }}
+          >
+            <AlertCircle className="h-8 w-8" style={{ color: '#B91C1C' }} />
           </div>
-          <h1 className="text-xl font-bold text-[var(--color-ink)] mb-2">Invalid Invite Link</h1>
-          <p className="text-[var(--color-ink-muted)] text-sm mb-6">
+          <h1 className="text-xl font-bold mb-2" style={{ color: '#1C1917' }}>Invalid Invite Link</h1>
+          <p className="text-sm mb-6" style={{ color: '#57534E' }}>
             This link is invalid, broken, or could not be found. Please contact the agency to request a new onboarding link.
           </p>
         </div>
@@ -199,13 +211,23 @@ const payload = {
 
   if (status === "expired") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--color-surface)] p-4 sm:p-6">
-        <div className="max-w-md w-full bg-[var(--color-surface)] rounded-xl shadow-lg border border-[var(--color-surface-border)] p-8 text-center">
-          <div className="w-16 h-16 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Clock className="h-8 w-8 text-amber-500" />
+      <div className="public-root min-h-screen flex items-center justify-center p-4 sm:p-6">
+        <div 
+          className="max-w-md w-full rounded-xl p-8 text-center"
+          style={{
+            background: '#FFFFFF',
+            boxShadow: '0 12px 24px -4px rgba(28, 25, 23, 0.10)',
+            border: '1px solid rgba(28, 25, 23, 0.10)',
+          }}
+        >
+          <div 
+            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+            style={{ backgroundColor: 'rgba(180, 83, 9, 0.10)' }}
+          >
+            <Clock className="h-8 w-8" style={{ color: '#B45309' }} />
           </div>
-          <h1 className="text-xl font-bold text-[var(--color-ink)] mb-2">Invite Expired or Used</h1>
-          <p className="text-[var(--color-ink-muted)] text-sm mb-6">
+          <h1 className="text-xl font-bold mb-2" style={{ color: '#1C1917' }}>Invite Expired or Used</h1>
+          <p className="text-sm mb-6" style={{ color: '#57534E' }}>
             This single-use link has either expired or has already been used to create an account. Please contact the agency for assistance.
           </p>
         </div>
@@ -215,22 +237,41 @@ const payload = {
 
   if (status === "success") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-[var(--color-surface)] p-4 sm:p-6">
+      <div className="public-root min-h-screen flex items-center justify-center p-4 sm:p-6">
         <Toaster position="top-center" />
-        <div className="max-w-lg w-full bg-[var(--color-surface)] rounded-2xl shadow-xl border border-[var(--color-surface-border)] p-8 text-center">
-          <div className="w-20 h-20 bg-emerald-500/10 rounded-full flex items-center justify-center mx-auto mb-5">
-            <CheckCircle2 className="h-10 w-10 text-emerald-500" />
+        <div 
+          className="max-w-lg w-full rounded-2xl p-8 text-center"
+          style={{
+            background: '#FFFFFF',
+            boxShadow: '0 20px 32px -6px rgba(28, 25, 23, 0.12)',
+            border: '1px solid rgba(28, 25, 23, 0.10)',
+          }}
+        >
+          <div 
+            className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5"
+            style={{ backgroundColor: 'rgba(4, 120, 87, 0.10)' }}
+          >
+            <CheckCircle2 className="h-10 w-10" style={{ color: '#047857' }} />
           </div>
-          <h1 className="text-2xl font-extrabold text-[var(--color-ink)] mb-3">Application Submitted!</h1>
-          <p className="text-[var(--color-ink-muted)] text-sm leading-relaxed mb-6">
-            Thank you, <span className="font-bold text-[var(--color-ink)]">{formData.full_name}</span>. Your profile has been successfully submitted to <span className="font-bold text-[var(--color-ink)]">{branding?.name}</span>.
+          <h1 className="text-2xl font-extrabold mb-3" style={{ color: '#1C1917' }}>Application Submitted!</h1>
+          <p className="text-sm leading-relaxed mb-6" style={{ color: '#57534E' }}>
+            Thank you, <span className="font-bold" style={{ color: '#1C1917' }}>{formData.full_name}</span>. Your profile has been successfully submitted to <span className="font-bold" style={{ color: '#1C1917' }}>{branding?.name}</span>.
           </p>
           
-          <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-4 text-left space-y-3 mb-6">
-            <h3 className="text-sm font-bold text-blue-800 flex items-center gap-2">
+          <div 
+            className="rounded-xl p-4 text-left space-y-3 mb-6"
+            style={{
+              background: 'rgba(29, 78, 216, 0.05)',
+              border: '1px solid rgba(29, 78, 216, 0.20)',
+            }}
+          >
+            <h3 
+              className="text-sm font-bold flex items-center gap-2"
+              style={{ color: '#1D4ED8' }}
+            >
               <ShieldCheck size={16} /> What happens next?
             </h3>
-            <ul className="text-xs text-blue-700 space-y-2">
+            <ul className="text-xs space-y-2" style={{ color: '#1D4ED8' }}>
               <li className="flex items-start gap-2">
                 <span className="font-bold">1.</span> The agency will review your details and verify your identity.
               </li>
@@ -243,9 +284,9 @@ const payload = {
             </ul>
           </div>
 
-          <p className="text-[10px] text-[var(--color-ink-subtle)]">
+          <p className="text-[10px]" style={{ color: '#78716C' }}>
             You can safely close this window. {branding?.phone && (
-              <>If you have questions, call the agency at <a href={`tel:${branding.phone}`} className="font-bold text-[var(--color-primary)] hover:underline">{branding.phone}</a>.</>
+              <>If you have questions, call the agency at <a href={`tel:${branding.phone}`} className="font-bold hover:underline" style={{ color: '#6D28D9' }}>{branding.phone}</a>.</>
             )}
           </p>
         </div>
@@ -255,7 +296,7 @@ const payload = {
 
   // --- READY STATE: The Form ---
   return (
-    <div className="min-h-screen bg-[var(--color-surface)] pb-12">
+    <div className="public-root min-h-screen pb-12" style={{ backgroundColor: '#FFFFFF' }}>
       <Toaster position="top-center" />
       <NewClientForm
         loading={status === "submitting"}

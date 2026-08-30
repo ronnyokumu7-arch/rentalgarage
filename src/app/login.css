@@ -1,0 +1,236 @@
+/* src/app/login.css - AUTH PAGES ONLY */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+/* ══════════════════════════════════════════════════════════
+   🔐 AUTH PAGES DESIGN SYSTEM
+   Split-screen: Dark brand panel + Light form panel
+   Used by: Login, Register, Reset Password
+   ═══════════════════════════════════════════════════════════ */
+
+.auth-root {
+  display: flex;
+  min-height: 100vh;
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.auth-root h1,
+.auth-root h2,
+.auth-root h3,
+.auth-root h4,
+.auth-root h5,
+.auth-root h6 {
+  font-family: "Space Grotesk", "Inter", sans-serif !important;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+
+.auth-root code,
+.auth-root pre,
+.auth-root .font-mono,
+.auth-root .mono,
+.auth-root [class*="tabular-nums"],
+.auth-root [class*="font-mono"],
+.auth-root .plate-number,
+.auth-root .id-number,
+.auth-root .reference-code {
+  font-family: "JetBrains Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  letter-spacing: 0.02em;
+}
+
+.auth-root ::selection {
+  background: #7C3AED;
+  color: white;
+}
+
+/* ══════════════════════════════════════════════════════════
+   🔐 AUTH SPLIT-SCREEN THEME LOCK
+   Left panel is ALWAYS dark, right panel is ALWAYS light.
+   ═══════════════════════════════════════════════════════════ */
+
+.auth-dark {
+  --color-ink-primary:   #F5F0EB;
+  --color-ink-secondary: #E8E4DE;
+  --color-ink-muted:     #A8A39E;
+  --color-ink-subtle:    #78716C;
+  --color-ink-faint:     #57534E;
+  --color-surface:       #1A1714;
+  --color-surface-hover: #2C2823;
+  --color-surface-border: rgba(255, 248, 240, 0.06);
+  --color-primary:       #A78BFA;
+  --color-primary-text:  #A78BFA;
+}
+
+.auth-light {
+  --color-ink-primary:   #1C1917;
+  --color-ink-secondary: #292524;
+  --color-ink-muted:     #57534E;
+  --color-ink-subtle:    #78716C;
+  --color-ink-faint:     #A8A39E;
+  --color-bg:            #FFFFFF;
+  --color-surface:       #FFFFFF;
+  --color-surface-hover: #FAF8F5;
+  --color-surface-active:#F5F2ED;
+  --color-surface-border: rgba(44, 38, 32, 0.08);
+  --color-primary:       #7C3AED;
+  --color-primary-hover: #6D28D9;
+  --color-primary-text:  #6D28D9;
+  --color-primary-muted: rgba(124, 58, 237, 0.10);
+}
+
+/* ══════════════════════════════════════════════════════════
+   🔧 AUTH PAGE FIX - Force dark text on white background
+   ═══════════════════════════════════════════════════════════ */
+
+/* This forces text-ink classes to always be dark when inside a white background */
+.auth-light .text-ink,
+.auth-light .text-ink-secondary,
+.auth-light h1.text-ink,
+.auth-light h2.text-ink,
+.auth-light h3.text-ink,
+.auth-light h4.text-ink,
+.auth-light h5.text-ink,
+.auth-light h6.text-ink {
+  color: #1C1917 !important;
+}
+
+.auth-light .text-ink-muted {
+  color: #57534E !important;
+}
+
+.auth-light .text-ink-subtle {
+  color: #78716C !important;
+}
+
+.auth-light .text-ink-faint {
+  color: #A8A39E !important;
+}
+
+/* Fix for auth page headings that might not have text-ink class */
+.auth-light h1,
+.auth-light h2,
+.auth-light h3,
+.auth-light h4,
+.auth-light h5,
+.auth-light h6 {
+  color: #1C1917 !important;
+}
+
+/* Fix for auth page body text */
+.auth-light p,
+.auth-light span,
+.auth-light label,
+.auth-light div:not(.auth-light) {
+  color: #1C1917;
+}
+
+.auth-light .text-sm,
+.auth-light .text-base {
+  color: #1C1917;
+}
+
+/* But keep muted text as muted */
+.auth-light .text-ink-muted,
+.auth-light p.text-ink-muted,
+.auth-light span.text-ink-muted {
+  color: #57534E !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   ✨ AUTH ANIMATIONS
+   ═══════════════════════════════════════════════════════════ */
+
+@keyframes auth-pulse-slow {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+@keyframes auth-pulse-slower {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.15); }
+}
+
+@keyframes auth-float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(2deg); }
+}
+
+@keyframes auth-shimmer {
+  0% { transform: translateX(-100%) skewX(-15deg); }
+  100% { transform: translateX(200%) skewX(-15deg); }
+}
+
+@keyframes auth-gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.auth-animate-pulse-slow {
+  animation: auth-pulse-slow 8s ease-in-out infinite;
+}
+
+.auth-animate-pulse-slower {
+  animation: auth-pulse-slower 12s ease-in-out infinite;
+}
+
+.auth-animate-float {
+  animation: auth-float 6s ease-in-out infinite;
+}
+
+.auth-animate-shimmer {
+  animation: auth-shimmer 3s ease-in-out infinite;
+}
+
+.auth-animate-gradient-shift {
+  background-size: 200% 200%;
+  animation: auth-gradient-shift 6s ease-in-out infinite;
+}
+
+/* ── Premium Text Gradients ────────────────────────────────── */
+.auth-text-gradient-primary {
+  background: linear-gradient(135deg, #A78BFA, #7C3AED, #A78BFA);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: auth-gradient-shift 6s ease-in-out infinite;
+}
+
+.auth-text-gradient-gold {
+  background: linear-gradient(135deg, #FBBF24, #F59E0B, #D97706);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: auth-gradient-shift 6s ease-in-out infinite;
+}
+
+/* ── Glassmorphism Enhancements ────────────────────────────── */
+.auth-glass-premium {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.auth-glass-premium-hover:hover {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: rgba(167, 139, 250, 0.15);
+  transition: all 0.3s ease;
+}
+
+/* ══════════════════════════════════════════════════════════
+   📱 RESPONSIVE
+   ═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 768px) {
+  .auth-root {
+    flex-direction: column;
+  }
+}

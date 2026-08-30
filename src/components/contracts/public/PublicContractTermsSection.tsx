@@ -22,17 +22,26 @@ export default function PublicContractTermsSection({ tenantName }: Props) {
       
       {/* Section Header */}
       <div className="mb-6">
-        <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-          <FileText size={18} className="text-blue-600" />
+        <h3 
+          className="text-sm font-bold flex items-center gap-2"
+          style={{ color: '#1C1917' }}
+        >
+          <FileText size={18} style={{ color: '#6D28D9' }} />
           Terms & Conditions
         </h3>
-        <p className="text-xs text-slate-500 mt-1">
+        <p 
+          className="text-xs mt-1"
+          style={{ color: '#57534E' }}
+        >
           Review the contract terms before signing.
         </p>
       </div>
 
       {/* Clean Tab Navigation */}
-      <div className="mb-6 border-b border-slate-200">
+      <div 
+        className="mb-6"
+        style={{ borderBottom: '1px solid rgba(28, 25, 23, 0.10)' }}
+      >
         <nav className="flex gap-1 -mb-px overflow-x-auto custom-scrollbar">
           {TABS.map((tab) => {
             const Icon = tab.icon;
@@ -42,14 +51,24 @@ export default function PublicContractTermsSection({ tenantName }: Props) {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`
-                  relative flex items-center gap-2 px-4 py-2.5 text-xs font-semibold 
-                  whitespace-nowrap transition-colors border-b-2 focus:outline-none
-                  ${isActive 
-                    ? "border-blue-600 text-blue-700 bg-blue-50/50" 
-                    : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
+                className="relative flex items-center gap-2 px-4 py-2.5 text-xs font-semibold whitespace-nowrap transition-colors focus:outline-none"
+                style={{
+                  borderBottom: isActive ? '2px solid #6D28D9' : '2px solid transparent',
+                  color: isActive ? '#6D28D9' : '#57534E',
+                  background: isActive ? 'rgba(109, 40, 217, 0.05)' : 'transparent',
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.color = '#1C1917';
+                    e.currentTarget.style.background = '#F5F3F0';
                   }
-                `}
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.color = '#57534E';
+                    e.currentTarget.style.background = 'transparent';
+                  }
+                }}
               >
                 <Icon size={14} />
                 {tab.label}
@@ -73,9 +92,23 @@ export default function PublicContractTermsSection({ tenantName }: Props) {
 function SummaryTab({ tenantName }: { tenantName: string }) {
   return (
     <div className="space-y-4">
-      <div className="p-4 bg-blue-50 rounded-xl border border-blue-100">
-        <h4 className="text-sm font-bold text-blue-900 mb-3">Your Declaration</h4>
-        <p className="text-xs text-blue-800 mb-3">
+      <div 
+        className="p-4 rounded-xl"
+        style={{
+          background: 'rgba(109, 40, 217, 0.05)',
+          border: '1px solid rgba(109, 40, 217, 0.15)',
+        }}
+      >
+        <h4 
+          className="text-sm font-bold mb-3"
+          style={{ color: '#6D28D9' }}
+        >
+          Your Declaration
+        </h4>
+        <p 
+          className="text-xs mb-3"
+          style={{ color: '#6D28D9' }}
+        >
           By signing, you confirm:
         </p>
         <ul className="space-y-2">
@@ -87,15 +120,33 @@ function SummaryTab({ tenantName }: { tenantName: string }) {
             "I have no serious driving offenses in the last 5 years"
           ].map((item, i) => (
             <li key={i} className="flex items-start gap-2">
-              <CheckCircle2 size={14} className="text-blue-600 flex-shrink-0 mt-0.5" />
-              <span className="text-xs text-blue-800">{item}</span>
+              <CheckCircle2 
+                size={14} 
+                className="flex-shrink-0 mt-0.5"
+                style={{ color: '#6D28D9' }}
+              />
+              <span 
+                className="text-xs"
+                style={{ color: '#6D28D9' }}
+              >
+                {item}
+              </span>
             </li>
           ))}
         </ul>
       </div>
 
-      <div className="p-4 bg-slate-50 rounded-xl border border-slate-200">
-        <p className="text-xs text-slate-600 leading-relaxed">
+      <div 
+        className="p-4 rounded-xl"
+        style={{
+          background: '#FAF9F7',
+          border: '1px solid rgba(28, 25, 23, 0.10)',
+        }}
+      >
+        <p 
+          className="text-xs leading-relaxed"
+          style={{ color: '#57534E' }}
+        >
           By signing this document, you agree to all rental terms and conditions provided by {tenantName}. 
           The full legal agreement is available in the PDF download.
         </p>
@@ -140,28 +191,43 @@ function TermsTab() {
 // Tab 3: Agency Policies
 function PoliciesTab({ tenantName }: { tenantName: string }) {
   return (
-    <div className="p-4 bg-amber-50 rounded-xl border border-amber-100 space-y-4">
+    <div 
+      className="p-4 rounded-xl space-y-4"
+      style={{
+        background: 'rgba(180, 83, 9, 0.05)',
+        border: '1px solid rgba(180, 83, 9, 0.20)',
+      }}
+    >
       <PolicyItem 
-        icon={<Fuel size={14} className="text-amber-600" />}
+        icon={<Fuel size={14} style={{ color: '#B45309' }} />}
         title="Fuel Policy"
         content="Return the car with the same fuel level as pickup. If below, a refueling fee applies."
       />
       <PolicyItem 
-        icon={<MapPin size={14} className="text-amber-600" />}
+        icon={<MapPin size={14} style={{ color: '#B45309' }} />}
         title="Mileage Limit"
         content="Daily limit: 550 KM. Excess mileage: KES 50 per KM."
       />
       <PolicyItem 
-        icon={<Clock size={14} className="text-amber-600" />}
+        icon={<Clock size={14} style={{ color: '#B45309' }} />}
         title="Late Returns"
         content="Returns over 2 hours late are charged as a new rental day."
       />
       
-      <div className="pt-3 border-t border-amber-200">
-        <p className="text-xs text-amber-800 font-semibold mb-2">
+      <div 
+        className="pt-3"
+        style={{ borderTop: '1px solid rgba(180, 83, 9, 0.20)' }}
+      >
+        <p 
+          className="text-xs font-semibold mb-2"
+          style={{ color: '#B45309' }}
+        >
           {tenantName} Specific Policies
         </p>
-        <p className="text-xs text-amber-700">
+        <p 
+          className="text-xs"
+          style={{ color: '#B45309' }}
+        >
           Additional agency-specific policies are detailed in the full PDF contract document.
         </p>
       </div>
@@ -173,12 +239,29 @@ function PoliciesTab({ tenantName }: { tenantName: string }) {
 function ArticleItem({ number, title, content }: { number: number; title: string; content: string }) {
   return (
     <div className="flex gap-3">
-      <div className="flex-shrink-0 w-6 h-6 rounded-full bg-slate-100 text-slate-700 text-xs font-bold flex items-center justify-center">
+      <div 
+        className="flex-shrink-0 w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center"
+        style={{
+          background: '#FAF9F7',
+          color: '#44403C',
+          border: '1px solid rgba(28, 25, 23, 0.10)',
+        }}
+      >
         {number}
       </div>
       <div>
-        <h5 className="text-xs font-bold text-slate-900 mb-1">{title}</h5>
-        <p className="text-xs text-slate-600 leading-relaxed">{content}</p>
+        <h5 
+          className="text-xs font-bold mb-1"
+          style={{ color: '#1C1917' }}
+        >
+          {title}
+        </h5>
+        <p 
+          className="text-xs leading-relaxed"
+          style={{ color: '#57534E' }}
+        >
+          {content}
+        </p>
       </div>
     </div>
   );
@@ -187,10 +270,27 @@ function ArticleItem({ number, title, content }: { number: number; title: string
 function PolicyItem({ icon, title, content }: { icon: React.ReactNode; title: string; content: string }) {
   return (
     <div className="flex items-start gap-3">
-      <div className="p-1.5 bg-amber-100 rounded-lg shrink-0">{icon}</div>
+      <div 
+        className="p-1.5 rounded-lg shrink-0"
+        style={{
+          background: 'rgba(180, 83, 9, 0.10)',
+        }}
+      >
+        {icon}
+      </div>
       <div>
-        <h5 className="text-xs font-bold text-amber-900 mb-1">{title}</h5>
-        <p className="text-xs text-amber-800 leading-relaxed">{content}</p>
+        <h5 
+          className="text-xs font-bold mb-1"
+          style={{ color: '#B45309' }}
+        >
+          {title}
+        </h5>
+        <p 
+          className="text-xs leading-relaxed"
+          style={{ color: '#B45309' }}
+        >
+          {content}
+        </p>
       </div>
     </div>
   );

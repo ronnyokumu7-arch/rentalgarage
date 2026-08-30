@@ -21,6 +21,7 @@ export function useNewBooking() {
   const [vehicleSearch, setVehicleSearch] = useState('');
   const [driverSearch, setDriverSearch] = useState('');
   
+  // ✅ MILESTONE 2 & 3: Added service_details, toll_fees, parking_fees
   const [formData, setFormData] = useState({
     client_id: '',
     vehicle_id: '',
@@ -33,6 +34,9 @@ export function useNewBooking() {
     pickup_location: '',
     return_location: '',
     destination: '',
+    service_details: {} as Record<string, any>,
+    toll_fees: 0,
+    parking_fees: 0,
   });
 
   // ✅ MILESTONE 1: Live quote state
@@ -113,8 +117,7 @@ export function useNewBooking() {
     return grouped;
   }, [services]);
 
-  // ✅ MILESTONE 1: Debounced quote API call
-  // ✅ MILESTONE 2: Includes driver_id so quote reflects per-driver fees
+  // ✅ MILESTONE 1, 2 & 3: Debounced quote API call
   useEffect(() => {
     if (
       !formData.vehicle_id ||
@@ -133,8 +136,11 @@ export function useNewBooking() {
           service_type: formData.service_type,
           pickup_at: formData.pickup_at,
           return_at: formData.scheduled_return_at,
-          // ✅ MILESTONE 2: Send driver_id for per-driver fee resolution
           driver_id: formData.driver_id ? parseInt(formData.driver_id) : undefined,
+          // ✅ MILESTONE 2 & 3: Pass add-ons and service details to backend pricing engine
+          toll_fees: formData.toll_fees,
+          parking_fees: formData.parking_fees,
+          service_details: formData.service_details,
         });
         setQuote(result);
       } catch (err: any) {
@@ -152,15 +158,19 @@ export function useNewBooking() {
     formData.service_type,
     formData.pickup_at,
     formData.scheduled_return_at,
-    formData.driver_id,  // ✅ MILESTONE 2: Re-quote when driver changes
+    formData.driver_id,
+    formData.toll_fees,       // ✅ Re-quote when tolls change
+    formData.parking_fees,    // ✅ Re-quote when parking changes
+    formData.service_details, // ✅ Re-quote when service details (e.g., extra hours) change
   ]);
 
-  const updateField = (field: string, value: string) => {
+  // ✅ Updated to accept string, number, or object (for service_details)
+  const updateField = (field: string, value: string | number | Record<string, any>) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   const calculateTotal = () => {
-    // ✅ MILESTONE 1: Prefer quote total when available
+    // ✅ MILESTONE 1: Prefer backend quote total when available
     if (quote?.total) {
       return parseFloat(quote.total.toString());
     }
@@ -212,7 +222,10 @@ export function useNewBooking() {
         destination: formData.destination || undefined,
         total_amount: calculateTotal(),
         currency_code: 'KES',
-        status: 'pending'
+        // ✅ MILESTONE 2 & 3: Include new pricing fields
+        toll_fees: formData.toll_fees || undefined,
+        parking_fees: formData.parking_fees || undefined,
+        service_details: Object.keys(formData.service_details).length > 0 ? formData.service_details : undefined,
       };
 
       // ✅ MILESTONE 2: Include driver_id if selected
@@ -224,10 +237,6 @@ export function useNewBooking() {
       toast.success('Booking created successfully!');
       router.push('/dashboard/bookings');
     } catch (error: any) {
-      // ✅ MILESTONE 2 LOCKDOWN: FastAPI validation errors arrive as an ARRAY of
-      // objects like [{loc: [...], msg: "Value error, end_date...", type: "value_error"}].
-      // Rendering the array raw crashes React with "Objects are not valid as a React child".
-      // Extract a human-readable string instead.
       const detail = error.response?.data?.detail;
       let msg = 'Failed to create booking';
       if (typeof detail === 'string') {
