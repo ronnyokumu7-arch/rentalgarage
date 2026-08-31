@@ -11,31 +11,21 @@ import { env } from "@/lib/env";
  * - Uses Zod-validated environment variables for the base URL.
  * - Sends HttpOnly refresh cookies automatically via `withCredentials: true`.
  * - Attaches short-lived access tokens from cookies to outgoing requests.
- * - ✅ NEW: Automatically refreshes expired tokens before logging out.
+ * - ✅ HARDENED: Delegates refresh to auth-context's single-flight queue.
+ * - ✅ HARDENED: Retries once on network errors before logging out.
+ * - ✅ HARDENED: Only logs out on definitive auth failures (401/403 from refresh).
  * - Logs network timeouts and 5xx server errors for easier debugging.
  */
 
-/**
- * ✅ CRITICAL: Concurrency Guard
- * When a token expires, multiple React Query hooks might fail with a 401 simultaneously.
- * Without this flag, the app would attempt to refresh multiple times concurrently.
- */
-let isRefreshing = false;
-let failedQueue: Array<{
-  resolve: (value?: unknown) => void;
-  reject: (reason?: unknown) => void;
-}> = [];
+// ─── REFRESH HANDLER REGISTRY ───────────────────────────────────────────────
+// Auth-context registers its refresh queue here on mount. The interceptor
+// calls this instead of managing its own queue — single source of truth.
+type RefreshHandler = () => Promise<string | null>;
+let refreshHandler: RefreshHandler | null = null;
 
-const processQueue = (error: AxiosError | null, token: string | null = null) => {
-  failedQueue.forEach((prom) => {
-    if (error) {
-      prom.reject(error);
-    } else {
-      prom.resolve(token);
-    }
-  });
-  failedQueue = [];
-};
+export function registerRefreshHandler(handler: RefreshHandler) {
+  refreshHandler = handler;
+}
 
 // ─── COOKIE HELPERS ──────────────────────────────────────────────────────────
 const getCookie = (name: string): string | null => {
@@ -44,9 +34,9 @@ const getCookie = (name: string): string | null => {
   return match ? decodeURIComponent(match[2]) : null;
 };
 
-const setCookie = (name: string, value: string, days: number = 7) => {
+const setCookie = (name: string, value: string, minutes: number = 15) => {
   if (typeof document === "undefined") return;
-  const expires = new Date(Date.now() + days * 864e5).toUTCString();
+  const expires = new Date(Date.now() + minutes * 60000).toUTCString();
   document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; secure; samesite=lax`;
 };
 
@@ -86,6 +76,7 @@ apiClient.interceptors.request.use(
 // ─── RESPONSE INTERCEPTOR ────────────────────────────────────────────────────
 /**
  * Handles global API errors, automatic token refresh, and session expiration.
+ * ✅ HARDENED: Uses auth-context's single-flight refresh queue.
  */
 apiClient.interceptors.response.use(
   (response) => response,
@@ -108,61 +99,52 @@ apiClient.interceptors.response.use(
         return Promise.reject(error);
       }
 
-      // If already refreshing, queue this request
-      if (isRefreshing) {
-        return new Promise((resolve, reject) => {
-          failedQueue.push({ resolve, reject });
-        })
-          .then((token) => {
-            originalRequest.headers.Authorization = `Bearer ${token}`;
-            return apiClient(originalRequest);
-          })
-          .catch((err) => Promise.reject(err));
-      }
-
       originalRequest._retry = true;
-      isRefreshing = true;
 
-      try {
-        console.warn("[API Client] 401 Unauthorized: Attempting token refresh...");
-
-        // Call refresh endpoint (refresh token is sent via HttpOnly cookie)
-        const response = await axios.post(
-          `${env.NEXT_PUBLIC_API_URL}/auth/refresh`,
-          {},
-          { withCredentials: true }
-        );
-
-        const { access_token } = response.data;
-
-        // Save new access token to cookie
-        setCookie("rm_token", access_token, 1); // 1 day (access token itself expires in 15min via JWT)
-
-        console.log("[API Client] Token refreshed successfully. Retrying original request.");
-
-        // Process queued requests
-        processQueue(null, access_token);
-
-        // Retry the original failed request
-        originalRequest.headers.Authorization = `Bearer ${access_token}`;
-        return apiClient(originalRequest);
-      } catch (refreshError) {
-        console.error("[API Client] Token refresh failed. Logging out.");
-
-        // Refresh failed - log user out
-        processQueue(refreshError as AxiosError, null);
-
+      // ✅ HARDENED: Use auth-context's single-flight queue
+      if (!refreshHandler) {
+        console.error("[API Client] No refresh handler registered. Logging out.");
         clearCookie("rm_token");
         localStorage.removeItem("rm_token");
         localStorage.removeItem("rm_refresh_token");
-
         setTimeout(() => {
           window.location.href = "/login?reason=session_expired";
         }, 100);
+        return Promise.reject(error);
+      }
 
+      try {
+        console.warn("[API Client] 401 Unauthorized: Delegating to auth-context refresh queue...");
+
+        // ✅ Call auth-context's refresh queue (single-flight, retry-once built-in)
+        const newToken = await refreshHandler();
+
+        if (!newToken) {
+          // Refresh definitively failed (401/403 from backend) — logout
+          console.error("[API Client] Token refresh failed. Logging out.");
+          clearCookie("rm_token");
+          localStorage.removeItem("rm_token");
+          localStorage.removeItem("rm_refresh_token");
+          setTimeout(() => {
+            window.location.href = "/login?reason=session_expired";
+          }, 100);
+          return Promise.reject(error);
+        }
+
+        console.log("[API Client] Token refreshed successfully. Retrying original request.");
+
+        // Retry the original failed request with new token
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        return apiClient(originalRequest);
+      } catch (refreshError) {
+        console.error("[API Client] Token refresh threw error:", refreshError);
+        clearCookie("rm_token");
+        localStorage.removeItem("rm_token");
+        localStorage.removeItem("rm_refresh_token");
+        setTimeout(() => {
+          window.location.href = "/login?reason=session_expired";
+        }, 100);
         return Promise.reject(refreshError);
-      } finally {
-        isRefreshing = false;
       }
     }
 
