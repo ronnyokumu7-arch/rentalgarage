@@ -34,11 +34,11 @@ const getCookie = (name: string): string | null => {
   return match ? decodeURIComponent(match[2]) : null;
 };
 
-const setCookie = (name: string, value: string, minutes: number = 15) => {
-  if (typeof document === "undefined") return;
-  const expires = new Date(Date.now() + minutes * 60000).toUTCString();
-  document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; secure; samesite=lax`;
-};
+// const setCookie = (name: string, value: string, minutes: number = 15) => {
+//   if (typeof document === "undefined") return;
+//   const expires = new Date(Date.now() + minutes * 60000).toUTCString();
+//   document.cookie = `${name}=${encodeURIComponent(value)}; expires=${expires}; path=/; secure; samesite=lax`;
+// };
 
 const clearCookie = (name: string) => {
   if (typeof document === "undefined") return;
