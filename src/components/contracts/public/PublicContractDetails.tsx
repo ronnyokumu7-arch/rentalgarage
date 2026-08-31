@@ -1,8 +1,8 @@
 // src/components/contracts/public/PublicContractDetails.tsx
 "use client";
 
-import React from "react";
 import { Calendar, Car, User, Banknote, UserCircle } from "lucide-react";
+import { brand } from "@/lib/brand";
 import type { PublicContractView } from "@/lib/types";
 
 interface Props {
@@ -28,7 +28,7 @@ export default function PublicContractDetails({ contract }: Props) {
         {/* Client Info */}
         <DetailSection
           title="Client Details"
-          icon={<User size={18} className="text-[#57534E]" />}
+          icon={<User size={18} />}
           primary={contract.client_name}
           secondary="Renter"
         />
@@ -36,7 +36,7 @@ export default function PublicContractDetails({ contract }: Props) {
         {/* Vehicle Info */}
         <DetailSection
           title="Vehicle Details"
-          icon={<Car size={18} className="text-[#57534E]" />}
+          icon={<Car size={18} />}
           primary={`${contract.vehicle_make} ${contract.vehicle_model}`}
           secondary={`Plate: ${contract.vehicle_plate}`}
         />
@@ -45,7 +45,7 @@ export default function PublicContractDetails({ contract }: Props) {
         {hasDriver && (
           <DetailSection
             title="Assigned Driver"
-            icon={<UserCircle size={18} className="text-[#57534E]" />}
+            icon={<UserCircle size={18} />}
             primary={contract.driver_name!}
             secondary={contract.driver_phone || "—"}
             tertiary={contract.driver_dl_number ? `DL ${contract.driver_dl_number}` : undefined}
@@ -55,7 +55,7 @@ export default function PublicContractDetails({ contract }: Props) {
         {/* Dates */}
         <DetailSection
           title="Rental Period"
-          icon={<Calendar size={18} className="text-[#57534E]" />}
+          icon={<Calendar size={18} />}
           primary={`${formatDate(contract.start_date)} to ${formatDate(contract.end_date)}`}
           secondary="Agreed rental duration"
         />
@@ -63,7 +63,7 @@ export default function PublicContractDetails({ contract }: Props) {
         {/* Financials */}
         <DetailSection
           title="Total Amount"
-          icon={<Banknote size={18} className="text-[#57534E]" />}
+          icon={<Banknote size={18} />}
           primary={`${contract.currency_code} ${Number(contract.total_amount).toLocaleString()}`}
           secondary="Total contract value"
         />
@@ -72,7 +72,7 @@ export default function PublicContractDetails({ contract }: Props) {
   );
 }
 
-// Reusable detail card
+// Reusable detail card — ✅ ALL colors from brand system (public page = always light, theme-immune)
 function DetailSection({ 
   title, 
   icon, 
@@ -88,39 +88,43 @@ function DetailSection({
 }) {
   return (
     <div className="space-y-2 sm:space-y-4">
+      {/* ✅ Micro-label: brand ink.subtle (lighter than body text for hierarchy) */}
       <h3 
         className="text-xs font-bold uppercase tracking-wider"
-        style={{ color: '#78716C' }}
+        style={{ color: brand.colors.ink.subtle }}
       >
         {title}
       </h3>
       <div className="flex items-start gap-3">
+        {/* ✅ Icon chip: warm surface bg + muted icon color */}
         <div 
           className="p-2 rounded-lg shrink-0"
-          style={{
-            background: '#FAF9F7',
-            border: '1px solid rgba(28, 25, 23, 0.06)',
+          style={{ 
+            background: brand.colors.light.surfaceWarm, 
+            color: brand.colors.ink.muted 
           }}
         >
           {icon}
         </div>
         <div>
+          {/* ✅ Primary value: brand ink.primary (highest contrast for key data) */}
           <p 
             className="text-sm font-bold"
-            style={{ color: '#1C1917' }}
+            style={{ color: brand.colors.ink.primary }}
           >
             {primary}
           </p>
+          {/* ✅ Secondary: brand ink.muted (supporting info) */}
           <p 
             className="text-xs"
-            style={{ color: '#57534E' }}
+            style={{ color: brand.colors.ink.muted }}
           >
             {secondary}
           </p>
           {tertiary && (
             <p 
               className="text-xs font-mono"
-              style={{ color: '#57534E' }}
+              style={{ color: brand.colors.ink.muted }}
             >
               {tertiary}
             </p>

@@ -76,18 +76,93 @@
   line-height: 1.55;
 }
 
+/* ══════════════════════════════════════════════════════════
+   🛑 FORCED HIGH-CONTRAST OVERRIDES (Prevents washed-out text)
+   ═══════════════════════════════════════════════════════════ */
+
+/* Force all text to be dark */
+.public-root,
+.public-root * {
+  color: #1C1917 !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+
+/* ✅ Headings - pure dark and bold */
 .public-root h1,
 .public-root h2,
 .public-root h3,
 .public-root h4,
 .public-root h5,
-.public-root h6 {
+.public-root h6,
+.public-root .section-title,
+.public-root .block-title,
+.public-root .card-title,
+.public-root .field-label,
+.public-root .label,
+.public-root .heading {
   font-family: "Space Grotesk", "Inter", sans-serif !important;
   letter-spacing: -0.02em;
-  font-weight: 700;
-  color: var(--public-text-primary);
+  font-weight: 800 !important;
+  color: #1C1917 !important;
 }
 
+/* ✅ Brand name (h1) - always pure black */
+.public-root h1,
+.public-root .brand-name,
+.public-root .company-name,
+.public-root .tenant-name {
+  color: #000000 !important;
+  font-weight: 800 !important;
+  text-transform: uppercase;
+}
+
+/* ✅ Subheadings (h3) - dark and readable */
+.public-root h3 {
+  color: #44403C !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 0.75rem;
+}
+
+/* ✅ Muted/subtle text - readable but slightly softer */
+.public-root .muted,
+.public-root .subtle,
+.public-root .text-muted,
+.public-root .text-subtle,
+.public-root .text-gray-400,
+.public-root .text-gray-500,
+.public-root .text-ink-muted {
+  color: #57534E !important;
+}
+
+/* ✅ Links */
+.public-root a {
+  color: #7C3AED !important;
+}
+
+/* ✅ Inputs & selects */
+.public-root input,
+.public-root select,
+.public-root textarea {
+  color: #1C1917 !important;
+  background: #FFFFFF !important;
+  border-color: #D6D3D1 !important;
+}
+
+/* ✅ Buttons */
+.public-root button {
+  color: #FFFFFF !important;
+}
+
+/* ✅ Table headers */
+.public-root th {
+  color: #44403C !important;
+  font-weight: 700 !important;
+}
+
+/* ✅ Code / Mono */
 .public-root code,
 .public-root pre,
 .public-root .font-mono,
@@ -99,27 +174,12 @@
 .public-root .reference-code {
   font-family: "JetBrains Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
   letter-spacing: 0.02em;
-}
-
-.public-root p,
-.public-root span,
-.public-root div,
-.public-root label {
-  color: var(--public-text-primary);
+  color: #44403C !important;
 }
 
 .public-root ::selection {
   background: #7C3AED;
   color: white;
-}
-
-/* ── Muted Text ─────────────────────────────────────── */
-.public-root .muted {
-  color: var(--public-text-muted);
-}
-
-.public-root .subtle {
-  color: var(--public-text-subtle);
 }
 
 /* ── Cards ─────────────────────────────────────────── */
@@ -154,7 +214,7 @@
 
 .public-btn-primary {
   background: var(--public-primary);
-  color: #FFFFFF;
+  color: #FFFFFF !important;
 }
 
 .public-btn-primary:hover {
@@ -165,7 +225,7 @@
 
 .public-btn-secondary {
   background: var(--public-secondary);
-  color: #FFFFFF;
+  color: #FFFFFF !important;
 }
 
 .public-btn-secondary:hover {
@@ -216,10 +276,10 @@
   text-align: left;
   padding: 0.75rem 1rem;
   font-size: 0.75rem;
-  font-weight: 600;
+  font-weight: 700 !important;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: var(--public-text-muted);
+  color: #44403C !important;
   border-bottom: 2px solid var(--public-surface-border);
 }
 

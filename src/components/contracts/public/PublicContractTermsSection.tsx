@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { Shield, Scale, AlertCircle, FileText, CheckCircle2, Fuel, MapPin, Clock } from "lucide-react";
+import { brand } from "@/lib/brand";
 
 interface Props {
   tenantName: string;
@@ -24,24 +25,21 @@ export default function PublicContractTermsSection({ tenantName }: Props) {
       <div className="mb-6">
         <h3 
           className="text-sm font-bold flex items-center gap-2"
-          style={{ color: '#1C1917' }}
+          style={{ color: brand.colors.ink.primary }}
         >
-          <FileText size={18} style={{ color: '#6D28D9' }} />
+          <FileText size={18} style={{ color: brand.colors.info.light }} />
           Terms & Conditions
         </h3>
         <p 
           className="text-xs mt-1"
-          style={{ color: '#57534E' }}
+          style={{ color: brand.colors.ink.muted }}
         >
           Review the contract terms before signing.
         </p>
       </div>
 
       {/* Clean Tab Navigation */}
-      <div 
-        className="mb-6"
-        style={{ borderBottom: '1px solid rgba(28, 25, 23, 0.10)' }}
-      >
+      <div className="mb-6 border-b" style={{ borderColor: brand.colors.light.surfaceBorder }}>
         <nav className="flex gap-1 -mb-px overflow-x-auto custom-scrollbar">
           {TABS.map((tab) => {
             const Icon = tab.icon;
@@ -51,23 +49,14 @@ export default function PublicContractTermsSection({ tenantName }: Props) {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className="relative flex items-center gap-2 px-4 py-2.5 text-xs font-semibold whitespace-nowrap transition-colors focus:outline-none"
+                className={`
+                  relative flex items-center gap-2 px-4 py-2.5 text-xs font-semibold 
+                  whitespace-nowrap transition-colors border-b-2 focus:outline-none
+                `}
                 style={{
-                  borderBottom: isActive ? '2px solid #6D28D9' : '2px solid transparent',
-                  color: isActive ? '#6D28D9' : '#57534E',
-                  background: isActive ? 'rgba(109, 40, 217, 0.05)' : 'transparent',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.color = '#1C1917';
-                    e.currentTarget.style.background = '#F5F3F0';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!isActive) {
-                    e.currentTarget.style.color = '#57534E';
-                    e.currentTarget.style.background = 'transparent';
-                  }
+                  borderColor: isActive ? brand.colors.info.light : 'transparent',
+                  color: isActive ? brand.colors.info.text : brand.colors.ink.muted,
+                  backgroundColor: isActive ? brand.colors.info.bg : 'transparent',
                 }}
               >
                 <Icon size={14} />
@@ -93,21 +82,21 @@ function SummaryTab({ tenantName }: { tenantName: string }) {
   return (
     <div className="space-y-4">
       <div 
-        className="p-4 rounded-xl"
-        style={{
-          background: 'rgba(109, 40, 217, 0.05)',
-          border: '1px solid rgba(109, 40, 217, 0.15)',
+        className="p-4 rounded-xl border"
+        style={{ 
+          backgroundColor: brand.colors.info.bg,
+          borderColor: brand.colors.info.border
         }}
       >
         <h4 
           className="text-sm font-bold mb-3"
-          style={{ color: '#6D28D9' }}
+          style={{ color: brand.colors.info.text }}
         >
           Your Declaration
         </h4>
         <p 
           className="text-xs mb-3"
-          style={{ color: '#6D28D9' }}
+          style={{ color: brand.colors.info.text }}
         >
           By signing, you confirm:
         </p>
@@ -120,14 +109,10 @@ function SummaryTab({ tenantName }: { tenantName: string }) {
             "I have no serious driving offenses in the last 5 years"
           ].map((item, i) => (
             <li key={i} className="flex items-start gap-2">
-              <CheckCircle2 
-                size={14} 
-                className="flex-shrink-0 mt-0.5"
-                style={{ color: '#6D28D9' }}
-              />
+              <CheckCircle2 size={14} style={{ color: brand.colors.info.light }} className="flex-shrink-0 mt-0.5" />
               <span 
                 className="text-xs"
-                style={{ color: '#6D28D9' }}
+                style={{ color: brand.colors.info.text }}
               >
                 {item}
               </span>
@@ -137,15 +122,15 @@ function SummaryTab({ tenantName }: { tenantName: string }) {
       </div>
 
       <div 
-        className="p-4 rounded-xl"
-        style={{
-          background: '#FAF9F7',
-          border: '1px solid rgba(28, 25, 23, 0.10)',
+        className="p-4 rounded-xl border"
+        style={{ 
+          backgroundColor: brand.colors.light.surfaceWarm,
+          borderColor: brand.colors.light.surfaceBorder
         }}
       >
         <p 
           className="text-xs leading-relaxed"
-          style={{ color: '#57534E' }}
+          style={{ color: brand.colors.ink.muted }}
         >
           By signing this document, you agree to all rental terms and conditions provided by {tenantName}. 
           The full legal agreement is available in the PDF download.
@@ -182,7 +167,7 @@ function TermsTab() {
       <ArticleItem 
         number={5}
         title="Insurance & Accidents"
-        content="Report any accident, theft, or damage to us within 24 hours AND to police if there&apos;s injury or theft. Get a police report. Do not admit fault or settle with others without us."
+        content="Report any accident, theft, or damage to us within 24 hours AND to police if there's injury or theft. Get a police report. Do not admit fault or settle with others without us."
       />
     </div>
   );
@@ -192,41 +177,38 @@ function TermsTab() {
 function PoliciesTab({ tenantName }: { tenantName: string }) {
   return (
     <div 
-      className="p-4 rounded-xl space-y-4"
-      style={{
-        background: 'rgba(180, 83, 9, 0.05)',
-        border: '1px solid rgba(180, 83, 9, 0.20)',
+      className="p-4 rounded-xl border space-y-4"
+      style={{ 
+        backgroundColor: brand.colors.warning.bg,
+        borderColor: brand.colors.warning.border
       }}
     >
       <PolicyItem 
-        icon={<Fuel size={14} style={{ color: '#B45309' }} />}
+        icon={<Fuel size={14} style={{ color: brand.colors.secondary }} />}
         title="Fuel Policy"
         content="Return the car with the same fuel level as pickup. If below, a refueling fee applies."
       />
       <PolicyItem 
-        icon={<MapPin size={14} style={{ color: '#B45309' }} />}
+        icon={<MapPin size={14} style={{ color: brand.colors.secondary }} />}
         title="Mileage Limit"
         content="Daily limit: 550 KM. Excess mileage: KES 50 per KM."
       />
       <PolicyItem 
-        icon={<Clock size={14} style={{ color: '#B45309' }} />}
+        icon={<Clock size={14} style={{ color: brand.colors.secondary }} />}
         title="Late Returns"
         content="Returns over 2 hours late are charged as a new rental day."
       />
       
-      <div 
-        className="pt-3"
-        style={{ borderTop: '1px solid rgba(180, 83, 9, 0.20)' }}
-      >
+      <div className="pt-3 border-t" style={{ borderColor: brand.colors.warning.border }}>
         <p 
           className="text-xs font-semibold mb-2"
-          style={{ color: '#B45309' }}
+          style={{ color: brand.colors.warning.text }}
         >
           {tenantName} Specific Policies
         </p>
         <p 
           className="text-xs"
-          style={{ color: '#B45309' }}
+          style={{ color: brand.colors.warning.text }}
         >
           Additional agency-specific policies are detailed in the full PDF contract document.
         </p>
@@ -241,10 +223,9 @@ function ArticleItem({ number, title, content }: { number: number; title: string
     <div className="flex gap-3">
       <div 
         className="flex-shrink-0 w-6 h-6 rounded-full text-xs font-bold flex items-center justify-center"
-        style={{
-          background: '#FAF9F7',
-          color: '#44403C',
-          border: '1px solid rgba(28, 25, 23, 0.10)',
+        style={{ 
+          backgroundColor: brand.colors.light.surfaceWarm,
+          color: brand.colors.ink.secondary
         }}
       >
         {number}
@@ -252,13 +233,13 @@ function ArticleItem({ number, title, content }: { number: number; title: string
       <div>
         <h5 
           className="text-xs font-bold mb-1"
-          style={{ color: '#1C1917' }}
+          style={{ color: brand.colors.ink.primary }}
         >
           {title}
         </h5>
         <p 
           className="text-xs leading-relaxed"
-          style={{ color: '#57534E' }}
+          style={{ color: brand.colors.ink.muted }}
         >
           {content}
         </p>
@@ -272,22 +253,20 @@ function PolicyItem({ icon, title, content }: { icon: React.ReactNode; title: st
     <div className="flex items-start gap-3">
       <div 
         className="p-1.5 rounded-lg shrink-0"
-        style={{
-          background: 'rgba(180, 83, 9, 0.10)',
-        }}
+        style={{ backgroundColor: brand.colors.secondaryMuted }}
       >
         {icon}
       </div>
       <div>
         <h5 
           className="text-xs font-bold mb-1"
-          style={{ color: '#B45309' }}
+          style={{ color: brand.colors.warning.text }}
         >
           {title}
         </h5>
         <p 
           className="text-xs leading-relaxed"
-          style={{ color: '#B45309' }}
+          style={{ color: brand.colors.warning.text }}
         >
           {content}
         </p>

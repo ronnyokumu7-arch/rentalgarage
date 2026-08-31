@@ -2,6 +2,7 @@
 "use client";
 
 import { CheckCircle2, Loader2 } from "lucide-react";
+import { brand } from "@/lib/brand";
 
 interface Props {
   onSign: (signature: string) => Promise<boolean>;
@@ -16,10 +17,10 @@ export default function PublicContractActions({
 }: Props) {
   return (
     <div 
-      className="p-4 sm:px-8 sm:py-6"
-      style={{
-        background: '#FAF9F7',
-        borderTop: '1px solid rgba(28, 25, 23, 0.10)',
+      className="p-4 sm:px-8 sm:py-6 border-t"
+      style={{ 
+        backgroundColor: brand.colors.light.bgElevated,
+        borderColor: brand.colors.light.surfaceBorder
       }}
     >
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -27,7 +28,7 @@ export default function PublicContractActions({
         {/* Simple English confirmation text */}
         <p 
           className="text-xs text-center sm:text-left max-w-md"
-          style={{ color: '#57534E' }}
+          style={{ color: brand.colors.ink.muted }}
         >
           By clicking sign, you confirm you have read and agree to all terms above.
         </p>
@@ -35,25 +36,38 @@ export default function PublicContractActions({
         {/* Sign button with loading state */}
         {!signed ? (
           <button
-            onClick={() => onSign("")} // Signature handled by parent via signature pad
+            onClick={() => onSign("")}
             disabled={isSigning}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl 
+                      text-sm font-bold shrink-0 group"
             style={{
-              background: 'linear-gradient(135deg, #6D28D9 0%, #5B21B6 100%)',
+              backgroundColor: brand.colors.info.main,
               color: '#FFFFFF',
-              boxShadow: '0 4px 12px rgba(109, 40, 217, 0.25)',
-              cursor: isSigning ? 'not-allowed' : 'pointer',
-              opacity: isSigning ? 0.5 : 1,
+              boxShadow: brand.colors.shadows.lg,
+              transition: `all ${brand.easing.spring}`,
+              transform: 'translateY(0)',
             }}
             onMouseEnter={(e) => {
               if (!isSigning) {
-                e.currentTarget.style.transform = 'translateY(-1px)';
-                e.currentTarget.style.boxShadow = '0 6px 16px rgba(109, 40, 217, 0.35)';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = `${brand.colors.shadows.xl}, 0 0 0 3px ${brand.colors.info.border}`;
               }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(109, 40, 217, 0.25)';
+              if (!isSigning) {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = brand.colors.shadows.lg;
+              }
+            }}
+            onMouseDown={(e) => {
+              if (!isSigning) {
+                e.currentTarget.style.transform = 'translateY(0) scale(0.98)';
+              }
+            }}
+            onMouseUp={(e) => {
+              if (!isSigning) {
+                e.currentTarget.style.transform = 'translateY(-2px) scale(1)';
+              }
             }}
           >
             {isSigning ? (
@@ -71,14 +85,16 @@ export default function PublicContractActions({
         ) : (
           /* Success state - contract already signed */
           <div 
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl text-sm font-bold shrink-0"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl 
+                      text-sm font-bold border shrink-0"
             style={{
-              background: 'rgba(4, 120, 87, 0.05)',
-              color: '#047857',
-              border: '1px solid rgba(4, 120, 87, 0.20)',
+              backgroundColor: brand.colors.success.bg,
+              color: brand.colors.success.text,
+              borderColor: brand.colors.success.border,
+              transition: `all ${brand.easing.smooth}`,
             }}
           >
-            <CheckCircle2 size={16} style={{ color: '#047857' }} />
+            <CheckCircle2 size={16} style={{ color: brand.colors.success.main }} />
             Contract Signed
           </div>
         )}

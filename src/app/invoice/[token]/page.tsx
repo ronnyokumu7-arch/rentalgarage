@@ -1,4 +1,3 @@
-// src/app/(public)/invoice/[token]/page.tsx
 "use client";
 
 import { useState } from "react";
@@ -7,6 +6,7 @@ import { invoicesApi } from "@/lib/api/invoices";
 import { Loader2, AlertCircle, FileText, CheckCircle2, Download, XCircle, Send } from "lucide-react";
 import toast, { Toaster } from "react-hot-toast";
 import { usePublicInvoice } from "@/hooks/public-docs/usePublicInvoice";
+import { brand } from "@/lib/brand";
 import "@/app/public.css";
 
 import PublicInvoiceHeader from "@/components/public-docs/PublicInvoiceHeader";
@@ -52,10 +52,15 @@ export default function PublicInvoicePage() {
 
   if (loading) {
     return (
-      <div className="public-root min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FAF9F7' }}>
+      <div 
+        className="min-h-screen flex items-center justify-center p-4 force-light" 
+        style={{ backgroundColor: brand.colors.light.bg }}
+      >
         <div className="flex flex-col items-center gap-4 text-center">
-          <Loader2 className="h-10 w-10 animate-spin" style={{ color: '#6D28D9' }} />
-          <p className="font-medium text-sm sm:text-base" style={{ color: '#57534E' }}>Loading details...</p>
+          <Loader2 className="h-10 w-10 animate-spin" style={{ color: brand.colors.primary }} />
+          <p className="font-medium text-sm sm:text-base" style={{ color: brand.colors.ink.muted }}>
+            Loading details...
+          </p>
         </div>
       </div>
     );
@@ -63,24 +68,42 @@ export default function PublicInvoicePage() {
 
   if (error || !invoice) {
     return (
-      <div className="public-root min-h-screen flex items-center justify-center p-4 sm:p-6" style={{ backgroundColor: '#FAF9F7' }}>
+      <div 
+        className="min-h-screen flex items-center justify-center p-4 sm:p-6 force-light" 
+        style={{ backgroundColor: brand.colors.light.bg }}
+      >
         <div 
           className="max-w-md w-full rounded-xl p-6 sm:p-8 text-center"
           style={{
-            background: '#FFFFFF',
-            boxShadow: '0 1px 3px rgba(28, 25, 23, 0.08)',
-            border: '1px solid rgba(28, 25, 23, 0.10)',
+            background: brand.colors.light.surface,
+            boxShadow: brand.colors.shadows.sm,
+            border: `1px solid ${brand.colors.light.surfaceBorder}`,
           }}
         >
           <div 
             className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-            style={{ backgroundColor: 'rgba(185, 28, 28, 0.10)' }}
+            style={{ backgroundColor: brand.colors.danger.bg }}
           >
-            <AlertCircle className="h-7 w-7 sm:h-8 sm:w-8" style={{ color: '#B91C1C' }} />
+            <AlertCircle className="h-7 w-7 sm:h-8 sm:w-8" style={{ color: brand.colors.danger.main }} />
           </div>
-          <h1 className="text-lg sm:text-xl font-bold mb-2" style={{ color: '#1C1917' }}>Unavailable</h1>
-          <p className="text-xs sm:text-sm mb-6" style={{ color: '#57534E' }}>{error || "This link is invalid or has expired."}</p>
-          <p className="text-xs" style={{ color: '#78716C' }}>Please contact the rental agency for a new link.</p>
+          <h1 
+            className="text-lg sm:text-xl font-bold mb-2" 
+            style={{ color: brand.colors.ink.primary }}
+          >
+            Unavailable
+          </h1>
+          <p 
+            className="text-xs sm:text-sm mb-6" 
+            style={{ color: brand.colors.ink.muted }}
+          >
+            {error || "This link is invalid or has expired."}
+          </p>
+          <p 
+            className="text-xs" 
+            style={{ color: brand.colors.ink.subtle }}
+          >
+            Please contact the rental agency for a new link.
+          </p>
         </div>
       </div>
     );
@@ -90,147 +113,136 @@ export default function PublicInvoicePage() {
   const isPaid = invoice.status === "paid";
   const isVoid = invoice.status === "void";
 
-  // Banner state
+  // Banner state — uses brand semantic colors for consistency
   const bannerState = (() => {
     if (isVoid) {
       return {
-        bg: 'rgba(185, 28, 28, 0.05)',
-        iconBg: 'rgba(185, 28, 28, 0.10)',
-        icon: <XCircle className="h-5 w-5 shrink-0" style={{ color: '#B91C1C' }} />,
+        bg: brand.colors.danger.bg,
+        iconBg: brand.colors.danger.bg,
+        icon: <XCircle className="h-5 w-5 shrink-0" style={{ color: brand.colors.danger.main }} />,
         title: isQuotation ? "Quotation Cancelled" : "Invoice Voided",
         subtitle: "This document has been cancelled. Please contact the agency for a new one.",
-        textColor: '#B91C1C',
+        textColor: brand.colors.danger.text,
       };
     }
     if (isQuotation) {
       return {
-        bg: 'rgba(109, 40, 217, 0.05)',
-        iconBg: 'rgba(109, 40, 217, 0.10)',
-        icon: <Send className="h-5 w-5 shrink-0" style={{ color: '#6D28D9' }} />,
+        bg: brand.colors.primaryMuted,
+        iconBg: brand.colors.primaryMuted,
+        icon: <Send className="h-5 w-5 shrink-0" style={{ color: brand.colors.primary }} />,
         title: "Quotation Ready",
         subtitle: "Review the details below and accept to confirm your booking.",
-        textColor: '#6D28D9',
+        textColor: brand.colors.primary,
       };
     }
     if (isPaid) {
       return {
-        bg: 'rgba(4, 120, 87, 0.05)',
-        iconBg: 'rgba(4, 120, 87, 0.10)',
-        icon: <CheckCircle2 className="h-5 w-5 shrink-0" style={{ color: '#047857' }} />,
+        bg: brand.colors.success.bg,
+        iconBg: brand.colors.success.bg,
+        icon: <CheckCircle2 className="h-5 w-5 shrink-0" style={{ color: brand.colors.success.main }} />,
         title: "Invoice Fully Paid",
         subtitle: "Thank you for your payment.",
-        textColor: '#047857',
+        textColor: brand.colors.success.text,
       };
     }
     return {
-      bg: 'rgba(29, 78, 216, 0.05)',
-      iconBg: 'rgba(29, 78, 216, 0.10)',
-      icon: <FileText className="h-5 w-5 shrink-0" style={{ color: '#1D4ED8' }} />,
+      bg: brand.colors.info.bg,
+      iconBg: brand.colors.info.bg,
+      icon: <FileText className="h-5 w-5 shrink-0" style={{ color: brand.colors.info.main }} />,
       title: "Pending Payment",
       subtitle: "Please review the details below and arrange payment.",
-      textColor: '#1D4ED8',
+      textColor: brand.colors.info.text,
     };
   })();
 
   return (
     <div 
-      className="public-root min-h-screen py-6 sm:py-12 px-3 sm:px-6 lg:px-8" 
-      style={{ backgroundColor: '#FAF9F7' }}
+      className="min-h-screen py-6 sm:py-12 px-3 sm:px-6 lg:px-8 force-light" 
+      style={{ backgroundColor: brand.colors.light.bg }}
     >
       <Toaster position="top-center" />
       <div className="max-w-4xl mx-auto">
+        {/* ✅ Header OUTSIDE main card — matches contract page layout */}
         <PublicInvoiceHeader invoice={invoice} />
 
+        {/* ✅ Main document card */}
         <div 
           className="rounded-xl sm:rounded-2xl overflow-hidden"
           style={{
-            background: '#FFFFFF',
-            boxShadow: '0 12px 24px -4px rgba(28, 25, 23, 0.10)',
-            border: '1px solid rgba(28, 25, 23, 0.10)',
+            background: brand.colors.light.surface,
+            boxShadow: brand.colors.shadows.xl,
+            border: `1px solid ${brand.colors.light.surfaceBorder}`,
           }}
         >
-          {/* Status Banner - mobile stacks, desktop side-by-side */}
+          {/* Status Banner — mobile stacks, desktop side-by-side */}
           <div 
-            className="p-4 sm:p-5"
+            className="p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b"
             style={{
-              borderBottom: '1px solid rgba(28, 25, 23, 0.08)',
-              background: bannerState.bg,
+              borderColor: brand.colors.light.surfaceBorder,
+              backgroundColor: bannerState.bg,
             }}
           >
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              {/* Left: Status icon + text */}
-              <div className="flex items-start gap-3 min-w-0 flex-1">
-                <div 
-                  className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: bannerState.iconBg }}
-                >
-                  {bannerState.icon}
-                </div>
-                <div className="min-w-0">
-                  <h3 
-                    className="text-sm font-bold"
-                    style={{ color: bannerState.textColor }}
-                  >
-                    {bannerState.title}
-                  </h3>
-                  <p 
-                    className="text-xs leading-relaxed"
-                    style={{ color: bannerState.textColor, opacity: 0.85 }}
-                  >
-                    {bannerState.subtitle}
-                  </p>
-                </div>
-              </div>
-              
-              {/* Right: Download button - full width on mobile, compact on desktop */}
-              <button
-                type="button"
-                onClick={handleDownloadPdf}
-                disabled={isDownloadingPdf}
-                className="w-full sm:w-auto flex items-center justify-center gap-1.5 px-3.5 py-2 rounded-lg text-xs font-semibold transition-all shrink-0"
-                style={{
-                  background: '#FFFFFF',
-                  border: '1px solid rgba(28, 25, 23, 0.10)',
-                  color: '#44403C',
-                  boxShadow: '0 1px 2px rgba(28, 25, 23, 0.06)',
-                  cursor: isDownloadingPdf ? 'not-allowed' : 'pointer',
-                  opacity: isDownloadingPdf ? 0.6 : 1,
-                  whiteSpace: 'nowrap',
-                }}
-                onMouseEnter={(e) => {
-                  if (!isDownloadingPdf) {
-                    e.currentTarget.style.background = '#F5F3F0';
-                    e.currentTarget.style.borderColor = 'rgba(28, 25, 23, 0.18)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#FFFFFF';
-                  e.currentTarget.style.borderColor = 'rgba(28, 25, 23, 0.10)';
-                }}
-                onMouseDown={(e) => {
-                  if (!isDownloadingPdf) {
-                    e.currentTarget.style.transform = 'scale(0.95)';
-                  }
-                }}
-                onMouseUp={(e) => {
-                  if (!isDownloadingPdf) {
-                    e.currentTarget.style.transform = 'scale(1)';
-                  }
-                }}
+            {/* Left: Status icon + text */}
+            <div className="flex items-center gap-3">
+              <div 
+                className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+                style={{ backgroundColor: bannerState.iconBg }}
               >
-                {isDownloadingPdf ? (
-                  <>
-                    <Loader2 size={13} className="animate-spin" /> 
-                    Generating...
-                  </>
-                ) : (
-                  <>
-                    <Download size={13} /> 
-                    Download PDF
-                  </>
-                )}
-              </button>
+                {bannerState.icon}
+              </div>
+              <div>
+                <h3 
+                  className="text-sm font-bold"
+                  style={{ color: bannerState.textColor }}
+                >
+                  {bannerState.title}
+                </h3>
+                <p 
+                  className="text-xs"
+                  style={{ color: bannerState.textColor }}
+                >
+                  {bannerState.subtitle}
+                </p>
+              </div>
             </div>
+
+            {/* Right: Download button */}
+            <button
+              type="button"
+              onClick={handleDownloadPdf}
+              disabled={isDownloadingPdf}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-lg 
+                        text-xs font-semibold transition-all shrink-0 
+                        disabled:opacity-60 disabled:cursor-not-allowed"
+              style={{
+                backgroundColor: brand.colors.light.surface,
+                border: `1px solid ${brand.colors.light.surfaceBorder}`,
+                color: brand.colors.ink.muted,
+                boxShadow: brand.colors.shadows.sm,
+              }}
+              onMouseEnter={(e) => {
+                if (!isDownloadingPdf) {
+                  e.currentTarget.style.backgroundColor = brand.colors.light.surfaceHover;
+                  e.currentTarget.style.borderColor = brand.colors.light.surfaceBorderStrong;
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isDownloadingPdf) {
+                  e.currentTarget.style.backgroundColor = brand.colors.light.surface;
+                  e.currentTarget.style.borderColor = brand.colors.light.surfaceBorder;
+                }
+              }}
+            >
+              {isDownloadingPdf ? (
+                <>
+                  <Loader2 size={14} className="animate-spin" /> Generating PDF...
+                </>
+              ) : (
+                <>
+                  <Download size={14} /> Download PDF
+                </>
+              )}
+            </button>
           </div>
 
           <div className="p-4 sm:p-8">
@@ -258,10 +270,11 @@ export default function PublicInvoicePage() {
           </div>
         </div>
 
+        {/* ✅ Footer — matches contract page */}
         <div className="mt-6 sm:mt-8 text-center">
           <p 
             className="text-xs"
-            style={{ color: '#78716C' }}
+            style={{ color: brand.colors.ink.faint }}
           >
             Secured by Rental Garage • {isQuotation ? "Quotation" : "Invoice"} generated on{" "}
             {invoice.created_at ? new Date(invoice.created_at).toLocaleDateString() : "—"}

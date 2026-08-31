@@ -1,0 +1,55 @@
+/* src/app/public.css */
+
+/* ✅ Base container for public pages */
+.public-root {
+  background-color: #FAF9F7;
+  color: #1C1917;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ✅ Force dark, high-contrast text */
+.public-root h1,
+.public-root h2,
+.public-root h3,
+.public-root h4,
+.public-root h5,
+.public-root h6 {
+  color: #1C1917 !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.02em;
+}
+
+.public-root p,
+.public-root span,
+.public-root li {
+  color: #44403C !important;
+}
+
+/* ✅ Ensure labels/headings are readable */
+.public-root label,
+.public-root .label,
+.public-root .field-label {
+  color: #57534E !important;
+  font-weight: 600 !important;
+}
+
+/* ✅ Ensure buttons are readable */
+.public-root button {
+  color: #FFFFFF !important;
+}
+
+/* ✅ Ensure links are readable */
+.public-root a {
+  color: #7C3AED !important;
+}
+
+/* ✅ Ensure inputs are readable */
+.public-root input,
+.public-root select,
+.public-root textarea {
+  color: #1C1917 !important;
+  background: #FFFFFF !important;
+  border-color: #D6D3D1 !important;
+}

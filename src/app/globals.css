@@ -512,3 +512,32 @@
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
 }
+
+
+
+
+
+
+/* ════════════════════════════════════════════════════════════
+   🌞 PUBLIC PAGES — ALWAYS LIGHT (token-immune)
+   Add class `force-light` to any client-facing page root.
+   Re-declares the light palette INSIDE the subtree, so the
+   !important heading/body rules resolve to dark ink here,
+   no matter what theme the dashboard is in.
+   ════════════════════════════════════════════════════════════ */
+.force-light {
+  --color-ink-primary:   #1C1917 !important;
+  --color-ink-secondary: #292524 !important;
+  --color-ink-muted:     #57534E !important;
+  --color-ink-subtle:    #78716C !important;
+  --color-ink-faint:     #A8A39E !important;
+  --color-bg:            #F7F4F0 !important;
+  --color-surface:       #FFFFFF !important;
+  --color-surface-border: rgba(44, 38, 32, 0.08) !important;
+  color: #1C1917 !important;
+}
+
+/* Micro-labels (CLIENT DETAILS, TOTAL AMOUNT, ...) keep their subtle tone */
+.force-light h3.uppercase {
+  color: #78716C !important;
+}

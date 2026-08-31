@@ -1,99 +1,120 @@
 // src/components/public-docs/PublicInvoiceHeader.tsx
 "use client";
 
-import { Receipt, Phone, Mail } from "lucide-react";
-import type { PublicInvoiceView } from "@/lib/types";
+import { FileText, MapPin, Phone, Mail } from "lucide-react";
+import { brand } from "@/lib/brand";
 
-interface PublicInvoiceHeaderProps {
-  invoice: PublicInvoiceView;
+
+interface InvoiceLike {
+  doc_type?: string;
+  invoice_number?: string;
+  tenant_name?: string | null;
+  tenant_logo_url?: string | null;
+  tenant_address?: string | null;
+  tenant_phone?: string | null;
+  tenant_email?: string | null;
+  [key: string]: any;
 }
 
-export default function PublicInvoiceHeader({ invoice }: PublicInvoiceHeaderProps) {
-  const companyNameStyle: React.CSSProperties = {
-    fontSize: '1.5rem',
-    fontWeight: 700,
-    color: '#1C1917',
-    letterSpacing: '-0.02em',
-  };
+interface Props {
+  invoice: InvoiceLike;
+}
 
-  const contactLinkStyle: React.CSSProperties = {
-    fontSize: '0.875rem',
-    color: '#57534E',
-    transition: 'color 0.2s ease',
-  };
-
-  const invoiceBadgeStyle: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    gap: '0.5rem',
-    padding: '0.25rem 0.75rem',
-    borderRadius: '9999px',
-    background: '#FAF9F7',
-    border: '1px solid rgba(28, 25, 23, 0.06)',
-    fontSize: '0.75rem',
-    fontWeight: 600,
-    color: '#57534E',
-    textTransform: 'uppercase',
-    letterSpacing: '0.05em',
-  };
+export default function PublicInvoiceHeader({ invoice }: Props) {
+  const isQuotation = invoice.doc_type === "quotation";
+  const docLabel = isQuotation ? "Quotation" : "Invoice";
 
   return (
-    <div className="text-center mb-6 sm:mb-10">
-      {invoice.tenant_logo_url ? (
-        <img 
-          src={invoice.tenant_logo_url} 
-          alt="Logo" 
-          className="h-16 mx-auto mb-4 object-contain" 
-        />
-      ) : (
-        <div 
-          className="w-16 h-16 mx-auto mb-4 rounded-full flex items-center justify-center"
-          style={{
-            background: '#F5F3F0',
-            color: '#57534E',
-          }}
-        >
-          <Receipt size={24} />
+    <div className="mb-8 sm:mb-12">
+      <div className="flex items-start gap-3 sm:gap-4">
+        
+        {/* Company Logo — same box as contract header */}
+        {invoice.tenant_logo_url ? (
+          <div 
+            className="w-14 h-14 sm:w-20 sm:h-20 rounded-xl overflow-hidden shrink-0"
+            style={{
+              background: brand.colors.light.surface,
+              border: `1px solid ${brand.colors.light.surfaceBorder}`,
+              boxShadow: brand.colors.shadows.sm,
+            }}
+          >
+            <img 
+              src={invoice.tenant_logo_url} 
+              alt={`${invoice.tenant_name || "Company"} Logo`}
+              className="w-full h-full object-contain p-2"
+            />
+          </div>
+        ) : (
+          <div 
+            className="w-14 h-14 sm:w-20 sm:h-20 rounded-xl flex items-center justify-center shrink-0"
+            style={{
+              background: brand.colors.primaryMuted,
+              border: `1px solid ${brand.colors.primaryMuted}`,
+            }}
+          >
+            <FileText size={28} style={{ color: brand.colors.primary }} />
+          </div>
+        )}
+
+        {/* Company Info — left-aligned, mirrors contract header */}
+        <div className="flex-1 min-w-0">
+          <h1 
+            className="text-lg sm:text-2xl font-bold tracking-tight"
+            style={{ color: brand.colors.ink.primary }}
+          >
+            {invoice.tenant_name || "Rental Company"}
+          </h1>
+          <p 
+            className="text-xs sm:text-sm mt-1"
+            style={{ color: brand.colors.ink.muted }}
+          >
+            {docLabel}
+          </p>
+          
+          {/* Contact Info — same row structure as contract header */}
+          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 text-xs">
+            {invoice.tenant_address && (
+              <span 
+                className="flex items-center gap-1.5"
+                style={{ color: brand.colors.ink.muted }}
+              >
+                <MapPin size={12} style={{ color: brand.colors.ink.subtle }} className="shrink-0" />
+                {invoice.tenant_address}
+              </span>
+            )}
+            {invoice.tenant_phone && (
+              <span 
+                className="flex items-center gap-1.5"
+                style={{ color: brand.colors.ink.muted }}
+              >
+                <Phone size={12} style={{ color: brand.colors.ink.subtle }} className="shrink-0" />
+                {invoice.tenant_phone}
+              </span>
+            )}
+            {invoice.tenant_email && (
+              <span 
+                className="flex items-center gap-1.5 min-w-0"
+                style={{ color: brand.colors.ink.muted }}
+              >
+                <Mail size={12} style={{ color: brand.colors.ink.subtle }} className="shrink-0" />
+                <span className="truncate">{invoice.tenant_email}</span>
+              </span>
+            )}
+          </div>
+
+          {/* ✅ Document number badge — kept, now left-aligned */}
+          <div 
+            className="mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
+            style={{
+              background: brand.colors.primaryMuted,
+              color: brand.colors.primary,
+              border: `1px solid ${brand.colors.primaryMuted}`,
+            }}
+          >
+            <FileText size={12} />
+            {invoice.invoice_number}
+          </div>
         </div>
-      )}
-      <h1 
-        className="text-2xl sm:text-3xl font-bold tracking-tight"
-        style={companyNameStyle}
-      >
-        {invoice.tenant_name}
-      </h1>
-
-      <div className="mt-2 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
-        {invoice.tenant_phone && (
-          <a 
-            href={`tel:${invoice.tenant_phone}`} 
-            className="flex items-center gap-1"
-            style={contactLinkStyle}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#1C1917'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#57534E'}
-          >
-            <Phone size={12} /> {invoice.tenant_phone}
-          </a>
-        )}
-        {invoice.tenant_email && (
-          <a 
-            href={`mailto:${invoice.tenant_email}`} 
-            className="flex items-center gap-1"
-            style={contactLinkStyle}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#1C1917'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#57534E'}
-          >
-            <Mail size={12} /> {invoice.tenant_email}
-          </a>
-        )}
-      </div>
-
-      <div 
-        className="mt-4 inline-flex items-center gap-2"
-        style={invoiceBadgeStyle}
-      >
-        <Receipt size={14} />
-        {invoice.invoice_number}
       </div>
     </div>
   );
