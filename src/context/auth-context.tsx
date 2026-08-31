@@ -17,8 +17,15 @@ import { AuthState, User, Tenant, LoginResponse } from "@/lib/types";
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<void>;
   logout: () => void;
-  refresh: () => Promise<void>;
+  refresh: () => Promise<boolean>;
   refreshTenant: () => Promise<void>;
+  /**
+   * Single-flight refresh queue: multiple 401s queue behind ONE refresh.
+   * Returns true if tokens were rotated, false if refresh definitively failed.
+   * Callers should ONLY logout when this returns false AND the error was 401
+   * (not network).
+   */
+  refreshQueue: (onSuccess: () => void, onFailure: () => void) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -53,12 +60,10 @@ const getRefreshToken = (): string | null => {
 const setAccessToken = (accessToken: string) => {
   if (typeof window === "undefined") return;
   
-  // Store in localStorage (for API interceptor)
   localStorage.setItem(ACCESS_KEY, accessToken);
   
-  // Store in cookie (for middleware edge validation)
   const isSecure = window.location.protocol === "https:";
-  const expires = new Date(Date.now() + 15 * 60 * 1000).toUTCString(); // 15 min
+  const expires = new Date(Date.now() + 15 * 60 * 1000).toUTCString();
   document.cookie = `${ACCESS_KEY}=${encodeURIComponent(accessToken)}; expires=${expires}; path=/; SameSite=Lax${isSecure ? "; Secure" : ""}`;
 };
 
@@ -75,11 +80,9 @@ const setTokens = (accessToken: string, refreshToken?: string | null) => {
 const removeAuthTokens = () => {
   if (typeof window === "undefined") return;
   
-  // Clear localStorage
   localStorage.removeItem(ACCESS_KEY);
   localStorage.removeItem(REFRESH_KEY);
   
-  // Clear cookies
   document.cookie = `${ACCESS_KEY}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
   document.cookie = "rm_refresh_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
 };
@@ -87,7 +90,7 @@ const removeAuthTokens = () => {
 // ─── TENANT CACHE ──────────────────────────────────────────────────────────
 let cachedTenant: Tenant | null = null;
 let tenantCacheTimestamp = 0;
-const TENANT_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const TENANT_CACHE_TTL = 5 * 60 * 1000;
 
 async function fetchTenant(tenantId: number, forceRefresh = false): Promise<Tenant | null> {
   const now = Date.now();
@@ -113,7 +116,13 @@ function clearTenantCache() {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
-  const isRotatingRef = useRef(false);
+  
+  // ✅ Single-flight refresh queue state
+  const refreshPromiseRef = useRef<Promise<boolean> | null>(null);
+  const refreshSubscribersRef = useRef<Array<{
+    onSuccess: () => void;
+    onFailure: () => void;
+  }>>([]);
 
   const [state, setState] = useState<AuthState>({
     user: null,
@@ -124,18 +133,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   /**
-   * Silent token rotation via POST /auth/refresh.
-   * Sends the refresh token in the request body (localStorage-backed),
-   * since cross-site HttpOnly cookies are blocked by modern browsers.
+   * ✅ SINGLE-FLIGHT REFRESH: only one refresh runs at a time.
+   * Other 401s queue behind it and retry/reject when it completes.
+   * Returns true if tokens rotated, false if refresh endpoint rejected (401).
+   * Network errors retry once before failing.
    */
   const rotateTokens = useCallback(async (): Promise<boolean> => {
-    if (isRotatingRef.current) return false;
-    isRotatingRef.current = true;
+    const refresh_token = getRefreshToken();
+    if (!refresh_token) return false;
 
     try {
-      const refresh_token = getRefreshToken();
-      if (!refresh_token) return false;
-
       const res = await apiClient.post<LoginResponse>("/auth/refresh", { refresh_token });
       const { access_token, refresh_token: new_refresh, user } = res.data;
 
@@ -153,12 +160,65 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       channel?.postMessage({ type: "tokens_rotated", access_token });
       return true;
-    } catch {
+    } catch (error: any) {
+      // ✅ Retry once on network errors (not on 401/403 from backend)
+      const isAuthFailure = error?.response?.status === 401 || error?.response?.status === 403;
+      if (!isAuthFailure) {
+        // Network blip or server 5xx — retry once after 1s
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        try {
+          const retryRes = await apiClient.post<LoginResponse>("/auth/refresh", { refresh_token });
+          const { access_token, refresh_token: new_refresh, user } = retryRes.data;
+
+          setTokens(access_token, new_refresh);
+
+          const tenant = user.tenant_id ? await fetchTenant(user.tenant_id) : null;
+
+          setState({
+            user,
+            tenant,
+            token: access_token,
+            isLoading: false,
+            isAuthenticated: true,
+          });
+
+          channel?.postMessage({ type: "tokens_rotated", access_token });
+          return true;
+        } catch {
+          // Retry failed — treat as network failure, don't logout yet
+          return false;
+        }
+      }
+      // Auth failure (401/403 from /auth/refresh) — refresh token is dead
       return false;
-    } finally {
-      isRotatingRef.current = false;
     }
   }, []);
+
+  /**
+   * Queue a refresh request. If one is already in flight, wait for it.
+   * Calls onSuccess if tokens rotated, onFailure if refresh definitively failed.
+   */
+  const refreshQueue = useCallback((onSuccess: () => void, onFailure: () => void) => {
+    refreshSubscribersRef.current.push({ onSuccess, onFailure });
+
+    if (!refreshPromiseRef.current) {
+      refreshPromiseRef.current = rotateTokens().then((success) => {
+        const subscribers = refreshSubscribersRef.current;
+        refreshSubscribersRef.current = [];
+        refreshPromiseRef.current = null;
+
+        subscribers.forEach(({ onSuccess, onFailure }) => {
+          if (success) {
+            onSuccess();
+          } else {
+            onFailure();
+          }
+        });
+
+        return success;
+      });
+    }
+  }, [rotateTokens]);
 
   // Listen for cross-tab rotation broadcasts
   useEffect(() => {
@@ -192,6 +252,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setState({ user, tenant, token, isLoading: false, isAuthenticated: true });
         }
       } catch {
+        // Access token expired on mount — try refresh
         const rotated = await rotateTokens();
         if (!rotated && isMounted) {
           removeAuthTokens();
@@ -265,19 +326,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     router.push("/login");
   };
 
-  const refresh = useCallback(async () => {
+  /**
+   * ✅ Manual refresh (for UI buttons). Only logs out if refresh endpoint
+   * definitively rejected (401/403), not on network errors.
+   */
+  const refresh = useCallback(async (): Promise<boolean> => {
     const ok = await rotateTokens();
     if (!ok) {
-      removeAuthTokens();
-      clearTenantCache();
-      setState({
-        user: null,
-        tenant: null,
-        token: null,
-        isLoading: false,
-        isAuthenticated: false,
-      });
+      // Check if it was an auth failure (refresh token dead) vs network
+      const refreshToken = getRefreshToken();
+      if (!refreshToken) {
+        // No refresh token — definitely logged out
+        removeAuthTokens();
+        clearTenantCache();
+        setState({
+          user: null,
+          tenant: null,
+          token: null,
+          isLoading: false,
+          isAuthenticated: false,
+        });
+      }
+      // If refresh token still exists but rotation failed, it's likely a
+      // network blip — don't logout, let the next request retry
     }
+    return ok;
   }, [rotateTokens]);
 
   const refreshTenant = useCallback(async () => {
@@ -289,7 +362,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [state.user?.tenant_id]);
 
   return (
-    <AuthContext.Provider value={{ ...state, login, logout, refresh, refreshTenant }}>
+    <AuthContext.Provider value={{ ...state, login, logout, refresh, refreshTenant, refreshQueue }}>
       {children}
     </AuthContext.Provider>
   );

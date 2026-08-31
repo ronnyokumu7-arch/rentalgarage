@@ -1,4 +1,3 @@
-// src/components/layout/Topbar.tsx
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -7,7 +6,8 @@ import { usePathname } from "next/navigation";
 import {
   Search, Bell, Sun, Moon, User, Settings,
   LogOut, ChevronRight, Command, Briefcase,
-  Menu, Sparkles, X, HelpCircle, Shield
+  Menu, Sparkles, X, HelpCircle, Shield,
+  CreditCard
 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 
@@ -86,7 +86,7 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
   const userInitial = user?.full_name?.charAt(0) || user?.email?.charAt(0) || "U";
   const fullName = user?.full_name || user?.email || "User";
 
-  // ── Render Avatar (Used only in the drawer) ────────────────────────────────
+  // ── Render Avatar ────────────────────────────────────────────────────────
   const renderAvatar = (size: "md" | "lg") => {
     const dims = {
       md: "w-10 h-10",
@@ -195,7 +195,7 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
         </div>
       </div>
 
-      {/* ── RIGHT: Controls ──────────────────────────────────────────────────── */}
+      {/* ── RIGHT: Controls ─────────────────────────────────────────────────── */}
       <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0 ml-auto">
         
         {/* Theme Toggle */}
@@ -232,9 +232,9 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
             <ChevronRight size={13} strokeWidth={2.5} className={`hidden md:block text-[var(--color-ink-subtle)] transition-transform duration-200 ${showUserMenu ? "rotate-90" : ""}`} />
           </button>
 
-          {/* User Dropdown Menu - Upgraded */}
+          {/* User Dropdown Menu - Premium Upgrade */}
           {showUserMenu && (
-            <div className="absolute right-0 top-[calc(100%+8px)] w-[calc(100vw-2rem)] sm:w-[320px] max-w-[320px] rounded-2xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-[var(--shadow-dropdown)] z-[9999] overflow-hidden animate-in slide-up fade-in duration-200">
+            <div className="absolute right-0 top-[calc(100%+8px)] w-[calc(100vw-2rem)] sm:w-[300px] max-w-[300px] rounded-2xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-[var(--shadow-dropdown)] z-[9999] overflow-hidden animate-in slide-up fade-in duration-200">
               
               {/* Header - User Info */}
               <div className="px-4 pt-4 pb-3 border-b border-[var(--color-surface-border)]">
@@ -267,74 +267,58 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
                 </div>
               </div>
 
-              {/* Quick Stats */}
-              <div className="grid grid-cols-3 gap-1 px-3 py-3 bg-[var(--color-surface-hover)]/50">
-                <div className="text-center">
-                  <p className="text-xs font-bold text-[var(--color-ink)]">12</p>
-                  <p className="text-[9px] text-[var(--color-ink-muted)]">Bookings</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xs font-bold text-[var(--color-ink)]">4</p>
-                  <p className="text-[9px] text-[var(--color-ink-muted)]">Vehicles</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-xs font-bold text-[var(--color-ink)]">2</p>
-                  <p className="text-[9px] text-[var(--color-ink-muted)]">Active</p>
-                </div>
-              </div>
-
-              {/* Actions - PRESERVING ORIGINAL PATHS */}
-              <div className="px-2 py-2">
+              {/* Menu Actions - Clean Icons */}
+              <div className="px-2 py-2 space-y-0.5">
                 <Link 
                   href={isSuperAdmin ? `/super-admin/users/${user?.id}` : `/dashboard/users/${user?.id}`} 
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-all duration-100 group"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-all duration-150 group"
                 >
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] group-hover:border-[var(--color-primary)]/30 group-hover:bg-[var(--color-primary-muted)] transition-all">
-                    <User size={14} strokeWidth={1.8} className="text-[var(--color-ink-muted)] group-hover:text-[var(--color-primary)] transition-colors" />
-                  </div>
+                  <User size={16} strokeWidth={1.8} className="text-[var(--color-ink-muted)] group-hover:text-[var(--color-primary)] transition-colors" />
                   <span className="flex-1 font-medium">View Profile</span>
                   <ChevronRight size={14} className="text-[var(--color-ink-subtle)] opacity-0 group-hover:opacity-100 transition-opacity" />
                 </Link>
                 
                 <Link 
                   href={isSuperAdmin ? "/super-admin/settings" : "/dashboard/settings"} 
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-all duration-100 group"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-all duration-150 group"
                 >
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] group-hover:border-[var(--color-primary)]/30 group-hover:bg-[var(--color-primary-muted)] transition-all">
-                    <Settings size={14} strokeWidth={1.8} className="text-[var(--color-ink-muted)] group-hover:text-[var(--color-primary)] transition-colors" />
-                  </div>
+                  <Settings size={16} strokeWidth={1.8} className="text-[var(--color-ink-muted)] group-hover:text-[var(--color-primary)] transition-colors" />
                   <span className="flex-1 font-medium">Settings</span>
                   <ChevronRight size={14} className="text-[var(--color-ink-subtle)] opacity-0 group-hover:opacity-100 transition-opacity" />
                 </Link>
 
                 <Link 
-                  href="/help" 
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-all duration-100 group"
+                  href="/dashboard/financials" 
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-all duration-150 group"
                 >
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] group-hover:border-[var(--color-primary)]/30 group-hover:bg-[var(--color-primary-muted)] transition-all">
-                    <HelpCircle size={14} strokeWidth={1.8} className="text-[var(--color-ink-muted)] group-hover:text-[var(--color-primary)] transition-colors" />
-                  </div>
+                  <CreditCard size={16} strokeWidth={1.8} className="text-[var(--color-ink-muted)] group-hover:text-[var(--color-primary)] transition-colors" />
+                  <span className="flex-1 font-medium">Billing & Invoices</span>
+                  <ChevronRight size={14} className="text-[var(--color-ink-subtle)] opacity-0 group-hover:opacity-100 transition-opacity" />
+                </Link>
+
+                <Link 
+                  href="/help" 
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-all duration-150 group"
+                >
+                  <HelpCircle size={16} strokeWidth={1.8} className="text-[var(--color-ink-muted)] group-hover:text-[var(--color-primary)] transition-colors" />
                   <span className="flex-1 font-medium">Help Center</span>
                   <ChevronRight size={14} className="text-[var(--color-ink-subtle)] opacity-0 group-hover:opacity-100 transition-opacity" />
                 </Link>
               </div>
 
               {/* Divider */}
-              <div className="h-px bg-[var(--color-surface-border)] mx-3" />
+              <div className="h-px bg-[var(--color-surface-border)] mx-3 my-1" />
 
-              {/* Logout */}
-              <div className="px-2 py-2">
-                <button 
-                  onClick={logout} 
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-[var(--color-danger-text)] hover:bg-[var(--color-danger-bg)] transition-all duration-100 group"
-                >
-                  <div className="w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 bg-[var(--color-danger-bg)] border border-[var(--color-danger)]/20 group-hover:border-[var(--color-danger)]/40 transition-all">
-                    <LogOut size={14} strokeWidth={1.8} className="text-[var(--color-danger-text)]" />
-                  </div>
-                  <span className="flex-1 text-left">Sign out</span>
-                  <ChevronRight size={14} className="text-[var(--color-danger-text)]/30 opacity-0 group-hover:opacity-100 transition-opacity" />
-                </button>
-              </div>
+{/* Logout - Distinguished */}
+<div className="px-2 py-2">
+  <button 
+    onClick={logout} 
+    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-[var(--color-danger-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-rose-500/10 transition-all duration-150 group"
+  >
+    <LogOut size={16} strokeWidth={1.8} className="text-[var(--color-danger-text)]" />
+    <span className="flex-1">Sign out</span>
+  </button>
+</div>
             </div>
           )}
         </div>
