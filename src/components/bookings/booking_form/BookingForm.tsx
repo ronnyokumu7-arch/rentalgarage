@@ -1,3 +1,4 @@
+// src/components/forms/BookingForm.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -93,14 +94,14 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
   return (
     <form id={formId} onSubmit={onSubmit} className="w-full space-y-6">
       
-      {/* Mode Switcher */}
+      {/* ── Mode Switcher ────────────────────────────────────────── */}
       <PremiumSwitch
         tabs={bookingTabs}
         activeTab={bookingMode}
         onChange={(id) => setBookingMode(id as 'selfdrive' | 'chauffeur')}
       />
 
-      {/* Section 1: Client, Vehicle & Driver - NO CONTAINER */}
+      {/* ── Section 1: Client, Vehicle & Driver ────────────────── */}
       <div>
         <div className="flex items-center gap-2 mb-4">
           <div className="w-6 h-6 rounded-md bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
@@ -133,43 +134,46 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
           />
 
           {bookingMode === 'chauffeur' ? (
-            <DriverSearch
-              selectedDriverId={formData.driver_id}
-              drivers={drivers}
-              searchQuery={driverSearch}
-              onSearchChange={setDriverSearch}
-              onSelect={(driver) => {
-                updateField('driver_id', driver?.id ? driver.id.toString() : '');
-                setDriverSearch('');
-              }}
-            />
+            <>
+              <DriverSearch
+                selectedDriverId={formData.driver_id}
+                drivers={drivers}
+                searchQuery={driverSearch}
+                onSearchChange={setDriverSearch}
+                onSelect={(driver) => {
+                  updateField('driver_id', driver?.id ? driver.id.toString() : '');
+                  setDriverSearch('');
+                }}
+              />
+
+              {/* ── 24-Hour Booking Toggle (Fixed) ────────────────── */}
+              <label className="flex items-center gap-3 cursor-pointer group p-3 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 hover:bg-[var(--color-surface-hover)] transition-colors">
+                <input
+                  type="checkbox"
+                  checked={is24HBooking}
+                  onChange={(e) => handle24HToggle(e.target.checked)}
+                  className="w-4 h-4 rounded border-[var(--color-surface-border)] text-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:ring-offset-2 transition-all"
+                />
+                <div className="flex flex-col">
+                  <span className="text-xs font-semibold text-[var(--color-ink)] group-hover:text-[var(--color-ink-primary)] transition-colors">
+                    24-Hour Booking
+                  </span>
+                  <span className="text-[10px] text-[var(--color-ink-muted)]">
+                    Includes overnight driver accommodation fee.
+                  </span>
+                </div>
+              </label>
+            </>
           ) : (
             <p className="text-[10px] text-[var(--color-ink-muted)] flex items-start gap-1.5">
               <Info size={11} className="text-[var(--color-primary)] shrink-0 mt-[1px]" />
               This is a self-drive rental — the client will drive the vehicle themselves. No staff driver needed.
             </p>
           )}
-
-          {bookingMode === 'chauffeur' && (
-            <label className="flex items-center gap-3 p-3 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 cursor-pointer hover:bg-[var(--color-surface-hover)] transition-colors">
-              <input
-                type="checkbox"
-                checked={is24HBooking}
-                onChange={(e) => handle24HToggle(e.target.checked)}
-                className="w-4 h-4 rounded border-[var(--color-surface-border)] text-[var(--color-primary)] focus:ring-[var(--color-primary)] focus:ring-offset-2"
-              />
-              <div className="flex flex-col">
-                <span className="text-xs font-semibold text-[var(--color-ink)]">24-Hour Booking</span>
-                <span className="text-[10px] text-[var(--color-ink-muted)]">
-                  Includes overnight driver accommodation fee.
-                </span>
-              </div>
-            </label>
-          )}
         </div>
       </div>
 
-      {/* Section 2: Service Type & Schedule - NO CONTAINER */}
+      {/* ── Section 2: Service Type & Schedule ────────────────── */}
       <div>
         <div className="flex items-center gap-2 mb-4">
           <div className="w-6 h-6 rounded-md bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
@@ -210,7 +214,7 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
         </div>
       </div>
 
-      {/* Section 3: Pickup & Return Locations - NO CONTAINER */}
+      {/* ── Section 3: Pickup & Return Locations ────────────────── */}
       <div>
         <div className="flex items-center gap-2 mb-4">
           <div className="w-6 h-6 rounded-md bg-purple-500/10 text-purple-500 flex items-center justify-center">
@@ -243,7 +247,7 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
         </div>
       </div>
 
-      {/* Right Sidebar: Summary & Submit */}
+      {/* ── Right Sidebar: Summary & Submit ────────────────────── */}
       <div className="lg:sticky lg:top-4 space-y-3 pt-4 border-t border-[var(--color-surface-border)]">
         <BookingSummary
           client={selectedClient}

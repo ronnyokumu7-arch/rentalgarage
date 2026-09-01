@@ -6,10 +6,10 @@ import { vehiclesApi } from "@/lib/api/vehicles";
 import type { VehicleCreate } from "@/lib/types";
 
 export const CAR_DATA: Record<string, string[]> = {
-  Toyota: ["Filder", "Axio", "RAV4", "Prado", "Hilux", "Corolla", "Harrier", "Land Cruiser V8", "Noah", "Voxy"],
+  Toyota: ["Filder", "Axio", "RAV4", "Vanguard", "Prado", "Hilux", "Corolla", "Harrier", "Land Cruiser V8", "Noah", "Voxy", "Alphard", "Vellfire"],
   Nissan: ["X-Trail", "Navara", "Patrol", "Note", "Sunny", "Juke", "Kicks", "Serena"],
-  Honda: ["Civic", "CR-V", "Accord", "Fit", "HR-V", "Vezel", "Stepwgn"],
-  Mazda: ["CX-5", "CX-3", "Demio", "Axela", "Atenza", "CX-30"],
+  Honda: ["Civic", "CR-V", "Accord", "Fit", "HR-V", "Vezel", "Stepwgn", "Spada"],
+  Mazda: ["CX-5", "CX-3", "CX-8", "Demio", "Axela", "Atenza", "Verisa"],
   Subaru: ["Forester", "Impreza", "Outback", "XV", "Legacy"],
   Mitsubishi: ["Pajero", "Outlander", "L200", "Eclipse Cross", "Canter"],
   Volkswagen: ["Golf", "Polo", "Tiguan", "Passat", "Amarok", "Caddy"],
@@ -21,6 +21,7 @@ export const CAR_DATA: Record<string, string[]> = {
   Suzuki: ["Swift", "Vitara", "Jimny", "Alto", "Celerio"],
   Isuzu: ["D-Max", "MU-X", "N-Series", "F-Series"],
   LandRover: ["Defender", "Discovery", "Range Rover", "Evoque", "Freelander"],
+  Renault: ["Koleos", "Duster", "Kadja", "Kiger"]
 };
 
 export const currentYear = new Date().getFullYear();
