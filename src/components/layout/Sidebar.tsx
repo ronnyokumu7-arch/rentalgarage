@@ -42,7 +42,7 @@ function getIcon(iconName?: string): LucideIcon | null {
 export default function Sidebar({ navItems, isMobile = false, onClose }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, tenant, logout } = useAuth(); // ✅ Added user & tenant
+  const { user, tenant, logout } = useAuth();
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const [flyoutPos, setFlyoutPos] = useState<number>(0);
   const [hoveredItem, setHoveredItem] = useState<{ label: string; top: number } | null>(null);
@@ -102,7 +102,6 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
   const settingsItem = navItems.find((item) => item.label === "Settings");
   const regularNavItems = navItems.filter((item) => item.label !== "Settings");
 
-  // ✅ User info for profile card
   const fullName = user?.full_name || user?.email || "User";
   const userInitial = fullName.charAt(0).toUpperCase();
   const companyName = tenant?.name || "Agency";
@@ -125,7 +124,6 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
             </div>
           </Link>
           
-          {/* Mobile Close Button */}
           {isMobile && onClose && (
             <button
               onClick={onClose}
@@ -142,7 +140,6 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
             const active = isActive(item.href, item.children);
             const isGroupOpen = openGroup === item.label;
             
-            // ✅ Fixed: Handle both string icons and LucideIcon components
             let Icon: LucideIcon | null = null;
             if (typeof item.icon === 'string') {
               Icon = getIcon(item.icon);
@@ -178,11 +175,17 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
                       <Icon
                         size={20}
                         strokeWidth={active ? 2 : 1.8}
-                        className={`transition-all duration-200 ${isMobile ? 'flex-shrink-0' : ''}`}
+                        className={`transition-all duration-200 ${
+                          isMobile ? 'flex-shrink-0' : ''
+                        } ${active ? 'text-[var(--color-primary)]' : ''}`}
                       />
                     )}
                     {isMobile && (
-                      <span className="text-sm font-medium">{item.label}</span>
+                      <span className={`text-sm font-medium ${
+                        active ? 'text-[var(--color-primary)]' : 'text-[var(--color-ink)]'
+                      }`}>
+                        {item.label}
+                      </span>
                     )}
                     {!isMobile && active && (
                       <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[var(--color-primary)] ring-2 ring-[var(--color-bg)]" />
@@ -216,13 +219,21 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
                       <Icon
                         size={20}
                         strokeWidth={isGroupOpen || active ? 2 : 1.8}
-                        className={`transition-all duration-200 ${isMobile ? 'flex-shrink-0' : ''}`}
+                        className={`transition-all duration-200 ${
+                          isMobile ? 'flex-shrink-0' : ''
+                        } ${isGroupOpen || active ? 'text-[var(--color-primary)]' : ''}`}
                       />
                     )}
                     {isMobile && (
                       <>
-                        <span className="text-sm font-medium">{item.label}</span>
-                        <ChevronRight size={16} className="ml-auto text-[var(--color-ink-subtle)]" />
+                        <span className={`text-sm font-medium ${
+                          isGroupOpen || active ? 'text-[var(--color-primary)]' : 'text-[var(--color-ink)]'
+                        }`}>
+                          {item.label}
+                        </span>
+                        <ChevronRight size={16} className={`ml-auto ${
+                          isGroupOpen || active ? 'text-[var(--color-primary)]' : 'text-[var(--color-ink-subtle)]'
+                        }`} />
                       </>
                     )}
                     {!isMobile && (
@@ -244,16 +255,14 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
         {/* ── Bottom Section: User Profile (Mobile Only) + Settings & Logout ── */}
         <div className={`px-3 pb-4 flex-shrink-0 space-y-1.5 border-t border-[var(--color-surface-border)] pt-3`}>
           
-          {/* ✅ USER PROFILE CARD (Mobile Only, Above Settings) */}
+          {/* User Profile Card (Mobile Only) */}
           {isMobile && (
             <div className="mb-2">
               <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--color-surface-hover)]/50 border border-[var(--color-surface-border)]">
-                {/* Clean Avatar - No outer circle */}
                 <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white bg-gradient-to-br from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20 flex-shrink-0">
                   {userInitial}
                 </div>
                 
-                {/* User Info */}
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-bold text-[var(--color-ink)] truncate leading-tight">
                     {fullName}
@@ -263,7 +272,6 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
                   </p>
                 </div>
                 
-                {/* Arrow to Profile */}
                 <Link 
                   href={user?.role === "super_admin" ? `/super-admin/users/${user?.id}` : `/dashboard/users/${user?.id}`}
                   onClick={() => isMobile && onClose?.()}
@@ -297,9 +305,17 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
               <Settings
                 size={18}
                 strokeWidth={isActive(settingsItem.href) ? 2 : 1.8}
-                className={`transition-all duration-500 ${!isMobile && 'group-hover/btn:rotate-[180deg] group-hover/btn:scale-110'}`}
+                className={`transition-all duration-500 ${
+                  isActive(settingsItem.href) ? 'text-[var(--color-primary)]' : ''
+                } ${!isMobile && 'group-hover/btn:rotate-[180deg] group-hover/btn:scale-110'}`}
               />
-              {isMobile && <span className="text-sm font-medium">Settings</span>}
+              {isMobile && (
+                <span className={`text-sm font-medium ${
+                  isActive(settingsItem.href) ? 'text-[var(--color-primary)]' : 'text-[var(--color-ink)]'
+                }`}>
+                  Settings
+                </span>
+              )}
             </Link>
           )}
 
@@ -313,7 +329,9 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
             <LogOut 
               size={18} 
               strokeWidth={1.8} 
-              className={`relative z-10 transition-transform duration-300 ${!isMobile && 'group-hover/logout:translate-x-0.5'}`}
+              className={`relative z-10 transition-transform duration-300 ${
+                !isMobile && 'group-hover/logout:translate-x-0.5'
+              }`}
             />
             {isMobile && <span className="text-sm font-medium">Sign out</span>}
             {!isMobile && (
@@ -358,7 +376,6 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
               {/* Flyout Header */}
               <div className="flex items-center gap-3 mb-4 pb-3 border-b border-[var(--color-surface-border)]">
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-[var(--color-primary-muted)] border border-[var(--color-primary)]/20">
-                  {/* ✅ Fixed: Handle both string icons and LucideIcon components */}
                   {openGroupItem.icon && (() => {
                     let Icon: LucideIcon | null = null;
                     if (typeof openGroupItem.icon === 'string') {
@@ -379,7 +396,6 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
               <div className="space-y-1">
                 {openGroupItem.children.map((child) => {
                   const childActive = pathname === child.href || pathname.startsWith(child.href + "/");
-                  // ✅ Fixed: Handle both string icons and LucideIcon components for children
                   let ChildIcon: LucideIcon | null = null;
                   if (typeof (child as any).icon === 'string') {
                     ChildIcon = getIcon((child as any).icon);
