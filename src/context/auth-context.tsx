@@ -11,7 +11,7 @@ import {
   ReactNode,
 } from "react";
 import { useRouter } from "next/navigation";
-import apiClient from "@/lib/api-client";
+import apiClient, { registerRefreshHandler } from "@/lib/api-client";
 import { AuthState, User, Tenant, LoginResponse } from "@/lib/types";
 
 interface AuthContextType extends AuthState {
@@ -184,15 +184,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           channel?.postMessage({ type: "tokens_rotated", access_token });
           return true;
-        } catch {
-          // Retry failed — treat as network failure, don't logout yet
-          return false;
+        } catch (retryError: any) {
+          const retryWasAuthFailure = retryError?.response?.status === 401 || retryError?.response?.status === 403;
+          if (retryWasAuthFailure) return false;
+          // Preserve the session on transient backend/network failures. The
+          // interceptor will surface the request failure without logging out.
+          throw retryError;
         }
       }
       // Auth failure (401/403 from /auth/refresh) — refresh token is dead
       return false;
     }
   }, []);
+
+  // Register the actual refresh path used by Axios before protected screens
+  // make requests. This was previously never registered, so the first access
+  // token expiry caused an immediate client-side logout.
+  useEffect(() => {
+    registerRefreshHandler(async () => {
+      const rotated = await rotateTokens();
+      return rotated ? getAccessToken() : null;
+    });
+    return () => registerRefreshHandler(null);
+  }, [rotateTokens]);
 
   /**
    * Queue a refresh request. If one is already in flight, wait for it.
@@ -253,7 +267,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       } catch {
         // Access token expired on mount — try refresh
-        const rotated = await rotateTokens();
+        let rotated = false;
+        try {
+          rotated = await rotateTokens();
+        } catch {
+          // A service outage is not an authentication failure. Retain tokens
+          // and let the user retry rather than forcing a login screen.
+          if (isMounted) setState((s) => ({ ...s, isLoading: false }));
+          return;
+        }
         if (!rotated && isMounted) {
           removeAuthTokens();
           setState((s) => ({
@@ -276,7 +298,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!state.isAuthenticated) return;
     const intervalId = setInterval(() => {
-      rotateTokens();
+      rotateTokens().catch((error) => {
+        console.warn("[Auth] Background token refresh failed; session retained.", error);
+      });
     }, KEEP_ALIVE_INTERVAL_MS);
     return () => clearInterval(intervalId);
   }, [state.isAuthenticated, rotateTokens]);
@@ -331,7 +355,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    * definitively rejected (401/403), not on network errors.
    */
   const refresh = useCallback(async (): Promise<boolean> => {
-    const ok = await rotateTokens();
+    let ok = false;
+    try {
+      ok = await rotateTokens();
+    } catch {
+      // Transient backend/network failure; preserve local session state.
+      return false;
+    }
     if (!ok) {
       // Check if it was an auth failure (refresh token dead) vs network
       const refreshToken = getRefreshToken();

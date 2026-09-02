@@ -23,7 +23,7 @@ import { env } from "@/lib/env";
 type RefreshHandler = () => Promise<string | null>;
 let refreshHandler: RefreshHandler | null = null;
 
-export function registerRefreshHandler(handler: RefreshHandler) {
+export function registerRefreshHandler(handler: RefreshHandler | null) {
   refreshHandler = handler;
 }
 
@@ -103,13 +103,9 @@ apiClient.interceptors.response.use(
 
       // ✅ HARDENED: Use auth-context's single-flight queue
       if (!refreshHandler) {
-        console.error("[API Client] No refresh handler registered. Logging out.");
-        clearCookie("rm_token");
-        localStorage.removeItem("rm_token");
-        localStorage.removeItem("rm_refresh_token");
-        setTimeout(() => {
-          window.location.href = "/login?reason=session_expired";
-        }, 100);
+        // The provider may still be mounting.  A 401 is not proof that the
+        // refresh token is invalid, so never destroy a session here.
+        console.warn("[API Client] Refresh handler is not ready yet.");
         return Promise.reject(error);
       }
 
@@ -138,12 +134,8 @@ apiClient.interceptors.response.use(
         return apiClient(originalRequest);
       } catch (refreshError) {
         console.error("[API Client] Token refresh threw error:", refreshError);
-        clearCookie("rm_token");
-        localStorage.removeItem("rm_token");
-        localStorage.removeItem("rm_refresh_token");
-        setTimeout(() => {
-          window.location.href = "/login?reason=session_expired";
-        }, 100);
+        // Timeouts and 5xx responses are availability failures, not logout
+        // signals. Preserve tokens so the next request can recover.
         return Promise.reject(refreshError);
       }
     }
