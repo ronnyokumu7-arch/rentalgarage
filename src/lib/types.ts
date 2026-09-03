@@ -518,16 +518,16 @@ export interface PricingLine {
 }
 
 // ✅ MILESTONE 3: Updated to match the clean output from our new pure pricing engines
+// ✅ CONTRACT v2: matches backend quote response exactly
 export interface PricingResult {
-  base_rate: number | string;
-  extra_hours?: number;
-  overtime_hourly_rate?: number | string;
-  extra_hours_subtotal?: number | string;
-  add_ons_subtotal?: number | string;
-  vehicle_subtotal?: number | string;
-  driver_subtotal?: number | string;
-  total: number | string;
+  service_type: ServiceType;
+  pickup_at: string;
+  scheduled_return_at: string;
+  billable_days: number;
+  daily_rate: number | string;
   lines: PricingLine[];
+  total: number | string;
+  currency_code: string;
 }
 
 // ─── Dashboard List Enrichments ─────────────────────────────────────────────

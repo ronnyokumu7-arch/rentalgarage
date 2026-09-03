@@ -1,7 +1,6 @@
-// src/components/forms/BookingForm.tsx
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { CalendarDays, MapPin, User, Info, Car, Users, Loader2, CheckCircle } from 'lucide-react';
 import { useNewBooking } from '@/hooks/bookings/useNewBooking';
 import ClientSearch from '../ClientSearch';
@@ -12,7 +11,6 @@ import AddressAutocomplete from '@/components/ui/AddressAutocomplete';
 import PremiumDateAndTimePicker from './PremiumDateAndTimePicker';
 import PremiumSwitch, { SwitchTab } from '@/components/ui/PremiumSwitch';
 import type { ServiceType } from '@/lib/types';
-
 
 const bookingTabs: SwitchTab[] = [
   { id: 'selfdrive', label: 'Self-Drive', icon: Car },
@@ -29,14 +27,14 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
     loading, clients, vehicles, drivers, formData,
     clientSearch, vehicleSearch, driverSearch,
     setClientSearch, setVehicleSearch, setDriverSearch,
-    updateField, calculateTotal, getSelectedClient, getSelectedVehicle, getSelectedDriver,
+    updateField, getSelectedClient, getSelectedVehicle, getSelectedDriver,
     handleSubmit, quote, quoteLoading,
+    allClients, quoteError,  // ✅ NEW: needed for display + error surfacing
   } = useNewBooking();
 
   const selectedClient = getSelectedClient();
   const selectedVehicle = getSelectedVehicle();
   const selectedDriver = getSelectedDriver();
-  const totalAmount = calculateTotal();
 
   const [bookingMode, setBookingMode] = useState<'selfdrive' | 'chauffeur'>(
     formData.service_type === 'pro_driver' ? 'chauffeur' : 'selfdrive'
@@ -50,28 +48,6 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
       updateField('driver_id', '');
     }
   }, [bookingMode]);
-
-  const [now, setNow] = useState(() => new Date());
-  useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), 60_000);
-    return () => clearInterval(id);
-  }, []);
-
-  const pickupMinTime = useMemo(() => {
-    const totalMin = now.getHours() * 60 + now.getMinutes();
-    const slotMin = Math.ceil(totalMin / 30) * 30;
-    const h = Math.floor(slotMin / 60);
-    const m = slotMin % 60;
-    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-  }, [now]);
-
-  const pickupDate = (formData.pickup_at || formData.start_date || "").split("T")[0];
-  const returnDate = (formData.scheduled_return_at || formData.end_date || "").split("T")[0];
-  const returnMinTime = useMemo(() => {
-    if (!pickupDate || !returnDate || pickupDate !== returnDate) return undefined;
-    const pickupTime = (formData.pickup_at || formData.start_date || "").split("T")[1]?.slice(0, 5);
-    return pickupTime || undefined;
-  }, [pickupDate, returnDate, formData.pickup_at, formData.start_date]);
 
   const handle24HToggle = (checked: boolean) => {
     const currentDetails = (formData.service_details as Record<string, any>) || {};
@@ -93,7 +69,6 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
 
   return (
     <form id={formId} onSubmit={onSubmit} className="w-full space-y-6">
-      
       {/* ── Mode Switcher ────────────────────────────────────────── */}
       <PremiumSwitch
         tabs={bookingTabs}
@@ -114,6 +89,7 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
           <ClientSearch
             selectedClientId={formData.client_id}
             clients={clients}
+            allClients={allClients}  // ✅ NEW: resolves display from full list
             searchQuery={clientSearch}
             onSearchChange={setClientSearch}
             onSelect={(client) => {
@@ -146,7 +122,6 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
                 }}
               />
 
-              {/* ── 24-Hour Booking Toggle (Fixed) ────────────────── */}
               <label className="flex items-center gap-3 cursor-pointer group p-3 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 hover:bg-[var(--color-surface-hover)] transition-colors">
                 <input
                   type="checkbox"
@@ -187,28 +162,25 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <PremiumDateAndTimePicker
             label="Pickup Date & Time"
-            blockPast
-            minTime={pickupMinTime}
-            value={formData.pickup_at || formData.start_date}
+            value={formData.pickup_at}
             onChange={(datetime) => {
               updateField('pickup_at', datetime);
-              updateField('start_date', datetime.split('T')[0]);
-              if (formData.scheduled_return_at && new Date(datetime) >= new Date(formData.scheduled_return_at)) {
-                updateField('scheduled_return_at', '');
-                updateField('end_date', '');
+              // ✅ Default return = pickup + 24h, ONLY once pickup is chosen
+              if (!formData.scheduled_return_at || new Date(formData.scheduled_return_at) <= new Date(datetime)) {
+                const d = new Date(datetime);
+                d.setDate(d.getDate() + 1);
+                const pad = (n: number) => String(n).padStart(2, '0');
+                updateField('scheduled_return_at', `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`);
               }
             }}
             required
           />
           <PremiumDateAndTimePicker
             label="Return Date & Time"
-            minTime={returnMinTime}
-            value={formData.scheduled_return_at || formData.end_date}
-            onChange={(datetime) => {
-              updateField('scheduled_return_at', datetime);
-              updateField('end_date', datetime.split('T')[0]);
-            }}
-            minDate={formData.pickup_at || formData.start_date || "today"}
+            value={formData.scheduled_return_at}
+            onChange={(datetime) => updateField('scheduled_return_at', datetime)}
+            floor={formData.pickup_at ? new Date(formData.pickup_at).toISOString() : undefined}
+            exclusiveFloor
             required
           />
         </div>
@@ -253,21 +225,22 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
           client={selectedClient}
           vehicle={selectedVehicle}
           driver={bookingMode === 'chauffeur' ? selectedDriver : undefined}
-          startDate={formData.pickup_at || formData.start_date}
-          endDate={formData.scheduled_return_at || formData.end_date}
-          totalAmount={totalAmount}
+          startDate={formData.pickup_at}
+          endDate={formData.scheduled_return_at}
+          totalAmount={quote?.total ? parseFloat(quote.total.toString()) : 0}
           serviceType={(formData.service_type as ServiceType) || "selfdrive"}
           quote={quote}
           quoteLoading={quoteLoading}
+          quoteError={quoteError}  // ✅ NEW: shows real error if quote failed
         />
 
         {!formId && (
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || quoteLoading}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] shadow-lg shadow-[var(--color-primary)]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
           >
-            {loading ? (
+            {loading || quoteLoading ? (
               <><Loader2 size={16} className="animate-spin" /> Creating booking...</>
             ) : (
               <><CheckCircle size={16} /> Create Booking</>

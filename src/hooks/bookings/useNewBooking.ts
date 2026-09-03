@@ -20,15 +20,12 @@ export function useNewBooking() {
   const [clientSearch, setClientSearch] = useState('');
   const [vehicleSearch, setVehicleSearch] = useState('');
   const [driverSearch, setDriverSearch] = useState('');
-  
-  // ✅ MILESTONE 2 & 3: Added service_details, toll_fees, parking_fees
+
   const [formData, setFormData] = useState({
     client_id: '',
     vehicle_id: '',
     driver_id: '',
     service_type: 'selfdrive' as ServiceType,
-    start_date: '',
-    end_date: '',
     pickup_at: '',
     scheduled_return_at: '',
     pickup_location: '',
@@ -39,11 +36,11 @@ export function useNewBooking() {
     parking_fees: 0,
   });
 
-  // ✅ MILESTONE 1: Live quote state
   const [quote, setQuote] = useState<PricingResult | null>(null);
   const [quoteLoading, setQuoteLoading] = useState(false);
+  const [quoteError, setQuoteError] = useState<string | null>(null);
 
-  // Load initial data (clients + vehicles + services + drivers)
+  // ✅ Load initial data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -64,12 +61,10 @@ export function useNewBooking() {
     fetchData();
   }, []);
 
-  // Filter clients based on search
   const filteredClients = useMemo(() => {
     if (!clientSearch.trim()) return clients.slice(0, 10);
-    
     const search = clientSearch.toLowerCase();
-    return clients.filter(client => 
+    return clients.filter(client =>
       client.full_name.toLowerCase().includes(search) ||
       client.id_number?.toLowerCase().includes(search) ||
       client.dl_number?.toLowerCase().includes(search) ||
@@ -77,25 +72,21 @@ export function useNewBooking() {
     ).slice(0, 10);
   }, [clients, clientSearch]);
 
-  // Filter vehicles based on search
   const filteredVehicles = useMemo(() => {
     if (!vehicleSearch.trim()) return vehicles.slice(0, 10);
-    
     const search = vehicleSearch.toLowerCase();
-    return vehicles.filter(vehicle => 
+    return vehicles.filter(vehicle =>
       vehicle.make.toLowerCase().includes(search) ||
       vehicle.model.toLowerCase().includes(search) ||
       vehicle.plate_number.toLowerCase().includes(search)
     ).slice(0, 10);
   }, [vehicles, vehicleSearch]);
 
-  // ✅ MILESTONE 2: Filter drivers based on search (available + on_trip only for assignment)
   const filteredDrivers = useMemo(() => {
-    const assignable = drivers.filter(d => 
+    const assignable = drivers.filter(d =>
       !d.is_archived && (d.status === 'available' || d.status === 'on_trip')
     );
     if (!driverSearch.trim()) return assignable.slice(0, 10);
-    
     const search = driverSearch.toLowerCase();
     return assignable.filter(driver =>
       driver.full_name.toLowerCase().includes(search) ||
@@ -105,47 +96,90 @@ export function useNewBooking() {
     ).slice(0, 10);
   }, [drivers, driverSearch]);
 
-  // ✅ MILESTONE 1.1: Group services by category (for Chauffeur sub-tabs)
   const servicesByCategory = useMemo(() => {
     const grouped: Record<string, ServiceDefinition[]> = {};
     services.forEach(svc => {
-      if (!grouped[svc.category]) {
-        grouped[svc.category] = [];
-      }
+      if (!grouped[svc.category]) grouped[svc.category] = [];
       grouped[svc.category].push(svc);
     });
     return grouped;
   }, [services]);
 
-  // ✅ MILESTONE 1, 2 & 3: Debounced quote API call
+  // ✅ Serialize local datetime → ISO for backend
+  const toISO = (localDatetime: string): string => {
+    if (!localDatetime) return '';
+    const d = new Date(localDatetime);
+    if (isNaN(d.getTime())) return '';
+    return d.toISOString();
+  };
+
+  // ✅ Debounced quote with VERBOSE error handling
   useEffect(() => {
-    if (
-      !formData.vehicle_id ||
-      !formData.pickup_at ||
-      !formData.scheduled_return_at
-    ) {
+    if (!formData.vehicle_id || !formData.pickup_at || !formData.scheduled_return_at) {
       setQuote(null);
+      setQuoteError(null);
+      return;
+    }
+
+    // ✅ Validate dates parse correctly before sending
+    const pickupISO = toISO(formData.pickup_at);
+    const returnISO = toISO(formData.scheduled_return_at);
+
+    if (!pickupISO || !returnISO) {
+      setQuote(null);
+      setQuoteError(`Invalid date format — pickup: "${formData.pickup_at}", return: "${formData.scheduled_return_at}"`);
       return;
     }
 
     const fetchQuote = async () => {
       setQuoteLoading(true);
+      setQuoteError(null);
+
+      const payload = {
+        vehicle_id: parseInt(formData.vehicle_id),
+        service_type: formData.service_type,
+        pickup_at: pickupISO,
+        return_at: returnISO,
+        driver_id: formData.driver_id ? parseInt(formData.driver_id) : undefined,
+        toll_fees: formData.toll_fees || undefined,
+        parking_fees: formData.parking_fees || undefined,
+        service_details: Object.keys(formData.service_details).length > 0
+          ? formData.service_details
+          : undefined,
+      };
+
       try {
-        const result = await bookingsApi.quote({
-          vehicle_id: parseInt(formData.vehicle_id),
-          service_type: formData.service_type,
-          pickup_at: formData.pickup_at,
-          return_at: formData.scheduled_return_at,
-          driver_id: formData.driver_id ? parseInt(formData.driver_id) : undefined,
-          // ✅ MILESTONE 2 & 3: Pass add-ons and service details to backend pricing engine
-          toll_fees: formData.toll_fees,
-          parking_fees: formData.parking_fees,
-          service_details: formData.service_details,
-        });
+        const result = await bookingsApi.quote(payload);
         setQuote(result);
+        setQuoteError(null);
       } catch (err: any) {
-        console.error("Quote failed:", err);
         setQuote(null);
+
+        // ✅ VERBOSE: surface the ACTUAL error so we can diagnose
+        const status = err.response?.status;
+        const data = err.response?.data;
+        const detail = data?.detail;
+
+        if (!err.response) {
+          // Network error — no response from server
+          setQuoteError(`Network error: ${err.message || 'Cannot reach server'}`);
+        } else if (typeof detail === 'string') {
+          setQuoteError(`[${status}] ${detail}`);
+        } else if (Array.isArray(detail) && detail.length > 0) {
+          // Pydantic validation errors
+          const msgs = detail.map((d: any) => {
+            const loc = d.loc ? d.loc.join(' → ') : '';
+            const msg = String(d.msg || '').replace(/^Value error,?\s*/i, '');
+            return loc ? `${loc}: ${msg}` : msg;
+          });
+          setQuoteError(`[${status}] ${msgs.join('; ')}`);
+        } else if (typeof data === 'string') {
+          setQuoteError(`[${status}] ${data.slice(0, 300)}`);
+        } else if (data) {
+          setQuoteError(`[${status}] ${JSON.stringify(data).slice(0, 300)}`);
+        } else {
+          setQuoteError(`[${status}] Unknown error — no response body`);
+        }
       } finally {
         setQuoteLoading(false);
       }
@@ -159,36 +193,13 @@ export function useNewBooking() {
     formData.pickup_at,
     formData.scheduled_return_at,
     formData.driver_id,
-    formData.toll_fees,       // ✅ Re-quote when tolls change
-    formData.parking_fees,    // ✅ Re-quote when parking changes
-    formData.service_details, // ✅ Re-quote when service details (e.g., extra hours) change
+    formData.toll_fees,
+    formData.parking_fees,
+    formData.service_details,
   ]);
 
-  // ✅ Updated to accept string, number, or object (for service_details)
   const updateField = (field: string, value: string | number | Record<string, any>) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-  };
-
-  const calculateTotal = () => {
-    // ✅ MILESTONE 1: Prefer backend quote total when available
-    if (quote?.total) {
-      return parseFloat(quote.total.toString());
-    }
-
-    // Fallback to client-side calculation
-    if (!formData.start_date || !formData.end_date || !formData.vehicle_id) return 0;
-    const vehicle = vehicles.find(v => v.id.toString() === formData.vehicle_id);
-    if (!vehicle) return 0;
-    
-    const start = new Date(formData.start_date);
-    const end = new Date(formData.end_date);
-    
-    const diffTime = end.getTime() - start.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
-    const days = Math.max(1, diffDays);
-    
-    return days * Number(vehicle.daily_rate);
   };
 
   const getSelectedClient = () => clients.find(c => c.id.toString() === formData.client_id);
@@ -201,9 +212,12 @@ export function useNewBooking() {
       toast.error('Please select a client and a vehicle.');
       return;
     }
-
     if (!formData.pickup_at || !formData.scheduled_return_at) {
       toast.error('Please select pickup and return times.');
+      return;
+    }
+    if (quoteError) {
+      toast.error(`Cannot create booking: ${quoteError}`);
       return;
     }
 
@@ -213,22 +227,16 @@ export function useNewBooking() {
         client_id: Number(formData.client_id),
         vehicle_id: Number(formData.vehicle_id),
         service_type: formData.service_type,
-        start_date: formData.start_date || formData.pickup_at.split('T')[0],
-        end_date: formData.end_date || formData.scheduled_return_at.split('T')[0],
-        pickup_at: formData.pickup_at,
-        scheduled_return_at: formData.scheduled_return_at,
+        pickup_at: toISO(formData.pickup_at),
+        scheduled_return_at: toISO(formData.scheduled_return_at),
         pickup_location: formData.pickup_location || undefined,
         return_location: formData.return_location || undefined,
         destination: formData.destination || undefined,
-        total_amount: calculateTotal(),
         currency_code: 'KES',
-        // ✅ MILESTONE 2 & 3: Include new pricing fields
         toll_fees: formData.toll_fees || undefined,
         parking_fees: formData.parking_fees || undefined,
         service_details: Object.keys(formData.service_details).length > 0 ? formData.service_details : undefined,
       };
-
-      // ✅ MILESTONE 2: Include driver_id if selected
       if (formData.driver_id) {
         payload.driver_id = Number(formData.driver_id);
       }
@@ -268,12 +276,12 @@ export function useNewBooking() {
     setVehicleSearch,
     setDriverSearch,
     updateField,
-    calculateTotal,
     getSelectedClient,
     getSelectedVehicle,
     getSelectedDriver,
     handleSubmit,
     quote,
     quoteLoading,
+    quoteError,
   };
 }

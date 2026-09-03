@@ -6,7 +6,8 @@ import type { Client } from "@/lib/types";
 
 interface ClientSearchProps {
   selectedClientId: string;
-  clients: Client[];
+  clients: Client[];          // ✅ Filtered list (for dropdown)
+  allClients?: Client[];      // ✅ Optional full list (for display resolution)
   searchQuery: string;
   onSearchChange: (query: string) => void;
   onSelect: (client: Client) => void;
@@ -15,13 +16,17 @@ interface ClientSearchProps {
 export default function ClientSearch({
   selectedClientId,
   clients,
+  allClients,
   searchQuery,
   onSearchChange,
   onSelect
 }: ClientSearchProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const selectedClient = clients.find(c => c.id.toString() === selectedClientId);
+  // ✅ Resolve display from FULL list when available; fall back to filtered.
+  // Never crashes if a consumer hasn't been updated to pass allClients.
+  const pool = allClients ?? clients;
+  const selectedClient = pool.find(c => c.id.toString() === selectedClientId);
 
   return (
     <div className="relative">
