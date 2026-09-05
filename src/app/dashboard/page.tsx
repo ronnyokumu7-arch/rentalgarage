@@ -1,10 +1,10 @@
 // src/app/dashboard/page.tsx
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import {
   LayoutDashboard, Activity, BarChart3, DollarSign, ArrowUpRight, Zap,
-  Landmark, TrendingUp, AlertCircle, Wallet,
+  Landmark, TrendingUp, AlertCircle, Wallet, Gauge, CalendarRange, LineChart,
 } from "lucide-react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -20,58 +20,13 @@ import {
   MobileHeroEarnings, MobileAlerts, MobileFleetStatus,
 } from "@/components/dashboard/MobileDashboardCards";
 import { DesktopFleetStatus, DesktopAlerts } from "@/components/dashboard/DesktopSidePanels";
+import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
 
-// ✅ REUSABLE: Premium Sliding Tab Switcher
-function PremiumTabSwitcher({ activeTab, setActiveTab }: { activeTab: string; setActiveTab: (tab: string) => void }) {
-  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number; top: number; height: number } | null>(null);
-
-  useEffect(() => {
-    const updateIndicator = () => {
-      const activeEl = tabRefs.current[activeTab];
-      if (activeEl) {
-        const rect = activeEl.getBoundingClientRect();
-        const containerRect = activeEl.parentElement?.getBoundingClientRect();
-        if (containerRect) {
-          setIndicatorStyle({ left: rect.left - containerRect.left, width: rect.width, top: rect.top - containerRect.top, height: rect.height });
-        }
-      }
-    };
-    updateIndicator();
-    window.addEventListener("resize", updateIndicator);
-    return () => window.removeEventListener("resize", updateIndicator);
-  }, [activeTab]);
-
-  return (
-    <div className="relative w-full sm:w-auto">
-      {indicatorStyle && (
-        <div className="absolute z-0 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 shadow-lg shadow-[var(--color-primary)]/10 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-          style={{ left: indicatorStyle.left, width: indicatorStyle.width, top: indicatorStyle.top, height: indicatorStyle.height }} />
-      )}
-      <div className="relative z-10 flex items-center gap-1 overflow-x-auto pb-0.5 pt-0.5 scrollbar-hide snap-x snap-mandatory"
-        style={{ WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
-        {[
-          { id: "overview", label: "Overview", icon: LayoutDashboard },
-          { id: "activity", label: "Bookings Calendar", icon: Activity },
-          { id: "reports", label: "Analytics", icon: BarChart3 },
-        ].map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button key={tab.id} ref={(el) => { tabRefs.current[tab.id] = el; }} type="button" onClick={() => setActiveTab(tab.id)}
-              className={`relative flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all duration-300 whitespace-nowrap touch-manipulation cursor-pointer snap-center flex-shrink-0 ${
-                isActive ? "text-[var(--color-ink)]" : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]/50"
-              }`}>
-              <Icon size={isActive ? 16 : 14} className={`transition-all duration-300 ${isActive ? "text-[var(--color-primary)]" : "opacity-70"}`} />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-[var(--color-surface-border)]/50 -z-10" />
-    </div>
-  );
-}
+const TABS = [
+  { id: "overview", label: "Overview", icon: LayoutDashboard },
+  { id: "activity", label: "Bookings Calendar", icon: Activity },
+  { id: "reports", label: "Analytics", icon: BarChart3 },
+];
 
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("overview");
@@ -79,7 +34,16 @@ export default function DashboardPage() {
   const { loading, stats, alerts, vehicles, commission, mtdRevenue, lastMonthRevenue, monthOverMonthPercent, isPositiveGrowth } = useDashboardStats();
 
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    const checkMobile = () => {
+      const mobile = window.innerWidth < 1024; // lg breakpoint
+      setIsMobile(mobile);
+      
+      // ✅ FORCE activeTab to "overview" on mobile (hide other tabs)
+      if (mobile) {
+        setActiveTab("overview");
+      }
+    };
+    
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -93,26 +57,53 @@ export default function DashboardPage() {
     );
   }
 
+  // ✅ Dynamic Header Info (PREMIUM: No circles, just clean bare icons)
   const currentTabInfo = {
-    overview: { title: "Dashboard", description: "Real-time overview", icon: <LayoutDashboard size={isMobile ? 17 : 19} /> },
-    activity: { title: "Bookings Calendar", description: "Visual overview of all upcoming and active rentals", icon: <Activity size={isMobile ? 17 : 19} /> },
-    reports: { title: "Analytics", description: "Deep insights into your business performance", icon: <BarChart3 size={isMobile ? 17 : 19} /> },
+    overview: { 
+      title: "Dashboard", 
+      description: "Real-time overview", 
+      icon: <Gauge size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" /> 
+    },
+    activity: { 
+      title: "Bookings Calendar", 
+      description: "Visual overview of all upcoming and active rentals", 
+      icon: <CalendarRange size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" /> 
+    },
+    reports: { 
+      title: "Analytics", 
+      description: "Deep insights into your business performance", 
+      icon: <LineChart size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" /> 
+    },
   }[activeTab as "overview" | "activity" | "reports"];
 
   return (
     <div className="space-y-4 sm:space-y-6 pb-6">
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center text-primary">{currentTabInfo?.icon}</div>
-          <div>
-            <h1 className="text-lg sm:text-xl font-bold text-ink font-display tracking-tight">{currentTabInfo?.title}</h1>
-            <p className="text-xs text-ink-muted hidden sm:block">{currentTabInfo?.description}</p>
+        <div>
+          <div className="flex items-center gap-3">
+            {/* ✅ Bare Icon - No container */}
+            {currentTabInfo?.icon}
+            
+            <h1 className="text-lg sm:text-xl font-bold text-ink font-display tracking-tight">
+              {currentTabInfo?.title}
+            </h1>
           </div>
+          <p className="text-xs text-ink-muted hidden sm:block mt-1">
+            {currentTabInfo?.description}
+          </p>
         </div>
         
-        {/* ✅ HIDE TABS ON MOBILE */}
+        {/* 
+          ✅ HIDE TAB SWITCHER ON MOBILE 
+          - `hidden lg:block`: Only shows on tablet/desktop
+          - Keeps Mobile clean and focused on the dashboard overview
+        */}
         <div className="hidden lg:block">
-          <PremiumTabSwitcher activeTab={activeTab} setActiveTab={setActiveTab} />
+          <PremiumTabSwitcher 
+            tabs={TABS} 
+            activeTab={activeTab} 
+            onTabChange={(tabId) => setActiveTab(tabId)} 
+          />
         </div>
       </div>
 
@@ -174,13 +165,15 @@ export default function DashboardPage() {
           </motion.div>
         )}
 
-        {activeTab === "activity" && (
+        {/* ✅ Only render on Desktop (isMobile is false) */}
+        {!isMobile && activeTab === "activity" && (
           <motion.div key="activity" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
             <FleetCalendar />
           </motion.div>
         )}
 
-        {activeTab === "reports" && (
+        {/* ✅ Only render on Desktop (isMobile is false) */}
+        {!isMobile && activeTab === "reports" && (
           <motion.div key="reports" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
             <div className="bg-surface border border-surface-border shadow-card rounded-2xl p-8 sm:p-12 flex flex-col items-center justify-center text-center">
               <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4"><BarChart3 size={32} className="text-primary" /></div>

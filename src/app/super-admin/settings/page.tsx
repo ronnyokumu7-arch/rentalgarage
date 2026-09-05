@@ -3,11 +3,12 @@
 
 import { useState } from "react";
 import {
-  Building2, ShieldCheck, Palette, Bell, Settings,
+  Building2, ShieldCheck, Palette, Bell,
   ChevronRight, ChevronLeft, Globe, Lock, Users,
   Wallet, Landmark, Activity,
 } from "lucide-react";
 import PlatformCommissionSettings from "@/components/admin/PlatformCommissionSettings";
+import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
 
 type TabId = "platform" | "revenue" | "access";
 
@@ -61,6 +62,25 @@ export default function SuperAdminSettingsPage() {
 
   const filteredModules = SETTINGS_MODULES.filter((m) => m.tab === activeTab);
 
+  // ✅ Dynamic Header Info (Same pattern as Dashboard)
+  const currentTabInfo = {
+    platform: {
+      title: "Platform Settings",
+      description: "Configure how the platform operates, earns, and who controls it",
+      icon: <Globe size={20} />,
+    },
+    revenue: {
+      title: "Revenue Settings",
+      description: "Configure commission, payment methods, and platform earnings",
+      icon: <Landmark size={20} />,
+    },
+    access: {
+      title: "Access & Audit",
+      description: "Manage super admins, authentication, and platform-wide audit logs",
+      icon: <ShieldCheck size={20} />,
+    },
+  }[activeTab];
+
   return (
     <div className="space-y-6">
       {/* Premium Header & Tab Switcher */}
@@ -76,43 +96,29 @@ export default function SuperAdminSettingsPage() {
             </button>
           )}
           <div>
-            <h1 className="text-2xl font-bold text-[var(--color-ink)] flex items-center gap-3">
+            <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] flex items-center gap-3">
               {!activeModule && (
-                <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
-                  <Settings size={20} />
+                <div className="w-9 h-9 sm:w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
+                  {currentTabInfo.icon}
                 </div>
               )}
-              {activeModule ? activeModule.title : "Platform Settings"}
+              {activeModule ? activeModule.title : currentTabInfo.title}
             </h1>
-            <p className="text-sm text-[var(--color-ink-muted)] mt-1">
+            <p className="text-xs sm:text-sm text-[var(--color-ink-muted)] mt-1">
               {activeModule
                 ? activeModule.description
-                : "Configure how the platform operates, earns, and who controls it"}
+                : currentTabInfo.description}
             </p>
           </div>
         </div>
 
+        {/* ✅ Imported Reusable Premium Tab Switcher */}
         {!activeModule && (
-          <div className="flex items-center gap-1 p-1 bg-[var(--color-surface)] rounded-xl border border-[var(--color-surface-border)] shadow-sm overflow-x-auto custom-scrollbar">
-            {TABS.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as TabId)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all whitespace-nowrap ${
-                    isActive
-                      ? "bg-[var(--color-primary)] text-white shadow-sm"
-                      : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"
-                  }`}
-                >
-                  <Icon size={14} />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
+          <PremiumTabSwitcher 
+            tabs={TABS} 
+            activeTab={activeTab} 
+            onTabChange={(tabId) => setActiveTab(tabId as TabId)} 
+          />
         )}
       </div>
 

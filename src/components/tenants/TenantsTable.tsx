@@ -1,7 +1,11 @@
+// src/components/tenants/TenantsTable.tsx
+"use client";
+
 import { useRouter } from "next/navigation";
 import { Building2, Mail, User, Phone, Search, Filter, Archive, Plus, CreditCard } from "lucide-react";
-import { TenantActionsMenu } from "./TenantActionsMenu";
 import type { Tenant } from "@/lib/types";
+import CardGrid from "@/components/ui/CardGrid";
+import DataTable, { RowAction } from "@/components/ui/DataTable";
 
 export function TenantsTable({ 
   filteredTenants, loading:_loading, actionLoadingId:_actionLoadingId, 
@@ -10,6 +14,23 @@ export function TenantsTable({
   subFilter:_subFilter, setSubFilter:_setSubFilter, showArchived, setShowArchived 
 }: any) {
   const router = useRouter();
+
+  // ✅ Reusable actions for both CardGrid and DataTable
+  const getActions = (tenant: Tenant): RowAction<Tenant>[] => [
+    {
+      label: "Manage Subscription",
+      icon: CreditCard,
+      variant: "primary",
+      onClick: () => handleToggleSubscription(tenant),
+    },
+    {
+      label: "Archive Agency",
+      icon: Archive,
+      variant: "danger",
+      separator: true,
+      onClick: () => handleArchive(tenant.id),
+    },
+  ];
 
   return (
     <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-sm overflow-hidden">
@@ -57,24 +78,84 @@ export function TenantsTable({
         </div>
       </div>
 
-      {/* Desktop Table View */}
-      <div className="hidden md:block overflow-x-auto">
-        <table className="w-full text-left text-sm">
-          <thead className="text-[var(--color-ink-muted)] text-xs uppercase font-bold bg-[var(--color-surface-hover)]/30">
-            <tr>
-              <th className="py-3 px-4">Organization</th>
-              <th className="py-3 px-4">Admin Contact</th>
-              <th className="py-3 px-4">Plan</th>
-              <th className="py-3 px-4">Status</th>
-              <th className="py-3 px-4 text-right">Manage</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[var(--color-surface-border)]">
-            {filteredTenants.map((tenant: Tenant) => (
-              <tr key={tenant.id} className="hover:bg-[var(--color-primary)]/[0.02] transition-colors group">
-                
-                {/* Organization Column */}
-                <td className="py-4 px-4 align-top">
+      {/* ✅ MOBILE: Premium CardGrid with Bottom Sheet Actions */}
+      <div className="block md:hidden">
+        <CardGrid
+          data={filteredTenants}
+          getCardId={(tenant) => tenant.id}
+          compact={true}
+          showGlassEffect={true}
+          containerClassName="px-4 py-4"
+          maxHeight="calc(100vh - 200px)"
+          rowActions={getActions}
+          renderCardHeader={({ item }) => (
+            <div className="flex items-center justify-between w-full">
+              <div className="flex items-center gap-3 min-w-0 flex-1">
+                <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] flex-shrink-0 mt-0.5">
+                  <Building2 size={18} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="font-semibold text-[var(--color-ink)] truncate">{item.name}</div>
+                  <div className="flex items-center gap-1.5 text-xs text-[var(--color-ink-muted)] mt-0.5 truncate">
+                    <Mail size={12} className="flex-shrink-0" />
+                    <span className="truncate">{item.email}</span>
+                  </div>
+                  {item.profile?.tax_number && (
+                    <div className="text-[10px] text-[var(--color-ink-subtle)] font-mono mt-0.5">
+                      PIN: {item.profile.tax_number}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 flex-shrink-0">
+                {item.is_trial ? (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> TRIAL
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> ACTIVE
+                  </span>
+                )}
+              </div>
+            </div>
+          )}
+          renderCardBody={({ item }) => (
+            <div className="mt-3 pt-3 border-t border-[var(--color-surface-border)]/60 flex items-center justify-between gap-2 text-xs text-[var(--color-ink-muted)]">
+              <div className="space-y-1 min-w-0">
+                <div className="flex items-center gap-1.5 truncate">
+                  <User size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                  <span className="truncate">{item.admin_name || "Not Set"}</span>
+                </div>
+                <div className="flex items-center gap-1.5 truncate">
+                  <Phone size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                  <span className="truncate">{item.admin_phone || "—"}</span>
+                </div>
+              </div>
+
+              <div className="flex-shrink-0">
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-lg bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] border border-[var(--color-surface-border)]">
+                  <CreditCard size={12} />
+                  {item.plan || "Starter"}
+                </span>
+              </div>
+            </div>
+          )}
+        />
+      </div>
+
+      {/* ✅ DESKTOP: Reusable DataTable */}
+      <div className="hidden md:block">
+        <DataTable
+          data={filteredTenants}
+          columns={[
+            {
+              header: "Organization",
+              accessorKey: "name",
+              cell: ({ row }) => {
+                const tenant = row.original;
+                return (
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] flex-shrink-0 mt-0.5">
                       <Building2 size={18} />
@@ -89,120 +170,55 @@ export function TenantsTable({
                       )}
                     </div>
                   </div>
-                </td>
-
-                {/* Admin Contact */}
-                <td className="py-4 px-4 align-top text-xs text-[var(--color-ink-muted)]">
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-1.5">
-                      <User size={12} className="text-[var(--color-ink-subtle)]" />
-                      <span>{tenant.admin_name || "Not Set"}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Phone size={12} className="text-[var(--color-ink-subtle)]" />
-                      <span>{tenant.admin_phone || "—"}</span>
-                    </div>
+                );
+              },
+            },
+            {
+              header: "Admin Contact",
+              accessorKey: "admin_name",
+              cell: ({ row }) => (
+                <div className="space-y-1.5 text-xs text-[var(--color-ink-muted)]">
+                  <div className="flex items-center gap-1.5">
+                    <User size={12} className="text-[var(--color-ink-subtle)]" />
+                    <span>{row.original.admin_name || "Not Set"}</span>
                   </div>
-                </td>
-
-                <td className="py-4 px-4 align-top">
-                  <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-lg bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] border border-[var(--color-surface-border)]">
-                    <CreditCard size={12} />
-                    {tenant.plan || "Starter"}
-                  </span>
-                </td>
-
-                <td className="py-4 px-4 align-top">
-                  {tenant.is_trial ? (
-                    <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-lg">
-                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> TRIAL
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> ACTIVE
-                    </span>
-                  )}
-                </td>
-
-                <td className="py-4 px-4 align-top text-right">
-                  <TenantActionsMenu 
-                    tenant={tenant}
-                    onToggleSubscription={() => handleToggleSubscription(tenant)}
-                    onArchive={() => handleArchive(tenant.id)}
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Mobile Card View */}
-      <div className="block md:hidden divide-y divide-[var(--color-surface-border)]">
-        {filteredTenants.map((tenant: Tenant) => (
-          <div key={tenant.id} className="p-4 space-y-3 hover:bg-[var(--color-primary)]/[0.02] transition-colors">
-            
-            {/* Top Row: Organization Icon + Name + Badge + Actions */}
-            <div className="flex items-start justify-between gap-3">
-              <div className="flex items-start gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] flex-shrink-0 mt-0.5">
-                  <Building2 size={18} />
-                </div>
-                <div className="min-w-0">
-                  <div className="font-semibold text-[var(--color-ink)] truncate">{tenant.name}</div>
-                  <div className="flex items-center gap-1.5 text-xs text-[var(--color-ink-muted)] mt-0.5 truncate">
-                    <Mail size={12} className="flex-shrink-0" />
-                    <span className="truncate">{tenant.email}</span>
+                  <div className="flex items-center gap-1.5">
+                    <Phone size={12} className="text-[var(--color-ink-subtle)]" />
+                    <span>{row.original.admin_phone || "—"}</span>
                   </div>
-                  {tenant.profile?.tax_number && (
-                    <div className="text-[10px] text-[var(--color-ink-subtle)] font-mono mt-0.5">
-                      PIN: {tenant.profile.tax_number}
-                    </div>
-                  )}
                 </div>
-              </div>
-
-              <div className="flex items-center gap-2 flex-shrink-0">
-                {tenant.is_trial ? (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-lg">
+              ),
+            },
+            {
+              header: "Plan",
+              accessorKey: "plan",
+              cell: ({ row }) => (
+                <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-lg bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] border border-[var(--color-surface-border)]">
+                  <CreditCard size={12} />
+                  {row.original.plan || "Starter"}
+                </span>
+              ),
+            },
+            {
+              header: "Status",
+              accessorKey: "is_trial",
+              cell: ({ row }) => (
+                row.original.is_trial ? (
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-lg">
                     <span className="w-1.5 h-1.5 rounded-full bg-amber-500" /> TRIAL
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-lg">
+                  <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded-lg">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" /> ACTIVE
                   </span>
-                )}
-                <TenantActionsMenu 
-                  tenant={tenant}
-                  onToggleSubscription={() => handleToggleSubscription(tenant)}
-                  onArchive={() => handleArchive(tenant.id)}
-                />
-              </div>
-            </div>
-
-            {/* Bottom Details Row: Admin Info + Plan Badge */}
-            <div className="pt-2.5 border-t border-[var(--color-surface-border)]/60 flex items-center justify-between gap-2 text-xs text-[var(--color-ink-muted)]">
-              <div className="space-y-1 min-w-0">
-                <div className="flex items-center gap-1.5 truncate">
-                  <User size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                  <span className="truncate">{tenant.admin_name || "Not Set"}</span>
-                </div>
-                <div className="flex items-center gap-1.5 truncate">
-                  <Phone size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                  <span className="truncate">{tenant.admin_phone || "—"}</span>
-                </div>
-              </div>
-
-              <div className="flex-shrink-0">
-                <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-lg bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] border border-[var(--color-surface-border)]">
-                  <CreditCard size={12} />
-                  {tenant.plan || "Starter"}
-                </span>
-              </div>
-            </div>
-
-          </div>
-        ))}
+                )
+              ),
+            },
+          ]}
+          rowActions={getActions}
+          getRowId={(tenant) => tenant.id}
+          emptyMessage="No agencies found"
+        />
       </div>
 
     </div>

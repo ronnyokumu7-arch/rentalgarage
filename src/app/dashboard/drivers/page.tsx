@@ -1,7 +1,7 @@
 // src/app/dashboard/drivers/page.tsx
 "use client";
 
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Users,
   Plus,
@@ -11,10 +11,11 @@ import {
   Pencil,
   Archive,
   RotateCcw,
-  UserCircle,
+  UserCircle, // ✅ Used in Sidebar
   Filter,
   ChevronRight,
   Briefcase,
+  FileBadge, // ✅ Used in Sidebar for contracts
 } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import FilterDropdown from "@/components/ui/FilterDropdown";
@@ -22,8 +23,15 @@ import DataTable, { RowAction } from "@/components/ui/DataTable";
 import CardGrid from "@/components/ui/CardGrid";
 import { useDrivers } from "@/hooks/drivers/useDrivers";
 import type { DriverListItem, DriverStatus, DriverPayMode } from "@/lib/types";
+import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
 
 type DriverTab = "company" | "contract";
+
+// ✅ DEFINE TABS HERE
+const TABS = [
+  { id: "company" as const, label: "Company", icon: Users },
+  { id: "contract" as const, label: "Contract", icon: Briefcase },
+];
 
 const inputClass = "w-full px-3 py-2.5 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/30 focus:border-[var(--color-primary)] outline-none transition-all text-sm";
 const labelClass = "block text-[10px] font-semibold uppercase tracking-wider text-[var(--color-ink-muted)] mb-1.5";
@@ -63,92 +71,6 @@ const emptyForm = {
   pay_mode: "commission" as DriverPayMode,
   daily_fee: "", overtime_hourly_fee: "", night_accommodation_fee: "", delivery_commission: "",
 };
-
-// ✅ REUSABLE: Premium Sliding Tab Switcher (Matches all other pages)
-function PremiumTabSwitcher({ activeTab, setActiveTab }: { activeTab: DriverTab; setActiveTab: (tab: DriverTab) => void }) {
-  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number; top: number; height: number } | null>(null);
-
-  useEffect(() => {
-    const updateIndicator = () => {
-      const activeEl = tabRefs.current[activeTab];
-      if (activeEl) {
-        const rect = activeEl.getBoundingClientRect();
-        const containerRect = activeEl.parentElement?.getBoundingClientRect();
-        if (containerRect) {
-          setIndicatorStyle({
-            left: rect.left - containerRect.left,
-            width: rect.width,
-            top: rect.top - containerRect.top,
-            height: rect.height,
-          });
-        }
-      }
-    };
-
-    updateIndicator();
-    window.addEventListener("resize", updateIndicator);
-    return () => window.removeEventListener("resize", updateIndicator);
-  }, [activeTab]);
-
-  return (
-    <div className="relative w-full sm:w-auto">
-      {/* Sliding Indicator Pill */}
-      {indicatorStyle && (
-        <div
-          className="absolute z-0 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 shadow-lg shadow-[var(--color-primary)]/10 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-          style={{
-            left: indicatorStyle.left,
-            width: indicatorStyle.width,
-            top: indicatorStyle.top,
-            height: indicatorStyle.height,
-          }}
-        />
-      )}
-
-      {/* Tab Container - No Scrollbar, Snap Centering */}
-      <div 
-        className="relative z-10 flex items-center gap-1 overflow-x-auto pb-0.5 pt-0.5 scrollbar-hide snap-x snap-mandatory"
-        style={{
-          WebkitOverflowScrolling: 'touch',
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-        }}
-      >
-        {[
-          { id: "company" as DriverTab, label: "Company", icon: Users },
-          { id: "contract" as DriverTab, label: "Contract", icon: Briefcase },
-        ].map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          
-          return (
-            <button
-              key={tab.id}
-              ref={(el) => { tabRefs.current[tab.id] = el; }}
-              type="button"
-              onClick={() => setActiveTab(tab.id)}
-              className={`
-                relative flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all duration-300 
-                whitespace-nowrap touch-manipulation cursor-pointer snap-center flex-shrink-0
-                ${isActive 
-                  ? "text-[var(--color-ink)]" 
-                  : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]/50"
-                }
-              `}
-            >
-              <Icon size={isActive ? 16 : 14} className={`transition-all duration-300 ${isActive ? "text-[var(--color-primary)]" : "opacity-70"}`} />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
-      
-      {/* Subtle bottom border line */}
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-[var(--color-surface-border)]/50 -z-10" />
-    </div>
-  );
-}
 
 export default function DriversPage() {
   const [activeTab, setActiveTab] = useState<DriverTab>("company");
@@ -282,17 +204,17 @@ export default function DriversPage() {
         },
   ];
 
-  // ✅ Dynamic Header Info
+  // ✅ Dynamic Header Info (PREMIUM: Matches Sidebar Icons)
   const currentTabInfo = {
     company: {
       title: "Company Drivers",
       description: "In-house driver pool — delivery tasks & chauffeur assignments.",
-      icon: <Users size={20} />,
+      icon: <UserCircle size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
     },
     contract: {
       title: "Contract Drivers",
       description: "External contracted drivers, freelancers, and temporary staffing.",
-      icon: <Briefcase size={20} />,
+      icon: <FileBadge size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
     },
   }[activeTab];
 
@@ -301,19 +223,25 @@ export default function DriversPage() {
       {/* Header with Premium Tab Switcher */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] flex items-center gap-3">
-            <div className="w-9 h-9 sm:w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] flex-shrink-0">
-              {currentTabInfo.icon}
-            </div>
-            <span>{currentTabInfo.title}</span>
-          </h1>
+          <div className="flex items-center gap-3">
+            {/* ✅ Bare Icon - No container */}
+            {currentTabInfo.icon}
+            
+            <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
+              {currentTabInfo.title}
+            </h1>
+          </div>
           <p className="text-xs sm:text-sm text-[var(--color-ink-muted)] mt-1">
             {currentTabInfo.description}
           </p>
         </div>
 
-        {/* ✅ Premium Sliding Tab Switcher */}
-        <PremiumTabSwitcher activeTab={activeTab} setActiveTab={setActiveTab} />
+        {/* ✅ Imported Reusable Premium Tab Switcher */}
+        <PremiumTabSwitcher 
+          tabs={TABS} 
+          activeTab={activeTab} 
+          onTabChange={(tabId) => setActiveTab(tabId as DriverTab)} 
+        />
       </div>
 
       {/* Conditional Segment View Engine */}

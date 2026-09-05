@@ -1,11 +1,12 @@
+// src/app/dashboard/settings/page.tsx
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import {
-  Building2, ShieldCheck, Palette, Bell, CreditCard, Settings,
-  ChevronRight, ChevronLeft, Puzzle, Database, Key, Users,
-  Globe, Lock, Zap, BarChart3, UserCheck, Receipt, Landmark,
-  Shield, HardDrive, Activity, Webhook,
+  Building2, ShieldCheck, Palette, Bell, CreditCard,
+  ChevronRight, ChevronLeft, Puzzle, Database, Key,
+  Globe, Lock, BarChart3, UserCheck, Receipt, Landmark,
+  HardDrive, Activity, Webhook, SlidersHorizontal, UserCog, Landmark as LandmarkIcon, ServerCog, ShieldHalf
 } from "lucide-react";
 
 import BusinessProfileSettings from "@/components/settings/BusinessProfileSettings";
@@ -13,7 +14,8 @@ import AppearanceSettings from "@/components/settings/AppearanceSettings";
 import TeamRolesSettings from "@/components/settings/TeamRolesSettings";
 import UserManagementSettings from "@/components/settings/UserManagementSettings";
 import BillingSubscriptionSettings from "@/components/settings/BillingSubscriptionSettings";
-import PaymentMethodsSettings from "@/components/settings/PaymentMethodsSettings"; // ✅ NEW IMPORT
+import PaymentMethodsSettings from "@/components/settings/PaymentMethodsSettings";
+import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
 
 type TabId = "general" | "team" | "financials" | "system" | "advanced";
 
@@ -28,11 +30,11 @@ interface SettingModule {
 }
 
 const TABS = [
-  { id: "general", label: "General", icon: Settings },
-  { id: "team", label: "Team & Access", icon: Users },
-  { id: "financials", label: "Financials", icon: Landmark },
-  { id: "system", label: "System", icon: Zap },
-  { id: "advanced", label: "Advanced", icon: Shield },
+  { id: "general", label: "General", icon: SlidersHorizontal },
+  { id: "team", label: "Team & Access", icon: UserCog },
+  { id: "financials", label: "Financials", icon: LandmarkIcon },
+  { id: "system", label: "System", icon: ServerCog },
+  { id: "advanced", label: "Advanced", icon: ShieldHalf },
 ];
 
 const SETTINGS_MODULES: SettingModule[] = [
@@ -72,121 +74,38 @@ const getThemeClasses = (theme: string) => {
   return themes[theme] || themes.blue;
 };
 
-// ✅ REUSABLE: Premium Sliding Tab Switcher (Matches all other pages)
-function PremiumTabSwitcher({ activeTab, setActiveTab }: { activeTab: TabId; setActiveTab: (tab: TabId) => void }) {
-  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number; top: number; height: number } | null>(null);
-
-  useEffect(() => {
-    const updateIndicator = () => {
-      const activeEl = tabRefs.current[activeTab];
-      if (activeEl) {
-        const rect = activeEl.getBoundingClientRect();
-        const containerRect = activeEl.parentElement?.getBoundingClientRect();
-        if (containerRect) {
-          setIndicatorStyle({
-            left: rect.left - containerRect.left,
-            width: rect.width,
-            top: rect.top - containerRect.top,
-            height: rect.height,
-          });
-        }
-      }
-    };
-
-    updateIndicator();
-    window.addEventListener("resize", updateIndicator);
-    return () => window.removeEventListener("resize", updateIndicator);
-  }, [activeTab]);
-
-  return (
-    <div className="relative w-full sm:w-auto">
-      {/* Sliding Indicator Pill */}
-      {indicatorStyle && (
-        <div
-          className="absolute z-0 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 shadow-lg shadow-[var(--color-primary)]/10 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-          style={{
-            left: indicatorStyle.left,
-            width: indicatorStyle.width,
-            top: indicatorStyle.top,
-            height: indicatorStyle.height,
-          }}
-        />
-      )}
-
-      {/* Tab Container - No Scrollbar, Snap Centering */}
-      <div 
-        className="relative z-10 flex items-center gap-1 overflow-x-auto pb-0.5 pt-0.5 scrollbar-hide snap-x snap-mandatory"
-        style={{
-          WebkitOverflowScrolling: 'touch',
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-        }}
-      >
-        {TABS.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          
-          return (
-            <button
-              key={tab.id}
-              ref={(el) => { tabRefs.current[tab.id] = el; }}
-              type="button"
-              onClick={() => setActiveTab(tab.id as TabId)}
-              className={`
-                relative flex-1 sm:flex-none flex items-center justify-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all duration-300 
-                whitespace-nowrap touch-manipulation cursor-pointer snap-center flex-shrink-0
-                ${isActive 
-                  ? "text-[var(--color-ink)]" 
-                  : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]/50"
-                }
-              `}
-            >
-              <Icon size={isActive ? 16 : 14} className={`transition-all duration-300 ${isActive ? "text-[var(--color-primary)]" : "opacity-70"}`} />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
-      
-      {/* Subtle bottom border line */}
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-[var(--color-surface-border)]/50 -z-10" />
-    </div>
-  );
-}
-
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<TabId>("general");
   const [activeModule, setActiveModule] = useState<SettingModule | null>(null);
 
   const filteredModules = SETTINGS_MODULES.filter((m) => m.tab === activeTab);
 
-  // ✅ Dynamic Header Info
+  // ✅ Dynamic Header Info (PREMIUM: No circles, just clean bare icons)
   const currentTabInfo = {
     general: {
       title: "General Settings",
       description: "Manage your agency configuration and system preferences",
-      icon: <Settings size={20} />,
+      icon: <SlidersHorizontal size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
     },
     team: {
       title: "Team & Access",
       description: "Manage staff, roles, and authentication settings",
-      icon: <Users size={20} />,
+      icon: <UserCog size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
     },
     financials: {
       title: "Financial Settings",
       description: "Configure billing, invoices, and payment methods",
-      icon: <Landmark size={20} />,
+      icon: <LandmarkIcon size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
     },
     system: {
       title: "System Settings",
       description: "Manage integrations, API keys, and webhooks",
-      icon: <Zap size={20} />,
+      icon: <ServerCog size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
     },
     advanced: {
       title: "Advanced Settings",
       description: "Data management, backups, and system health monitoring",
-      icon: <Shield size={20} />,
+      icon: <ShieldHalf size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
     },
   }[activeTab];
 
@@ -206,23 +125,27 @@ export default function SettingsPage() {
             </button>
           )}
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] flex items-center gap-3">
-              {!activeModule && (
-                <div className="w-9 h-9 sm:w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
-                  {currentTabInfo.icon}
-                </div>
-              )}
-              {activeModule ? activeModule.title : currentTabInfo.title}
-            </h1>
+            <div className="flex items-center gap-3">
+              {/* ✅ Bare Icon - No container */}
+              {!activeModule && currentTabInfo.icon}
+              
+              <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
+                {activeModule ? activeModule.title : currentTabInfo.title}
+              </h1>
+            </div>
             <p className="text-xs sm:text-sm text-[var(--color-ink-muted)] mt-1">
               {activeModule ? activeModule.description : currentTabInfo.description}
             </p>
           </div>
         </div>
 
-        {/* ✅ Premium Sliding Tab Switcher (Hidden when inside a module) */}
+        {/* ✅ Imported Reusable Premium Tab Switcher */}
         {!activeModule && (
-          <PremiumTabSwitcher activeTab={activeTab} setActiveTab={setActiveTab} />
+          <PremiumTabSwitcher 
+            tabs={TABS} 
+            activeTab={activeTab} 
+            onTabChange={(tabId) => setActiveTab(tabId as TabId)} 
+          />
         )}
       </div>
 
@@ -239,6 +162,7 @@ export default function SettingsPage() {
                 onClick={() => setActiveModule(module)}
                 className="group relative flex items-center gap-4 p-5 rounded-2xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] hover:border-[var(--color-primary)]/50 hover:shadow-[var(--shadow-lg)] transition-all duration-200 cursor-pointer"
               >
+                {/* ✅ Keep the container HERE for grid cards, as it's an intentional design element */}
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${theme.iconBg} ${theme.iconText} group-hover:scale-105 transition-transform duration-200`}>
                   <Icon size={22} strokeWidth={1.8} />
                 </div>

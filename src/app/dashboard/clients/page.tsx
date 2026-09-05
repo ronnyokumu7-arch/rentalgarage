@@ -2,7 +2,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo } from "react";
 import {
   Users,
   Building2,
@@ -19,6 +19,9 @@ import {
   Link2,
   ChevronRight,
   ShieldCheck,
+  UserRound,
+  Building,
+  UserPlus,
 } from "lucide-react";
 import { useClientsList } from "@/hooks/clients/useClientsList";
 import FilterDropdown from "@/components/ui/FilterDropdown";
@@ -28,6 +31,7 @@ import ClientInvitesPanel from "@/components/client/ClientInvitesPanel";
 import SecureImage from "@/components/ui/SecureImage";
 import CardGrid from "@/components/ui/CardGrid";
 import type { Client } from "@/lib/types";
+import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
 
 type ClientSegment = "individual" | "corporate" | "invites";
 
@@ -44,89 +48,6 @@ const CLIENT_STATUS_STYLES: Record<string, { bg: string; text: string; dot: stri
   suspended: { bg: "bg-red-500/10", text: "text-red-600 dark:text-red-400", dot: "bg-red-500", label: "Suspended" },
   inactive: { bg: "bg-gray-500/10", text: "text-gray-600 dark:text-gray-400", dot: "bg-gray-500", label: "Inactive" },
 };
-
-// ✅ REUSABLE: Premium Sliding Tab Switcher (Matches Financials page)
-function PremiumTabSwitcher({ activeTab, setActiveTab }: { activeTab: ClientSegment; setActiveTab: (tab: ClientSegment) => void }) {
-  const tabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
-  const [indicatorStyle, setIndicatorStyle] = useState<{ left: number; width: number; top: number; height: number } | null>(null);
-
-  useEffect(() => {
-    const updateIndicator = () => {
-      const activeEl = tabRefs.current[activeTab];
-      if (activeEl) {
-        const rect = activeEl.getBoundingClientRect();
-        const containerRect = activeEl.parentElement?.getBoundingClientRect();
-        if (containerRect) {
-          setIndicatorStyle({
-            left: rect.left - containerRect.left,
-            width: rect.width,
-            top: rect.top - containerRect.top,
-            height: rect.height,
-          });
-        }
-      }
-    };
-
-    updateIndicator();
-    window.addEventListener("resize", updateIndicator);
-    return () => window.removeEventListener("resize", updateIndicator);
-  }, [activeTab]);
-
-  return (
-    <div className="relative">
-      {/* Sliding Indicator Pill */}
-      {indicatorStyle && (
-        <div
-          className="absolute z-0 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 shadow-lg shadow-[var(--color-primary)]/10 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
-          style={{
-            left: indicatorStyle.left,
-            width: indicatorStyle.width,
-            top: indicatorStyle.top,
-            height: indicatorStyle.height,
-          }}
-        />
-      )}
-
-      {/* Tab Container - No Scrollbar, Snap Centering */}
-      <div 
-        className="relative z-10 flex items-center gap-1 overflow-x-auto pb-0.5 pt-0.5 scrollbar-hide snap-x snap-mandatory"
-        style={{
-          WebkitOverflowScrolling: 'touch',
-          scrollbarWidth: 'none',
-          msOverflowStyle: 'none',
-        }}
-      >
-        {TABS.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          
-          return (
-            <button
-              key={tab.id}
-              ref={(el) => { tabRefs.current[tab.id] = el; }}
-              type="button"
-              onClick={() => setActiveTab(tab.id as ClientSegment)}
-              className={`
-                relative flex items-center gap-2 px-5 py-3 rounded-xl text-sm font-bold transition-all duration-300 
-                whitespace-nowrap touch-manipulation cursor-pointer snap-center flex-shrink-0
-                ${isActive 
-                  ? "text-[var(--color-ink)]" 
-                  : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]/50"
-                }
-              `}
-            >
-              <Icon size={isActive ? 16 : 14} className={`transition-all duration-300 ${isActive ? "text-[var(--color-primary)]" : "opacity-70"}`} />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
-      
-      {/* Subtle bottom border line */}
-      <div className="absolute bottom-0 left-0 right-0 h-px bg-[var(--color-surface-border)]/50 -z-10" />
-    </div>
-  );
-}
 
 export default function ClientsPage() {
   const router = useRouter();
@@ -162,25 +83,26 @@ export default function ClientsPage() {
     return { total, active, inactive };
   }, [filteredClients]);
 
+  // ✅ Dynamic Header Info (PREMIUM: No circles, just clean bare icons)
   const currentTabInfo = useMemo(() => {
     if (activeTab === "individual") {
       return {
         title: "Individual Clients",
         description: "Manage individual customer accounts, personal verification steps, and driver records.",
-        icon: <UserIcon size={20} />,
+        icon: <UserRound size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
       };
     }
     if (activeTab === "corporate") {
       return {
         title: "Corporate Clients",
         description: "Oversee commercial agency relationships, corporate profiles, and company contracts.",
-        icon: <Building2 size={20} />,
+        icon: <Building size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
       };
     }
     return {
       title: "Client Invites",
       description: "Generate single-use onboarding links and manage pending invitations.",
-      icon: <Link2 size={20} />,
+      icon: <UserPlus size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
     };
   }, [activeTab]);
 
@@ -218,20 +140,26 @@ export default function ClientsPage() {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] flex items-center gap-3">
-              <div className="w-9 h-9 sm:w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] flex-shrink-0">
-                {currentTabInfo.icon}
-              </div>
-              <span>{currentTabInfo.title}</span>
-            </h1>
+            <div className="flex items-center gap-3">
+              {/* ✅ Bare Icon - No container */}
+              {currentTabInfo.icon}
+              
+              <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
+                {currentTabInfo.title}
+              </h1>
+            </div>
             <p className="text-xs sm:text-sm text-[var(--color-ink-muted)] mt-1">
               {currentTabInfo.description}
             </p>
           </div>
           
-          {/* ✅ Premium Tab Switcher */}
+          {/* ✅ Imported Reusable Premium Tab Switcher */}
           <div className="self-start sm:self-auto">
-            <PremiumTabSwitcher activeTab={activeTab} setActiveTab={setActiveTab} />
+            <PremiumTabSwitcher 
+              tabs={TABS} 
+              activeTab={activeTab} 
+              onTabChange={(tabId) => setActiveTab(tabId as ClientSegment)} 
+            />
           </div>
         </div>
         <ClientInvitesPanel />
@@ -244,20 +172,26 @@ export default function ClientsPage() {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] flex items-center gap-3">
-              <div className="w-9 h-9 sm:w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] flex-shrink-0">
-                {currentTabInfo.icon}
-              </div>
-              <span>{currentTabInfo.title}</span>
-            </h1>
+            <div className="flex items-center gap-3">
+              {/* ✅ Bare Icon - No container */}
+              {currentTabInfo.icon}
+              
+              <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
+                {currentTabInfo.title}
+              </h1>
+            </div>
             <p className="text-xs sm:text-sm text-[var(--color-ink-muted)] mt-1">
               {currentTabInfo.description}
             </p>
           </div>
           
-          {/* ✅ Premium Tab Switcher */}
+          {/* ✅ Imported Reusable Premium Tab Switcher */}
           <div className="self-start sm:self-auto">
-            <PremiumTabSwitcher activeTab={activeTab} setActiveTab={setActiveTab} />
+            <PremiumTabSwitcher 
+              tabs={TABS} 
+              activeTab={activeTab} 
+              onTabChange={(tabId) => setActiveTab(tabId as ClientSegment)} 
+            />
           </div>
         </div>
 
@@ -633,20 +567,26 @@ export default function ClientsPage() {
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] flex items-center gap-3">
-            <div className="w-9 h-9 sm:w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] flex-shrink-0">
-              {currentTabInfo.icon}
-            </div>
-            <span>{currentTabInfo.title}</span>
-          </h1>
+          <div className="flex items-center gap-3">
+            {/* ✅ Bare Icon - No container */}
+            {currentTabInfo.icon}
+            
+            <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
+              {currentTabInfo.title}
+            </h1>
+          </div>
           <p className="text-xs sm:text-sm text-[var(--color-ink-muted)] mt-1">
             {currentTabInfo.description}
           </p>
         </div>
         
-        {/* ✅ Premium Tab Switcher */}
+        {/* ✅ Imported Reusable Premium Tab Switcher */}
         <div className="self-start sm:self-auto">
-          <PremiumTabSwitcher activeTab={activeTab} setActiveTab={setActiveTab} />
+          <PremiumTabSwitcher 
+            tabs={TABS} 
+            activeTab={activeTab} 
+            onTabChange={(tabId) => setActiveTab(tabId as ClientSegment)} 
+          />
         </div>
       </div>
 

@@ -61,9 +61,6 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
     });
   };
 
-  // ❌ REMOVED: useEntitySelector (no longer needed)
-  // const { getById } = useEntitySelector<any>({ ... });
-
   const existingInvoice = invoices.find((inv) => inv.booking_id === selectedBookingId);
 
   // ✅ ENGINE RULE (matches backend): ceil(duration / 24h), min 1 day.
@@ -246,11 +243,9 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
           selectedId={selectedBookingId}
           onSelect={(id) => {
             setSelectedBookingId(id);
-            // ✅ This is still called, but we'll use onSelectEntity for the full object
             setSelectedBookingObj((prev) => prev);
           }}
           onSelectEntity={(booking) => {
-            // ✅ NEW: Get the full booking object directly from the selector
             setSelectedBookingObj(booking as Booking);
           }}
           label="Select Booking"

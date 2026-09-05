@@ -165,7 +165,7 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
                     } rounded-xl transition-all duration-200 outline-none group/btn ${
                       active
                         ? "text-[var(--color-primary)] bg-[var(--color-primary-muted)]"
-                        : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink-primary)] hover:bg-[var(--color-surface-hover)]"
+                        : "text-[var(--color-ink-subtle)] hover:text-[var(--color-ink-primary)] hover:bg-[var(--color-surface-hover)]"
                     }`}
                   >
                     {!isMobile && active && (
@@ -209,7 +209,7 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
                     } rounded-xl transition-all duration-200 outline-none group/btn ${
                       isGroupOpen || active
                         ? "text-[var(--color-primary)] bg-[var(--color-primary-muted)]"
-                        : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink-primary)] hover:bg-[var(--color-surface-hover)]"
+                        : "text-[var(--color-ink-subtle)] hover:text-[var(--color-ink-primary)] hover:bg-[var(--color-surface-hover)]"
                     }`}
                   >
                     {!isMobile && (isGroupOpen || active) && (
@@ -299,7 +299,7 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
               } h-11 rounded-xl transition-all duration-200 outline-none group/btn ${
                 isActive(settingsItem.href)
                   ? "text-[var(--color-primary)] bg-[var(--color-primary-muted)]"
-                  : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink-primary)] hover:bg-[var(--color-surface-hover)]"
+                  : "text-[var(--color-ink-subtle)] hover:text-[var(--color-ink-primary)] hover:bg-[var(--color-surface-hover)]"
               }`}
             >
               <Settings
@@ -323,7 +323,7 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
             onClick={handleLogout}
             className={`group/logout relative flex items-center justify-center ${
               isMobile ? 'justify-start gap-3 px-4' : 'w-full'
-            } h-11 rounded-xl text-[var(--color-ink-muted)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-bg)] transition-all duration-300`}
+            } h-11 rounded-xl text-[var(--color-ink-subtle)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-bg)] transition-all duration-300`}
             title="Sign out"
           >
             <LogOut 
@@ -410,7 +410,7 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
                       className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all duration-150 group/child ${
                         childActive
                           ? "bg-[var(--color-primary-muted)] text-[var(--color-primary)]"
-                          : "text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink-primary)]"
+                          : "text-[var(--color-ink-subtle)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink-primary)]"
                       }`}
                     >
                       {ChildIcon && (

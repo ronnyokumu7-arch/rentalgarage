@@ -71,11 +71,21 @@ export default function PremiumEntitySelector<T>({
         />
       </button>
 
-      {/* Dropdown Panel */}
+      {/* Dropdown Panel - ✅ FIXED FOR MOBILE */}
       {isOpen && (
-        <div className="absolute z-20 mt-2 w-full rounded-2xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-[var(--shadow-dropdown)] overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+        <div 
+          className={`
+            mt-2 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-[var(--shadow-dropdown)] overflow-hidden animate-in fade-in zoom-in-95 duration-200
+            
+            /* MOBILE: In-flow, takes up real estate, fully scrollable */
+            relative block w-full max-h-[45vh] flex flex-col
+            
+            /* DESKTOP: Floating dropdown, absolute positioned */
+            sm:absolute sm:left-0 sm:right-0 sm:z-20 sm:max-h-[280px] sm:shadow-[var(--shadow-xl)]
+          `}
+        >
           {/* Search Input */}
-          <div className="p-3 border-b border-[var(--color-surface-border)]">
+          <div className="p-3 border-b border-[var(--color-surface-border)] flex-shrink-0">
             <div className="relative">
               <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" />
               <input
@@ -89,8 +99,8 @@ export default function PremiumEntitySelector<T>({
             </div>
           </div>
 
-          {/* List */}
-          <div className="max-h-[280px] overflow-y-auto custom-scrollbar p-2 space-y-1">
+          {/* List - ✅ Mobile scrolls within the modal, desktop scrolls within the floating box */}
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
             {loading ? (
               <div className="flex items-center justify-center py-6 text-[var(--color-ink-muted)]">
                 <Loader2 size={20} className="animate-spin mr-2" />

@@ -2,7 +2,7 @@
 
 import {
   LayoutDashboard, Building2, CreditCard, BarChart3, Settings,
-  CalendarDays, Contact, Users, Car, Wallet, Server, LifeBuoy, ListChecks, UserCircle,
+  CalendarDays, Contact, Users, CarFront, Wallet, Server, LifeBuoy, ListChecks, UserCircle,
 } from "lucide-react";
 
 export interface NavChild {
@@ -18,72 +18,59 @@ export interface NavItem {
 }
 
 // ── OPTIMIZED PREMIUM ICON COMPONENTS ────────────────────────────────────────
-// Removed heavy DOM wrappers, blurs, and infinite animations to reduce CPU/GPU load.
-// Maintains premium feel through distinct color-coding and subtle scale transitions.
+// NOTE: No hardcoded colors. This allows the Sidebar to control them via CSS.
+// Using `currentColor` for seamless Light/Dark mode switching.
 
 const PremiumDashboardIcon = ({ size = 20, strokeWidth = 1.8, className = "" }: any) => (
-  <LayoutDashboard size={size} strokeWidth={strokeWidth} className={`text-[var(--color-primary)] transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <LayoutDashboard size={size} strokeWidth={strokeWidth} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
 );
 
 const PremiumCalendarIcon = ({ size = 20, strokeWidth = 1.8, className = "" }: any) => (
-  <CalendarDays size={size} strokeWidth={strokeWidth} className={`text-[var(--color-primary)] transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <CalendarDays size={size} strokeWidth={strokeWidth} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
 );
 
 const PremiumContactIcon = ({ size = 20, strokeWidth = 1.8, className = "" }: any) => (
-  <Contact size={size} strokeWidth={strokeWidth} className={`text-[var(--color-success)] transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
-);
-
-const PremiumCarIcon = ({ size = 20, strokeWidth = 1.8, className = "" }: any) => (
-  <Car size={size} strokeWidth={strokeWidth} className={`text-[var(--color-warning)] transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <Contact size={size} strokeWidth={strokeWidth} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
 );
 
 const PremiumUsersIcon = ({ size = 20, strokeWidth = 1.8, className = "" }: any) => (
-  <Users size={size} strokeWidth={strokeWidth} className={`text-[var(--color-primary)] transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <Users size={size} strokeWidth={strokeWidth} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
 );
 
 const PremiumWalletIcon = ({ size = 20, strokeWidth = 1.8, className = "" }: any) => (
-  <Wallet size={size} strokeWidth={strokeWidth} className={`text-[var(--color-success)] transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <Wallet size={size} strokeWidth={strokeWidth} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
 );
 
 const PremiumBarChartIcon = ({ size = 20, strokeWidth = 1.8, className = "" }: any) => (
-  <div className={`relative ${className}`}>
-    <BarChart3 size={size} strokeWidth={strokeWidth} className="text-[var(--color-warning)]" />
-    <div className="absolute -top-1 right-0 flex gap-0.5 opacity-0 group-hover/nav:opacity-100 transition-opacity duration-300">
-      <div className="w-0.5 h-2 bg-[var(--color-primary)] rounded-full animate-[bounce_1s_ease-in-out_infinite]" style={{ animationDelay: "0ms" }} />
-      <div className="w-0.5 h-3 bg-[var(--color-primary)] rounded-full animate-[bounce_1s_ease-in-out_infinite]" style={{ animationDelay: "150ms" }} />
-      <div className="w-0.5 h-1.5 bg-[var(--color-primary)] rounded-full animate-[bounce_1s_ease-in-out_infinite]" style={{ animationDelay: "300ms" }} />
-    </div>
-  </div>
+  <BarChart3 size={size} strokeWidth={strokeWidth} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
 );
 
 const PremiumSettingsIcon = ({ size = 20, strokeWidth = 1.8, className = "" }: any) => (
-  <Settings size={size} strokeWidth={strokeWidth} className={`text-[var(--color-ink-muted)] group-hover/nav:text-[var(--color-ink)] transition-colors duration-200 ${className}`} />
+  <Settings size={size} strokeWidth={strokeWidth} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
 );
 
 const PremiumBuildingIcon = ({ size = 20, strokeWidth = 1.8, className = "" }: any) => (
-  <Building2 size={size} strokeWidth={strokeWidth} className={`text-[var(--color-primary)] transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <Building2 size={size} strokeWidth={strokeWidth} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
 );
 
 const PremiumCreditCardIcon = ({ size = 20, strokeWidth = 1.8, className = "" }: any) => (
-  <CreditCard size={size} strokeWidth={strokeWidth} className={`text-[var(--color-success)] transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <CreditCard size={size} strokeWidth={strokeWidth} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
 );
 
 const PremiumServerIcon = ({ size = 20, strokeWidth = 1.8, className = "" }: any) => (
-  <Server size={size} strokeWidth={strokeWidth} className={`text-[var(--color-ink-muted)] group-hover/nav:text-[var(--color-primary)] transition-colors duration-200 ${className}`} />
+  <Server size={size} strokeWidth={strokeWidth} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
 );
 
 const PremiumLifeBuoyIcon = ({ size = 20, strokeWidth = 1.8, className = "" }: any) => (
-  <LifeBuoy size={size} strokeWidth={strokeWidth} className={`text-[var(--color-primary)] transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <LifeBuoy size={size} strokeWidth={strokeWidth} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
 );
 
-// ✅ Tasks Icon
 const PremiumTasksIcon = ({ size = 20, strokeWidth = 1.8, className = "" }: any) => (
-  <ListChecks size={size} strokeWidth={strokeWidth} className={`text-[var(--color-primary)] transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <ListChecks size={size} strokeWidth={strokeWidth} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
 );
 
-// ✅ MILESTONE 2: Drivers Icon (uses UserCircle, color-cycled for visual distinction)
 const PremiumDriversIcon = ({ size = 20, strokeWidth = 1.8, className = "" }: any) => (
-  <UserCircle size={size} strokeWidth={strokeWidth} className={`text-[var(--color-primary)] transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <UserCircle size={size} strokeWidth={strokeWidth} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
 );
 
 // ─── SUPER ADMIN NAVIGATION ───────────────────────────────────────────────────
@@ -102,8 +89,8 @@ export const tenantAdminNav: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: PremiumDashboardIcon },
   { label: "Bookings", href: "/dashboard/bookings", icon: PremiumCalendarIcon },
   { label: "Clients", href: "/dashboard/clients", icon: PremiumContactIcon },
-  { label: "Fleet", href: "/dashboard/fleet", icon: PremiumCarIcon },
-  { label: "Drivers", href: "/dashboard/drivers", icon: PremiumDriversIcon }, // ✅ MILESTONE 2
+  { label: "Fleet", href: "/dashboard/fleet", icon: CarFront },
+  { label: "Drivers", href: "/dashboard/drivers", icon: PremiumDriversIcon },
   { label: "Users", href: "/dashboard/users", icon: PremiumUsersIcon },
   { label: "Financials", href: "/dashboard/financials", icon: PremiumWalletIcon },
   { label: "Reports", href: "/dashboard/reports", icon: PremiumBarChartIcon },
