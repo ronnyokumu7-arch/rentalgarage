@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import toast from "react-hot-toast";
 import { vehiclesApi } from "@/lib/api/vehicles";
 import type { Vehicle, VehicleStatus } from "@/lib/types";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 
 export function useFleetList() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -31,8 +32,23 @@ export function useFleetList() {
     }
   }, []);
 
+  // ✅ LIVE REFRESH: focus + visibility listeners for cross-tab changes
+  useLiveRefresh(fetchVehicles);
+
   useEffect(() => {
     fetchVehicles();
+  }, [fetchVehicles]);
+
+  // ✅ AUTO-REFRESH: listen for vehicle creation + updates from modals / inline contexts
+  useEffect(() => {
+    const handleVehicleEvent = () => fetchVehicles();
+    window.addEventListener('vehicle:created', handleVehicleEvent);
+    window.addEventListener('vehicle:updated', handleVehicleEvent);
+    
+    return () => {
+      window.removeEventListener('vehicle:created', handleVehicleEvent);
+      window.removeEventListener('vehicle:updated', handleVehicleEvent);
+    };
   }, [fetchVehicles]);
 
   useEffect(() => {

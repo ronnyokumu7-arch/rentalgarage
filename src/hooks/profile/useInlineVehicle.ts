@@ -69,6 +69,9 @@ export function useInlineVehicle(vehicle: Vehicle) {
       });
       toast.success("Vehicle details updated successfully!");
       setIsEditing(false);
+      
+      // ✅ AUTO-REFRESH: notify fleet list to refetch (cross-context update)
+      window.dispatchEvent(new CustomEvent('vehicle:updated', { detail: { vehicleId: vehicle.id } }));
     } catch {
       toast.error("Failed to update vehicle details.");
     } finally {
@@ -86,6 +89,9 @@ export function useInlineVehicle(vehicle: Vehicle) {
       else if (action === "retire") await vehiclesApi.retire(vehicle.id);
       
       toast.success(`Vehicle ${action.replace(/_/g, " ")} successfully!`);
+      
+      // ✅ AUTO-REFRESH: notify fleet list to refetch (cross-context status change)
+      window.dispatchEvent(new CustomEvent('vehicle:updated', { detail: { vehicleId: vehicle.id } }));
     } catch (error: any) {
       toast.error(error.response?.data?.detail || `Failed to ${action.replace(/_/g, " ")} vehicle.`);
     } finally {

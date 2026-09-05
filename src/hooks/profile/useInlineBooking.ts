@@ -31,8 +31,6 @@ export function useInlineBooking(booking: Booking) {
   });
 
   // ✅ FIX: Added booking.vehicle_id to dependencies
-  // This ensures that when the booking prop updates (after a save/refresh) with a new vehicle_id,
-  // the hook automatically fetches the new vehicle details from the backend.
   useEffect(() => {
     if (booking.client_id) clientsApi.get(booking.client_id).then(setClient).catch(console.error);
     if (booking.vehicle_id) vehiclesApi.get(booking.vehicle_id).then(setVehicle).catch(console.error);
@@ -73,11 +71,11 @@ export function useInlineBooking(booking: Booking) {
   const handleVehicleChange = (newVehicleId: number) => {
     const newVehicle = availableVehicles.find(v => v.id === newVehicleId);
     if (newVehicle) {
-      setVehicle(newVehicle); // Instantly updates UI during edit mode
+      setVehicle(newVehicle);
       setFormData(prev => ({
         ...prev,
         vehicle_id: newVehicleId,
-        daily_rate: Number(newVehicle.daily_rate) // Triggers cost recalculation
+        daily_rate: Number(newVehicle.daily_rate)
       }));
     }
   };
@@ -97,6 +95,9 @@ export function useInlineBooking(booking: Booking) {
       });
       toast.success("Booking updated successfully!");
       setIsEditing(false);
+      
+      // ✅ AUTO-REFRESH: notify bookings list to refetch (cross-context update)
+      window.dispatchEvent(new CustomEvent('booking:updated'));
     } catch {
       toast.error("Failed to update booking.");
     } finally {
@@ -114,6 +115,9 @@ export function useInlineBooking(booking: Booking) {
       else if (action === "cancel") await bookingsApi.cancel(booking.id);
       else if (action === "no_show") await bookingsApi.noShow(booking.id);
       toast.success(`Booking ${action.replace("_", " ")} successfully!`);
+      
+      // ✅ AUTO-REFRESH: notify bookings list to refetch (cross-context status change)
+      window.dispatchEvent(new CustomEvent('booking:updated'));
     } catch (error: any) {
       toast.error(error.response?.data?.detail || `Failed to ${action.replace("_", " ")} booking.`);
     } finally {
@@ -130,6 +134,9 @@ export function useInlineBooking(booking: Booking) {
       const res = await contractsApi.generateShareLink(contract.id);
       setContract(prev => prev ? { ...prev, status: 'sent' as any, share_token: res.share_token } : null);
       toast.success("Contract link copied to clipboard!");
+      
+      // ✅ AUTO-REFRESH: notify contracts list (status flipped to 'sent')
+      window.dispatchEvent(new CustomEvent('contract:updated'));
       return res.share_token;
     } catch (error: any) {
       toast.error(error.response?.data?.detail || "Failed to generate contract link.");
@@ -145,6 +152,9 @@ export function useInlineBooking(booking: Booking) {
     try {
       const res = await invoicesApi.generateShareLink(booking.invoices[0].id);
       toast.success("Invoice link copied to clipboard!");
+      
+      // ✅ AUTO-REFRESH: notify invoices list
+      window.dispatchEvent(new CustomEvent('invoice:updated'));
       return res.share_token;
     } catch {
       toast.error("Failed to copy invoice link.");

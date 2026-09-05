@@ -8,6 +8,7 @@ import { usePathname } from "next/navigation";
 import { clientsApi } from "@/lib/api/clients";
 import type { Client } from "@/lib/types";
 import toast from "react-hot-toast";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 
 type ViewMode = "active" | "vault";
 
@@ -20,7 +21,7 @@ export function useClientsList() {
   const [currentPage, setCurrentPage] = useState(1);
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
-  const pathname = usePathname(); // ✅ NEW: Track route changes
+  const pathname = usePathname();
 
   const pageSize = 7;
 
@@ -36,6 +37,9 @@ export function useClientsList() {
     }
   }, [view]);
 
+  // ✅ LIVE REFRESH: focus + visibility (factory)
+  useLiveRefresh(fetchClients, pathname === "/dashboard/clients");
+
   // Initial fetch + fetch when view changes
   useEffect(() => {
     fetchClients();
@@ -48,26 +52,20 @@ export function useClientsList() {
     }
   }, [pathname, fetchClients]);
 
-  // ✅ BACKUP: Refetch when window regains focus or becomes visible
+  // ✅ AUTO-REFRESH: listen for client creation + invite creation
   useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible" && pathname === "/dashboard/clients") {
-        fetchClients();
-      }
-    };
-    
-    const handleFocus = () => {
+    const handleClientEvent = () => {
       if (pathname === "/dashboard/clients") {
         fetchClients();
       }
     };
-
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("focus", handleFocus);
+    
+    window.addEventListener('client:created', handleClientEvent);
+    window.addEventListener('client:invite:created', handleClientEvent);
     
     return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("focus", handleFocus);
+      window.removeEventListener('client:created', handleClientEvent);
+      window.removeEventListener('client:invite:created', handleClientEvent);
     };
   }, [pathname, fetchClients]);
 
@@ -105,8 +103,6 @@ export function useClientsList() {
   const suspendedClients = clients.filter((c) => c.status === "suspended").length;
   const pendingClients = clients.filter((c) => c.status === "pending").length;
 
-  // ✅ FIXED: Call the dedicated activate endpoint, not the generic update
-  // (ClientUpdate schema silently ignores 'status' field by design)
   const handleVerify = async (clientId: number) => {
     const client = clients.find((c) => c.id === clientId);
     if (client) {
@@ -129,7 +125,6 @@ export function useClientsList() {
     }
   };
 
-  // ✅ FIXED: Call the dedicated suspend endpoint
   const handleSuspend = async (clientId: number) => {
     setActionLoadingId(clientId);
     try {
@@ -144,7 +139,6 @@ export function useClientsList() {
     }
   };
 
-  // ✅ FIXED: Call the dedicated reactivate endpoint
   const handleReactivate = async (clientId: number) => {
     const client = clients.find((c) => c.id === clientId);
     if (client) {
@@ -209,5 +203,6 @@ export function useClientsList() {
     handleReactivate,
     handleArchive,
     fetchClients,
+    refetch: fetchClients,
   };
 }

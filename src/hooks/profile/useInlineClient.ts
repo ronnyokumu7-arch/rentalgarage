@@ -54,6 +54,9 @@ export function useInlineClient(client: Client, _taskId: number) {
       });
       toast.success("Client details updated successfully!");
       setIsEditing(false);
+      
+      // ✅ AUTO-REFRESH: notify clients list to refetch (cross-context update)
+      window.dispatchEvent(new CustomEvent('client:updated', { detail: { clientId: client.id } }));
     } catch {
       toast.error("Failed to update client details.");
     } finally {
@@ -69,6 +72,9 @@ export function useInlineClient(client: Client, _taskId: number) {
       else if (action === "suspend") await clientsApi.suspend(client.id, "Suspended via Operations Center");
       else if (action === "reactivate") await clientsApi.reactivate(client.id);
       toast.success(`Client ${action}d successfully!`);
+      
+      // ✅ AUTO-REFRESH: notify clients list to refetch (cross-context status change)
+      window.dispatchEvent(new CustomEvent('client:created'));
     } catch (error: any) {
       toast.error(error.response?.data?.detail || `Failed to ${action} client.`);
     } finally {

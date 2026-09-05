@@ -48,6 +48,9 @@ export default function AddClientModal({ isOpen, onClose }: AddClientModalProps)
       const res = await clientInvitesApi.create(ttl, expectedName, expectedPhone);
       setInvite(res.data);
       toast.success("Invite link generated!");
+
+      // ✅ AUTO-REFRESH: notify clients list to refetch (new pending invite appears instantly)
+      window.dispatchEvent(new CustomEvent('client:invite:created'));
     } catch {
       toast.error("Failed to generate invite link");
     } finally {

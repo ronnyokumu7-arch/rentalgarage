@@ -75,6 +75,9 @@ export function useNewVehicleForm() {
 
       const newVehicle = await vehiclesApi.create(payload);
       toast.success("Vehicle added to fleet successfully!");
+      
+      // ✅ AUTO-REFRESH: notify fleet list to refetch (new vehicle appears instantly)
+      window.dispatchEvent(new CustomEvent('vehicle:created'));
 
       const uploadPromises = [];
       if (insuranceFile) uploadPromises.push(vehiclesApi.uploadInsuranceDoc(newVehicle.id, insuranceFile));

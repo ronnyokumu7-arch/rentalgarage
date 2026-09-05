@@ -153,6 +153,9 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
           ? "Invoice updated successfully! Regenerate the contract to reflect new rate."
           : "Invoice generated successfully!"
       );
+      
+      // ✅ AUTO-REFRESH: notify invoices list to refetch (new/updated invoice appears instantly)
+      window.dispatchEvent(new CustomEvent('invoice:updated'));
 
       onCreated();
       handleClose();

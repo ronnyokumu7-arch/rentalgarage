@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import toast from "react-hot-toast";
 import { paymentsApi } from "@/lib/api/payments";
 import type { Payment, PaymentMethod, PaymentStatus } from "@/lib/types";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 
 export function usePayments() {
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -35,10 +36,25 @@ export function usePayments() {
     } finally {
       setLoading(false);
     }
-  }, [statusFilter, methodFilter]); // ✅ FIXED: Added missing dependencies so it re-fetches when filters change
+  }, [statusFilter, methodFilter]);
+
+  // ✅ LIVE REFRESH: focus + visibility listeners for cross-tab changes
+  useLiveRefresh(fetchPayments);
 
   useEffect(() => {
     fetchPayments();
+  }, [fetchPayments]);
+
+  // ✅ AUTO-REFRESH: listen for payment creation + updates from modals / public pages
+  useEffect(() => {
+    const handlePaymentEvent = () => fetchPayments();
+    window.addEventListener('payment:created', handlePaymentEvent);
+    window.addEventListener('payment:updated', handlePaymentEvent);
+    
+    return () => {
+      window.removeEventListener('payment:created', handlePaymentEvent);
+      window.removeEventListener('payment:updated', handlePaymentEvent);
+    };
   }, [fetchPayments]);
 
   const filteredPayments = useMemo(() => {

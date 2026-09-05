@@ -7,6 +7,7 @@ import { contractsApi } from "@/lib/api/contracts";
 import { invoicesApi } from "@/lib/api/invoices";
 import type { Booking } from "@/lib/types";
 import toast from "react-hot-toast";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 
 export type ViewMode = "active" | "vault";
 
@@ -71,8 +72,31 @@ export function useBookingsList() {
     }
   }, [view]);
 
+  // ✅ LIVE REFRESH: focus + visibility listeners for cross-tab changes
+  useLiveRefresh(fetchBookings);
+
   useEffect(() => {
     fetchBookings();
+  }, [fetchBookings]);
+
+  // ✅ AUTO-REFRESH: listen for booking creation from modals
+  useEffect(() => {
+    const handleBookingCreated = () => fetchBookings();
+    window.addEventListener('booking:created', handleBookingCreated);
+    
+    return () => {
+      window.removeEventListener('booking:created', handleBookingCreated);
+    };
+  }, [fetchBookings]);
+
+  // ✅ AUTO-REFRESH: listen for booking updates from inline contexts (Operations Center, tasks)
+  useEffect(() => {
+    const handleBookingUpdated = () => fetchBookings();
+    window.addEventListener('booking:updated', handleBookingUpdated);
+    
+    return () => {
+      window.removeEventListener('booking:updated', handleBookingUpdated);
+    };
   }, [fetchBookings]);
 
   useEffect(() => {

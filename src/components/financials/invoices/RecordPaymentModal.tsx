@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, Banknote, ReceiptText, User, Phone } from "lucide-react"; // ✅ FIXED: Removed AlertCircle
+import { Loader2, Banknote, ReceiptText, User, Phone } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import PremiumEntitySelector from "@/components/financials/shared/PremiumEntitySelector";
 import { invoicesApi } from "@/lib/api/invoices";
@@ -13,7 +13,7 @@ interface RecordPaymentModalProps {
   open: boolean;
   onClose: () => void;
   onPaymentRecorded: () => void;
-  invoice: Invoice | null; // ✅ Kept for backward compatibility (pre-selected invoice)
+  invoice: Invoice | null;
 }
 
 const inputClass =
@@ -33,7 +33,6 @@ export default function RecordPaymentModal({
   const [reference, setReference] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // ✅ Sync with preselectedInvoice when modal opens
   useEffect(() => {
     if (open) {
       setSelectedInvoice(preselectedInvoice);
@@ -43,7 +42,6 @@ export default function RecordPaymentModal({
     }
   }, [open, preselectedInvoice]);
 
-  // ✅ Fetch eligible invoices (unpaid/partially paid/overdue)
   const fetchEligibleInvoices = async () => {
     const data = await invoicesApi.list();
     return data.filter(
@@ -54,9 +52,6 @@ export default function RecordPaymentModal({
         inv.status === "partially_paid"
     );
   };
-
-  // ❌ REMOVED: useEntitySelector (no longer needed)
-  // const { getById } = useEntitySelector<any>({ ... });
 
   const remainingBalance = selectedInvoice
     ? Number(selectedInvoice.amount_due) - Number(selectedInvoice.amount_paid || 0)
@@ -82,6 +77,11 @@ export default function RecordPaymentModal({
       });
 
       toast.success("Payment recorded successfully!");
+      
+      // ✅ AUTO-REFRESH: notify payments list + invoices list to refetch
+      window.dispatchEvent(new CustomEvent('payment:created'));
+      window.dispatchEvent(new CustomEvent('invoice:updated'));
+      
       onPaymentRecorded();
       onClose();
     } catch (error: any) {
@@ -92,7 +92,6 @@ export default function RecordPaymentModal({
     return;
   };
 
-  // ✅ Render premium invoice card for the selector (Uses enriched fields)
   const renderInvoiceCard = (inv: any) => {
     const balance = Number(inv.amount_due) - Number(inv.amount_paid || 0);
     const statusStyle = 
@@ -155,28 +154,23 @@ export default function RecordPaymentModal({
       size="md"
     >
       <div className="space-y-6">
-        {/* ✅ Premium Entity Selector for Invoices */}
         <PremiumEntitySelector
           fetcher={fetchEligibleInvoices}
-          // ✅ FIXED: Removed nested key (client.full_name)
           searchKeys={["invoice_number", "client_name", "booking_number", "id"]}
           placeholder="Select an invoice..."
           emptyMessage="No eligible invoices. Only unpaid/partially paid/overdue invoices can be paid."
           renderEntityCard={renderInvoiceCard}
           selectedId={selectedInvoice?.id || null}
           onSelect={() => {
-            // ✅ FIXED: Removed unused 'id' parameter
             setSelectedInvoice((prev) => prev);
           }}
           onSelectEntity={(inv) => {
-            // ✅ NEW: Get the full invoice object directly from the selector
             setSelectedInvoice(inv as Invoice);
           }}
           label="Select Invoice"
           required
         />
 
-        {/* Invoice Summary */}
         {selectedInvoice && (
           <div className="p-5 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)]">
             <div className="flex justify-between items-center mb-3">

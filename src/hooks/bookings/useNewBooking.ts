@@ -243,6 +243,11 @@ export function useNewBooking() {
 
       await bookingsApi.create(payload);
       toast.success('Booking created successfully!');
+      
+      // ✅ AUTO-REFRESH: notify bookings list to refetch (works across all modal types)
+      window.dispatchEvent(new CustomEvent('booking:created'));
+      
+      // Navigate to bookings page (redundant if already there, but ensures clean state)
       router.push('/dashboard/bookings');
     } catch (error: any) {
       const detail = error.response?.data?.detail;

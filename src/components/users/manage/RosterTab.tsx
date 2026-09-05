@@ -123,13 +123,16 @@ export default function RosterTab() {
         department: data.department,
         job_title: data.job_title,
         password: data.password,
-        role: data.role,  // ✅ Now respects the Admin/Staff choice from the modal
+        role: data.role,
         is_active: true,
       };
       
       const newUser = await usersApi.create(payload);
       updateUserLocally(newUser);
       setAddManuallySuccess(`Account created! Credentials emailed to ${data.email}`);
+      
+      // ✅ AUTO-REFRESH: notify users list to refetch (new user appears instantly across tabs)
+      window.dispatchEvent(new CustomEvent('user:created'));
     } catch (error: unknown) {
       toast.error(getErrorMessage(error, "Failed to create account"));
     } finally {
@@ -160,6 +163,9 @@ export default function RosterTab() {
         job_title: data.job_title,
       });
       setInviteLink(result.invite_link);
+      
+      // ✅ AUTO-REFRESH: notify users list to refetch (invite appears instantly)
+      window.dispatchEvent(new CustomEvent('user:created'));
     } catch (error: unknown) {
       toast.error(getErrorMessage(error, "Failed to generate invite link"));
     } finally {
@@ -172,7 +178,7 @@ export default function RosterTab() {
     setInviteLink(null);
   }, []);
 
-  // ─── Row Action Handlers (unchanged) ─────────────────────────────────────
+  // ─── Row Action Handlers ─────────────────────────────────────────────────
   const handleSuspend = useCallback(async (userToSuspend: User) => {
     setActionLoadingId(userToSuspend.id);
     try {
@@ -188,6 +194,9 @@ export default function RosterTab() {
         is_suspended: !userToSuspend.is_suspended,
         is_active: userToSuspend.is_suspended
       });
+      
+      // ✅ AUTO-REFRESH: notify users list to refetch (status change)
+      window.dispatchEvent(new CustomEvent('user:updated', { detail: { userId: userToSuspend.id } }));
     } catch (error: unknown) {
       toast.error(getErrorMessage(error, "Action failed"));
     } finally {
@@ -203,6 +212,9 @@ export default function RosterTab() {
       toast.success("User verified successfully");
       const updatedUser = users.find(u => u.id === userId);
       if (updatedUser) updateUserLocally({ ...updatedUser, is_onboarded: true });
+      
+      // ✅ AUTO-REFRESH: notify users list to refetch (verification status change)
+      window.dispatchEvent(new CustomEvent('user:updated', { detail: { userId } }));
     } catch (error: unknown) {
       toast.error(getErrorMessage(error, "Failed to verify user"));
     } finally {
@@ -251,6 +263,9 @@ export default function RosterTab() {
       await usersApi.delete(userId);
       toast.success("User deleted successfully");
       removeUserLocally(userId);
+      
+      // ✅ AUTO-REFRESH: notify users list to refetch (user removed)
+      window.dispatchEvent(new CustomEvent('user:updated', { detail: { userId } }));
     } catch (error: unknown) {
       toast.error(getErrorMessage(error, "Failed to delete user"));
     } finally {

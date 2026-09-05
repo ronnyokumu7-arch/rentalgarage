@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from "react";
 import toast from "react-hot-toast";
 import { usersApi } from "@/lib/api/users";
 import type { User } from "@/lib/types";
+import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 
 export type CategoryMode = "executive" | "staff";
 
@@ -58,8 +59,23 @@ export function useUsersList() {
     }
   }, []);
 
+  // ✅ LIVE REFRESH: focus + visibility listeners for cross-tab changes
+  useLiveRefresh(fetchUsers);
+
   useEffect(() => {
     fetchUsers();
+  }, [fetchUsers]);
+
+  // ✅ AUTO-REFRESH: listen for user creation + updates from modals / inline contexts
+  useEffect(() => {
+    const handleUserEvent = () => fetchUsers();
+    window.addEventListener('user:created', handleUserEvent);
+    window.addEventListener('user:updated', handleUserEvent);
+    
+    return () => {
+      window.removeEventListener('user:created', handleUserEvent);
+      window.removeEventListener('user:updated', handleUserEvent);
+    };
   }, [fetchUsers]);
 
   // Counters for Toolbar UI
@@ -135,6 +151,9 @@ export function useUsersList() {
     try {
       await usersApi.sendVerification(userId, { channel });
       toast.success(`Verification ${channel} sent successfully!`);
+      
+      // ✅ AUTO-REFRESH: notify users list to refetch
+      window.dispatchEvent(new CustomEvent('user:updated', { detail: { userId } }));
     } catch (error: any) {
       toast.error(error.response?.data?.detail || `Failed to send verification ${channel}`);
     }
@@ -145,6 +164,9 @@ export function useUsersList() {
       const updatedUser = await usersApi.markVerified(userId, { channel });
       updateUserLocally(updatedUser);
       toast.success(`User ${channel} marked as verified!`);
+      
+      // ✅ AUTO-REFRESH: notify users list to refetch
+      window.dispatchEvent(new CustomEvent('user:updated', { detail: { userId } }));
     } catch (error: any) {
       toast.error(error.response?.data?.detail || `Failed to mark ${channel} as verified`);
     }

@@ -64,6 +64,10 @@ export default function GenerateContractModal({ open, onClose, onGenerated }: Ge
           await contractsApi.regenerate(selectedBooking.id);
           toast.dismiss();
           toast.success("Contract regenerated successfully!");
+          
+          // ✅ AUTO-REFRESH: notify contracts + bookings list to refetch
+          window.dispatchEvent(new CustomEvent('contract:updated'));
+          window.dispatchEvent(new CustomEvent('booking:updated'));
         } else {
           // Copy share link for active contracts
           toast.loading("Generating share link...", { duration: 1000 });
@@ -76,6 +80,9 @@ export default function GenerateContractModal({ open, onClose, onGenerated }: Ge
           await navigator.clipboard.writeText(fullUrl);
           toast.dismiss();
           toast.success("Contract link copied to clipboard!");
+          
+          // ✅ AUTO-REFRESH: notify contracts list to refetch (share_token changed)
+          window.dispatchEvent(new CustomEvent('contract:updated'));
         }
         onGenerated();
         handleClose();
@@ -85,6 +92,11 @@ export default function GenerateContractModal({ open, onClose, onGenerated }: Ge
         await contractsApi.generateForBooking(selectedBooking.id);
         toast.dismiss();
         toast.success("Contract generated successfully!");
+        
+        // ✅ AUTO-REFRESH: notify contracts + bookings list to refetch
+        window.dispatchEvent(new CustomEvent('contract:created'));
+        window.dispatchEvent(new CustomEvent('booking:updated'));
+        
         onGenerated();
         handleClose();
       }
@@ -166,7 +178,6 @@ export default function GenerateContractModal({ open, onClose, onGenerated }: Ge
           renderEntityCard={renderBookingCard}
           selectedId={selectedBooking?.id || null}
           onSelect={() => {
-            // ✅ FIXED: Removed unused 'id' parameter
             setSelectedBooking((prev) => prev);
           }}
           onSelectEntity={(booking) => {
