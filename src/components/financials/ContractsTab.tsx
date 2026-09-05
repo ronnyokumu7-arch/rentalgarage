@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Search, FileText, Filter, FileSignature } from "lucide-react";
-import { useSearchParams, useRouter } from "next/navigation"; // ✅ NEW
+import { useSearchParams, useRouter } from "next/navigation";
 import FilterDropdown from "@/components/ui/FilterDropdown";
 import { useContracts } from "@/hooks/financials/useContracts";
 import ContractsTable from "./contracts/ContractsTable";
@@ -10,8 +10,8 @@ import GenerateContractModal from "./contracts/GenerateContractModal";
 import type { ContractStatus } from "@/lib/types";
 
 export default function ContractsTab() {
-  const router = useRouter(); // ✅ NEW
-  const searchParams = useSearchParams(); // ✅ NEW
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
   const {
     contracts,
@@ -34,16 +34,15 @@ export default function ContractsTab() {
 
   const pageSize = 7;
 
-  // ✅ NEW: Sync statusFilter with URL query parameter
+  // ✅ Sync statusFilter with URL query parameter
   useEffect(() => {
     const statusFromUrl = searchParams.get("status");
     if (statusFromUrl && statusFromUrl !== statusFilter) {
       setStatusFilter(statusFromUrl as ContractStatus | "all");
     }
-    // Only run when URL changes
   }, [searchParams]);
 
-  // ✅ NEW: Update URL when statusFilter changes (so users can share/deep-link)
+  // ✅ Update URL when statusFilter changes (so users can share/deep-link)
   useEffect(() => {
     if (statusFilter !== "all") {
       router.replace(`/dashboard/financials?tab=contracts&status=${statusFilter}`, { scroll: false });
@@ -51,6 +50,39 @@ export default function ContractsTab() {
       router.replace(`/dashboard/financials?tab=contracts`, { scroll: false });
     }
   }, [statusFilter, router]);
+
+  // ✅ FRESHNESS: refetch on window focus (cross-tab changes)
+  useEffect(() => {
+    const handleFocus = () => refetch();
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [refetch]);
+
+  // ✅ FRESHNESS: refetch when tab becomes visible (switching browser tabs)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") refetch();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, [refetch]);
+
+  // ✅ FRESHNESS: wrap send/void to refetch after mutation
+  const sendAndRefetch = useCallback(
+    async (contractId: number) => {
+      await handleSend(contractId);
+      await refetch();
+    },
+    [handleSend, refetch]
+  );
+
+  const voidAndRefetch = useCallback(
+    async (contractId: number) => {
+      await handleVoid(contractId);
+      await refetch();
+    },
+    [handleVoid, refetch]
+  );
 
   const searchFilteredContracts = useMemo(() => {
     const searchLower = search.trim().toLowerCase();
@@ -85,10 +117,10 @@ export default function ContractsTab() {
   return (
     <>
       <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden">
-        {/* Toolbar - DNA matched to Clients page */}
+        {/* Toolbar */}
         <div className="p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
           
-          {/* Metrics Breakdown Panel - Draft | Sent | Signed (Evenly Distributed) */}
+          {/* Metrics Breakdown Panel */}
           <div className="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm overflow-x-auto custom-scrollbar">
             <div className="flex items-center gap-2 whitespace-nowrap flex-1 min-w-0">
               <span className="text-xs font-medium text-[var(--color-ink-muted)]">Draft</span>
@@ -106,10 +138,9 @@ export default function ContractsTab() {
             </div>
           </div>
 
-          {/* Controls: Search + Icon-Only Filter + Action Button */}
+          {/* Controls */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <div className="flex items-center gap-2 flex-1 sm:w-80">
-              {/* Search Input */}
               <div className="relative flex-1">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
                 <input
@@ -121,7 +152,6 @@ export default function ContractsTab() {
                 />
               </div>
 
-              {/* ✅ Reusable FilterDropdown for Status */}
               <FilterDropdown
                 filterId="contract-status"
                 label="Status"
@@ -137,7 +167,6 @@ export default function ContractsTab() {
               />
             </div>
 
-            {/* Generate Contract Button */}
             <button
               type="button"
               onClick={() => {
@@ -172,21 +201,19 @@ export default function ContractsTab() {
           </div>
         ) : (
           <>
-            {/* Contracts Table */}
             <ContractsTable
               data={paginatedContracts as any}
               allData={displayedContracts as any}
               onDownload={handleDownload}
               onCopyLink={handleCopyLink}
-              onSend={handleSend}
-              onVoid={handleVoid}
+              onSend={sendAndRefetch}
+              onVoid={voidAndRefetch}
               onGenerate={(id) => {
                 setGenerateForId(id);
                 setShowGenerateModal(true);
               }}
             />
 
-            {/* Pagination Footer */}
             <div className="hidden md:flex p-4 border-t border-[var(--color-surface-border)] flex-col sm:flex-row items-center justify-between gap-3">
               <p className="text-xs text-[var(--color-ink-muted)] text-center sm:text-left">
                 Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, displayedContracts.length)} of {displayedContracts.length} contracts

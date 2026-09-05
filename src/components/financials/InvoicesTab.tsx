@@ -1,14 +1,13 @@
-// src/components/financials/InvoicesTab.tsx
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import { Search, FileText, Filter, FileSignature } from "lucide-react";
 import FilterDropdown from "@/components/ui/FilterDropdown";
 import { useInvoices } from "@/hooks/financials/useInvoices";
 import InvoicesTable from "./invoices/InvoicesTable";
 import RecordPaymentModal from "./invoices/RecordPaymentModal";
 import CreateInvoiceModal from "./invoices/CreateInvoiceModal";
-import type { Invoice, InvoiceStatus } from "@/lib/types"; // ✅ FIXED: Added InvoiceStatus import
+import type { Invoice, InvoiceStatus } from "@/lib/types";
 
 export default function InvoicesTab() {
   const {
@@ -24,6 +23,31 @@ export default function InvoicesTab() {
   const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const pageSize = 7;
+
+  // ✅ FRESHNESS: refetch on window focus (cross-tab changes)
+  useEffect(() => {
+    const handleFocus = () => refetch();
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, [refetch]);
+
+  // ✅ FRESHNESS: refetch when tab becomes visible (switching browser tabs)
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === "visible") refetch();
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, [refetch]);
+
+  // ✅ FRESHNESS: wrap void to refetch after mutation
+  const voidAndRefetch = useCallback(
+    async (invoiceId: number) => {
+      await handleVoid(invoiceId);
+      await refetch();
+    },
+    [handleVoid, refetch]
+  );
 
   const displayedInvoices = useMemo(() => {
     return invoices.filter(invoice => {
@@ -59,10 +83,10 @@ export default function InvoicesTab() {
     <>
       <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden">
         
-        {/* Toolbar - DNA matched to Contracts/Clients page */}
+        {/* Toolbar */}
         <div className="p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
           
-          {/* Metrics Breakdown Panel - Draft | Sent | Paid (Evenly Distributed) */}
+          {/* Metrics Breakdown Panel */}
           <div className="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm overflow-x-auto custom-scrollbar">
             <div className="flex items-center gap-2 whitespace-nowrap flex-1 min-w-0">
               <span className="text-xs font-medium text-[var(--color-ink-muted)]">Draft</span>
@@ -80,10 +104,9 @@ export default function InvoicesTab() {
             </div>
           </div>
 
-          {/* Controls: Search + Icon-Only Filter + Action Button */}
+          {/* Controls */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <div className="flex items-center gap-2 flex-1 sm:w-80">
-              {/* Search Input */}
               <div className="relative flex-1">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
                 <input
@@ -95,7 +118,6 @@ export default function InvoicesTab() {
                 />
               </div>
 
-              {/* ✅ Reusable FilterDropdown for Status */}
               <FilterDropdown
                 filterId="invoice-status"
                 label="Status"
@@ -113,7 +135,6 @@ export default function InvoicesTab() {
               />
             </div>
 
-            {/* Generate Invoice Button */}
             <button
               type="button"
               onClick={() => setCreateModalOpen(true)}
@@ -125,7 +146,7 @@ export default function InvoicesTab() {
           </div>
         </div>
 
-        {/* Content Area - Edge-to-edge table */}
+        {/* Content Area */}
         {loading ? (
           <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2">
             <div className="w-5 h-5 rounded-full border-2 border-[var(--color-primary)] border-t-transparent animate-spin" />
@@ -145,17 +166,15 @@ export default function InvoicesTab() {
           </div>
         ) : (
           <>
-            {/* ✅ EDGE-TO-EDGE TABLE: No p-4 wrapper */}
             <InvoicesTable 
               data={paginatedInvoices}
               onDownload={handleDownload}
               onCopyLink={handleCopyLink}
-              onVoid={handleVoid}
+              onVoid={voidAndRefetch}
               onRecordPayment={openPaymentModal}
               onCreate={() => setCreateModalOpen(true)} 
             />
 
-            {/* Pagination Footer */}
             <div className="hidden md:flex p-4 border-t border-[var(--color-surface-border)] flex-col sm:flex-row items-center justify-between gap-3">
               <p className="text-xs text-[var(--color-ink-muted)] text-center sm:text-left">
                 Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, displayedInvoices.length)} of {displayedInvoices.length} invoices
@@ -186,7 +205,6 @@ export default function InvoicesTab() {
         )}
       </div>
 
-      {/* Modals */}
       <CreateInvoiceModal
         open={createModalOpen}
         onClose={() => setCreateModalOpen(false)}
