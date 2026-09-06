@@ -143,21 +143,18 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
   return (
     <header className="h-14 sm:h-16 flex items-center gap-2 sm:gap-4 px-3 sm:px-6 sticky top-0 z-30 border-b border-[var(--color-surface-border)] bg-[var(--color-bg)]/80 backdrop-blur-xl transition-all duration-300">
       
-      {/* ── LEFT: Brand (Hidden on Desktop) ─────────────────────────────────── */}
-      <Link href="/dashboard" className="lg:hidden flex items-center gap-2.5 group">
-        <div className="relative">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-xs shadow-lg shadow-blue-500/25 ring-2 ring-[var(--color-surface)] transition-all duration-300 group-hover:shadow-blue-500/40 group-hover:scale-105">
-            RG
-          </div>
-          <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-400 animate-pulse ring-2 ring-[var(--color-surface)]" />
-        </div>
-        <span className="text-sm font-bold text-[var(--color-ink)] tracking-tight">
-          Rental<span className="text-blue-600 dark:text-blue-400">Garage</span>
+      {/* ── LEFT: Brand ─────────────────────────────────────────────────────── */}
+      <Link href="/dashboard" className="flex items-center gap-2.5 group flex-shrink-0">
+        <span className="text-sm font-medium text-[var(--color-ink)] tracking-tight">
+          Rental<span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-hover)]">Garage</span>
+        </span>
+        <span className="hidden lg:inline-block text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)] bg-[var(--color-surface-hover)] px-2 py-0.5 rounded-full border border-[var(--color-surface-border)]">
+          {isSuperAdmin ? "Super" : "Enterprise"}
         </span>
       </Link>
 
       {/* Breadcrumb / Context - Desktop only */}
-      <div className="hidden lg:flex items-center gap-2 text-sm text-[var(--color-ink-muted)]">
+      <div className="hidden lg:flex items-center gap-2 text-sm text-[var(--color-ink-muted)] ml-2">
         <span className="font-medium">{getGreeting()}</span>
         <span className="text-[var(--color-ink-subtle)]">•</span>
         <span className="text-[var(--color-ink-subtle)] capitalize">
@@ -309,16 +306,16 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
               {/* Divider */}
               <div className="h-px bg-[var(--color-surface-border)] mx-3 my-1" />
 
-{/* Logout - Distinguished */}
-<div className="px-2 py-2">
-  <button 
-    onClick={logout} 
-    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-[var(--color-danger-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-rose-500/10 transition-all duration-150 group"
-  >
-    <LogOut size={16} strokeWidth={1.8} className="text-[var(--color-danger-text)]" />
-    <span className="flex-1">Sign out</span>
-  </button>
-</div>
+              {/* Logout - Distinguished */}
+              <div className="px-2 py-2">
+                <button 
+                  onClick={logout} 
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-[var(--color-danger-text)] hover:bg-[var(--color-danger-bg)] dark:hover:bg-rose-500/10 transition-all duration-150 group"
+                >
+                  <LogOut size={16} strokeWidth={1.8} className="text-[var(--color-danger-text)]" />
+                  <span className="flex-1">Sign out</span>
+                </button>
+              </div>
             </div>
           )}
         </div>

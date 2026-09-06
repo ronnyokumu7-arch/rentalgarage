@@ -65,7 +65,6 @@ export default function DataTable<T>({
     setMounted(true);
   }, []);
 
-  // ✅ FIXED: Check both the trigger button AND the portal menu
   useEffect(() => {
     if (!openActionId) return;
     
@@ -80,7 +79,6 @@ export default function DataTable<T>({
       }
     };
     
-    // ✅ FIXED: Use click instead of mousedown to avoid race condition
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, [openActionId]);
@@ -194,7 +192,8 @@ export default function DataTable<T>({
 
   return (
     <>
-      <div className="border border-[var(--color-surface-border)] rounded-xl bg-[var(--color-surface)] flex flex-col overflow-hidden shadow-[var(--shadow-card)]">
+      {/* ✅ REMOVED rounded-xl and overflow-hidden to make top edges sharp */}
+      <div className="border border-[var(--color-surface-border)] bg-[var(--color-surface)] flex flex-col shadow-[var(--shadow-card)]">
         <div className="overflow-x-auto -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
           <table className="w-full min-w-max text-sm text-left">
             <thead className="text-xs text-[var(--color-ink-muted)] uppercase bg-[var(--color-surface-hover)] sticky top-0 z-10 shadow-sm">
@@ -264,10 +263,8 @@ export default function DataTable<T>({
       {/* ✅ Portal-rendered Row Actions Dropdown */}
       {mounted && openActionId !== null && dropdownPos && createPortal(
         <>
-          {/* Backdrop - allows clicking through to close */}
           <div className="fixed inset-0 z-[9998]" onClick={() => setOpenActionId(null)} />
           
-          {/* Dropdown Menu */}
           <div
             data-dropdown-menu={openActionId}
             className="fixed z-[9999] w-56 bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-xl shadow-[var(--shadow-dropdown)] overflow-hidden animate-in fade-in zoom-in-95 duration-100"
@@ -291,11 +288,9 @@ export default function DataTable<T>({
                       e.stopPropagation();
                       e.preventDefault();
                       
-                      // Close menu first, then execute action
                       setOpenActionId(null);
                       setDropdownPos(null);
                       
-                      // Execute the action
                       if (typeof action.onClick === "function") {
                         action.onClick(item);
                       }

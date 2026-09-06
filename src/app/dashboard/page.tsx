@@ -62,29 +62,31 @@ export default function DashboardPage() {
     overview: { 
       title: "Dashboard", 
       description: "Real-time overview", 
-      icon: <Gauge size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" /> 
+      icon: <Gauge size={28} strokeWidth={1.5} className="text-[var(--color-primary)] hidden sm:block" /> 
     },
     activity: { 
       title: "Bookings Calendar", 
       description: "Visual overview of all upcoming and active rentals", 
-      icon: <CalendarRange size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" /> 
+      icon: <CalendarRange size={28} strokeWidth={1.5} className="text-[var(--color-primary)] hidden sm:block" /> 
     },
     reports: { 
       title: "Analytics", 
       description: "Deep insights into your business performance", 
-      icon: <LineChart size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" /> 
+      icon: <LineChart size={28} strokeWidth={1.5} className="text-[var(--color-primary)] hidden sm:block" /> 
     },
   }[activeTab as "overview" | "activity" | "reports"];
 
   return (
     <div className="space-y-4 sm:space-y-6 pb-6">
+      {/* ✅ Header - Clean on mobile, no icon, no title */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            {/* ✅ Bare Icon - No container */}
+            {/* ✅ Icon hidden on mobile */}
             {currentTabInfo?.icon}
             
-            <h1 className="text-lg sm:text-xl font-bold text-ink font-display tracking-tight">
+            {/* ✅ Title hidden on mobile */}
+            <h1 className="hidden sm:block text-lg sm:text-xl font-bold text-ink font-display tracking-tight">
               {currentTabInfo?.title}
             </h1>
           </div>
@@ -93,11 +95,7 @@ export default function DashboardPage() {
           </p>
         </div>
         
-        {/* 
-          ✅ HIDE TAB SWITCHER ON MOBILE 
-          - `hidden lg:block`: Only shows on tablet/desktop
-          - Keeps Mobile clean and focused on the dashboard overview
-        */}
+        {/* ✅ Tab Switcher - Desktop only */}
         <div className="hidden lg:block">
           <PremiumTabSwitcher 
             tabs={TABS} 
@@ -125,7 +123,7 @@ export default function DashboardPage() {
                   </div>
                 )}
 
-                {/* ✅ Mobile Order: Alerts -> Recent Activity -> Action Center -> Fleet Status */}
+                {/* Mobile Order: Alerts -> Recent Activity -> Action Center -> Fleet Status */}
                 <MobileAlerts alerts={alerts} />
                 <RecentActivityWidget />
                 <ActionCenterWidget />
@@ -150,11 +148,10 @@ export default function DashboardPage() {
                   </motion.div>
                 )}
 
-                {/* ✅ Desktop Main Content - items-start prevents stretching */}
+                {/* Desktop Main Content */}
                 <div className="grid lg:grid-cols-3 gap-6 items-start">
                   <div className="lg:col-span-2"><ActionCenterWidget /></div>
                   <div className="space-y-6">
-                    {/* ✅ REORDERED: Needs Attention FIRST, then Activity, then Fleet Status */}
                     <DesktopAlerts alerts={alerts} />
                     <RecentActivityWidget />
                     <DesktopFleetStatus vehicles={vehicles} />
@@ -165,14 +162,14 @@ export default function DashboardPage() {
           </motion.div>
         )}
 
-        {/* ✅ Only render on Desktop (isMobile is false) */}
+        {/* Only render on Desktop */}
         {!isMobile && activeTab === "activity" && (
           <motion.div key="activity" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
             <FleetCalendar />
           </motion.div>
         )}
 
-        {/* ✅ Only render on Desktop (isMobile is false) */}
+        {/* Only render on Desktop */}
         {!isMobile && activeTab === "reports" && (
           <motion.div key="reports" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
             <div className="bg-surface border border-surface-border shadow-card rounded-2xl p-8 sm:p-12 flex flex-col items-center justify-center text-center">
