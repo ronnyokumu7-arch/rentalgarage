@@ -40,16 +40,27 @@ export default function ContractsTab() {
     if (statusFromUrl && statusFromUrl !== statusFilter) {
       setStatusFilter(statusFromUrl as ContractStatus | "all");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
-  // ✅ Update URL when statusFilter changes (so users can share/deep-link)
+  // ✅ FIXED: Update URL when statusFilter changes — ONLY while the contracts
+  // tab is active. Depends on the tab param (a plain string), NOT the router
+  // object, and skips the write if the URL already matches. This stops it from
+  // fighting the parent's tab navigation (previously it rewrote ?tab=contracts
+  // over ?tab=invoices and broke tab switching).
   useEffect(() => {
-    if (statusFilter !== "all") {
-      router.replace(`/dashboard/financials?tab=contracts&status=${statusFilter}`, { scroll: false });
-    } else {
-      router.replace(`/dashboard/financials?tab=contracts`, { scroll: false });
+    if ((searchParams.get("tab") || "overview") !== "contracts") return;
+
+    const targetSearch =
+      statusFilter !== "all"
+        ? `tab=contracts&status=${statusFilter}`
+        : "tab=contracts";
+
+    if (searchParams.toString() !== targetSearch) {
+      router.replace(`/dashboard/financials?${targetSearch}`, { scroll: false });
     }
-  }, [statusFilter, router]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [statusFilter, searchParams]);
 
   // ✅ FRESHNESS: refetch on window focus (cross-tab changes)
   useEffect(() => {
@@ -64,7 +75,7 @@ export default function ContractsTab() {
       if (document.visibilityState === "visible") refetch();
     };
     document.addEventListener("visibilitychange", handleVisibility);
-    return () => document.removeEventListener("visibilitychange", handleVisibility);
+    return () => window.removeEventListener("visibilitychange", handleVisibility);
   }, [refetch]);
 
   // ✅ FRESHNESS: wrap send/void to refetch after mutation
