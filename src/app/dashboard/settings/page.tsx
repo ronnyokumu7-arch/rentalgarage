@@ -6,10 +6,12 @@ import {
   Building2, ShieldCheck, Palette, Bell, CreditCard,
   ChevronRight, ChevronLeft, Puzzle, Database, Key,
   Globe, Lock, BarChart3, UserCheck, Receipt, Landmark,
-  HardDrive, Activity, Webhook, SlidersHorizontal, UserCog, Landmark as LandmarkIcon, ServerCog, ShieldHalf
+  HardDrive, Activity, Webhook, SlidersHorizontal, UserCog, Landmark as LandmarkIcon, ServerCog, ShieldHalf,
+  ScrollText,
 } from "lucide-react";
 
 import BusinessProfileSettings from "@/components/settings/BusinessProfileSettings";
+import BusinessPoliciesSettings from "@/components/settings/BusinessPoliciesSettings";
 import AppearanceSettings from "@/components/settings/AppearanceSettings";
 import TeamRolesSettings from "@/components/settings/TeamRolesSettings";
 import UserManagementSettings from "@/components/settings/UserManagementSettings";
@@ -40,6 +42,7 @@ const TABS = [
 const SETTINGS_MODULES: SettingModule[] = [
   // General
   { id: "business", title: "Business Profile", description: "Manage your agency details, logo, and official contact information.", icon: Building2, theme: "blue", tab: "general" },
+  { id: "policies", title: "Business Policies", description: "Customize contract clauses — fuel policy, liability, terms & conditions.", icon: ScrollText, theme: "emerald", tab: "general", badge: "New" },
   { id: "appearance", title: "Appearance", description: "Customize dashboard themes, regional formats, and display preferences.", icon: Palette, theme: "purple", tab: "general" },
   { id: "notifications", title: "Notifications", description: "Control email alerts, booking reminders, and system warnings.", icon: Bell, theme: "amber", tab: "general" },
   { id: "regional", title: "Regional Settings", description: "Set timezone, currency, date formats, and language preferences.", icon: Globe, theme: "emerald", tab: "general" },
@@ -192,6 +195,8 @@ export default function SettingsPage() {
           {/* ✅ DYNAMIC ROUTING: Render specific module components, or fallback placeholder */}
           {activeModule.id === "business" ? (
             <BusinessProfileSettings />
+          ) : activeModule.id === "policies" ? (
+            <BusinessPoliciesSettings />
           ) : activeModule.id === "appearance" ? (
             <AppearanceSettings />
           ) : activeModule.id === "roles" ? (
@@ -200,7 +205,7 @@ export default function SettingsPage() {
             <UserManagementSettings />
           ) : activeModule.id === "billing" ? (
             <BillingSubscriptionSettings />
-          ) : activeModule.id === "payments" ? ( // ✅ NEW: Payment Methods Integration
+          ) : activeModule.id === "payments" ? (
             <PaymentMethodsSettings />
           ) : (
             <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-2xl shadow-[var(--shadow-card)] p-8 min-h-[400px] flex flex-col items-center justify-center text-center">

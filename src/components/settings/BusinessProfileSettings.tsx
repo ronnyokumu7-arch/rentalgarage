@@ -105,8 +105,8 @@ export default function BusinessProfileSettings() {
                   <FileText className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold text-[var(--color-ink)]">Business Policy</h3>
-                  <p className="text-xs text-[var(--color-ink-muted)]">Default terms for contracts and receipts</p>
+                  <h3 className="text-lg font-bold text-[var(--color-ink)]">Receipts & Document Footer</h3>
+                  <p className="text-xs text-[var(--color-ink-muted)]">Terms printed at the bottom of receipts and non-contract documents</p>
                 </div>
               </div>
 
