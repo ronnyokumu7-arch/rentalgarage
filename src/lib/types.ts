@@ -827,10 +827,24 @@ export interface TaskUpdate {
 
 // ─── Tenants & Subscriptions ─────────────────────────────────────────────────
 export type SubscriptionStatus =
-  | "trial" | "starter_trial" | "pending_verification" 
+  | "trial" | "starter_trial" | "pending_verification"
   | "active" | "past_due" | "suspended" | "cancelled";
 
 export type PaymentMethodType = "mpesa" | "airtel_money" | "card" | "paypal" | "bank";
+
+/**
+ * ✅ SINGLE SOURCE OF TRUTH for display state.
+ * Mirrors backend TenantOut.effective_status derivation exactly:
+ *   vaulted    = is_archived
+ *   suspended  = suspended_at OR !is_active OR subscription_status='suspended'
+ *   trial      = subscription_status in (trial, starter_trial)
+ *   active     = subscription_status = 'active'
+ *   attention  = subscription_status in (past_due, pending_verification, cancelled)
+ *
+ * All UI components (badges, filters, action buttons) must key off this field
+ * — never off raw is_active / is_archived / subscription_status combinations.
+ */
+export type EffectiveStatus = "vaulted" | "suspended" | "trial" | "active" | "attention";
 
 export interface TenantProfile {
   id?: number;
@@ -854,36 +868,43 @@ export interface Tenant {
   name: string;
   email: string;
   phone_number?: string | null;
-  
+
   admin_name?: string | null;
   admin_email?: string | null;
   admin_phone?: string | null;
-  
+
   is_active: boolean;
   is_archived: boolean;
   is_trial?: boolean;
   owner_id?: number | null;
   suspended_at?: string | null;
   suspension_reason?: string | null;
-  
+
+  // ✅ Vault audit trail — written on archive/delete-soft, cleared on restore
+  vaulted_at?: string | null;
+  vault_reason?: string | null;
+
   last_reset_request_at?: string | null;
   email_change_cooldown_until?: string | null;
   admin_email_changed_at?: string | null;
   admin_changed_by_user_id?: number | null;
-  
+
   plan: string;
   subscription_status: SubscriptionStatus;
   trial_ends_at?: string | null;
   subscription_ends_at?: string | null;
   grace_period_ends_at?: string | null;
-  
+
   default_payment_method?: PaymentMethodType | null;
   stripe_customer_id?: string | null;
   paypal_payer_id?: string | null;
   payment_metadata?: Record<string, any> | null;
-  
+
   profile?: TenantProfile | null;
-  
+
+  // ✅ Derived display state — the one field the UI should trust
+  effective_status: EffectiveStatus;
+
   created_at: string;
   updated_at: string;
 }
@@ -926,14 +947,16 @@ export interface UpdateTenantPayload {
   admin_name?: string;
   admin_email?: string;
   admin_phone?: string;
-  is_active?: boolean;
-  is_archived?: boolean;
   plan?: string;
   subscription_status?: SubscriptionStatus;
   default_payment_method?: PaymentMethodType;
   stripe_customer_id?: string;
   paypal_payer_id?: string;
   payment_metadata?: Record<string, any>;
+  // ⚠️ CONTRACT RULE: is_active and is_archived are REMOVED from this payload.
+  // Lifecycle transitions are owned exclusively by dedicated endpoints:
+  //   POST /tenants/{id}/suspend | /activate | /archive | /restore
+  // The backend PATCH endpoint now rejects these fields with a 400.
 }
 
 // ─── Payment Gateways ────────────────────────────────────────────────────────

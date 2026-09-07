@@ -36,7 +36,7 @@ export default function CommissionPaymentVerification() {
   // ✅ Tenant id → name map (queue shows names, not raw ids)
   useEffect(() => {
     tenantsApi
-      .list(0, 500)
+      .list({ page: 1, page_size: 500 })
       .then((tenants) => {
         const map: Record<number, string> = {};
         tenants.forEach((t) => (map[t.id] = t.name));

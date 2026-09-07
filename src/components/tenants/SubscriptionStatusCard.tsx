@@ -86,7 +86,7 @@ export function SubscriptionStatusCard({ tenant, onUpdated }: SubscriptionStatus
     setIsTogglingStatus(true);
     try {
       if (tenant.is_active) {
-        await tenantsApi.suspend(tenant.id, 'Suspended by Super Admin');
+        await tenantsApi.suspend(tenant.id, { reason: 'Suspended by Super Admin' });
         toast.success('Tenant suspended');
       } else {
         await tenantsApi.activate(tenant.id);

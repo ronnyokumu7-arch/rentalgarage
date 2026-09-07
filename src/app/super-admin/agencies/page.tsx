@@ -6,6 +6,7 @@ import { useTenantsList } from "@/hooks/tenants/useTenantsList";
 import { TenantsTable } from "@/components/tenants/TenantsTable";
 import TenantSubscriptionVerification from "@/components/admin/TenantSubscriptionVerification";
 import CommissionPaymentVerification from "@/components/admin/CommissionPaymentVerification";
+import ConfirmDestructiveModal from "@/components/ui/ConfirmDestructiveModal";
 import { Building2, Wallet, ShieldCheck } from "lucide-react";
 import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
 
@@ -72,6 +73,27 @@ export default function SuperAdminAgenciesPage() {
         {activeTab === "subscriptions" && <TenantSubscriptionVerification />}
         {activeTab === "commission" && <CommissionPaymentVerification />}
       </main>
+
+      {/* ✅ DESTRUCTIVE ACTION CONFIRMATION MODAL */}
+      <ConfirmDestructiveModal
+        open={!!listProps.pending}
+        title={
+          listProps.pending?.type === "suspend"
+            ? "Suspend Agency"
+            : "Move Agency to Vault"
+        }
+        message={
+          listProps.pending?.type === "suspend"
+            ? `This will immediately lock every user under ${listProps.pending?.tenant.name}. They will be unable to sign in, book trips, or generate contracts until unsuspended.`
+            : `This permanently removes ${listProps.pending?.tenant.name} from active operations. All their data is preserved and can be restored later.`
+        }
+        confirmWord={listProps.pending?.tenant.name || ""}
+        confirmLabel={listProps.pending?.type === "suspend" ? "Suspend Agency" : "Vault Agency"}
+        dangerVariant="danger"
+        loading={listProps.actionLoadingId === listProps.pending?.tenant.id}
+        onConfirm={listProps.executePending}
+        onCancel={() => listProps.setPending(null)}
+      />
     </div>
   );
 }

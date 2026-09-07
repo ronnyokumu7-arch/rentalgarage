@@ -5,7 +5,6 @@ import type {
   Tenant,
   CreateTenantPayload,
   UpdateTenantPayload,
-  // ✅ NEW: Imported strict Payment Gateway types
   PaymentGatewayConfig,
   PaymentGatewayPayload,
   GatewayType,
@@ -37,22 +36,59 @@ export interface SendResetLinkPayload {
 }
 
 // ---------------------------------------------------------------------------
+// ✅ Lifecycle Action Payloads (typed, audited)
+// ---------------------------------------------------------------------------
+export interface SuspendPayload {
+  reason: string; // min 10 chars enforced by backend
+}
+
+export interface UnsuspendPayload {
+  note?: string; // optional reinstatement note
+}
+
+export interface ArchivePayload {
+  reason: string; // min 10 chars enforced by backend
+}
+
+export interface RestorePayload {
+  note?: string; // optional restore note
+}
+
+// ---------------------------------------------------------------------------
 // Tenant List Response
 // ---------------------------------------------------------------------------
 export interface TenantListResponse {
   data?: Tenant[];
   items?: Tenant[];
   total?: number;
+  page?: number;
+  page_size?: number;
+}
+
+export interface TenantListParams {
+  page?: number;
+  page_size?: number;
+  search?: string;
+  status?: "ACTIVE" | "SUSPENDED" | "VAULTED" | "ATTENTION" | null;
+  show_archived?: boolean;
 }
 
 export const tenantsApi = {
   /**
    * GET /tenants/
-   * Returns list of tenants. Handles both array and paginated object responses.
+   * Returns paginated list of tenants with effective-status scoping.
+   * Handles both array and paginated object responses.
    */
-  list: async (skip = 0, limit = 100): Promise<Tenant[]> => {
+  list: async (params: TenantListParams = {}): Promise<Tenant[]> => {
+    const queryParams = new URLSearchParams();
+    if (params.page) queryParams.set("page", String(params.page));
+    if (params.page_size) queryParams.set("page_size", String(params.page_size));
+    if (params.search) queryParams.set("search", params.search);
+    if (params.status) queryParams.set("status", params.status);
+    if (params.show_archived) queryParams.set("show_archived", "true");
+
     const res = await apiClient
-      .get<Tenant[] | TenantListResponse>(`/tenants/?skip=${skip}&limit=${limit}`)
+      .get<Tenant[] | TenantListResponse>(`/tenants/?${queryParams.toString()}`)
       .then((r) => r.data);
 
     if (Array.isArray(res)) return res;
@@ -96,6 +132,7 @@ export const tenantsApi = {
   /**
    * PATCH /tenants/{tenant_id}
    * Super Admin update for specific tenant configuration.
+   * ⚠️ CONTRACT RULE: lifecycle fields (is_active, is_archived) are rejected.
    */
   update: async (
     id: number | string,
@@ -111,26 +148,51 @@ export const tenantsApi = {
     return apiClient.post<Tenant>(`/tenants/${id}/transition-to-payg`).then((r) => r.data);
   },
 
+  // ---------------------------------------------------------------------------
+  // ✅ Lifecycle Endpoints (typed, audited, self-guarded)
+  // ---------------------------------------------------------------------------
+
   /**
    * POST /tenants/{tenant_id}/suspend
+   * Manual super-admin suspension. Reason is mandatory (min 10 chars).
+   * ⚠️ Self-guard: cannot suspend your own tenant.
    */
-  suspend: async (id: number | string, reason?: string): Promise<Tenant> => {
-    return apiClient.post<Tenant>(`/tenants/${id}/suspend`, null, { params: { reason } }).then((r) => r.data);
+  suspend: async (id: number | string, payload: SuspendPayload): Promise<Tenant> => {
+    return apiClient.post<Tenant>(`/tenants/${id}/suspend`, payload).then((r) => r.data);
   },
 
   /**
    * POST /tenants/{tenant_id}/activate
+   * Restores agency access (unsuspends). Optional note for audit trail.
    */
-  activate: async (id: number | string): Promise<Tenant> => {
-    return apiClient.post<Tenant>(`/tenants/${id}/activate`).then((r) => r.data);
+  activate: async (id: number | string, payload?: UnsuspendPayload): Promise<Tenant> => {
+    return apiClient.post<Tenant>(`/tenants/${id}/activate`, payload || {}).then((r) => r.data);
+  },
+
+  /**
+   * POST /tenants/{tenant_id}/activate (alias for unsuspend)
+   * Restores agency access after manual suspension.
+   */
+  unsuspend: async (id: number | string, payload?: UnsuspendPayload): Promise<Tenant> => {
+    return apiClient.post<Tenant>(`/tenants/${id}/activate`, payload || {}).then((r) => r.data);
   },
 
   /**
    * POST /tenants/{tenant_id}/archive
-   * Moves tenant to Vault (Soft Delete)
+   * Moves tenant to Vault (soft delete). Reason is mandatory (min 10 chars).
+   * ⚠️ Self-guard: cannot vault your own tenant.
    */
-  archive: async (id: number | string): Promise<Tenant> => {
-    return apiClient.post<Tenant>(`/tenants/${id}/archive`).then((r) => r.data);
+  archive: async (id: number | string, payload: ArchivePayload): Promise<Tenant> => {
+    return apiClient.post<Tenant>(`/tenants/${id}/archive`, payload).then((r) => r.data);
+  },
+
+  /**
+   * POST /tenants/{tenant_id}/restore
+   * ✅ NEW: Restores tenant from Vault. Optional note for audit trail.
+   * Allowed on own tenant (recovery path while session lives).
+   */
+  restore: async (id: number | string, payload?: RestorePayload): Promise<Tenant> => {
+    return apiClient.post<Tenant>(`/tenants/${id}/restore`, payload || {}).then((r) => r.data);
   },
 
   /**
@@ -205,7 +267,6 @@ export const tenantsApi = {
    * Updates an existing gateway configuration.
    * ⚠️ CRITICAL: The payload MUST NOT contain masked credentials (e.g., "****1234"),
    * or the backend will overwrite the real secrets with the masked strings.
-   * The reusable hook is responsible for filtering these out.
    */
   updatePaymentGateway: async (
     id: number | string,
@@ -231,8 +292,6 @@ export const tenantsApi = {
   /**
    * DELETE /tenants/{tenant_id}/payment-gateways/{gateway_type}/{config_id}
    * Deletes a gateway configuration.
-   * ⚠️ NOTE: Ensure the backend DELETE endpoint is implemented in payment_gateways.py,
-   * otherwise this will return a 404/405 network error.
    */
   deletePaymentGateway: async (
     id: number | string,
