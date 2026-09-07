@@ -4,8 +4,10 @@ import toast from "react-hot-toast";
 import { tenantsApi } from "@/lib/api/tenants";
 import type { Tenant } from "@/lib/types";
 
+// ✅ All 4 lifecycle actions flow through the same confirmation modal pipeline.
+// No more window.confirm() (which violates no-alert ESLint rule).
 export interface PendingDestructiveAction {
-  type: "suspend" | "archive";
+  type: "suspend" | "archive" | "unsuspend" | "restore";
   tenant: Tenant;
 }
 
@@ -14,7 +16,7 @@ export const useTenantsList = () => {
   const [loading, setLoading] = useState(true);
   const [actionLoadingId, setActionLoadingId] = useState<number | string | null>(null);
 
-  // Modal state for typed-confirmation destructive actions
+  // Modal state for all lifecycle actions (routed to ConfirmDestructiveModal)
   const [pending, setPending] = useState<PendingDestructiveAction | null>(null);
 
   // Filters
@@ -64,11 +66,9 @@ export const useTenantsList = () => {
     try {
       const isCurrentlyActive = tenant.subscription_status === "active";
       if (isCurrentlyActive) {
-        // Deactivate subscription (billing-level suspension)
         await tenantsApi.update(tenant.id, { subscription_status: "past_due" });
         toast.success("Subscription deactivated");
       } else {
-        // Activate subscription
         await tenantsApi.update(tenant.id, { subscription_status: "active" });
         toast.success("Subscription activated");
       }
@@ -80,57 +80,35 @@ export const useTenantsList = () => {
     }
   };
 
-  // ── SUSPEND (opens typed-confirmation modal) ────────────────────────────
+  // ── SUSPEND (routes through confirmation modal) ─────────────────────────
   const handleSuspend = (tenantId: number | string) => {
     const tenant = tenants.find((t) => t.id === tenantId);
     if (!tenant) return;
     setPending({ type: "suspend", tenant });
   };
 
-  // ── UNSUSPEND (soft confirmation — less dangerous than suspend) ──────────
-  const handleUnsuspend = async (tenantId: number | string) => {
+  // ── UNSUSPEND (routes through confirmation modal — no more window.confirm)
+  const handleUnsuspend = (tenantId: number | string) => {
     const tenant = tenants.find((t) => t.id === tenantId);
     if (!tenant) return;
-    if (!window.confirm(`Unsuspend ${tenant.name}? They will regain access immediately.`)) return;
-
-    setActionLoadingId(tenant.id);
-    try {
-      await tenantsApi.activate(tenant.id, { note: "Unsuspended by super-admin" });
-      toast.success(`${tenant.name} has been unsuspended.`);
-      await fetchTenants();
-    } catch (error: any) {
-      toast.error(error?.response?.data?.detail || error?.message || "Unsuspend failed");
-    } finally {
-      setActionLoadingId(null);
-    }
+    setPending({ type: "unsuspend", tenant });
   };
 
-  // ── ARCHIVE / VAULT (opens typed-confirmation modal) ────────────────────
+  // ── ARCHIVE / VAULT (routes through confirmation modal) ─────────────────
   const handleArchive = (tenantId: number | string) => {
     const tenant = tenants.find((t) => t.id === tenantId);
     if (!tenant) return;
     setPending({ type: "archive", tenant });
   };
 
-  // ── RESTORE FROM VAULT (soft confirmation) ──────────────────────────────
-  const handleRestore = async (tenantId: number | string) => {
+  // ── RESTORE FROM VAULT (routes through confirmation modal — no more window.confirm)
+  const handleRestore = (tenantId: number | string) => {
     const tenant = tenants.find((t) => t.id === tenantId);
     if (!tenant) return;
-    if (!window.confirm(`Restore ${tenant.name} from the Vault? Their data and users will become active again.`)) return;
-
-    setActionLoadingId(tenant.id);
-    try {
-      await tenantsApi.restore(tenant.id, { note: "Restored from vault by super-admin" });
-      toast.success(`${tenant.name} has been restored.`);
-      await fetchTenants();
-    } catch (error: any) {
-      toast.error(error?.response?.data?.detail || error?.message || "Restore failed");
-    } finally {
-      setActionLoadingId(null);
-    }
+    setPending({ type: "restore", tenant });
   };
 
-  // ── EXECUTE PENDING DESTRUCTIVE ACTION (after typed confirmation) ───────
+  // ── EXECUTE PENDING ACTION (after confirmation modal confirmation) ──────
   const executePending = async () => {
     if (!pending) return;
     const { type, tenant } = pending;
@@ -139,9 +117,15 @@ export const useTenantsList = () => {
       if (type === "suspend") {
         await tenantsApi.suspend(tenant.id, { reason: "Suspended by super-admin" });
         toast.success(`${tenant.name} has been suspended. They can no longer access their dashboard.`);
-      } else {
+      } else if (type === "archive") {
         await tenantsApi.archive(tenant.id, { reason: "Archived by super-admin" });
         toast.success(`${tenant.name} has been moved to the Vault.`);
+      } else if (type === "unsuspend") {
+        await tenantsApi.activate(tenant.id, { note: "Unsuspended by super-admin" });
+        toast.success(`${tenant.name} has been unsuspended.`);
+      } else if (type === "restore") {
+        await tenantsApi.restore(tenant.id, { note: "Restored from vault by super-admin" });
+        toast.success(`${tenant.name} has been restored.`);
       }
       setPending(null);
       await fetchTenants();
@@ -152,25 +136,26 @@ export const useTenantsList = () => {
     }
   };
 
-return {
-  tenants,
-  filteredTenants,
-  loading,
-  actionLoadingId,
-  searchQuery,
-  setSearchQuery,
-  statusFilter,
-  setStatusFilter: (value: string | null) => setStatusFilter(value || "ALL"),
-  showArchived,
-  setShowArchived,
-  fetchTenants,
-  handleToggleSubscription,
-  handleSuspend,
-  handleUnsuspend,
-  handleArchive,
-  handleRestore,
-  pending,
-  setPending,
-  executePending,
-};
+  return {
+    tenants,
+    filteredTenants,
+    loading,
+    actionLoadingId,
+    searchQuery,
+    setSearchQuery,
+    statusFilter,
+    setStatusFilter: (value: string | null) => setStatusFilter(value || "ALL"),
+    showArchived,
+    setShowArchived,
+    fetchTenants,
+    handleToggleSubscription,
+    handleSuspend,
+    handleUnsuspend,
+    handleArchive,
+    handleRestore,
+    // Modal control surface
+    pending,
+    setPending,
+    executePending,
+  };
 };
