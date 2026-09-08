@@ -1,7 +1,7 @@
 // src/app/(auth)/reset-password/page.tsx
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, CheckCircle2, Lock } from "lucide-react";
@@ -20,6 +20,10 @@ function getPasswordStrength(pw: string) {
 const strengthColors = ["#e2e6f0", "#ef4444", "#f59e0b", "#10b981", "#059669"];
 const strengthLabels = ["Too weak", "Weak", "Fair", "Good", "Strong"];
 
+// ✅ Upper-bound countdown (matches backend default TTL of 60 min).
+// The backend expiry remains authoritative — this is a UX aid only.
+const RESET_LINK_TTL_SECONDS = 60 * 60;
+
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
@@ -30,9 +34,32 @@ function ResetPasswordForm() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
+  const [secondsRemaining, setSecondsRemaining] = useState(RESET_LINK_TTL_SECONDS);
 
   const strength = getPasswordStrength(password);
   const isMatch = confirm.length > 0 && password === confirm;
+
+  // ✅ Countdown ticker (stops on success or when token missing)
+  useEffect(() => {
+    if (!token || success) return;
+    const interval = setInterval(() => {
+      setSecondsRemaining((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [token, success]);
+
+  // ✅ When the local upper bound runs out, show the expired state
+  useEffect(() => {
+    if (secondsRemaining === 0 && !success) {
+      setError("This reset link has expired. Please request a new one.");
+    }
+  }, [secondsRemaining, success]);
+
+  const formatTime = (totalSeconds: number) => {
+    const mins = Math.floor(totalSeconds / 60);
+    const secs = totalSeconds % 60;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,7 +71,19 @@ function ResetPasswordForm() {
       await apiClient.post("/auth/reset-password", { token, new_password: password });
       setSuccess(true);
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Invalid or expired reset link.");
+      // ✅ Surface the backend's specific message first (expired / invalid / reuse)
+      const backendMessage = err?.response?.data?.detail;
+      if (typeof backendMessage === "string" && backendMessage.trim()) {
+        setError(backendMessage);
+      } else if (err?.code === "ECONNABORTED") {
+        setError("The request timed out. Check your connection and try again.");
+      } else if (err?.response?.status === 429) {
+        setError("Too many attempts. Wait a minute and try again.");
+      } else if (err?.response?.status >= 500) {
+        setError("Something went wrong on our side. Try again in a moment.");
+      } else {
+        setError("Invalid or expired reset link. Please request a new one.");
+      }
     } finally {
       setLoading(false);
     }
@@ -66,7 +105,7 @@ function ResetPasswordForm() {
           This password reset link is invalid or has expired.
         </p>
         <Link 
-          href="/login" 
+          href="/forgot-password" 
           className="inline-flex h-10 px-6 rounded-xl items-center justify-center text-sm font-semibold text-white"
           style={{
             background: 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)',
@@ -82,7 +121,7 @@ function ResetPasswordForm() {
             e.currentTarget.style.boxShadow = '0 2px 8px rgba(124, 58, 237, 0.30)';
           }}
         >
-          Back to login
+          Request New Link
         </Link>
       </div>
     );
@@ -100,6 +139,15 @@ function ResetPasswordForm() {
             <p className="text-sm" style={{ color: '#57534E' }}>
               Your new password must be different from previously used passwords.
             </p>
+            {/* ✅ Countdown (upper bound; backend expiry is authoritative) */}
+            {!error && secondsRemaining > 0 && (
+              <p 
+                className="text-xs font-semibold"
+                style={{ color: secondsRemaining <= 300 ? '#B91C1C' : '#78716C' }}
+              >
+                Link expires in about {formatTime(secondsRemaining)}
+              </p>
+            )}
           </div>
 
           {/* Error */}
