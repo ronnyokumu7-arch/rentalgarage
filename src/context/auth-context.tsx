@@ -197,16 +197,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const refreshOnce = useCallback(async (): Promise<boolean> => {
+    if (refreshPromiseRef.current) return refreshPromiseRef.current;
+
+    const promise = rotateTokens().finally(() => {
+      refreshPromiseRef.current = null;
+    });
+    refreshPromiseRef.current = promise;
+    return promise;
+  }, [rotateTokens]);
+
   // Register the actual refresh path used by Axios before protected screens
   // make requests. This was previously never registered, so the first access
   // token expiry caused an immediate client-side logout.
   useEffect(() => {
     registerRefreshHandler(async () => {
-      const rotated = await rotateTokens();
+      const rotated = await refreshOnce();
       return rotated ? getAccessToken() : null;
     });
     return () => registerRefreshHandler(null);
-  }, [rotateTokens]);
+  }, [refreshOnce]);
 
   /**
    * Queue a refresh request. If one is already in flight, wait for it.
@@ -216,10 +226,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     refreshSubscribersRef.current.push({ onSuccess, onFailure });
 
     if (!refreshPromiseRef.current) {
-      refreshPromiseRef.current = rotateTokens().then((success) => {
+      refreshOnce().then((success) => {
         const subscribers = refreshSubscribersRef.current;
         refreshSubscribersRef.current = [];
-        refreshPromiseRef.current = null;
 
         subscribers.forEach(({ onSuccess, onFailure }) => {
           if (success) {
@@ -232,7 +241,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return success;
       });
     }
-  }, [rotateTokens]);
+  }, [refreshOnce]);
 
   // Listen for cross-tab rotation broadcasts
   useEffect(() => {
@@ -269,7 +278,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Access token expired on mount — try refresh
         let rotated = false;
         try {
-          rotated = await rotateTokens();
+          rotated = await refreshOnce();
         } catch {
           // A service outage is not an authentication failure. Retain tokens
           // and let the user retry rather than forcing a login screen.
@@ -292,18 +301,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     initAuth();
     return () => { isMounted = false; };
-  }, [rotateTokens]);
+  }, [refreshOnce]);
 
   // Keep-alive: rotate tokens every 10 minutes
   useEffect(() => {
     if (!state.isAuthenticated) return;
     const intervalId = setInterval(() => {
-      rotateTokens().catch((error) => {
+      refreshOnce().catch((error) => {
         console.warn("[Auth] Background token refresh failed; session retained.", error);
       });
     }, KEEP_ALIVE_INTERVAL_MS);
     return () => clearInterval(intervalId);
-  }, [state.isAuthenticated, rotateTokens]);
+  }, [state.isAuthenticated, refreshOnce]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -357,7 +366,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refresh = useCallback(async (): Promise<boolean> => {
     let ok = false;
     try {
-      ok = await rotateTokens();
+      ok = await refreshOnce();
     } catch {
       // Transient backend/network failure; preserve local session state.
       return false;
@@ -381,7 +390,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // network blip — don't logout, let the next request retry
     }
     return ok;
-  }, [rotateTokens]);
+  }, [refreshOnce]);
 
   const refreshTenant = useCallback(async () => {
     if (!state.user?.tenant_id) return;
