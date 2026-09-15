@@ -1,7 +1,7 @@
 // src/app/(auth)/reset-password/page.tsx
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Eye, EyeOff, CheckCircle2, Lock } from "lucide-react";
@@ -20,13 +20,9 @@ function getPasswordStrength(pw: string) {
 const strengthColors = ["#e2e6f0", "#ef4444", "#f59e0b", "#10b981", "#059669"];
 const strengthLabels = ["Too weak", "Weak", "Fair", "Good", "Strong"];
 
-// ✅ Upper-bound countdown (matches backend default TTL of 60 min).
-// The backend expiry remains authoritative — this is a UX aid only.
-const RESET_LINK_TTL_SECONDS = 60 * 60;
-
 function ResetPasswordForm() {
   const searchParams = useSearchParams();
-  const token = searchParams.get("token");
+  const token = searchParams.get("token")?.trim() || null;
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
@@ -34,32 +30,9 @@ function ResetPasswordForm() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState("");
-  const [secondsRemaining, setSecondsRemaining] = useState(RESET_LINK_TTL_SECONDS);
 
   const strength = getPasswordStrength(password);
   const isMatch = confirm.length > 0 && password === confirm;
-
-  // ✅ Countdown ticker (stops on success or when token missing)
-  useEffect(() => {
-    if (!token || success) return;
-    const interval = setInterval(() => {
-      setSecondsRemaining((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [token, success]);
-
-  // ✅ When the local upper bound runs out, show the expired state
-  useEffect(() => {
-    if (secondsRemaining === 0 && !success) {
-      setError("This reset link has expired. Please request a new one.");
-    }
-  }, [secondsRemaining, success]);
-
-  const formatTime = (totalSeconds: number) => {
-    const mins = Math.floor(totalSeconds / 60);
-    const secs = totalSeconds % 60;
-    return `${mins}:${secs.toString().padStart(2, "0")}`;
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,15 +112,6 @@ function ResetPasswordForm() {
             <p className="text-sm" style={{ color: '#57534E' }}>
               Your new password must be different from previously used passwords.
             </p>
-            {/* ✅ Countdown (upper bound; backend expiry is authoritative) */}
-            {!error && secondsRemaining > 0 && (
-              <p 
-                className="text-xs font-semibold"
-                style={{ color: secondsRemaining <= 300 ? '#B91C1C' : '#78716C' }}
-              >
-                Link expires in about {formatTime(secondsRemaining)}
-              </p>
-            )}
           </div>
 
           {/* Error */}
