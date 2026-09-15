@@ -104,7 +104,7 @@ export default function BookingsListMobile({
                     <Phone size={12} className="text-[var(--color-ink-subtle)]" />
                   </div>
                   <div className="min-w-0">
-                    <p className="text-xs font-semibold text-[var(--color-ink)] truncate leading-tight">
+                    <p className="text-xs font-semibold text-[var(--color-ink)] leading-tight break-words [overflow-wrap:anywhere]">
                       {client?.full_name || `Client #${item.client_id}`}
                     </p>
                     {client?.phone && (
@@ -118,7 +118,7 @@ export default function BookingsListMobile({
                 {/* Vehicle */}
                 <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
                   <div className="min-w-0 text-right">
-                    <p className="text-xs font-semibold text-[var(--color-ink)] truncate leading-tight">
+                    <p className="text-xs font-semibold text-[var(--color-ink)] leading-tight break-words [overflow-wrap:anywhere]">
                       {vehicle ? `${vehicle.make} ${vehicle.model}` : `Vehicle #${item.vehicle_id}`}
                     </p>
                     {vehicle?.plate_number && (

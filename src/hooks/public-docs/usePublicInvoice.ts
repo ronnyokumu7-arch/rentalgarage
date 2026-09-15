@@ -56,9 +56,9 @@ export function usePublicInvoice(token: string) {
     if (!token) return;
     setIsAccepting(true);
     try {
-      await invoicesApi.acceptPublic(token);
+      const updatedInvoice = await invoicesApi.acceptPublic(token);
+      setInvoice(updatedInvoice);
       toast.success('Booking confirmed! Invoice & contract generated.');
-      await fetchInvoice();  // re-fetch to get the morphed invoice
     } catch (err: any) {
       toast.error(err.response?.data?.detail || 'Failed to accept quotation');
     } finally {

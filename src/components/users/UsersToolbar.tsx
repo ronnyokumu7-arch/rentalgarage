@@ -71,18 +71,18 @@ export default function UsersToolbar({
         </div>
 
         {/* Metrics Breakdown Pills - Text-only, evenly distributed */}
-        <div className="flex items-center justify-between gap-3 px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm overflow-x-auto custom-scrollbar">
-          <div className="flex items-center gap-2 whitespace-nowrap flex-1 min-w-0">
+        <div className="flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
+          <div className="flex items-center justify-center gap-1.5 min-w-0 text-center sm:flex-1">
             <span className="text-xs font-medium text-[var(--color-ink-muted)]">Team</span>
             <span className="text-xs font-bold text-[var(--color-ink)] tabular-nums">{totalUsers}</span>
           </div>
           <div className="w-px h-3 bg-[var(--color-surface-border)] flex-shrink-0" />
-          <div className="flex items-center gap-2 whitespace-nowrap flex-1 min-w-0">
+          <div className="flex items-center justify-center gap-1.5 min-w-0 text-center sm:flex-1">
             <span className="text-xs font-medium text-[var(--color-ink-muted)]">Active</span>
             <span className="text-xs font-bold text-[var(--color-success-text)] tabular-nums">{activeUsers}</span>
           </div>
           <div className="w-px h-3 bg-[var(--color-surface-border)] flex-shrink-0" />
-          <div className="flex items-center gap-2 whitespace-nowrap flex-1 min-w-0">
+          <div className="flex items-center justify-center gap-1.5 min-w-0 text-center sm:flex-1">
             <span className="text-xs font-medium text-[var(--color-ink-muted)]">Inactive</span>
             <span className="text-xs font-bold text-[var(--color-danger-text)] tabular-nums">{inactiveUsers}</span>
           </div>

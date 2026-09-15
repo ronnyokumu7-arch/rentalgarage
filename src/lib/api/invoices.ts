@@ -1,5 +1,5 @@
 import apiClient from "@/lib/api-client";
-import type { Invoice, InvoiceCreate, InvoiceUpdate, InvoiceStatus, PaymentMethod, PaginatedResponse } from "@/lib/types";
+import type { Invoice, InvoiceCreate, InvoiceUpdate, InvoiceStatus, PaymentMethod, PaginatedResponse, PublicInvoiceView } from "@/lib/types";
 
 export interface RecordPaymentPayload {
   amount: number;
@@ -65,7 +65,7 @@ export const invoicesApi = {
    *   auto-contract (+ background PDF). ONE atomic commit.
    */
   acceptPublic: (token: string) =>
-    apiClient.post<Invoice>(`/invoices/public/${token}/accept`).then((r) => r.data),
+    apiClient.post<PublicInvoiceView>(`/invoices/public/${token}/accept`).then((r) => r.data),
 
   /**
    * ✅ Client cancels: booking→cancelled (reason=client_cancelled) + invoice void.

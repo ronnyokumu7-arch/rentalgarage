@@ -63,7 +63,7 @@ export default function BookingsPage() {
               {currentTabInfo.title}
             </h1>
           </div>
-          <p className="text-xs sm:text-sm text-[var(--color-ink-muted)] mt-1 truncate sm:whitespace-normal">
+          <p className="text-xs sm:text-sm text-[var(--color-ink-muted)] mt-1 whitespace-normal break-words [overflow-wrap:anywhere]">
             {currentTabInfo.description}
           </p>
         </div>
