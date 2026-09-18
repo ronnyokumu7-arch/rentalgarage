@@ -229,7 +229,7 @@ export default function FleetList({
   return (
     <>
       <div className="p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
-        <div className="flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
+        <div className="hidden sm:flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
           <div className="flex items-center gap-2 whitespace-nowrap">
             <span className="text-xs font-medium text-[var(--color-ink-muted)]">Available</span>
             <span className="text-xs font-bold text-blue-500 tabular-nums">{availableVehicles}</span>
@@ -274,7 +274,10 @@ export default function FleetList({
             <FilterDropdown
               filterId="fleet-status"
               label="Status"
-              options={FLEET_FILTER_OPTIONS.filter((opt) => opt.value !== "")}
+              options={FLEET_FILTER_OPTIONS.filter((opt) => opt.value !== "").map((opt) => ({
+                ...opt,
+                count: filteredVehicles.filter((vehicle) => vehicle.status === opt.value).length,
+              }))}
               value={statusFilter || null}
               onChange={(value) => setStatusFilter((value || "") as VehicleStatus | "")}
               icon={Filter}

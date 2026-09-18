@@ -104,7 +104,7 @@ export default function SuperAdminSettingsPage() {
               )}
               {activeModule ? activeModule.title : currentTabInfo.title}
             </h1>
-            <p className="text-xs sm:text-sm text-[var(--color-ink-muted)] mt-1">
+            <p className="ml-10 text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
               {activeModule
                 ? activeModule.description
                 : currentTabInfo.description}

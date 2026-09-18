@@ -140,7 +140,7 @@ export default function PaymentsTab() {
         <div className="p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
           
           {/* Metrics Breakdown Panel - Completed | Pending | Failed (Evenly Distributed) */}
-          <div className="flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
+          <div className="hidden sm:flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
             <div className="flex items-center gap-2 whitespace-nowrap flex-1 min-w-0">
               <span className="text-xs font-medium text-[var(--color-ink-muted)]">Completed</span>
               <span className="text-xs font-bold text-[var(--color-success-text)] tabular-nums">{payments.filter(p => p.status === "completed").length}</span>
@@ -196,9 +196,9 @@ export default function PaymentsTab() {
                 filterId="payment-status"
                 label="Status"
                 options={[
-                  { label: "Completed", value: "completed" },
-                  { label: "Pending", value: "pending" },
-                  { label: "Failed", value: "failed" },
+                  { label: "Completed", value: "completed", count: payments.filter(p => p.status === "completed").length },
+                  { label: "Pending", value: "pending", count: payments.filter(p => p.status === "pending").length },
+                  { label: "Failed", value: "failed", count: payments.filter(p => p.status === "failed").length },
                 ]}
                 value={statusFilter === "all" ? null : statusFilter}
                 onChange={(value) => setStatusFilter((value || "all") as PaymentStatus | "all")}

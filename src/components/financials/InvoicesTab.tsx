@@ -87,7 +87,7 @@ export default function InvoicesTab() {
         <div className="p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
           
           {/* Metrics Breakdown Panel */}
-          <div className="flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
+          <div className="hidden sm:flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
             <div className="flex items-center gap-2 whitespace-nowrap flex-1 min-w-0">
               <span className="text-xs font-medium text-[var(--color-ink-muted)]">Draft</span>
               <span className="text-xs font-bold text-[var(--color-ink)] tabular-nums">{invoices.filter(i => i.status === "draft").length}</span>
@@ -122,10 +122,10 @@ export default function InvoicesTab() {
                 filterId="invoice-status"
                 label="Status"
                 options={[
-                  { label: "Draft", value: "draft" },
-                  { label: "Sent", value: "sent" },
+                  { label: "Draft", value: "draft", count: invoices.filter(i => i.status === "draft").length },
+                  { label: "Sent", value: "sent", count: invoices.filter(i => i.status === "sent").length },
                   { label: "Partially Paid", value: "partially_paid" },
-                  { label: "Paid", value: "paid" },
+                  { label: "Paid", value: "paid", count: invoices.filter(i => i.status === "paid").length },
                   { label: "Overdue", value: "overdue" },
                   { label: "Void", value: "void" },
                 ]}

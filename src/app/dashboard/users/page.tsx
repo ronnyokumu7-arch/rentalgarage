@@ -51,7 +51,7 @@ export default function UsersPage() {
               {currentTabInfo.title}
             </h1>
           </div>
-          <p className="text-xs sm:text-sm text-[var(--color-ink-muted)] mt-1">
+          <p className="ml-10 text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
             {currentTabInfo.description}
           </p>
         </div>

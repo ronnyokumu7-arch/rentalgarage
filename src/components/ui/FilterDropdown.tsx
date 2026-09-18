@@ -7,6 +7,7 @@ import { Filter, Check } from "lucide-react";
 export interface FilterOption {
   label: string;
   value: string;
+  count?: number;
 }
 
 interface FilterDropdownProps {
@@ -100,7 +101,7 @@ export default function FilterDropdown({
                       : "text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"
                   }`}
                 >
-                  <span>{option.label}</span>
+                  <span>{option.label}{option.count !== undefined ? ` (${option.count})` : ""}</span>
                   {value === option.value && <Check size={14} />}
                 </button>
               ))}

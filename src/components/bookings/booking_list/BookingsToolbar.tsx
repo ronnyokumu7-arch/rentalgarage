@@ -26,7 +26,7 @@ export default function BookingsToolbar({
   return (
     <div className="p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
       {/* Metrics Counter Panel */}
-      <div className="flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
+      <div className="hidden sm:flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
         <div className="flex items-center justify-center gap-1.5 min-w-0 text-center">
           <span className="text-xs font-medium text-[var(--color-ink-muted)]">New</span>
           <span className="text-xs font-bold text-[var(--color-warning-text)] tabular-nums">{upcomingCount}</span>
@@ -61,10 +61,10 @@ export default function BookingsToolbar({
             filterId="booking-status"
             label="Status"
             options={[
-              { label: "Pending", value: "pending" },
+              { label: "Pending", value: "pending", count: upcomingCount },
               { label: "Confirmed", value: "confirmed" },
-              { label: "Active", value: "active" },
-              { label: "Completed", value: "completed" },
+              { label: "Active", value: "active", count: activeTripsCount },
+              { label: "Completed", value: "completed", count: completedCount },
               { label: "Cancelled", value: "cancelled" },
               { label: "No Show", value: "no_show" },
               { label: "Awaiting Mileage", value: "awaiting_mileage" },

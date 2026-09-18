@@ -53,7 +53,7 @@ export default function SuperAdminAgenciesPage() {
             <h1 className="text-lg sm:text-xl font-bold text-[var(--color-ink)] font-display tracking-tight">
               {currentTabInfo.title}
             </h1>
-            <p className="text-xs text-[var(--color-ink-muted)] hidden sm:block">
+            <p className="ml-10 text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] hidden sm:block">
               {currentTabInfo.description}
             </p>
           </div>
