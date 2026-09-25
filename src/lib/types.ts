@@ -1,5 +1,5 @@
 // ─── Users & Auth ───────────────────────────────────────────────────────────
-export type UserRole = "super_admin" | "tenant_admin" | "tenant_staff";
+export type UserRole = "super_admin" | "tenant_admin" | "tenant_staff" | "investor";
 
 export interface User {
   id: number;
@@ -20,6 +20,12 @@ export interface User {
   phone_number?: string | null;
   department?: string | null;
   job_title?: string | null;
+  
+  // ✅ NEW: Financial / Payout Details (For Investors)
+  mpesa_phone?: string | null;
+  bank_name?: string | null;
+  bank_account_number?: string | null;
+  bank_account_name?: string | null;
   
   // Security & Access
   permissions?: string[];
@@ -123,7 +129,7 @@ export type ClientUpdate = Partial<
   Omit<Client, "id" | "tenant_id" | "created_at" | "updated_at">
 >;
 
-// ─── Vehicles ────────────────────────────────────────────────────────────────
+// ── Vehicles ────────────────────────────────────────────────────────────────
 export type VehicleStatus =
   | "pending_activation" | "available" | "rented" 
   | "maintenance" | "retired";  // ✅ awaiting_mileage removed
@@ -131,6 +137,10 @@ export type VehicleStatus =
 export interface Vehicle {
   id: number;
   tenant_id: number;
+  
+  // ✅ UPDATED: Investor Ownership Link (null = agency owned)
+  owner_id?: number | null;
+  
   make: string;
   model: string;
   year: number;
@@ -202,6 +212,43 @@ export interface VehicleUpdate {
   airport_transfer_base_rate?: number | null;
   supports_wedding_service?: boolean;
   wedding_base_rate?: number | null;
+}
+
+// ✅ NEW: Investor Lease & Earning Types
+export type LeaseStatus = "draft" | "pending_signature" | "active" | "terminated";
+export type LeaseType = "pay_per_booking" | "fixed_monthly";
+
+export interface InvestorLease {
+  id: number;
+  investor_id: number;
+  tenant_id: number;
+  vehicle_id: number | null;
+  lease_type: LeaseType;
+  rate_amount: number;
+  duration_months: number;
+  start_date: string;
+  end_date: string;
+  investor_signed_at: string | null;
+  agency_signed_at: string | null;
+  status: LeaseStatus;
+  created_at: string;
+  vehicle?: Vehicle | null;
+  tenant_name?: string | null;
+}
+
+export type EarningStatus = "pending" | "cleared" | "paid";
+export type EarningType = "revenue_share" | "maintenance_deduction" | "payout";
+
+export interface InvestorEarning {
+  id: number;
+  vehicle_id: number;
+  vehicle_plate: string;
+  transaction_type: EarningType;
+  amount: number;
+  currency_code: string;
+  status: EarningStatus;
+  description: string;
+  created_at: string;
 }
 
 // ─── Drivers ────────────────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
 // src/lib/api/tenants.ts
 import apiClient from "@/lib/api-client";
-import type { AgencyHealthData } from '@/lib/types';
+import type { AgencyHealthData, SubscriptionOut } from '@/lib/types';
 import type {
   Tenant,
   CreateTenantPayload,
@@ -52,6 +52,22 @@ export interface ArchivePayload {
 
 export interface RestorePayload {
   note?: string; // optional restore note
+}
+
+// ---------------------------------------------------------------------------
+// ✅ Subscription Management Payloads (Super Admin)
+// ---------------------------------------------------------------------------
+export interface ExtendTrialPayload {
+  days: number; // 1-365 days to extend
+}
+
+export interface BulkExtendTrialsPayload {
+  days: number; // 1-365 days to extend all active trials
+}
+
+export interface BulkExtendTrialsResponse {
+  updated: number;
+  days_added: number;
 }
 
 // ---------------------------------------------------------------------------
@@ -312,5 +328,46 @@ export const tenantsApi = {
    */
   getHealthMetrics: async (tenantId: number | string): Promise<AgencyHealthData> => {
     return apiClient.get<AgencyHealthData>(`/tenants/${tenantId}/health`).then((r) => r.data);
+  },
+
+  // ---------------------------------------------------------------------------
+  // 🎯 Subscription Management (Super Admin)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * GET /subscriptions/?tenant_id={tenantId}
+   * Fetches all subscriptions for a specific tenant.
+   * Returns the first (most recent) subscription, or null if none exist.
+   */
+  getSubscriptionsForTenant: async (tenantId: number | string): Promise<SubscriptionOut | null> => {
+    const res = await apiClient.get<{ items: SubscriptionOut[] }>(`/subscriptions/?tenant_id=${tenantId}`).then((r) => r.data);
+    return res.items && res.items.length > 0 ? res.items[0] : null;
+  },
+
+  /**
+   * POST /subscriptions/{subscriptionId}/extend-trial
+   * Extends a single active trial by N days (1-365).
+   * Only works on subscriptions with status 'trial' or 'starter_trial'.
+   */
+  extendTrial: async (subscriptionId: number, payload: ExtendTrialPayload): Promise<SubscriptionOut> => {
+    return apiClient.post<SubscriptionOut>(`/subscriptions/${subscriptionId}/extend-trial`, payload).then((r) => r.data);
+  },
+
+  /**
+   * POST /subscriptions/admin/bulk-extend-trials
+   * Extends ALL active trials by N days (1-365) in one operation.
+   * Returns the count of updated subscriptions.
+   */
+  bulkExtendTrials: async (payload: BulkExtendTrialsPayload): Promise<BulkExtendTrialsResponse> => {
+    return apiClient.post<BulkExtendTrialsResponse>("/subscriptions/admin/bulk-extend-trials", payload).then((r) => r.data);
+  },
+
+  /**
+   * POST /subscriptions/{subscriptionId}/cancel
+   * Cancels a subscription immediately.
+   * Super Admin only.
+   */
+  cancelSubscription: async (subscriptionId: number): Promise<SubscriptionOut> => {
+    return apiClient.post<SubscriptionOut>(`/subscriptions/${subscriptionId}/cancel`).then((r) => r.data);
   },
 };

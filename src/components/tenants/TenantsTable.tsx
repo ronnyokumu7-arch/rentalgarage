@@ -1,8 +1,9 @@
 // src/components/super-admin/tenants/TenantsTable.tsx
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Mail, User, Phone, CreditCard, Archive, RotateCcw, ShieldAlert, Eye } from "lucide-react";
+import { Building2, Mail, User, Phone, CreditCard, Archive, RotateCcw, ShieldAlert, Eye, Calendar, Clock, X } from "lucide-react";
 import type { Tenant } from "@/lib/types";
 import TenantCardGrid from "@/components/tenants/TenantCardGrid";
 import DataTable, { RowAction } from "@/components/ui/DataTable";
@@ -11,6 +12,7 @@ import { TenantsToolbar } from "@/components/tenants/TenantsToolbar";
 interface TenantsTableProps {
   filteredTenants: Tenant[];
   loading: boolean;
+  actionLoadingId: number | string | null;
   searchQuery: string;
   setSearchQuery: (query: string) => void;
   statusFilter: string;
@@ -22,12 +24,16 @@ interface TenantsTableProps {
   handleRestore: (id: number | string) => void;
   handleSuspend: (id: number | string) => void;
   handleUnsuspend: (id: number | string) => void;
+  handleExtendTrial: (tenantId: number | string, days: number) => void;
+  handleCancelSubscription: (tenantId: number | string) => void;
+  handleBulkExtendTrials: (days: number) => Promise<{ updated: number; days_added: number }>;
   onExport?: (format: "csv" | "excel") => void;
 }
 
 export function TenantsTable({
   filteredTenants,
   loading,
+  actionLoadingId,
   searchQuery,
   setSearchQuery,
   statusFilter,
@@ -39,9 +45,20 @@ export function TenantsTable({
   handleRestore,
   handleSuspend,
   handleUnsuspend,
+  handleExtendTrial,
+  handleCancelSubscription,
+  handleBulkExtendTrials,
   onExport,
 }: TenantsTableProps) {
   const router = useRouter();
+
+  // ✅ Modal state for extend trial (days input)
+  const [extendModalOpen, setExtendModalOpen] = useState(false);
+  const [extendTenant, setExtendTenant] = useState<Tenant | null>(null);
+  const [extendDays, setExtendDays] = useState(30);
+  const [bulkExtendOpen, setBulkExtendOpen] = useState(false);
+  const [bulkExtendDays, setBulkExtendDays] = useState(30);
+  const [bulkExtendLoading, setBulkExtendLoading] = useState(false);
 
   // ✅ Reusable actions for both TenantCardGrid and DataTable
   const getActions = (tenant: Tenant): RowAction<Tenant>[] => {
@@ -59,6 +76,30 @@ export function TenantsTable({
         onClick: () => handleToggleSubscription(tenant),
       },
     ];
+
+    // ✅ Add trial management actions for active tenants
+    const isTrial = tenant.subscription_status === "trial" || tenant.subscription_status === "starter_trial";
+    const isActive = tenant.effective_status === "active" || tenant.subscription_status === "active";
+
+    if (isTrial || isActive) {
+      actions.push({
+        label: "Extend Trial...",
+        icon: Calendar,
+        variant: "default",
+        separator: true,
+        onClick: () => {
+          setExtendTenant(tenant);
+          setExtendDays(30);
+          setExtendModalOpen(true);
+        },
+      });
+      actions.push({
+        label: "Cancel Subscription",
+        icon: Clock,
+        variant: "danger",
+        onClick: () => handleCancelSubscription(tenant.id),
+      });
+    }
 
     if (tenant.effective_status === "vaulted" || tenant.is_archived) {
       actions.push({
@@ -139,21 +180,56 @@ export function TenantsTable({
     );
   };
 
+  const handleExtendTrialSubmit = async () => {
+    if (!extendTenant || extendDays < 1 || extendDays > 365) return;
+    await handleExtendTrial(extendTenant.id, extendDays);
+    setExtendModalOpen(false);
+    setExtendTenant(null);
+  };
+
+  const handleBulkExtendSubmit = async () => {
+    if (bulkExtendDays < 1 || bulkExtendDays > 365) return;
+    setBulkExtendLoading(true);
+    try {
+      await handleBulkExtendTrials(bulkExtendDays);
+      setBulkExtendOpen(false);
+    } finally {
+      setBulkExtendLoading(false);
+    }
+  };
+
   const isVaultView = showArchived === true;
   const isEmptyVault = isVaultView && filteredTenants.length === 0;
 
   return (
     <div className="space-y-4">
-      {/* ✅ Premium TenantsToolbar */}
-      <TenantsToolbar
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        statusFilter={statusFilter}
-        setStatusFilter={setStatusFilter}
-        showArchived={showArchived}
-        setShowArchived={setShowArchived}
-        onExport={onExport}
-      />
+      {/* ✅ Premium TenantsToolbar + Bulk Extend Button */}
+      <div className="flex items-center gap-2">
+        <div className="flex-1">
+          <TenantsToolbar
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            showArchived={showArchived}
+            setShowArchived={setShowArchived}
+            onExport={onExport}
+          />
+        </div>
+        
+        {/* ✅ Bulk Extend Trials Button */}
+        {!isVaultView && (
+          <button
+            onClick={() => setBulkExtendOpen(true)}
+            disabled={loading || bulkExtendLoading}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+          >
+            <Calendar size={14} />
+            <span className="hidden sm:inline">Extend All Trials</span>
+            <span className="sm:hidden">+N Days</span>
+          </button>
+        )}
+      </div>
 
       {/* ✅ MOBILE: TenantCardGrid with Sharp Edges */}
       <div className="block md:hidden">
@@ -289,6 +365,117 @@ export function TenantsTable({
           onRowClick={(tenant) => router.push(`/super-admin/agencies/${tenant.id}`)}
         />
       </div>
+
+      {/* ✅ EXTEND TRIAL MODAL (per-tenant) */}
+      {extendModalOpen && extendTenant && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-[var(--shadow-lg)] rounded-2xl max-w-md w-full animate-in slide-in-from-bottom-4 duration-300">
+            <div className="flex items-center justify-between p-5 border-b border-[var(--color-surface-border)]">
+              <div>
+                <h3 className="text-base font-bold text-[var(--color-ink)]">Extend Trial</h3>
+                <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">{extendTenant.name}</p>
+              </div>
+              <button
+                onClick={() => setExtendModalOpen(false)}
+                className="p-2 rounded-lg hover:bg-[var(--color-surface-hover)] transition-colors"
+              >
+                <X size={16} className="text-[var(--color-ink-muted)]" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-[var(--color-ink-muted)] mb-2">
+                  Extension Duration (Days)
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  max={365}
+                  value={extendDays}
+                  onChange={(e) => setExtendDays(Number(e.target.value))}
+                  className="w-full px-4 py-2.5 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all text-sm"
+                  placeholder="30"
+                />
+                <p className="text-xs text-[var(--color-ink-muted)] mt-1.5">
+                  Add 1-365 days to the current trial period.
+                </p>
+              </div>
+              <div className="flex gap-2.5 pt-2">
+                <button
+                  onClick={() => setExtendModalOpen(false)}
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--color-surface-border)] text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] transition-all text-xs font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleExtendTrialSubmit}
+                  disabled={actionLoadingId === extendTenant.id || extendDays < 1 || extendDays > 365}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs font-bold"
+                >
+                  Extend {extendDays} Days
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ✅ BULK EXTEND MODAL (all trials) */}
+      {bulkExtendOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-[var(--shadow-lg)] rounded-2xl max-w-md w-full animate-in slide-in-from-bottom-4 duration-300">
+            <div className="flex items-center justify-between p-5 border-b border-[var(--color-surface-border)]">
+              <div>
+                <h3 className="text-base font-bold text-[var(--color-ink)]">Extend All Trials</h3>
+                <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">This will affect all active trial subscriptions.</p>
+              </div>
+              <button
+                onClick={() => setBulkExtendOpen(false)}
+                className="p-2 rounded-lg hover:bg-[var(--color-surface-hover)] transition-colors"
+              >
+                <X size={16} className="text-[var(--color-ink-muted)]" />
+              </button>
+            </div>
+            <div className="p-5 space-y-4">
+              <div className="p-3.5 rounded-xl bg-[var(--color-warning-bg)] border border-[var(--color-warning-border)]">
+                <p className="text-xs font-semibold text-[var(--color-warning-text)]">
+                  ⚠️ This action extends all active trials. Use with caution.
+                </p>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-[var(--color-ink-muted)] mb-2">
+                  Extension Duration (Days)
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  max={365}
+                  value={bulkExtendDays}
+                  onChange={(e) => setBulkExtendDays(Number(e.target.value))}
+                  className="w-full px-4 py-2.5 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all text-sm"
+                  placeholder="30"
+                />
+              </div>
+              <div className="flex gap-2.5 pt-2">
+                <button
+                  onClick={() => setBulkExtendOpen(false)}
+                  disabled={bulkExtendLoading}
+                  className="flex-1 px-4 py-2.5 rounded-xl border border-[var(--color-surface-border)] text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] transition-all disabled:opacity-50 text-xs font-semibold"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleBulkExtendSubmit}
+                  disabled={bulkExtendLoading || bulkExtendDays < 1 || bulkExtendDays > 365}
+                  className="flex-1 px-4 py-2.5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed text-xs font-bold"
+                >
+                  {bulkExtendLoading ? "Extending..." : `Extend All +${bulkExtendDays} Days`}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,9 +1,8 @@
-// src/components/users/NewUserForm.tsx
 "use client";
 
 import { 
   User, Shield, CheckCircle, Mail, CreditCard, 
-  Upload, Camera, FileText, Car, Loader2, Calendar, Lock, Briefcase, Info
+  Upload, Camera, FileText, Car, Loader2, Calendar, Lock, Briefcase, Info, Building2, Smartphone
 } from "lucide-react";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
@@ -22,6 +21,7 @@ export interface UserInvitePreview {
   job_title?: string | null;
   role: string;
   is_driver: boolean;
+  is_investor: boolean; // ✅ NEW: Flag for investor flow
 }
 
 interface NewUserFormProps {
@@ -36,6 +36,11 @@ interface NewUserFormProps {
     dl_expiry: string;
     password: string;
     confirmPassword: string;
+    // ✅ NEW: Investor Payout Details
+    mpesa_phone?: string;
+    bank_name?: string;
+    bank_account_number?: string;
+    bank_account_name?: string;
   };
   updateField: (field: string, value: string) => void;
   avatarFile: File | null;
@@ -69,7 +74,9 @@ export default function NewUserForm({
 }: NewUserFormProps) {
 
   const isDriver = preview.is_driver;
-  const docsRequired = isDriver ? 2 : 1; // ID Front always; DL Front for drivers
+  const isInvestor = preview.is_investor; // ✅ NEW
+  
+  const docsRequired = isDriver ? 2 : 1; 
   const docsUploaded = (idFrontFile ? 1 : 0) + (isDriver && dlFrontFile ? 1 : 0);
   const passwordsMatch = formData.password === formData.confirmPassword;
 
@@ -112,7 +119,7 @@ export default function NewUserForm({
       {/* LEFT COLUMN: Identity + Compliance + Security */}
       <div className="space-y-3">
 
-        {/* ✅ Tenant Branding Header (mirrors client intake) */}
+        {/* ✅ Tenant Branding Header */}
         <div className="bg-gradient-to-br from-[var(--color-primary)]/10 to-[var(--color-primary)]/5 rounded-xl border border-[var(--color-primary)]/20 p-4">
           <div className="flex items-center gap-3">
             {preview.tenant_logo_url ? (
@@ -191,64 +198,109 @@ export default function NewUserForm({
           </div>
         </section>
 
-        {/* Section 2: Compliance */}
+        {/* Section 2: Compliance OR Payout Details (Dynamic) */}
         <section className={sectionClass}>
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-6 h-6 rounded-md bg-purple-500/10 text-purple-500 flex items-center justify-center">
-              <Shield size={14} />
+            <div className={`w-6 h-6 rounded-md flex items-center justify-center ${isInvestor ? 'bg-emerald-500/10 text-emerald-500' : 'bg-purple-500/10 text-purple-500'}`}>
+              {isInvestor ? <Building2 size={14} /> : <Shield size={14} />}
             </div>
-            <h3 className="text-sm font-bold text-[var(--color-ink)]">Compliance & Documents</h3>
+            <h3 className="text-sm font-bold text-[var(--color-ink)]">
+              {isInvestor ? 'Payout & Banking Details' : 'Compliance & Documents'}
+            </h3>
           </div>
 
-          {/* ✅ DRIVER NOTICE */}
-          {isDriver && (
-            <div className="mb-3 p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/20 flex items-start gap-2">
-              <Info size={14} className="text-amber-500 shrink-0 mt-0.5" />
-              <p className="text-[10px] text-amber-700 dark:text-amber-400 leading-relaxed">
-                You're joining as a <span className="font-bold">Driver</span>. Your Driver's License details and DL image are required.
-              </p>
+          {isInvestor ? (
+            // ✅ INVESTOR PAYOUT FIELDS
+            <div className="space-y-3">
+              <div className="p-2.5 rounded-lg bg-emerald-500/5 border border-emerald-500/20 flex items-start gap-2">
+                <Info size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                <p className="text-[10px] text-emerald-700 dark:text-emerald-400 leading-relaxed">
+                  You're joining as a <span className="font-bold">Host Investor</span>. Please provide your preferred payout details. You can update these anytime in your settings.
+                </p>
+              </div>
+              
+              <div>
+                <label className={labelClass}>M-Pesa Phone Number</label>
+                <div className="relative">
+                  <Smartphone size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)] z-10 pointer-events-none" />
+                  <PhoneInput
+                    international
+                    defaultCountry="KE"
+                    value={formData.mpesa_phone}
+                    onChange={(value) => updateField("mpesa_phone", value || "")}
+                    placeholder="+254 712 345678"
+                    className="phone-input-custom pl-8"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="sm:col-span-2">
+                  <label className={labelClass}>Bank Name</label>
+                  <input type="text" value={formData.bank_name || ""} onChange={(e) => updateField("bank_name", e.target.value)} placeholder="e.g. KCB, Equity, NCBA" className={inputClass} />
+                </div>
+                <div>
+                  <label className={labelClass}>Account Number</label>
+                  <input type="text" value={formData.bank_account_number || ""} onChange={(e) => updateField("bank_account_number", e.target.value)} placeholder="1234567890" className={inputClass} />
+                </div>
+                <div>
+                  <label className={labelClass}>Account Name</label>
+                  <input type="text" value={formData.bank_account_name || ""} onChange={(e) => updateField("bank_account_name", e.target.value)} placeholder="Your Name" className={inputClass} />
+                </div>
+              </div>
             </div>
+          ) : (
+            // ✅ STAFF / DRIVER COMPLIANCE FIELDS
+            <>
+              {isDriver && (
+                <div className="mb-3 p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/20 flex items-start gap-2">
+                  <Info size={14} className="text-amber-500 shrink-0 mt-0.5" />
+                  <p className="text-[10px] text-amber-700 dark:text-amber-400 leading-relaxed">
+                    You're joining as a <span className="font-bold">Driver</span>. Your Driver's License details and DL image are required.
+                  </p>
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                <div>
+                  <label className={labelClass}>Driving License Number {isDriver && <span className="text-[var(--color-danger)]">*</span>}</label>
+                  <div className="relative">
+                    <Car size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" />
+                    <input type="text" value={formData.dl_number} onChange={(e) => updateField("dl_number", e.target.value)} placeholder="DL-01234" className={`${inputClass} pl-8`} required={isDriver} />
+                  </div>
+                </div>
+                <div>
+                  <label className={labelClass}>DL Expiry Date {isDriver && <span className="text-[var(--color-danger)]">*</span>}</label>
+                  <div className="relative group">
+                    <Calendar size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)] pointer-events-none z-10" />
+                    <Flatpickr
+                      value={formData.dl_expiry}
+                      onChange={(dates) => {
+                        if (dates[0]) {
+                          updateField("dl_expiry", formatDateToLocalYYYYMMDD(dates[0]));
+                        }
+                      }}
+                      options={{
+                        dateFormat: "Y-m-d",
+                        minDate: "today",
+                        disableMobile: true,
+                      }}
+                      className={`${inputClass} pl-8`}
+                      placeholder="Select date..."
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className={labelClass}>Documents ({docsUploaded}/{docsRequired} uploaded)</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <DocUploadSlot label="ID Front" icon={FileText} file={idFrontFile} setFile={setIdFrontFile} required />
+                  <DocUploadSlot label="DL Front" icon={Car} file={dlFrontFile} setFile={setDlFrontFile} required={isDriver} />
+                </div>
+              </div>
+            </>
           )}
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-            <div>
-              <label className={labelClass}>Driving License Number {isDriver && <span className="text-[var(--color-danger)]">*</span>}</label>
-              <div className="relative">
-                <Car size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" />
-                <input type="text" value={formData.dl_number} onChange={(e) => updateField("dl_number", e.target.value)} placeholder="DL-01234" className={`${inputClass} pl-8`} required={isDriver} />
-              </div>
-            </div>
-            <div>
-              <label className={labelClass}>DL Expiry Date {isDriver && <span className="text-[var(--color-danger)]">*</span>}</label>
-              <div className="relative group">
-                <Calendar size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)] pointer-events-none z-10" />
-                <Flatpickr
-                  value={formData.dl_expiry}
-                  onChange={(dates) => {
-                    if (dates[0]) {
-                      updateField("dl_expiry", formatDateToLocalYYYYMMDD(dates[0]));
-                    }
-                  }}
-                  options={{
-                    dateFormat: "Y-m-d",
-                    minDate: "today",
-                    disableMobile: true,
-                  }}
-                  className={`${inputClass} pl-8`}
-                  placeholder="Select date..."
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Document uploads */}
-          <div>
-            <label className={labelClass}>Documents ({docsUploaded}/{docsRequired} uploaded)</label>
-            <div className="grid grid-cols-2 gap-2">
-              <DocUploadSlot label="ID Front" icon={FileText} file={idFrontFile} setFile={setIdFrontFile} required />
-              <DocUploadSlot label="DL Front" icon={Car} file={dlFrontFile} setFile={setDlFrontFile} required={isDriver} />
-            </div>
-          </div>
         </section>
 
         {/* Section 3: Security */}
@@ -287,26 +339,40 @@ export default function NewUserForm({
       <aside className="lg:sticky lg:top-4 space-y-3">
         
         {/* Role Card */}
-        <section className={`${sectionClass} border-[var(--color-primary)]/20 bg-[var(--color-primary)]/5`}>
+        <section className={`${sectionClass} ${isInvestor ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-[var(--color-primary)]/20 bg-[var(--color-primary)]/5'}`}>
           <div className="flex items-center gap-2 mb-3">
-            <div className="w-6 h-6 rounded-md bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
+            <div className={`w-6 h-6 rounded-md flex items-center justify-center ${isInvestor ? 'bg-emerald-500/10 text-emerald-500' : 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'}`}>
               <Briefcase size={14} />
             </div>
             <h3 className="text-sm font-bold text-[var(--color-ink)]">Your Role</h3>
           </div>
           <div className="space-y-2 text-xs">
-            <div className="flex justify-between">
-              <span className="text-[var(--color-ink-muted)]">Position</span>
-              <span className="font-bold text-[var(--color-ink)]">{preview.job_title || "Team Member"}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-[var(--color-ink-muted)]">Department</span>
-              <span className="font-semibold text-[var(--color-ink)]">{preview.department || "—"}</span>
-            </div>
-            {isDriver && (
-              <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold text-center text-[10px] uppercase tracking-wider">
-                Driver — DL Required
-              </div>
+            {isInvestor ? (
+              <>
+                <div className="flex justify-between">
+                  <span className="text-[var(--color-ink-muted)]">Position</span>
+                  <span className="font-bold text-[var(--color-ink)]">Host Investor</span>
+                </div>
+                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold text-center text-[10px] uppercase tracking-wider">
+                  Investor — Payout Details Required
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="flex justify-between">
+                  <span className="text-[var(--color-ink-muted)]">Position</span>
+                  <span className="font-bold text-[var(--color-ink)]">{preview.job_title || "Team Member"}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-[var(--color-ink-muted)]">Department</span>
+                  <span className="font-semibold text-[var(--color-ink)]">{preview.department || "—"}</span>
+                </div>
+                {isDriver && (
+                  <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 font-bold text-center text-[10px] uppercase tracking-wider">
+                    Driver — DL Required
+                  </div>
+                )}
+              </>
             )}
           </div>
         </section>
@@ -342,10 +408,17 @@ export default function NewUserForm({
               <span className="text-[var(--color-ink-muted)]">National ID</span>
               <span className="font-semibold text-[var(--color-ink)]">{formData.id_number || "—"}</span>
             </div>
-            <div className="flex justify-between">
-              <span className="text-[var(--color-ink-muted)]">Documents</span>
-              <span className="font-semibold text-[var(--color-ink)]">{docsUploaded}/{docsRequired}</span>
-            </div>
+            {isInvestor ? (
+               <div className="flex justify-between">
+               <span className="text-[var(--color-ink-muted)]">Bank</span>
+               <span className="font-semibold text-[var(--color-ink)] truncate max-w-[120px]">{formData.bank_name || "—"}</span>
+             </div>
+            ) : (
+              <div className="flex justify-between">
+                <span className="text-[var(--color-ink-muted)]">Documents</span>
+                <span className="font-semibold text-[var(--color-ink)]">{docsUploaded}/{docsRequired}</span>
+              </div>
+            )}
           </div>
         </div>
 

@@ -91,9 +91,18 @@ export const tenantAdminNav: NavItem[] = [
   { label: "Clients", href: "/dashboard/clients", icon: PremiumContactIcon },
   { label: "Fleet", href: "/dashboard/fleet", icon: CarFront },
   { label: "Drivers", href: "/dashboard/drivers", icon: PremiumDriversIcon },
+  { label: "Investors", href: "/dashboard/investors", icon: Users }, // ✅ ADDED
   { label: "Users", href: "/dashboard/users", icon: PremiumUsersIcon },
   { label: "Financials", href: "/dashboard/financials", icon: PremiumWalletIcon },
   { label: "Reports", href: "/dashboard/reports", icon: PremiumBarChartIcon },
   { label: "Tasks", href: "/dashboard/tasks", icon: PremiumTasksIcon },
   { label: "Settings", href: "/dashboard/settings", icon: PremiumSettingsIcon },
+];
+
+// ─── INVESTOR NAVIGATION ──────────────────────────────────────────────────────
+export const investorNav: NavItem[] = [
+  { label: "Dashboard", href: "/investor/dashboard", icon: PremiumDashboardIcon },
+  { label: "My Fleet", href: "/investor/fleet", icon: CarFront },
+  { label: "Earnings", href: "/investor/earnings", icon: PremiumWalletIcon },
+  { label: "Settings", href: "/investor/settings", icon: PremiumSettingsIcon },
 ];

@@ -1,4 +1,3 @@
-// src/context/auth-context.tsx
 "use client";
 
 import {
@@ -330,7 +329,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: true,
       });
 
+      // ✅ UPDATED: Role-based redirection for investors
       if (user.role === "super_admin") router.push("/super-admin");
+      else if (user.role === "investor") router.push("/investor/dashboard");
       else router.push("/dashboard");
     } catch (error) {
       console.error("[Auth] Login failed:", error);

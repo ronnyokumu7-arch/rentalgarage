@@ -4,10 +4,10 @@ import toast from "react-hot-toast";
 import { tenantsApi } from "@/lib/api/tenants";
 import type { Tenant } from "@/lib/types";
 
-// ✅ All 4 lifecycle actions flow through the same confirmation modal pipeline.
+// ✅ All destructive actions flow through the same confirmation modal pipeline.
 // No more window.confirm() (which violates no-alert ESLint rule).
 export interface PendingDestructiveAction {
-  type: "suspend" | "archive" | "unsuspend" | "restore";
+  type: "suspend" | "archive" | "unsuspend" | "restore" | "cancel_subscription";
   tenant: Tenant;
 }
 
@@ -108,6 +108,51 @@ export const useTenantsList = () => {
     setPending({ type: "restore", tenant });
   };
 
+  // ── CANCEL SUBSCRIPTION (routes through confirmation modal) ─────────────
+  const handleCancelSubscription = (tenantId: number | string) => {
+    const tenant = tenants.find((t) => t.id === tenantId);
+    if (!tenant) return;
+    setPending({ type: "cancel_subscription", tenant });
+  };
+
+  // ── EXTEND TRIAL (direct action, no confirmation needed) ─────────────────
+  const handleExtendTrial = async (tenantId: number | string, days: number) => {
+    setActionLoadingId(tenantId);
+    try {
+      // Fetch the subscription for this tenant
+      const subscription = await tenantsApi.getSubscriptionsForTenant(tenantId);
+      if (!subscription) {
+        toast.error("No subscription found for this tenant");
+        return;
+      }
+
+      // Extend the trial
+      await tenantsApi.extendTrial(subscription.id, { days });
+      toast.success(`Trial extended by ${days} days for ${tenants.find(t => t.id === tenantId)?.name || "tenant"}`);
+      await fetchTenants();
+    } catch (error: any) {
+      toast.error(error?.response?.data?.detail || error?.message || "Failed to extend trial");
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  // ── BULK EXTEND ALL TRIALS (direct action, returns result for UI) ────────
+  const handleBulkExtendTrials = async (days: number): Promise<{ updated: number; days_added: number }> => {
+    setActionLoadingId("bulk");
+    try {
+      const result = await tenantsApi.bulkExtendTrials({ days });
+      toast.success(`Extended ${result.updated} active trial${result.updated !== 1 ? "s" : ""} by ${days} days`);
+      await fetchTenants();
+      return result;
+    } catch (error: any) {
+      toast.error(error?.response?.data?.detail || error?.message || "Failed to extend trials");
+      throw error;
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
   // ── EXECUTE PENDING ACTION (after confirmation modal confirmation) ──────
   const executePending = async () => {
     if (!pending) return;
@@ -126,6 +171,17 @@ export const useTenantsList = () => {
       } else if (type === "restore") {
         await tenantsApi.restore(tenant.id, { note: "Restored from vault by super-admin" });
         toast.success(`${tenant.name} has been restored.`);
+      } else if (type === "cancel_subscription") {
+        // Fetch the subscription for this tenant
+        const subscription = await tenantsApi.getSubscriptionsForTenant(tenant.id);
+        if (!subscription) {
+          toast.error("No subscription found for this tenant");
+          setPending(null);
+          return;
+        }
+        // Cancel the subscription
+        await tenantsApi.cancelSubscription(subscription.id);
+        toast.success(`${tenant.name}'s subscription has been cancelled.`);
       }
       setPending(null);
       await fetchTenants();
@@ -153,6 +209,9 @@ export const useTenantsList = () => {
     handleUnsuspend,
     handleArchive,
     handleRestore,
+    handleExtendTrial,
+    handleCancelSubscription,
+    handleBulkExtendTrials,
     // Modal control surface
     pending,
     setPending,
