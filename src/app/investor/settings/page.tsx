@@ -22,7 +22,7 @@ export default function InvestorSettingsPage() {
   const [bankAccountName, setBankAccountName] = useState("");
 
   // Password State
-  const [currentPassword, setCurrentPassword] = useState("");
+  const [_currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
