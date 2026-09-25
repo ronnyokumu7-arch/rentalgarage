@@ -44,14 +44,19 @@ export interface CommissionPaymentInfo {
   outstanding_balance: string;
   outstanding_count: number;
 
-  // ✅ M-PESA PAYBILL TRIPLE — exactly as entered/confirmed on the phone
-  paybill_number: string | null;   // Business number (e.g., 400200)
-  account_number: string | null;   // Your bank account behind the Paybill
-  account_name: string | null;     // Registered name — tenant confirms recipient
+  // ✅ M-PESA PLATFORM PAYBILL TRIPLE — the paybill agencies pay COMMISSIONS to.
+  // Deliberately distinct from a tenant's own customer-facing paybill
+  // (which lives in payment-gateway config, not here).
+  platform_paybill: string | null;          // Business number (e.g., 400200)
+  platform_account_number: string | null;   // Account behind the Paybill
+  platform_account_name: string | null;     // Registered name — tenant confirms recipient
 
   // Record keeping
   platform_phone: string | null;
   platform_email: string | null;
+
+  // The reference the tenant should quote when paying (your matching key)
+  payment_reference_hint: string | null;
 
   // Latest submission awaiting verification (if any)
   pending_payment: CommissionPayment | null;

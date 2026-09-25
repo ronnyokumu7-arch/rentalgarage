@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { User, Wallet, Shield, Save, Loader2, Smartphone, Building2, CreditCard, Lock } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
+import apiClient from "@/lib/api-client";
 import toast from "react-hot-toast";
 
 export default function InvestorSettingsPage() {
@@ -10,30 +11,45 @@ export default function InvestorSettingsPage() {
   const [loading, setLoading] = useState(false);
   
   // Profile State
-  const [fullName, setFullName] = useState(user?.full_name || "");
-  const [phoneNumber, setPhoneNumber] = useState(user?.phone_number || "");
-  const [idNumber, setIdNumber] = useState(user?.id_number || "");
+  const [fullName, setFullName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [idNumber, setIdNumber] = useState("");
 
   // Payout State
-  const [mpesaPhone, setMpesaPhone] = useState(user?.mpesa_phone || "");
-  const [bankName, setBankName] = useState(user?.bank_name || "");
-  const [bankAccountNumber, setBankAccountNumber] = useState(user?.bank_account_number || "");
-  const [bankAccountName, setBankAccountName] = useState(user?.bank_account_name || "");
+  const [mpesaPhone, setMpesaPhone] = useState("");
+  const [bankName, setBankName] = useState("");
+  const [bankAccountNumber, setBankAccountNumber] = useState("");
+  const [bankAccountName, setBankAccountName] = useState("");
 
   // Password State
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
+  // ✅ Initialize form with user data when it loads
+  useEffect(() => {
+    if (user) {
+      setFullName(user.full_name || "");
+      setPhoneNumber(user.phone_number || "");
+      setIdNumber(user.id_number || "");
+      setMpesaPhone(user.mpesa_phone || "");
+      setBankName(user.bank_name || "");
+      setBankAccountNumber(user.bank_account_number || "");
+      setBankAccountName(user.bank_account_name || "");
+    }
+  }, [user]);
+
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      // TODO: Replace with actual API call
-      // await usersApi.update(user!.id, { full_name: fullName, phone_number: phoneNumber, id_number: idNumber });
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network
+      await apiClient.patch("/users/me", {
+        full_name: fullName,
+        phone_number: phoneNumber,
+        id_number: idNumber,
+      });
       toast.success("Profile updated successfully");
-      await refresh();
+      await refresh(); // Refresh auth context to update UI
     } catch {
       toast.error("Failed to update profile");
     } finally {
@@ -45,9 +61,12 @@ export default function InvestorSettingsPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      // TODO: Replace with actual API call
-      // await usersApi.update(user!.id, { mpesa_phone: mpesaPhone, bank_name: bankName, bank_account_number: bankAccountNumber, bank_account_name: bankAccountName });
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await apiClient.patch("/users/me", {
+        mpesa_phone: mpesaPhone || null,
+        bank_name: bankName || null,
+        bank_account_number: bankAccountNumber || null,
+        bank_account_name: bankAccountName || null,
+      });
       toast.success("Payout details updated successfully");
       await refresh();
     } catch {
@@ -65,9 +84,11 @@ export default function InvestorSettingsPage() {
     }
     setLoading(true);
     try {
-      // TODO: Replace with actual API call
-      // await usersApi.changePassword(user!.id, { current_password: currentPassword, new_password: newPassword });
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Note: Backend might require current_password for security. 
+      // If your backend requires it, add current_password to this payload.
+      await apiClient.patch("/users/me", {
+        password: newPassword,
+      });
       toast.success("Password changed successfully");
       setCurrentPassword("");
       setNewPassword("");
@@ -111,7 +132,7 @@ export default function InvestorSettingsPage() {
             <div>
               <label className={labelClass}>Email Address</label>
               <input type="email" value={user?.email || ""} className={`${inputClass} bg-[var(--color-surface-hover)] cursor-not-allowed`} disabled />
-              <p className="text-[10px] text-[var(--color-ink-subtle)] mt-1">Email cannot be changed.</p>
+              <p className="text-[10px] text-[var(--color-ink-subtle)] mt-1">Contact support to change your email.</p>
             </div>
             <div>
               <label className={labelClass}>Phone Number</label>
@@ -211,13 +232,6 @@ export default function InvestorSettingsPage() {
         </div>
 
         <form onSubmit={handleChangePassword} className="space-y-4 max-w-md">
-          <div>
-            <label className={labelClass}>Current Password</label>
-            <div className="relative">
-              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" />
-              <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} className={`${inputClass} pl-10`} required />
-            </div>
-          </div>
           <div>
             <label className={labelClass}>New Password</label>
             <div className="relative">
