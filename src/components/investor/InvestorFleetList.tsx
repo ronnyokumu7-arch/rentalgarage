@@ -22,6 +22,7 @@ interface InvestorFleetListProps {
   totalVehicles: number;
   availableVehicles: number;
   rentedVehicles: number;
+  onAddVehicle: () => void; // ✅ NEW: Callback to open the modal
 }
 
 const FLEET_FILTER_OPTIONS: { value: VehicleStatus | ""; label: string }[] = [
@@ -74,6 +75,7 @@ export default function InvestorFleetList({
   totalVehicles,
   availableVehicles,
   rentedVehicles,
+  onAddVehicle, // ✅ NEW: Destructure the prop
 }: InvestorFleetListProps) {
   const router = useRouter();
 
@@ -131,8 +133,9 @@ export default function InvestorFleetList({
             />
           </div>
 
+          {/* ✅ UPDATED: Button now triggers the modal callback */}
           <button
-            onClick={() => router.push("/investor/fleet/new")}
+            onClick={onAddVehicle}
             className="h-9 px-4 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm flex-shrink-0"
           >
             <Plus size={14} strokeWidth={2.5} />

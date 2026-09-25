@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Car, Plus, BarChart3 } from "lucide-react";
 import { motion } from "framer-motion";
 import InvestorFleetList from "@/components/investor/InvestorFleetList";
 import { useInvestorFleetList } from "@/hooks/investor/useInvestorFleetList";
 import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
+import AddVehicleModal from "@/components/investor/AddVehicleModal";
 
 type TabMode = "fleet" | "performance";
 
@@ -16,8 +16,8 @@ const TABS: { id: TabMode; label: string; icon: React.ElementType }[] = [
 ];
 
 export default function InvestorFleetPage() {
-  const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabMode>("fleet");
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const fleetData = useInvestorFleetList();
 
   const currentTabInfo = {
@@ -61,7 +61,10 @@ export default function InvestorFleetPage() {
           animate={{ opacity: 1, y: 0 }} 
           className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden"
         >
-          <InvestorFleetList {...fleetData} />
+          <InvestorFleetList 
+            {...fleetData} 
+            onAddVehicle={() => setIsModalOpen(true)} 
+          />
         </motion.div>
       ) : (
         <motion.div 
@@ -77,10 +80,10 @@ export default function InvestorFleetPage() {
         </motion.div>
       )}
 
-      {/* Floating Action Button for Adding Vehicle */}
+      {/* Floating Action Button */}
       {activeTab === "fleet" && (
         <button
-          onClick={() => router.push("/investor/fleet/new")}
+          onClick={() => setIsModalOpen(true)}
           className="fixed bottom-20 right-6 md:bottom-8 md:right-8 z-50 group flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white rounded-full shadow-[var(--shadow-xl)] hover:scale-105 active:scale-95 transition-all duration-300 ease-out"
           title="Add New Vehicle"
         >
@@ -90,6 +93,13 @@ export default function InvestorFleetPage() {
           </span>
         </button>
       )}
+
+      {/* Add Vehicle Modal */}
+      <AddVehicleModal 
+        isOpen={isModalOpen} 
+        onClose={() => setIsModalOpen(false)} 
+        onSuccess={fleetData.refetch} 
+      />
     </div>
   );
 }
