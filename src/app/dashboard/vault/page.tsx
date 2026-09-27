@@ -13,19 +13,9 @@ import {
   Building2,
   Archive,
 } from "lucide-react";
+import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
 
-// ── Design System Constants ──────────────────────────────────────────────────
-const tabBaseClass = "flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer whitespace-nowrap";
-const tabActiveClass = "bg-[var(--color-primary)] text-white shadow-[var(--shadow-sm)]";
-const tabInactiveClass = "text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)]";
-
-interface VaultTab {
-  id: string;
-  label: string;
-  icon: React.ElementType;
-}
-
-const VAULT_TABS: VaultTab[] = [
+const VAULT_TABS = [
   { id: "bookings", label: "Bookings", icon: CalendarDays },
   { id: "clients", label: "Clients", icon: Users },
   { id: "vehicles", label: "Vehicles", icon: Car },
@@ -63,25 +53,15 @@ export default function VaultPage() {
         </div>
       </div>
 
-      {/* Tab Navigation */}
+      {/* Tab Navigation + Content Card */}
       <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden">
-        <div className="p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 overflow-x-auto custom-scrollbar">
-          <div className="flex items-center gap-2 min-w-max">
-            {VAULT_TABS.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
-                  className={`${tabBaseClass} ${isActive ? tabActiveClass : tabInactiveClass}`}
-                >
-                  <Icon size={16} strokeWidth={isActive ? 2.5 : 2} />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
+        {/* Tab Switcher — stays inside the card */}
+        <div className="p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50">
+          <PremiumTabSwitcher
+            tabs={VAULT_TABS}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+          />
         </div>
 
         {/* Tab Content Area */}

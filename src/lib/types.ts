@@ -160,6 +160,11 @@ export interface Vehicle {
   supports_wedding_service: boolean;
   wedding_base_rate: number | null;
   
+  // ✅ NEW: Investor Lease Agreement Fields
+  investor_lease_rate?: number | null;
+  lease_rate_type?: string | null;  // 'daily' | 'monthly'
+  lease_rate_locked?: boolean;
+  
   insurance_number: string | null;
   insurance_expiry: string | null;
   insurance_doc: string | null;
