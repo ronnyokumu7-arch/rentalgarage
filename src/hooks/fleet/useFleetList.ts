@@ -1,4 +1,3 @@
-// src/hooks/fleet/useFleetList.ts
 import { confirmAction } from "@/lib/utils/confirmAction";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import toast from "react-hot-toast";
@@ -20,6 +19,10 @@ export function useFleetList() {
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
 
+  // ✅ NEW: States for Investor Vehicle Pricing Modal
+  const [pricingVehicle, setPricingVehicle] = useState<Vehicle | null>(null);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+
   const fetchVehicles = useCallback(async () => {
     setLoading(true);
     try {
@@ -32,14 +35,12 @@ export function useFleetList() {
     }
   }, []);
 
-  // ✅ LIVE REFRESH: focus + visibility listeners for cross-tab changes
   useLiveRefresh(fetchVehicles);
 
   useEffect(() => {
     fetchVehicles();
   }, [fetchVehicles]);
 
-  // ✅ AUTO-REFRESH: listen for vehicle creation + updates from modals / inline contexts
   useEffect(() => {
     const handleVehicleEvent = () => fetchVehicles();
     window.addEventListener('vehicle:created', handleVehicleEvent);
@@ -81,6 +82,15 @@ export function useFleetList() {
   const mileageDueCount = vehicles.filter((v) => v.mileage_due).length;
 
   const handleStatusAction = async (id: number, action: string) => {
+    // ✅ INTERCEPT: If activating an investor-owned vehicle, open pricing modal
+    const vehicle = filteredVehicles.find((v) => v.id === id);
+    if (action === "activate" && vehicle?.owner_id) {
+      setPricingVehicle(vehicle);
+      setIsPricingModalOpen(true);
+      return; // Stop here. The modal will handle the API call.
+    }
+
+    // Standard flow for agency-owned vehicles
     setActionLoadingId(id);
     try {
       if (action === "activate") {
@@ -99,8 +109,6 @@ export function useFleetList() {
         await vehiclesApi.retire(id);
         toast.success("Vehicle retired successfully");
       } else {
-        // ✅ LIFECYCLE: all status transitions use dedicated endpoints.
-        // This fallback catches unsupported actions gracefully.
         console.warn(`Unhandled fleet action: ${action}`);
         toast.error("Action not supported");
         return;
@@ -193,5 +201,10 @@ export function useFleetList() {
     rentedVehicles,
     mileageDueCount,
     refetch: fetchVehicles,
+    // ✅ NEW: Expose pricing modal states to parent component
+    pricingVehicle,
+    setPricingVehicle,
+    isPricingModalOpen,
+    setIsPricingModalOpen,
   };
 }

@@ -38,38 +38,41 @@ export default function InvestorFleetPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            {currentTabInfo.icon}
+            {/* ✅ Bare Icon — hidden on mobile, visible from sm: up */}
+            <span className="hidden sm:inline-flex">{currentTabInfo.icon}</span>
+
             <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
               {currentTabInfo.title}
             </h1>
           </div>
-          <p className="ml-10 text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
+          {/* ✅ Subheading aligns to icon's left edge */}
+          <p className="text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
             {currentTabInfo.description}
           </p>
         </div>
 
-        <PremiumTabSwitcher 
-          tabs={TABS} 
-          activeTab={activeTab} 
-          onTabChange={(tabId) => setActiveTab(tabId as TabMode)} 
+        <PremiumTabSwitcher
+          tabs={TABS}
+          activeTab={activeTab}
+          onTabChange={(tabId) => setActiveTab(tabId as TabMode)}
         />
       </div>
 
       {activeTab === "fleet" ? (
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }} 
-          animate={{ opacity: 1, y: 0 }} 
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
           className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden"
         >
-          <InvestorFleetList 
-            {...fleetData} 
-            onAddVehicle={() => setIsModalOpen(true)} 
+          <InvestorFleetList
+            {...fleetData}
+            onAddVehicle={() => setIsModalOpen(true)}
           />
         </motion.div>
       ) : (
-        <motion.div 
-          initial={{ opacity: 0, y: 10 }} 
-          animate={{ opacity: 1, y: 0 }} 
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
           className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-12 text-center"
         >
           <BarChart3 size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" />
@@ -95,10 +98,10 @@ export default function InvestorFleetPage() {
       )}
 
       {/* Add Vehicle Modal */}
-      <AddVehicleModal 
-        isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        onSuccess={fleetData.refetch} 
+      <AddVehicleModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={fleetData.refetch}
       />
     </div>
   );

@@ -1,4 +1,3 @@
-// src/app/dashboard/fleet/page.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -7,6 +6,7 @@ import { useState, useMemo, useEffect } from "react";
 import { useFleetList } from "@/hooks/fleet/useFleetList";
 import FleetList from "@/components/fleet/FleetList";
 import QuickGarageModal from "@/components/ui/QuickGarageModal";
+import InvestorVehiclePricingModal from "@/components/fleet/InvestorVehiclePricingModal";
 import { bookingsApi } from "@/lib/api/bookings";
 import type { Booking } from "@/lib/types";
 import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
@@ -37,18 +37,15 @@ export default function FleetPage() {
   useEffect(() => {
     async function fetchActiveRentals() {
       try {
-        // Fetch all bookings (you might want to add pagination params)
         const allBookings = await bookingsApi.list({
           page: 1,
           page_size: 100
         });
 
-        // Filter to active or confirmed bookings
         const active = allBookings.filter(
           b => b.status === 'active' || b.status === 'confirmed'
         );
 
-        // Create map: vehicle_id -> booking
         const rentalMap: Record<number, Booking> = {};
         active.forEach(booking => {
           if (booking.vehicle_id) {
@@ -65,7 +62,6 @@ export default function FleetPage() {
     fetchActiveRentals();
   }, []);
 
-  // ✅ Dynamic Header Info (PREMIUM: No circles, just clean bare icons)
   const currentTabInfo = useMemo(() => {
     if (activeTab === "fleet") {
       return {
@@ -94,20 +90,17 @@ export default function FleetPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            {/* ✅ Bare Icon — hidden on mobile, visible from sm: up */}
             <span className="hidden sm:inline-flex">{currentTabInfo.icon}</span>
 
             <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
               {currentTabInfo.title}
             </h1>
           </div>
-          {/* ✅ Subheading aligns to icon's left edge */}
           <p className="text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
             {currentTabInfo.description}
           </p>
         </div>
 
-        {/* ✅ Imported Reusable Premium Tab Switcher */}
         <PremiumTabSwitcher
           tabs={TABS}
           activeTab={activeTab}
@@ -117,15 +110,16 @@ export default function FleetPage() {
 
       {/* Segment View Engine */}
       {activeTab === "fleet" ? (
-        // ✅ WRAPPED FleetList with activeRentals prop
         <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
           <FleetList
             {...fleetData}
             activeRentals={activeRentals}
+            // ✅ EXPLICITLY PASS MODAL SETTERS FOR TYPE SAFETY
+            setPricingVehicle={fleetData.setPricingVehicle}
+            setIsPricingModalOpen={fleetData.setIsPricingModalOpen}
           />
         </div>
       ) : activeTab === "performance" ? (
-        // ✅ MATCHED empty state pattern from Clients page exactly
         <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-12 text-center animate-in fade-in duration-300">
           <BarChart3 size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" />
           <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">Performance Analytics</h3>
@@ -134,9 +128,7 @@ export default function FleetPage() {
           </p>
         </div>
       ) : (
-        // ✅ MATCHED garage hub card patterns from Clients page
         <div className="space-y-6 animate-in fade-in duration-300">
-          {/* Garage Hub Content */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
             {/* Quick Garage Card */}
             <div
@@ -211,7 +203,6 @@ export default function FleetPage() {
             </div>
           </div>
 
-          {/* Info Card - MATCHED Clients page empty state pattern */}
           <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-12 flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 rounded-2xl bg-[var(--color-warning-bg)] flex items-center justify-center mb-4">
               <Wrench size={24} className="text-[var(--color-warning-text)]" />
@@ -237,7 +228,18 @@ export default function FleetPage() {
         onSave={fleetData.handleGarageSave}
       />
 
-      {/* FLOATING ACTION BUTTON - Kept as-is, matches system patterns */}
+      {/* ✅ NEW: Investor Vehicle Pricing & Activation Modal */}
+      <InvestorVehiclePricingModal
+        vehicle={fleetData.pricingVehicle}
+        isOpen={fleetData.isPricingModalOpen}
+        onClose={() => {
+          fleetData.setIsPricingModalOpen(false);
+          fleetData.setPricingVehicle(null);
+        }}
+        onSuccess={fleetData.refetch}
+      />
+
+      {/* FLOATING ACTION BUTTON */}
       {activeTab === "garage" && (
         <button
           onClick={() => router.push("/dashboard/fleet/new")}

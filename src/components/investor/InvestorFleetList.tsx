@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Car, Loader2, Search, Filter, Plus, Gauge, RectangleHorizontal, ChevronRight } from "lucide-react";
+import { Car, Loader2, Search, Filter, Plus, Gauge, RectangleHorizontal, ChevronRight, Lock } from "lucide-react";
 import FilterDropdown from "@/components/ui/FilterDropdown";
 import DataTable from "@/components/ui/DataTable";
 import CardGrid from "@/components/ui/CardGrid";
@@ -22,7 +22,7 @@ interface InvestorFleetListProps {
   totalVehicles: number;
   availableVehicles: number;
   rentedVehicles: number;
-  onAddVehicle: () => void; // ✅ NEW: Callback to open the modal
+  onAddVehicle: () => void;
 }
 
 const FLEET_FILTER_OPTIONS: { value: VehicleStatus | ""; label: string }[] = [
@@ -75,7 +75,7 @@ export default function InvestorFleetList({
   totalVehicles,
   availableVehicles,
   rentedVehicles,
-  onAddVehicle, // ✅ NEW: Destructure the prop
+  onAddVehicle,
 }: InvestorFleetListProps) {
   const router = useRouter();
 
@@ -133,7 +133,6 @@ export default function InvestorFleetList({
             />
           </div>
 
-          {/* ✅ UPDATED: Button now triggers the modal callback */}
           <button
             onClick={onAddVehicle}
             className="h-9 px-4 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm flex-shrink-0"
@@ -198,22 +197,42 @@ export default function InvestorFleetList({
                   </div>
                 );
               }}
-              renderCardBody={({ item }) => (
-                <div className="mt-3 pt-3 border-t border-[var(--color-surface-border)]/60">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-[9px] font-semibold text-[var(--color-ink-subtle)] uppercase tracking-wider">Daily Rate</span>
+              renderCardBody={({ item }) => {
+                const rate = item.investor_lease_rate;
+                const type = item.lease_rate_type || "daily";
+                const locked = item.lease_rate_locked;
+
+                return (
+                  <div className="mt-3 pt-3 border-t border-[var(--color-surface-border)]/60">
+                    {/* ✅ UPDATED: Lease Rate Display */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[9px] font-semibold text-[var(--color-ink-subtle)] uppercase tracking-wider">Your Lease Rate</span>
+                      </div>
+                      {!rate || Number(rate) === 0 ? (
+                        <p className="text-xs font-medium text-[var(--color-ink-muted)] italic">Pending Agreement</p>
+                      ) : (
+                        <div className="flex flex-col items-end">
+                          <p className="text-base font-extrabold text-[var(--color-primary)] tabular-nums tracking-tight">
+                            KES {Number(rate).toLocaleString()}
+                          </p>
+                          <span className="text-[9px] text-[var(--color-ink-muted)] uppercase flex items-center gap-1">
+                            per {type}
+                            {locked && <Lock size={8} className="text-[var(--color-ink-subtle)]" />}
+                          </span>
+                        </div>
+                      )}
                     </div>
-                    <p className="text-base font-extrabold text-[var(--color-ink)] tabular-nums tracking-tight">KES {Number(item.daily_rate).toLocaleString()}</p>
-                  </div>
-                  <div className={`rounded-xl px-3 py-2.5 border ${item.status === 'maintenance' ? 'bg-amber-500/10 border-amber-500/20' : 'bg-[var(--color-surface-hover)]/50 border-[var(--color-surface-border)]/50'}`}>
-                    <div className="flex items-center justify-center gap-2">
-                      <span className={`w-2 h-2 rounded-full ${dotSpec[item.status]?.color || 'bg-gray-400'} flex-shrink-0`} />
-                      <span className="text-[10px] font-semibold text-[var(--color-ink-muted)]">{statusLabels[item.status] || 'Ready'}</span>
+
+                    <div className={`rounded-xl px-3 py-2.5 border ${item.status === 'maintenance' ? 'bg-amber-500/10 border-amber-500/20' : 'bg-[var(--color-surface-hover)]/50 border-[var(--color-surface-border)]/50'}`}>
+                      <div className="flex items-center justify-center gap-2">
+                        <span className={`w-2 h-2 rounded-full ${dotSpec[item.status]?.color || 'bg-gray-400'} flex-shrink-0`} />
+                        <span className="text-[10px] font-semibold text-[var(--color-ink-muted)]">{statusLabels[item.status] || 'Ready'}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                );
+              }}
             />
           </div>
 
@@ -259,13 +278,34 @@ export default function InvestorFleetList({
                   ),
                 },
                 {
-                  header: "Rate",
-                  accessorKey: "daily_rate",
-                  cell: ({ row }) => (
-                    <span className="text-sm font-semibold text-[var(--color-ink)]">
-                      KES {Number(row.original.daily_rate).toLocaleString()}
-                    </span>
-                  ),
+                  // ✅ UPDATED: Lease Rate Column
+                  header: "Your Lease Rate",
+                  accessorKey: "investor_lease_rate",
+                  cell: ({ row }) => {
+                    const rate = row.original.investor_lease_rate;
+                    const type = row.original.lease_rate_type || "daily";
+                    const locked = row.original.lease_rate_locked;
+
+                    if (!rate || Number(rate) === 0) {
+                      return (
+                        <span className="text-xs text-[var(--color-ink-muted)] italic">
+                          Pending Agreement
+                        </span>
+                      );
+                    }
+
+                    return (
+                      <div className="flex flex-col">
+                        <span className="text-sm font-bold text-[var(--color-primary)]">
+                          KES {Number(rate).toLocaleString()}
+                        </span>
+                        <span className="text-[10px] text-[var(--color-ink-muted)] uppercase flex items-center gap-1">
+                          per {type}
+                          {locked && <Lock size={10} className="text-[var(--color-ink-subtle)]" title="Rate locked for contract period" />}
+                        </span>
+                      </div>
+                    );
+                  },
                 },
                 {
                   header: "Status",
