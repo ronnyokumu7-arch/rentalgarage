@@ -1,13 +1,17 @@
+// src/app/investor/earnings/page.tsx
 "use client";
 
 import { useState, useMemo } from "react";
-import { 
-  Wallet, TrendingUp, Clock, CheckCircle, Search, Filter, 
+import {
+  Wallet, TrendingUp, Clock, CheckCircle, Search, Filter,
   ArrowDownRight, Minus
 } from "lucide-react";
 import DataTable from "@/components/ui/DataTable";
 import CardGrid from "@/components/ui/CardGrid";
 import FilterDropdown from "@/components/ui/FilterDropdown";
+import DesktopStatCard from "@/components/dashboard/DesktopStatCard";
+import { MobileHeroEarnings } from "@/components/dashboard/MobileDashboardCards";
+import MobileEarningsStatsCarousel from "@/components/investor/MobileEarningsStatsCarousel";
 import type { InvestorEarning, EarningStatus, EarningType } from "@/lib/types";
 
 const useInvestorEarnings = () => {
@@ -53,6 +57,12 @@ const typeColors: Record<EarningType, string> = {
   payout: "text-blue-600 dark:text-blue-400",
 };
 
+const typeBgColors: Record<EarningType, string> = {
+  revenue_share: "bg-emerald-500/10",
+  maintenance_deduction: "bg-rose-500/10",
+  payout: "bg-blue-500/10",
+};
+
 export default function InvestorEarningsPage() {
   const { earnings } = useInvestorEarnings();
   const [search, setSearch] = useState("");
@@ -62,9 +72,10 @@ export default function InvestorEarningsPage() {
     const total = earnings.reduce((sum, e) => e.transaction_type !== "maintenance_deduction" ? sum + e.amount : sum, 0);
     const pending = earnings.filter(e => e.status === "pending").reduce((sum, e) => sum + e.amount, 0);
     const lastPayout = earnings.find(e => e.transaction_type === "payout" && e.status === "paid");
-    
+
     return {
       totalEarnings: total,
+      thisMonth: "—", // TODO: wire to real MTD data when available
       pendingPayout: pending,
       lastPayoutAmount: lastPayout ? lastPayout.amount : 0,
       lastPayoutDate: lastPayout ? new Date(lastPayout.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—",
@@ -74,8 +85,8 @@ export default function InvestorEarningsPage() {
   const filteredEarnings = useMemo(() => {
     return earnings.filter((e) => {
       const searchLower = search.toLowerCase();
-      const matchesSearch = 
-        e.vehicle_plate.toLowerCase().includes(searchLower) || 
+      const matchesSearch =
+        e.vehicle_plate.toLowerCase().includes(searchLower) ||
         e.description.toLowerCase().includes(searchLower);
       const matchesStatus = statusFilter === "" || e.status === statusFilter;
       return matchesSearch && matchesStatus;
@@ -93,50 +104,69 @@ export default function InvestorEarningsPage() {
 
   return (
     <div className="space-y-6">
+      {/* ✅ Standard page header — bare icon hidden on mobile, subhead aligned to icon's left edge */}
       <div>
-        <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">Earnings & Payouts</h1>
-        <p className="text-sm text-[var(--color-ink-muted)] mt-1">Track your revenue share, deductions, and payout history.</p>
+        <div className="flex items-center gap-3">
+          <span className="hidden sm:inline-flex">
+            <Wallet size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />
+          </span>
+          <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
+            Earnings &amp; Payouts
+          </h1>
+        </div>
+        <p className="text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
+          Track your revenue share, deductions, and payout history.
+        </p>
       </div>
 
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
-              <TrendingUp size={16} className="text-emerald-600" />
-            </div>
-            <span className="text-xs font-semibold text-[var(--color-ink-muted)]">Total Earnings</span>
-          </div>
-          <p className="text-xl font-bold text-[var(--color-ink)]">KES {stats.totalEarnings.toLocaleString()}</p>
-        </div>
+      {/* ✅ MOBILE: Hero + 3-card carousel */}
+      <div className="lg:hidden space-y-3">
+        <MobileHeroEarnings
+          value={`KES ${stats.totalEarnings.toLocaleString()}`}
+        />
+        <MobileEarningsStatsCarousel
+          thisMonth={stats.thisMonth}
+          pendingPayout={stats.pendingPayout}
+          lastPayoutAmount={stats.lastPayoutAmount}
+          lastPayoutDate={stats.lastPayoutDate}
+        />
+      </div>
 
-        <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
-              <Clock size={16} className="text-amber-600" />
-            </div>
-            <span className="text-xs font-semibold text-[var(--color-ink-muted)]">Pending Payout</span>
-          </div>
-          <p className="text-xl font-bold text-[var(--color-ink)]">KES {stats.pendingPayout.toLocaleString()}</p>
-        </div>
-
-        <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center">
-              <Wallet size={16} className="text-blue-600" />
-            </div>
-            <span className="text-xs font-semibold text-[var(--color-ink-muted)]">Last Payout</span>
-          </div>
-          <p className="text-xl font-bold text-[var(--color-ink)]">KES {stats.lastPayoutAmount.toLocaleString()}</p>
-        </div>
-
-        <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] p-4">
-          <div className="flex items-center gap-2 mb-2">
-            <div className="w-8 h-8 rounded-lg bg-purple-500/10 flex items-center justify-center">
-              <CheckCircle size={16} className="text-purple-600" />
-            </div>
-            <span className="text-xs font-semibold text-[var(--color-ink-muted)]">Last Payout Date</span>
-          </div>
-          <p className="text-xl font-bold text-[var(--color-ink)]">{stats.lastPayoutDate}</p>
+      {/* ✅ DESKTOP: 4 stat cards */}
+      <div className="hidden lg:block">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <DesktopStatCard
+            label="Total Earnings"
+            value={`KES ${stats.totalEarnings.toLocaleString()}`}
+            subtext="Lifetime revenue share"
+            icon={TrendingUp}
+            gradient="from-emerald-500 to-teal-600"
+            delay={0.1}
+          />
+          <DesktopStatCard
+            label="This Month"
+            value={stats.thisMonth}
+            subtext="Current cycle"
+            icon={Clock}
+            gradient="from-amber-500 to-orange-600"
+            delay={0.2}
+          />
+          <DesktopStatCard
+            label="Pending Payout"
+            value={`KES ${stats.pendingPayout.toLocaleString()}`}
+            subtext="Awaiting next cycle"
+            icon={Wallet}
+            gradient="from-blue-500 to-indigo-600"
+            delay={0.3}
+          />
+          <DesktopStatCard
+            label="Last Payout"
+            value={`KES ${stats.lastPayoutAmount.toLocaleString()}`}
+            subtext={stats.lastPayoutDate}
+            icon={CheckCircle}
+            gradient="from-purple-500 to-violet-600"
+            delay={0.4}
+          />
         </div>
       </div>
 
@@ -165,7 +195,7 @@ export default function InvestorEarningsPage() {
               icon={Filter}
             />
           </div>
-          
+
           <button className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-xs font-bold text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-all">
             <ArrowDownRight size={14} />
             Export CSV
@@ -196,10 +226,11 @@ export default function InvestorEarningsPage() {
                 renderCardHeader={({ item }) => {
                   const Icon = typeIcons[item.transaction_type];
                   const color = typeColors[item.transaction_type];
+                  const bg = typeBgColors[item.transaction_type];
                   return (
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
-                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${color.replace('text-', 'bg-').replace('600', '500/10').replace('400', '500/10')}`}>
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${bg}`}>
                           <Icon size={18} className={color} />
                         </div>
                         <div className="min-w-0 flex-1">

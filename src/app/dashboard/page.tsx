@@ -61,7 +61,7 @@ export default function DashboardPage() {
   const currentTabInfo = {
     overview: {
       title: "Dashboard",
-      description: "Real-time overview",
+      description: "Real-time overview of your rental business performance",
       icon: <Gauge size={28} strokeWidth={1.5} className="text-[var(--color-primary)] hidden sm:block" />
     },
     activity: {

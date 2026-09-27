@@ -37,26 +37,28 @@ export default function InvestorVehicleProfilePage({ params }: { params: { vehic
     fetchVehicle();
   }, [params.vehicleId]);
 
-  const handleUpload = async (docType: 'insurance' | 'registration' | 'inspection', file: File) => {
+  const handleUpload = async (docType: 'insurance' | 'registration' | 'inspection' | 'service_tag', file: File) => {
     setUploading(docType);
     try {
       // ✅ Use the new investor-specific upload methods
+      // Note: 'service_tag' is routed to the registration endpoint to reuse the DB column
       if (docType === 'insurance') {
         await vehiclesApi.uploadInvestorInsuranceDoc(Number(params.vehicleId), file);
-      } else if (docType === 'registration') {
-        await vehiclesApi.uploadInvestorRegistrationDoc(Number(params.vehicleId), file);
       } else if (docType === 'inspection') {
         await vehiclesApi.uploadInvestorInspectionDoc(Number(params.vehicleId), file);
+      } else if (docType === 'service_tag' || docType === 'registration') {
+        await vehiclesApi.uploadInvestorRegistrationDoc(Number(params.vehicleId), file);
       }
       
-      toast.success(`${docType} document uploaded successfully`);
+      const displayName = docType === 'service_tag' ? 'Service Tag' : docType;
+      toast.success(`${displayName} uploaded successfully`);
       
       // ✅ Refresh vehicle data to reflect the new document URL immediately
       const updatedVehicle = await vehiclesApi.get(Number(params.vehicleId));
       setVehicle(updatedVehicle);
     } catch (error: any) {
       console.error(`Failed to upload ${docType}:`, error);
-      toast.error(error.response?.data?.detail || `Failed to upload ${docType}`);
+      toast.error(error.response?.data?.detail || `Failed to upload`);
     } finally {
       setUploading(null);
     }
@@ -124,29 +126,35 @@ export default function InvestorVehicleProfilePage({ params }: { params: { vehic
       <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] p-6">
         <h2 className="text-lg font-bold text-[var(--color-ink)] mb-4">Required Documents</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          
+          {/* 1. Insurance Policy (Required) */}
           <DocumentUploadCard
             title="Insurance Policy"
             icon={FileText}
             uploaded={!!vehicle.insurance_doc}
             uploading={uploading === 'insurance'}
             onUpload={(file) => handleUpload('insurance', file)}
-            required
+            required={true}
           />
+          
+          {/* 2. Current Service Tag (Required) - Reuses registration_doc column */}
           <DocumentUploadCard
-            title="Vehicle Registration"
+            title="Current Service Tag"
             icon={FileText}
             uploaded={!!vehicle.registration_doc}
-            uploading={uploading === 'registration'}
-            onUpload={(file) => handleUpload('registration', file)}
-            required
+            uploading={uploading === 'service_tag'}
+            onUpload={(file) => handleUpload('service_tag', file)}
+            required={true}
           />
+          
+          {/* 3. Inspection Report (Optional) */}
           <DocumentUploadCard
             title="Inspection Report"
             icon={FileText}
             uploaded={!!vehicle.inspection_doc}
             uploading={uploading === 'inspection'}
             onUpload={(file) => handleUpload('inspection', file)}
-            required
+            required={false}
           />
         </div>
       </div>
