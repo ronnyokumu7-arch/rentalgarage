@@ -200,7 +200,7 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
         {/* Notifications */}
         <button className="relative w-9 h-9 rounded-xl flex items-center justify-center text-ink-muted hover:bg-surface-hover hover:text-ink transition-all duration-200 active:scale-95">
           <Bell size={17} strokeWidth={1.8} />
-          <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 ring-2 ring-bg animate-pulse" />
+          <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
         </button>
 
         {/* Divider */}
