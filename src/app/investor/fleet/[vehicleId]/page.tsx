@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FileText, Upload, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { FileText, Upload, CheckCircle, AlertCircle, Loader2, ChevronRight } from "lucide-react";
 import { vehiclesApi } from "@/lib/api/vehicles";
-import type { Vehicle } from "@/lib/types";
+import { investorContractsApi } from "@/lib/api/investorContracts";
+import InvestorContractSignModal from "@/components/investor/InvestorContractSignModal";
+import type { Vehicle, InvestorContract } from "@/lib/types";
 import toast from "react-hot-toast";
 
 interface DocumentUploadCardProps {
@@ -17,31 +19,41 @@ interface DocumentUploadCardProps {
 
 export default function InvestorVehicleProfilePage({ params }: { params: { vehicleId: string } }) {
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
+  const [activeContract, setActiveContract] = useState<InvestorContract | null>(null);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState<string | null>(null);
+  
+  // ✅ State for the in-app signing modal
+  const [isSignModalOpen, setIsSignModalOpen] = useState(false);
 
-  // ✅ Fetch vehicle details on mount
+  // ✅ Fetch vehicle details and active contract on mount
   useEffect(() => {
-    const fetchVehicle = async () => {
+    const fetchData = async () => {
       try {
-        const data = await vehiclesApi.get(Number(params.vehicleId));
-        setVehicle(data);
+        const [vehicleData, contractsData] = await Promise.all([
+          vehiclesApi.get(Number(params.vehicleId)),
+          investorContractsApi.list({ vehicle_id: Number(params.vehicleId) })
+        ]);
+        
+        setVehicle(vehicleData);
+        
+        // Find the most recent non-terminated contract
+        const active = contractsData.find((c: InvestorContract) => c.status !== 'terminated');
+        setActiveContract(active || null);
       } catch (error) {
-        console.error("Failed to fetch vehicle:", error);
+        console.error("Failed to fetch data:", error);
         toast.error("Failed to load vehicle details");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchVehicle();
+    fetchData();
   }, [params.vehicleId]);
 
   const handleUpload = async (docType: 'insurance' | 'registration' | 'inspection' | 'service_tag', file: File) => {
     setUploading(docType);
     try {
-      // ✅ Use the new investor-specific upload methods
-      // Note: 'service_tag' is routed to the registration endpoint to reuse the DB column
       if (docType === 'insurance') {
         await vehiclesApi.uploadInvestorInsuranceDoc(Number(params.vehicleId), file);
       } else if (docType === 'inspection') {
@@ -53,7 +65,6 @@ export default function InvestorVehicleProfilePage({ params }: { params: { vehic
       const displayName = docType === 'service_tag' ? 'Service Tag' : docType;
       toast.success(`${displayName} uploaded successfully`);
       
-      // ✅ Refresh vehicle data to reflect the new document URL immediately
       const updatedVehicle = await vehiclesApi.get(Number(params.vehicleId));
       setVehicle(updatedVehicle);
     } catch (error: any) {
@@ -61,6 +72,17 @@ export default function InvestorVehicleProfilePage({ params }: { params: { vehic
       toast.error(error.response?.data?.detail || `Failed to upload`);
     } finally {
       setUploading(null);
+    }
+  };
+
+  // ✅ Helper to refresh contract data after signing
+  const refreshContractData = async () => {
+    try {
+      const contractsData = await investorContractsApi.list({ vehicle_id: Number(params.vehicleId) });
+      const active = contractsData.find((c: InvestorContract) => c.status !== 'terminated');
+      setActiveContract(active || null);
+    } catch (error) {
+      console.error("Failed to refresh contract data:", error);
     }
   };
 
@@ -105,19 +127,44 @@ export default function InvestorVehicleProfilePage({ params }: { params: { vehic
               per {vehicle.lease_rate_type || 'day'} {vehicle.lease_rate_locked && '🔒'}
             </p>
           </div>
+          
           <div>
             <p className="text-xs font-semibold text-[var(--color-ink-muted)] uppercase mb-1">Contract Status</p>
-            <div className="flex items-center gap-2 mt-1">
-              {vehicle.lease_rate_locked ? (
-                <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                  <CheckCircle size={14} /> Active Contract
+            {activeContract ? (
+              <div className="space-y-3">
+                <div className="flex items-center gap-2">
+                  {activeContract.status === 'signed' ? (
+                    <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                      <CheckCircle size={14} /> Signed & Active
+                    </span>
+                  ) : activeContract.status === 'pending_signature' ? (
+                    <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                      <AlertCircle size={14} /> Pending Your Signature
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-gray-500/10 text-gray-600 dark:text-gray-400 border border-gray-500/20">
+                      <FileText size={14} /> Draft
+                    </span>
+                  )}
+                </div>
+                {/* ✅ Replaced public link with in-app modal trigger */}
+                <button 
+                  onClick={() => setIsSignModalOpen(true)}
+                  className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--color-primary)] hover:underline transition-colors"
+                >
+                  View & Sign Contract <ChevronRight size={12} />
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col gap-1 mt-1">
+                <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-gray-500/10 text-gray-600 dark:text-gray-400 border border-gray-500/20 w-fit">
+                  <AlertCircle size={14} /> No Contract Generated
                 </span>
-              ) : (
-                <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                  <AlertCircle size={14} /> Pending Approval
-                </span>
-              )}
-            </div>
+                <p className="text-xs text-[var(--color-ink-muted)]">
+                  The agency has not generated a contract for this vehicle yet.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -158,11 +205,21 @@ export default function InvestorVehicleProfilePage({ params }: { params: { vehic
           />
         </div>
       </div>
+
+      {/* ✅ In-App Signing Modal */}
+      {activeContract && (
+        <InvestorContractSignModal
+          contract={activeContract}
+          isOpen={isSignModalOpen}
+          onClose={() => setIsSignModalOpen(false)}
+          onSuccess={refreshContractData}
+        />
+      )}
     </div>
   );
 }
 
-// ✅ Helper component with proper TypeScript types (no more 'any' warnings)
+// ✅ Helper component with proper TypeScript types
 function DocumentUploadCard({ title, icon: Icon, uploaded, uploading, onUpload, required }: DocumentUploadCardProps) {
   return (
     <div className={`p-4 rounded-xl border-2 border-dashed transition-all ${

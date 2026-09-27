@@ -1083,3 +1083,45 @@ export interface PaginatedResponse<T> {
   page_size: number;
   total_pages: number;
 }
+
+
+// ✅ NEW: Investor Contract Types
+export type InvestorContractStatus = "draft" | "pending_signature" | "signed" | "terminated";
+
+export interface InvestorContract {
+  id: number;
+  tenant_id: number;
+  vehicle_id: number;
+  booking_id: number | null; // Null for monthly contracts
+  contract_number: string;
+  
+  // Lease Terms Snapshot
+  lease_rate: number;
+  lease_rate_type: "daily" | "monthly";
+  duration_months: number | null;
+  
+  start_date: string;
+  end_date: string;
+  status: InvestorContractStatus;
+  
+  // Document & Sharing
+  pdf_path: string | null;
+  share_token: string | null;
+  share_token_expires_at: string | null;
+  
+  // Signatures
+  signed_by_investor: boolean;
+  investor_signed_at: string | null;
+  investor_signature_path: string | null;
+  
+  signed_by_agency: boolean;
+  agency_signed_at: string | null;
+  agency_signature_path: string | null;
+  
+  created_at: string;
+  updated_at: string;
+
+  // Computed fields (from backend @computed_field)
+  vehicle_plate?: string;
+  investor_name?: string;
+}

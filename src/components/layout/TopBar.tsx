@@ -214,7 +214,7 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
           >
             <div className="relative flex-shrink-0">
               {renderAvatar("md")}
-              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-bg" />
+              <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400" />
             </div>
             <span className="hidden md:block text-[13px] font-medium text-ink max-w-[80px] truncate">
               {fullName.split(" ")[0]}
@@ -231,7 +231,7 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
                 <div className="flex items-center gap-3">
                   <div className="relative flex-shrink-0">
                     {renderAvatar("lg")}
-                    <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-surface" />
+                    <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-bold text-ink truncate leading-tight">{fullName}</p>
