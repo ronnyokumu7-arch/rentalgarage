@@ -224,23 +224,24 @@ export default function DriversPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            {/* ✅ Bare Icon - No container */}
-            {currentTabInfo.icon}
-            
+            {/* ✅ Bare Icon — hidden on mobile, visible from sm: up */}
+            <span className="hidden sm:inline-flex">{currentTabInfo.icon}</span>
+
             <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
               {currentTabInfo.title}
             </h1>
           </div>
-          <p className="ml-10 text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
+          {/* ✅ Subheading aligns to icon's left edge */}
+          <p className="text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
             {currentTabInfo.description}
           </p>
         </div>
 
         {/* ✅ Imported Reusable Premium Tab Switcher */}
-        <PremiumTabSwitcher 
-          tabs={TABS} 
-          activeTab={activeTab} 
-          onTabChange={(tabId) => setActiveTab(tabId as DriverTab)} 
+        <PremiumTabSwitcher
+          tabs={TABS}
+          activeTab={activeTab}
+          onTabChange={(tabId) => setActiveTab(tabId as DriverTab)}
         />
       </div>
 
@@ -343,7 +344,7 @@ export default function DriversPage() {
                   cardClassName="!p-3 hover:!border-[var(--color-primary)]/40 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] transition-all duration-300"
                   containerClassName="px-2 pb-4"
                   maxHeight="calc(100vh - 160px)"
-                  
+
                   renderCardHeader={({ item }) => {
                     const statusDot: Record<DriverStatus, string> = {
                       available: "bg-emerald-500",
@@ -352,7 +353,7 @@ export default function DriversPage() {
                       suspended: "bg-red-500",
                     };
                     return (
-                      <div 
+                      <div
                         className="flex items-center justify-between w-full cursor-pointer"
                         onClick={() => openEdit(item.id)}
                       >
@@ -366,7 +367,7 @@ export default function DriversPage() {
                               <div className={`w-3 h-3 rounded-full ${statusDot[item.status]} ring-2 ring-[var(--color-surface)] shadow-sm`} />
                             </div>
                           </div>
-                          
+
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-1.5">
                               <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight uppercase">
@@ -380,19 +381,19 @@ export default function DriversPage() {
                             </div>
                           </div>
                         </div>
-                        
+
                         <ChevronRight size={16} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
                       </div>
                     );
                   }}
-                  
+
                   renderCardBody={({ item }) => {
                     const dl = dlState(item.dl_expiry);
                     const statusStyle = STATUS_STYLES[item.status] || STATUS_STYLES.suspended;
-                    
+
                     return (
                       <div className="mt-3 pt-3 border-t border-[var(--color-surface-border)]/60">
-                        
+
                         {/* Contact & ID Section */}
                         <div className="flex items-center gap-3 mb-3">
                           {/* Phone */}
@@ -456,7 +457,7 @@ export default function DriversPage() {
                       </div>
                     );
                   }}
-                  
+
                   rowActions={getDriverActions}
                 />
               </div>

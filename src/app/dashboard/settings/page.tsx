@@ -129,14 +129,17 @@ export default function SettingsPage() {
           )}
           <div>
             <div className="flex items-center gap-3">
-              {/* ✅ Bare Icon - No container */}
-              {!activeModule && currentTabInfo.icon}
-              
+              {/* ✅ Bare Icon — hidden on mobile, visible from sm: up; also hidden when inside a module */}
+              <span className="hidden sm:inline-flex">
+                {!activeModule && currentTabInfo.icon}
+              </span>
+
               <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
                 {activeModule ? activeModule.title : currentTabInfo.title}
               </h1>
             </div>
-            <p className="ml-10 text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
+            {/* ✅ Subheading aligns to icon's left edge */}
+            <p className="text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
               {activeModule ? activeModule.description : currentTabInfo.description}
             </p>
           </div>
@@ -144,10 +147,10 @@ export default function SettingsPage() {
 
         {/* ✅ Imported Reusable Premium Tab Switcher */}
         {!activeModule && (
-          <PremiumTabSwitcher 
-            tabs={TABS} 
-            activeTab={activeTab} 
-            onTabChange={(tabId) => setActiveTab(tabId as TabId)} 
+          <PremiumTabSwitcher
+            tabs={TABS}
+            activeTab={activeTab}
+            onTabChange={(tabId) => setActiveTab(tabId as TabId)}
           />
         )}
       </div>
@@ -180,9 +183,9 @@ export default function SettingsPage() {
                   </div>
                   <p className="text-sm text-[var(--color-ink-muted)] mt-0.5 line-clamp-2">{module.description}</p>
                 </div>
-                <ChevronRight 
-                  size={18} 
-                  className="text-[var(--color-ink-subtle)] group-hover:text-[var(--color-primary)] group-hover:translate-x-1 transition-all duration-200 flex-shrink-0" 
+                <ChevronRight
+                  size={18}
+                  className="text-[var(--color-ink-subtle)] group-hover:text-[var(--color-primary)] group-hover:translate-x-1 transition-all duration-200 flex-shrink-0"
                 />
               </div>
             );
@@ -191,7 +194,7 @@ export default function SettingsPage() {
       ) : (
         // ── THE WORKSPACE: Individual Module View ──
         <div className="animate-in slide-in-from-right-4 fade-in duration-300">
-          
+
           {/* ✅ DYNAMIC ROUTING: Render specific module components, or fallback placeholder */}
           {activeModule.id === "business" ? (
             <BusinessProfileSettings />

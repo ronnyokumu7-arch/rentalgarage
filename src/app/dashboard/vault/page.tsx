@@ -2,16 +2,16 @@
 "use client";
 
 import { useState } from "react";
-import { 
-  CalendarDays, 
-  Users, 
-  Car, 
-  FileText, 
-  CreditCard, 
-  CheckSquare, 
-  Shield, 
+import {
+  CalendarDays,
+  Users,
+  Car,
+  FileText,
+  CreditCard,
+  CheckSquare,
+  Shield,
   Building2,
-  Archive
+  Archive,
 } from "lucide-react";
 
 // ── Design System Constants ──────────────────────────────────────────────────
@@ -41,14 +41,23 @@ export default function VaultPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center gap-4">
-        <div className="p-3 rounded-2xl bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20">
-          <Archive size={24} className="text-[var(--color-primary)]" />
-        </div>
+      {/* Header — Vault signature icon container, aligned to standard pattern */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[var(--color-ink)]">History Library</h1>
-          <p className="text-sm text-[var(--color-ink-muted)] mt-1">
+          <div className="flex items-center gap-3">
+            {/* ✅ Vault signature: tinted container kept, hidden on mobile */}
+            <span className="hidden sm:inline-flex">
+              <div className="p-3 rounded-2xl bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20">
+                <Archive size={24} className="text-[var(--color-primary)]" />
+              </div>
+            </span>
+
+            <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
+              History Library
+            </h1>
+          </div>
+          {/* ✅ Subheading aligns to container's left edge */}
+          <p className="text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
             Access archived records, voided documents, and completed history.
           </p>
         </div>
@@ -87,7 +96,7 @@ export default function VaultPage() {
               </p>
             </div>
           )}
-          
+
           {activeTab === "clients" && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
               <Users size={48} className="text-[var(--color-ink-subtle)] mb-4" />

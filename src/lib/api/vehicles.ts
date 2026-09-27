@@ -6,12 +6,26 @@ export interface MileageUpdatePayload {
   next_service_km?: number | null;
 }
 
+// ✅ NEW: Payload interface for investor vehicle onboarding
+export interface InvestorVehicleCreatePayload {
+  make: string;
+  model: string;
+  plate_number: string;
+  year: number;
+  vin?: string | null;
+  expected_lease_rate?: number | null; // Investor's suggested rate
+  current_mileage?: number;
+  next_service_km?: number | null;
+  insurance_number?: string | null;
+  insurance_expiry?: string | null;
+  inspection_doc?: string | null;
+  notes?: string | null;
+}
+
 export const vehiclesApi = {
-  // ✅ FIXED: Unwrap .items & Add include_archived
   list: (params?: { status?: string; page?: number; page_size?: number; include_archived?: boolean }) =>
     apiClient.get<PaginatedResponse<Vehicle>>("/vehicles/", { params }).then((r) => r.data.items),
 
-  // ✅ FIXED: Unwrap .items
   listArchived: (params?: { status?: string; page?: number; page_size?: number }) =>
     apiClient.get<PaginatedResponse<Vehicle>>("/vehicles/archived", { params }).then((r) => r.data.items),
 
@@ -20,6 +34,10 @@ export const vehiclesApi = {
 
   create: (data: VehicleCreate) =>
     apiClient.post<Vehicle>("/vehicles", data).then((r) => r.data),
+
+  // ✅ ADDED: Dedicated investor vehicle onboarding endpoint
+  createInvestorVehicle: (data: InvestorVehicleCreatePayload) =>
+    apiClient.post<Vehicle>("/investors/vehicles", data).then((r) => r.data),
 
   update: (id: number, data: VehicleUpdate) =>
     apiClient.patch<Vehicle>(`/vehicles/${id}`, data).then((r) => r.data),
@@ -45,7 +63,6 @@ export const vehiclesApi = {
   restore: (id: number) =>
     apiClient.post<Vehicle>(`/vehicles/${id}/restore`).then((r) => r.data),
 
-  // ✅ FIXED: /bookings endpoint is now paginated, must unwrap .items
   getBookings: (vehicleId: number) =>
     apiClient.get<PaginatedResponse<Booking>>("/bookings", { params: { vehicle_id: vehicleId } }).then((r) => r.data.items),
 

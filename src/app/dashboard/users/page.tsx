@@ -44,23 +44,24 @@ export default function UsersPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            {/* ✅ Bare Icon - No container */}
-            {currentTabInfo.icon}
-            
+            {/* ✅ Bare Icon — hidden on mobile, visible from sm: up */}
+            <span className="hidden sm:inline-flex">{currentTabInfo.icon}</span>
+
             <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
               {currentTabInfo.title}
             </h1>
           </div>
-          <p className="ml-10 text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
+          {/* ✅ Subheading aligns to icon's left edge */}
+          <p className="text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
             {currentTabInfo.description}
           </p>
         </div>
 
         {/* ✅ Imported Reusable Premium Tab Switcher */}
-        <PremiumTabSwitcher 
-          tabs={TABS} 
-          activeTab={activeTab} 
-          onTabChange={(tabId) => setActiveTab(tabId as UserMainTab)} 
+        <PremiumTabSwitcher
+          tabs={TABS}
+          activeTab={activeTab}
+          onTabChange={(tabId) => setActiveTab(tabId as UserMainTab)}
         />
       </div>
 

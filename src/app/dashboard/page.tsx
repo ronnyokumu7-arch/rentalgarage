@@ -37,13 +37,13 @@ export default function DashboardPage() {
     const checkMobile = () => {
       const mobile = window.innerWidth < 1024; // lg breakpoint
       setIsMobile(mobile);
-      
+
       // ✅ FORCE activeTab to "overview" on mobile (hide other tabs)
       if (mobile) {
         setActiveTab("overview");
       }
     };
-    
+
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -59,20 +59,20 @@ export default function DashboardPage() {
 
   // ✅ Dynamic Header Info (PREMIUM: No circles, just clean bare icons)
   const currentTabInfo = {
-    overview: { 
-      title: "Dashboard", 
-      description: "Real-time overview", 
-      icon: <Gauge size={28} strokeWidth={1.5} className="text-[var(--color-primary)] hidden sm:block" /> 
+    overview: {
+      title: "Dashboard",
+      description: "Real-time overview",
+      icon: <Gauge size={28} strokeWidth={1.5} className="text-[var(--color-primary)] hidden sm:block" />
     },
-    activity: { 
-      title: "Bookings Calendar", 
-      description: "Visual overview of all upcoming and active rentals", 
-      icon: <CalendarRange size={28} strokeWidth={1.5} className="text-[var(--color-primary)] hidden sm:block" /> 
+    activity: {
+      title: "Bookings Calendar",
+      description: "Visual overview of all upcoming and active rentals",
+      icon: <CalendarRange size={28} strokeWidth={1.5} className="text-[var(--color-primary)] hidden sm:block" />
     },
-    reports: { 
-      title: "Analytics", 
-      description: "Deep insights into your business performance", 
-      icon: <LineChart size={28} strokeWidth={1.5} className="text-[var(--color-primary)] hidden sm:block" /> 
+    reports: {
+      title: "Analytics",
+      description: "Deep insights into your business performance",
+      icon: <LineChart size={28} strokeWidth={1.5} className="text-[var(--color-primary)] hidden sm:block" />
     },
   }[activeTab as "overview" | "activity" | "reports"];
 
@@ -84,23 +84,23 @@ export default function DashboardPage() {
           <div className="flex items-center gap-3">
             {/* ✅ Icon hidden on mobile */}
             {currentTabInfo?.icon}
-            
+
             {/* ✅ Title hidden on mobile */}
             <h1 className="hidden sm:block text-lg sm:text-xl font-bold text-ink font-display tracking-tight">
               {currentTabInfo?.title}
             </h1>
           </div>
-          <p className="text-xs text-ink-muted hidden sm:block mt-1">
+          <p className="text-sm sm:text-base leading-relaxed text-ink-muted hidden sm:block mt-1">
             {currentTabInfo?.description}
           </p>
         </div>
-        
+
         {/* ✅ Tab Switcher - Desktop only */}
         <div className="hidden lg:block">
-          <PremiumTabSwitcher 
-            tabs={TABS} 
-            activeTab={activeTab} 
-            onTabChange={(tabId) => setActiveTab(tabId)} 
+          <PremiumTabSwitcher
+            tabs={TABS}
+            activeTab={activeTab}
+            onTabChange={(tabId) => setActiveTab(tabId)}
           />
         </div>
       </div>
@@ -115,7 +115,7 @@ export default function DashboardPage() {
                 {/* Hero + Stats */}
                 <MobileHeroEarnings value={`KES ${(stats.totalRevenue || 0).toLocaleString()}`} change={{ value: `${isPositiveGrowth ? '+' : ''}${monthOverMonthPercent}%`, positive: isPositiveGrowth }} />
                 <MobileStatsCarousel mtdRevenue={mtdRevenue} lastMonthRevenue={lastMonthRevenue} monthOverMonthPercent={monthOverMonthPercent} isPositiveGrowth={isPositiveGrowth} pendingPayments={stats.pendingPayments || 0} commission={commission} />
-                
+
                 {commission && parseFloat(commission.outstanding_balance) > 0 && (
                   <div className="flex items-center justify-between p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800/30">
                     <div><p className="text-[10px] text-amber-700 dark:text-amber-400 font-medium">Outstanding Balance</p><p className="text-sm font-bold text-amber-800 dark:text-amber-300">KES {parseFloat(commission.outstanding_balance).toLocaleString()}</p></div>

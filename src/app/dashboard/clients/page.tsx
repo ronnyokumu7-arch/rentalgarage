@@ -74,10 +74,10 @@ export default function ClientsPage() {
 
   const clientMetrics = useMemo(() => {
     const total = filteredClients.length;
-    const active = filteredClients.filter((client) => 
+    const active = filteredClients.filter((client) =>
       client.status !== 'suspended' && (client as any).bookingsCount > 0
     ).length;
-    const inactive = filteredClients.filter((client) => 
+    const inactive = filteredClients.filter((client) =>
       client.status === 'suspended' || (client as any).bookingsCount === 0
     ).length;
     return { total, active, inactive };
@@ -141,24 +141,25 @@ export default function ClientsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <div className="flex items-center gap-3">
-              {/* ✅ Bare Icon - No container */}
-              {currentTabInfo.icon}
-              
+              {/* ✅ Bare Icon — hidden on mobile */}
+              <span className="hidden sm:inline-flex">{currentTabInfo.icon}</span>
+
               <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
                 {currentTabInfo.title}
               </h1>
             </div>
-            <p className="ml-10 text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
+            {/* ✅ Subheading aligns to icon's left edge */}
+            <p className="text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
               {currentTabInfo.description}
             </p>
           </div>
-          
+
           {/* ✅ Imported Reusable Premium Tab Switcher */}
           <div className="self-start sm:self-auto">
-            <PremiumTabSwitcher 
-              tabs={TABS} 
-              activeTab={activeTab} 
-              onTabChange={(tabId) => setActiveTab(tabId as ClientSegment)} 
+            <PremiumTabSwitcher
+              tabs={TABS}
+              activeTab={activeTab}
+              onTabChange={(tabId) => setActiveTab(tabId as ClientSegment)}
             />
           </div>
         </div>
@@ -173,32 +174,33 @@ export default function ClientsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <div className="flex items-center gap-3">
-              {/* ✅ Bare Icon - No container */}
-              {currentTabInfo.icon}
-              
+              {/* ✅ Bare Icon — hidden on mobile */}
+              <span className="hidden sm:inline-flex">{currentTabInfo.icon}</span>
+
               <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
                 {currentTabInfo.title}
               </h1>
             </div>
-            <p className="ml-10 text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
+            {/* ✅ Subheading aligns to icon's left edge */}
+            <p className="text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
               {currentTabInfo.description}
             </p>
           </div>
-          
+
           {/* ✅ Imported Reusable Premium Tab Switcher */}
           <div className="self-start sm:self-auto">
-            <PremiumTabSwitcher 
-              tabs={TABS} 
-              activeTab={activeTab} 
-              onTabChange={(tabId) => setActiveTab(tabId as ClientSegment)} 
+            <PremiumTabSwitcher
+              tabs={TABS}
+              activeTab={activeTab}
+              onTabChange={(tabId) => setActiveTab(tabId as ClientSegment)}
             />
           </div>
         </div>
 
         <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
-          
+
           <div className="p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
-            
+
               <div className="hidden sm:flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
                 <div className="flex items-center justify-center gap-1.5 min-w-0 text-center sm:flex-1">
                 <span className="text-xs font-medium text-[var(--color-ink-muted)]">Clients</span>
@@ -300,12 +302,12 @@ export default function ClientsPage() {
                   cardClassName="!p-3 hover:!border-[var(--color-primary)]/40 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] transition-all duration-300"
                   containerClassName="px-2 pb-4"
                   maxHeight="calc(100vh - 160px)"
-                  
+
                   renderCardHeader={({ item }) => {
                     const style = CLIENT_STATUS_STYLES[item.status] || CLIENT_STATUS_STYLES.inactive;
-                    
+
                     return (
-                      <div 
+                      <div
                         className="flex items-center justify-between w-full cursor-pointer"
                         onClick={() => router.push(`/dashboard/clients/${item.id}`)}
                       >
@@ -325,7 +327,7 @@ export default function ClientsPage() {
                               <div className={`w-3 h-3 rounded-full ${style.dot} ring-2 ring-[var(--color-surface)] shadow-sm`} />
                             </div>
                           </div>
-                          
+
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-1.5">
                               <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
@@ -347,20 +349,20 @@ export default function ClientsPage() {
                             )}
                           </div>
                         </div>
-                        
+
                         <ChevronRight size={16} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
                       </div>
                     );
                   }}
-                  
+
                   renderCardBody={({ item }) => {
                     const dlExpiryDate = (item as any).dl_expiry_date;
                     const isDLValid = dlExpiryDate ? new Date(dlExpiryDate) > new Date() : false;
                     const style = CLIENT_STATUS_STYLES[item.status] || CLIENT_STATUS_STYLES.inactive;
-                    
+
                     return (
                       <div className="mt-3 pt-3 border-t border-[var(--color-surface-border)]/60">
-                        
+
                         {/* Contact & ID Section - Clean & Minimal */}
                         <div className="flex items-center gap-3 mb-3">
                           {/* Phone */}
@@ -402,7 +404,7 @@ export default function ClientsPage() {
                             ? 'bg-amber-500/10 border-amber-500/20'
                             : 'bg-[var(--color-surface-hover)]/50 border-[var(--color-surface-border)]/50'
                         }`}>
-                          
+
                           <div className="flex items-center justify-between">
                             {/* DL Info */}
                             <div className="flex items-center gap-2 min-w-0">
@@ -433,7 +435,7 @@ export default function ClientsPage() {
                       </div>
                     );
                   }}
-                  
+
                   rowActions={getClientActions}
                 />
               </div>
@@ -533,7 +535,7 @@ export default function ClientsPage() {
                       cell: ({ row }) => {
                         const client = row.original;
                         const style = CLIENT_STATUS_STYLES[client.status] || CLIENT_STATUS_STYLES.inactive;
-                        
+
                         return (
                           <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${style.bg} ${style.text}`}>
                             {style.label}
@@ -568,24 +570,25 @@ export default function ClientsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            {/* ✅ Bare Icon - No container */}
-            {currentTabInfo.icon}
-            
+            {/* ✅ Bare Icon — hidden on mobile */}
+            <span className="hidden sm:inline-flex">{currentTabInfo.icon}</span>
+
             <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
               {currentTabInfo.title}
             </h1>
           </div>
-          <p className="ml-10 text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
+          {/* ✅ Subheading aligns to icon's left edge */}
+          <p className="text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
             {currentTabInfo.description}
           </p>
         </div>
-        
+
         {/* ✅ Imported Reusable Premium Tab Switcher */}
         <div className="self-start sm:self-auto">
-          <PremiumTabSwitcher 
-            tabs={TABS} 
-            activeTab={activeTab} 
-            onTabChange={(tabId) => setActiveTab(tabId as ClientSegment)} 
+          <PremiumTabSwitcher
+            tabs={TABS}
+            activeTab={activeTab}
+            onTabChange={(tabId) => setActiveTab(tabId as ClientSegment)}
           />
         </div>
       </div>

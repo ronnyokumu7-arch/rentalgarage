@@ -8,14 +8,17 @@ export default function ReportsPage() {
     <div className="space-y-6">
       <div>
         <div className="flex items-center gap-3">
-          {/* ✅ Bare Icon - No container */}
-          <LineChart size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />
-          
+          {/* ✅ Bare Icon — hidden on mobile, visible from sm: up */}
+          <span className="hidden sm:inline-flex">
+            <LineChart size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />
+          </span>
+
           <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
             Reports
           </h1>
         </div>
-        <p className="text-xs sm:text-sm text-[var(--color-ink-muted)] mt-1">
+        {/* ✅ Subheading aligns to icon's left edge, standard font size */}
+        <p className="text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
           Business intelligence, revenue analytics, and operational insights.
         </p>
       </div>

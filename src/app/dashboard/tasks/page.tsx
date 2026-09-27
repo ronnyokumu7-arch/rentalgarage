@@ -82,29 +82,30 @@ export default function TasksPage() {
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            {/* ✅ Bare Icon - No container */}
-            {currentTabInfo.icon}
-            
+            {/* ✅ Bare Icon — hidden on mobile, visible from sm: up */}
+            <span className="hidden sm:inline-flex">{currentTabInfo.icon}</span>
+
             <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
               {currentTabInfo.title}
             </h1>
           </div>
-          <p className="ml-10 text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
+          {/* ✅ Subheading aligns to icon's left edge */}
+          <p className="text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
             {currentTabInfo.description}
           </p>
         </div>
 
         {/* ✅ Imported Reusable Premium Tab Switcher */}
-        <PremiumTabSwitcher 
-          tabs={TABS} 
-          activeTab={activeTab} 
-          onTabChange={(tabId) => setActiveTab(tabId as typeof activeTab)} 
+        <PremiumTabSwitcher
+          tabs={TABS}
+          activeTab={activeTab}
+          onTabChange={(tabId) => setActiveTab(tabId as typeof activeTab)}
         />
       </div>
 
       {/* Main Content Card - Matches Fleet/Clients/Bookings pattern */}
       <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
-        
+
         {activeTab === "tasks" && (
           <TasksTab
             tasks={paginatedTasks}
@@ -185,11 +186,11 @@ export default function TasksPage() {
       </div>
 
       {/* Task Profile Modal */}
-      <TaskProfileModal 
-        open={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
-        editingTask={editingTask} 
-        onSaveSuccess={refetch} 
+      <TaskProfileModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        editingTask={editingTask}
+        onSaveSuccess={refetch}
       />
     </div>
   );

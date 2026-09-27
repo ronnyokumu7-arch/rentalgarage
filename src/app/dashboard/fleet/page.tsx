@@ -38,16 +38,16 @@ export default function FleetPage() {
     async function fetchActiveRentals() {
       try {
         // Fetch all bookings (you might want to add pagination params)
-        const allBookings = await bookingsApi.list({ 
-          page: 1, 
-          page_size: 100 
+        const allBookings = await bookingsApi.list({
+          page: 1,
+          page_size: 100
         });
-        
+
         // Filter to active or confirmed bookings
         const active = allBookings.filter(
           b => b.status === 'active' || b.status === 'confirmed'
         );
-        
+
         // Create map: vehicle_id -> booking
         const rentalMap: Record<number, Booking> = {};
         active.forEach(booking => {
@@ -55,7 +55,7 @@ export default function FleetPage() {
             rentalMap[booking.vehicle_id] = booking;
           }
         });
-        
+
         setActiveRentals(rentalMap);
       } catch (error) {
         console.error('Failed to fetch active rentals:', error);
@@ -94,23 +94,24 @@ export default function FleetPage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            {/* ✅ Bare Icon - No container */}
-            {currentTabInfo.icon}
-            
+            {/* ✅ Bare Icon — hidden on mobile, visible from sm: up */}
+            <span className="hidden sm:inline-flex">{currentTabInfo.icon}</span>
+
             <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
               {currentTabInfo.title}
             </h1>
           </div>
-          <p className="ml-10 text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
+          {/* ✅ Subheading aligns to icon's left edge */}
+          <p className="text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
             {currentTabInfo.description}
           </p>
         </div>
 
         {/* ✅ Imported Reusable Premium Tab Switcher */}
-        <PremiumTabSwitcher 
-          tabs={TABS} 
-          activeTab={activeTab} 
-          onTabChange={(tabId) => setActiveTab(tabId as TabMode)} 
+        <PremiumTabSwitcher
+          tabs={TABS}
+          activeTab={activeTab}
+          onTabChange={(tabId) => setActiveTab(tabId as TabMode)}
         />
       </div>
 
@@ -118,8 +119,8 @@ export default function FleetPage() {
       {activeTab === "fleet" ? (
         // ✅ WRAPPED FleetList with activeRentals prop
         <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
-          <FleetList 
-            {...fleetData} 
+          <FleetList
+            {...fleetData}
             activeRentals={activeRentals}
           />
         </div>

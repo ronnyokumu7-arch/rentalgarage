@@ -35,16 +35,16 @@ export default function BookingsPage() {
 
   // ✅ Dynamic Header Info (PREMIUM: Matches Sidebar Icons)
   const currentTabInfo = useMemo(() => {
-    return activeTab === "list" 
-      ? { 
-          title: "Manage Bookings", 
-          description: "Create new reservations, manage bookings, and handle extensions.", 
-          icon: <LayoutList size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" /> 
+    return activeTab === "list"
+      ? {
+          title: "Manage Bookings",
+          description: "Create new reservations, manage bookings, and handle extensions.",
+          icon: <LayoutList size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
         }
-      : { 
-          title: "Fleet Timeline Calendar", 
-          description: "Real-time look at vehicle distribution, active reservations, and scheduling blocks.", 
-          icon: <CalendarDays size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" /> 
+      : {
+          title: "Fleet Timeline Calendar",
+          description: "Real-time look at vehicle distribution, active reservations, and scheduling blocks.",
+          icon: <CalendarDays size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
         };
   }, [activeTab]);
 
@@ -56,23 +56,24 @@ export default function BookingsPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-3">
-            {/* ✅ Bare Icon - No container */}
-            {currentTabInfo.icon}
-            
+            {/* ✅ Bare Icon — hidden on mobile, visible from sm: up */}
+            <span className="hidden sm:inline-flex">{currentTabInfo.icon}</span>
+
             <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight truncate">
               {currentTabInfo.title}
             </h1>
           </div>
-          <p className="ml-10 text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1 whitespace-normal break-words [overflow-wrap:anywhere]">
+          {/* ✅ Subheading aligns to the icon's left edge (no ml-*), matches Dashboard */}
+          <p className="text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1 whitespace-normal break-words [overflow-wrap:anywhere]">
             {currentTabInfo.description}
           </p>
         </div>
 
         {/* ✅ Imported Reusable Premium Tab Switcher */}
-        <PremiumTabSwitcher 
-          tabs={TABS} 
-          activeTab={activeTab} 
-          onTabChange={(tabId) => setActiveTab(tabId as TabMode)} 
+        <PremiumTabSwitcher
+          tabs={TABS}
+          activeTab={activeTab}
+          onTabChange={(tabId) => setActiveTab(tabId as TabMode)}
         />
       </div>
 
@@ -81,7 +82,7 @@ export default function BookingsPage() {
         {activeTab === "list" ? (
           // ✅ WRAPPED BookingsList in same card container as Fleet/Clients pages
           <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
-            <BookingsList 
+            <BookingsList
               bookingsData={bookingsData}
               clientMap={clientMap}
               vehicleMap={vehicleMap}
