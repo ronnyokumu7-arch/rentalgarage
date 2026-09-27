@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { FileText, Upload, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
-import apiClient from "@/lib/api-client";
 import { vehiclesApi } from "@/lib/api/vehicles";
 import type { Vehicle } from "@/lib/types";
 import toast from "react-hot-toast";
@@ -41,15 +40,14 @@ export default function InvestorVehicleProfilePage({ params }: { params: { vehic
   const handleUpload = async (docType: 'insurance' | 'registration' | 'inspection', file: File) => {
     setUploading(docType);
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      // ✅ Upload to the dedicated investor endpoint
-      // Note: If you prefer to use the existing standard endpoints, you can swap this to:
-      // docType === 'insurance' ? vehiclesApi.uploadInsuranceDoc(vehicle!.id, file) : ...
-      await apiClient.post(`/investors/vehicles/${params.vehicleId}/upload-${docType}`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      // ✅ Use the new investor-specific upload methods
+      if (docType === 'insurance') {
+        await vehiclesApi.uploadInvestorInsuranceDoc(Number(params.vehicleId), file);
+      } else if (docType === 'registration') {
+        await vehiclesApi.uploadInvestorRegistrationDoc(Number(params.vehicleId), file);
+      } else if (docType === 'inspection') {
+        await vehiclesApi.uploadInvestorInspectionDoc(Number(params.vehicleId), file);
+      }
       
       toast.success(`${docType} document uploaded successfully`);
       

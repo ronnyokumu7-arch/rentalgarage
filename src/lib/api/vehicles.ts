@@ -69,6 +69,7 @@ export const vehiclesApi = {
   updateMileage: (id: number, data: MileageUpdatePayload) =>
     apiClient.patch<Vehicle>(`/vehicles/${id}/update-mileage`, data).then((r) => r.data),
 
+  // --- Standard Agency Uploads ---
   uploadInsuranceDoc: (id: number, file: File) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -89,6 +90,31 @@ export const vehiclesApi = {
     const formData = new FormData();
     formData.append("file", file);
     return apiClient.post(`/vehicles/${id}/upload-inspection`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+
+  // ✅ NEW: Investor-Specific Uploads (Matches backend /investors/vehicles/{id}/upload-{type})
+  uploadInvestorInsuranceDoc: (vehicleId: number, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiClient.post(`/investors/vehicles/${vehicleId}/upload-insurance`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+
+  uploadInvestorRegistrationDoc: (vehicleId: number, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiClient.post(`/investors/vehicles/${vehicleId}/upload-registration`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+
+  uploadInvestorInspectionDoc: (vehicleId: number, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiClient.post(`/investors/vehicles/${vehicleId}/upload-inspection`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
     });
   },

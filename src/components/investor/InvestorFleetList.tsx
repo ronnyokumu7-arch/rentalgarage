@@ -301,7 +301,7 @@ export default function InvestorFleetList({
                         </span>
                         <span className="text-[10px] text-[var(--color-ink-muted)] uppercase flex items-center gap-1">
                           per {type}
-                          {locked && <Lock size={10} className="text-[var(--color-ink-subtle)]" title="Rate locked for contract period" />}
+{locked && <Lock size={10} className="text-[var(--color-ink-subtle)]" aria-label="Rate locked" />}
                         </span>
                       </div>
                     );
