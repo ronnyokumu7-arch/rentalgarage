@@ -23,11 +23,15 @@ export const investorContractsApi = {
   list: (params?: { vehicle_id?: number; contract_status?: string }) =>
     apiClient.get<InvestorContract[]>("/investor-contracts/", { params }).then((r) => r.data),
 
-  // 3. Sign a contract (Agency or Investor)
+  // 3. Sign a contract (Agency or Investor - Authenticated)
   sign: (contractId: number, data: InvestorContractSignPayload) =>
     apiClient.post<InvestorContract>(`/investor-contracts/${contractId}/sign`, data).then((r) => r.data),
 
   // 4. Public view (No auth required, used for email links)
   getPublic: (token: string) =>
     apiClient.get(`/investor-contracts/public/${token}`).then((r) => r.data),
+
+  // ✅ 5. Sign a contract via public token (No auth required)
+  signByToken: (token: string, data: InvestorContractSignPayload) =>
+    apiClient.post<InvestorContract>(`/investor-contracts/public/${token}/sign`, data).then((r) => r.data),
 };

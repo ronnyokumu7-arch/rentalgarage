@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import SignatureCanvas from "react-signature-canvas";
-import { CheckCircle, AlertCircle, Loader2, PenLine, RotateCcw, X } from "lucide-react";
+import { CheckCircle, AlertCircle, Loader2, PenLine, RotateCcw, X, Download } from "lucide-react";
 import { investorContractsApi } from "@/lib/api/investorContracts";
 import type { InvestorContract } from "@/lib/types";
 import toast from "react-hot-toast";
@@ -12,7 +12,7 @@ interface InvestorContractSignModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  defaultRole?: "agency" | "investor"; // ✅ NEW: Allows reuse for agency signing
+  defaultRole?: "agency" | "investor";
 }
 
 export default function InvestorContractSignModal({
@@ -20,14 +20,29 @@ export default function InvestorContractSignModal({
   isOpen,
   onClose,
   onSuccess,
-  defaultRole = "investor", // ✅ NEW: Defaults to investor
+  defaultRole = "investor",
 }: InvestorContractSignModalProps) {
   const sigCanvasRef = useRef<SignatureCanvas>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   
   const [isSigning, setIsSigning] = useState(false);
   const [isEmpty, setIsEmpty] = useState(true);
   const [isAgreed, setIsAgreed] = useState(false);
-const signerRole = defaultRole;
+  const signerRole = defaultRole;
+  
+  // ✅ FIX: Dynamically match canvas resolution to container size to prevent mobile offset
+  const [canvasSize, setCanvasSize] = useState({ width: 600, height: 200 });
+
+  useEffect(() => {
+    const updateSize = () => {
+      if (containerRef.current) {
+        setCanvasSize({ width: containerRef.current.offsetWidth, height: 200 });
+      }
+    };
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
+  }, []);
 
   if (!isOpen) return null;
 
@@ -44,14 +59,9 @@ const signerRole = defaultRole;
 
     setIsSigning(true);
     try {
-      // ✅ Convert canvas to high-quality base64 PNG
       const signatureDataUrl = sigCanvasRef.current?.toDataURL("image/png");
-      
-      if (!signatureDataUrl) {
-        throw new Error("Failed to capture signature");
-      }
+      if (!signatureDataUrl) throw new Error("Failed to capture signature");
 
-      // ✅ Calls the authenticated backend endpoint with dynamic role
       await investorContractsApi.sign(contract.id, {
         signature: signatureDataUrl,
         signer_role: signerRole,
@@ -61,8 +71,7 @@ const signerRole = defaultRole;
       onSuccess();
       onClose();
     } catch (error: any) {
-      console.error("Signing failed:", error);
-      toast.error(error.response?.data?.detail || "Failed to sign contract. Please try again.");
+      toast.error(error.response?.data?.detail || "Failed to sign contract.");
     } finally {
       setIsSigning(false);
     }
@@ -72,7 +81,6 @@ const signerRole = defaultRole;
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-2xl shadow-2xl w-full max-w-2xl overflow-y-auto animate-in zoom-in-95 duration-200">
         
-        {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-[var(--color-surface-border)]">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
@@ -99,15 +107,11 @@ const signerRole = defaultRole;
             </div>
             <div>
               <p className="text-xs font-semibold text-[var(--color-ink-muted)] uppercase mb-1">Lease Rate</p>
-              <p className="text-sm font-medium text-[var(--color-ink)]">
-                KES {Number(contract.lease_rate).toLocaleString()} / {contract.lease_rate_type}
-              </p>
+              <p className="text-sm font-medium text-[var(--color-ink)]">KES {Number(contract.lease_rate).toLocaleString()} / {contract.lease_rate_type}</p>
             </div>
             <div>
               <p className="text-xs font-semibold text-[var(--color-ink-muted)] uppercase mb-1">Duration</p>
-              <p className="text-sm font-medium text-[var(--color-ink)]">
-                {contract.duration_months ? `${contract.duration_months} Month(s)` : 'Per Active Rental Day'}
-              </p>
+              <p className="text-sm font-medium text-[var(--color-ink)]">{contract.duration_months ? `${contract.duration_months} Month(s)` : 'Per Active Rental Day'}</p>
             </div>
             <div>
               <p className="text-xs font-semibold text-[var(--color-ink-muted)] uppercase mb-1">
@@ -116,28 +120,30 @@ const signerRole = defaultRole;
               <div className="flex items-center gap-1.5">
                 {signerRole === "agency" ? (
                   contract.signed_by_investor ? (
-                    <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                      <CheckCircle size={12} /> Signed by Investor
-                    </span>
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400"><CheckCircle size={12} /> Signed by Investor</span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400">
-                      <AlertCircle size={12} /> Pending Investor
-                    </span>
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400"><AlertCircle size={12} /> Pending Investor</span>
                   )
                 ) : (
                   contract.signed_by_agency ? (
-                    <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400">
-                      <CheckCircle size={12} /> Signed by Agency
-                    </span>
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400"><CheckCircle size={12} /> Signed by Agency</span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400">
-                      <AlertCircle size={12} /> Pending Agency
-                    </span>
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400"><AlertCircle size={12} /> Pending Agency</span>
                   )
                 )}
               </div>
             </div>
           </div>
+
+          {/* ✅ View PDF Button */}
+          <a 
+            href={`${process.env.NEXT_PUBLIC_API_URL}/investor-contracts/${contract.id}/pdf`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 transition-all border border-[var(--color-primary)]/20"
+          >
+            <Download size={16} /> View / Download Contract PDF
+          </a>
 
           {/* Signature Pad */}
           <div>
@@ -146,26 +152,25 @@ const signerRole = defaultRole;
               {signerRole === "agency" ? "Agency Representative Signature" : "Your Electronic Signature"}
             </h4>
             
-            <div className="relative mb-2">
+            {/* ✅ FIX: Container ref for dynamic sizing */}
+            <div ref={containerRef} className="w-full h-[200px] relative mb-2">
               <SignatureCanvas
                 ref={sigCanvasRef}
                 penColor="#0f172a"
-                // ✅ HIGH PRECISION SETTINGS for tiny dots and smooth strokes
                 minWidth={0.5}
                 maxWidth={2.5}
                 dotSize={1} 
                 throttle={0}
                 velocityFilterWeight={0.1}
                 canvasProps={{
-                  width: 600,
-                  height: 200,
-                  className: "w-full h-[200px] border-2 border-dashed border-[var(--color-surface-border)] rounded-xl bg-white cursor-crosshair touch-none",
+                  width: canvasSize.width,
+                  height: canvasSize.height,
+                  className: "w-full h-full border-2 border-dashed border-[var(--color-surface-border)] rounded-xl bg-white cursor-crosshair",
+                  style: { touchAction: "none" } // ✅ CRITICAL: Prevents page scroll while drawing on mobile
                 }}
                 onBegin={() => setIsEmpty(false)}
                 onEnd={() => {
-                  if (sigCanvasRef.current?.isEmpty()) {
-                    setIsEmpty(true);
-                  }
+                  if (sigCanvasRef.current?.isEmpty()) setIsEmpty(true);
                 }}
               />
               <button
@@ -179,7 +184,7 @@ const signerRole = defaultRole;
             </div>
 
             {isEmpty && (
-              <p className="text-xs text-[var(--color-ink-subtle)] text-center mb-4 -mt-2">
+              <p className="text-xs text-[var(--color-ink-subtle)] text-center -mt-2">
                 Please draw your signature in the box above.
               </p>
             )}
@@ -196,17 +201,13 @@ const signerRole = defaultRole;
             <span className="text-xs text-[var(--color-ink)] leading-relaxed">
               {signerRole === "agency" 
                 ? "By checking this box and signing above, I confirm that I am an authorized representative of the agency and legally bind the agency to the terms of this lease agreement."
-                : "By checking this box and signing above, I acknowledge that I have read, understood, and agree to be legally bound by the terms of this lease agreement. I confirm that this electronic signature is my own and is legally binding."}
+                : "By checking this box and signing above, I acknowledge that I have read, understood, and agree to be legally bound by the terms of this lease agreement."}
             </span>
           </label>
 
           {/* Action Buttons */}
           <div className="flex gap-3 pt-2">
-            <button 
-              type="button" 
-              onClick={onClose} 
-              className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-[var(--color-ink)] bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-hover)]/80 transition-all"
-            >
+            <button type="button" onClick={onClose} className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-[var(--color-ink)] bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-hover)]/80 transition-all">
               Cancel
             </button>
             <button
@@ -214,17 +215,8 @@ const signerRole = defaultRole;
               disabled={isSigning || isEmpty || !isAgreed}
               className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSigning ? (
-                <>
-                  <Loader2 size={18} className="animate-spin" />
-                  Securing Signature...
-                </>
-              ) : (
-                <>
-                  <CheckCircle size={18} />
-                  Sign Contract
-                </>
-              )}
+              {isSigning ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle size={18} />}
+              {isSigning ? "Securing Signature..." : "Sign Contract"}
             </button>
           </div>
         </div>
