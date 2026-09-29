@@ -77,6 +77,10 @@ export default function InvestorContractSignModal({
     }
   };
 
+  // ✅ BULLETPROOF: Fallback URL prevents "/investor/fleet/undefined/..." bugs
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+  const pdfUrl = `${apiBaseUrl}/investor-contracts/${contract.id}/pdf`;
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
       <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-2xl shadow-2xl w-full max-w-2xl overflow-y-auto animate-in zoom-in-95 duration-200">
@@ -135,9 +139,9 @@ export default function InvestorContractSignModal({
             </div>
           </div>
 
-          {/* ✅ View PDF Button */}
+          {/* ✅ View PDF Button (Bulletproof URL) */}
           <a 
-            href={`${process.env.NEXT_PUBLIC_API_URL}/investor-contracts/${contract.id}/pdf`}
+            href={pdfUrl}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 transition-all border border-[var(--color-primary)]/20"

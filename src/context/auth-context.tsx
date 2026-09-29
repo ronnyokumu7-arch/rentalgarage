@@ -29,8 +29,14 @@ interface AuthContextType extends AuthState {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// Keep-alive cadence: shorter than 15-min access token TTL
-const KEEP_ALIVE_INTERVAL_MS = 10 * 60 * 1000;
+// ✅ PHASE 2: Keep-alive cadence now 30 min (was 10 min for 15-min tokens)
+// Matches the backend's 60-min access_token_expire_minutes
+const KEEP_ALIVE_INTERVAL_MS = 30 * 60 * 1000;
+
+// ✅ PHASE 2: Cookie TTL must match access token TTL (60 min)
+// If cookie expires before token, requests after 60 min are sent without
+// Authorization → 401 → refresh (works, but adds unnecessary load)
+const ACCESS_TOKEN_COOKIE_TTL_MS = 60 * 60 * 1000;
 
 // ─── CROSS-TAB SYNCHRONIZATION ─────────────────────────────────────────────
 const channel = typeof window !== "undefined" && "BroadcastChannel" in window
@@ -55,6 +61,8 @@ const getRefreshToken = (): string | null => {
  * Store access token in BOTH localStorage (for API calls) and a first-party
  * cookie (for Next.js middleware edge validation). The cookie is NOT HttpOnly
  * since middleware runs before React hydration and can't access localStorage.
+ * 
+ * ✅ PHASE 2: Cookie TTL now 60 min (was 15 min) to match access token TTL
  */
 const setAccessToken = (accessToken: string) => {
   if (typeof window === "undefined") return;
@@ -62,7 +70,7 @@ const setAccessToken = (accessToken: string) => {
   localStorage.setItem(ACCESS_KEY, accessToken);
   
   const isSecure = window.location.protocol === "https:";
-  const expires = new Date(Date.now() + 15 * 60 * 1000).toUTCString();
+  const expires = new Date(Date.now() + ACCESS_TOKEN_COOKIE_TTL_MS).toUTCString();
   document.cookie = `${ACCESS_KEY}=${encodeURIComponent(accessToken)}; expires=${expires}; path=/; SameSite=Lax${isSecure ? "; Secure" : ""}`;
 };
 
@@ -136,6 +144,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    * Other 401s queue behind it and retry/reject when it completes.
    * Returns true if tokens rotated, false if refresh endpoint rejected (401).
    * Network errors retry once before failing.
+   * 
+   * ✅ PHASE 2: Cross-tab broadcast now includes BOTH tokens (was only access)
+   * This fixes the bug where Tab A rotates → Tab B's refresh token is revoked
+   * → Tab B's next 401 → refresh with revoked token → 401 → logout
    */
   const rotateTokens = useCallback(async (): Promise<boolean> => {
     const refresh_token = getRefreshToken();
@@ -157,7 +169,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: true,
       });
 
-      channel?.postMessage({ type: "tokens_rotated", access_token });
+      // ✅ PHASE 2: Broadcast BOTH tokens so other tabs update their refresh tokens
+      channel?.postMessage({ 
+        type: "tokens_rotated", 
+        access_token, 
+        refresh_token: new_refresh 
+      });
       return true;
     } catch (error: any) {
       // ✅ Retry once on network errors (not on 401/403 from backend)
@@ -181,7 +198,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             isAuthenticated: true,
           });
 
-          channel?.postMessage({ type: "tokens_rotated", access_token });
+          // ✅ PHASE 2: Broadcast BOTH tokens
+          channel?.postMessage({ 
+            type: "tokens_rotated", 
+            access_token, 
+            refresh_token: new_refresh 
+          });
           return true;
         } catch (retryError: any) {
           const retryWasAuthFailure = retryError?.response?.status === 401 || retryError?.response?.status === 403;
@@ -247,7 +269,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!channel) return;
     const handler = (event: MessageEvent) => {
       if (event.data.type === "tokens_rotated") {
+        // ✅ PHASE 2: Update BOTH tokens (was only access token)
         setAccessToken(event.data.access_token);
+        if (event.data.refresh_token) {
+          setRefreshToken(event.data.refresh_token);
+        }
       }
     };
     channel.addEventListener("message", handler);
@@ -302,7 +328,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => { isMounted = false; };
   }, [refreshOnce]);
 
-  // Keep-alive: rotate tokens every 10 minutes
+  // Keep-alive: rotate tokens every 30 minutes
   useEffect(() => {
     if (!state.isAuthenticated) return;
     const intervalId = setInterval(() => {
