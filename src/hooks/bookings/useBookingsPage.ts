@@ -9,6 +9,7 @@ import { useExtendBooking } from "@/hooks/bookings/useExtendBooking";
 import { bookingsApi } from "@/lib/api/bookings";
 import { BookingCreate } from "@/lib/types";
 import { differenceInDays } from "date-fns";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 export type TabMode = "list" | "calendar";
 
@@ -65,9 +66,9 @@ export function useBookingsPage() {
         await bookingsData.refetch();
       }
     } catch (error: any) {
-      const serverMessage = error.response?.data?.detail || error.message || "Failed to create booking";
+      const serverMessage = getApiErrorMessage(error, "Unable to reach the server. Please try again.");
       console.error("Booking creation failed:", serverMessage);
-      toast.error(`Could not save reservation: ${serverMessage}`);
+      if (!error.response?.data?.message) toast.error(serverMessage);
     }
   };
 

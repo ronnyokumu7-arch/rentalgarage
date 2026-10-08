@@ -4,9 +4,10 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { CheckCircle2, AlertCircle, Loader2, Clock, ShieldCheck } from "lucide-react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import NewClientForm from "@/components/client/NewClientForm";
 import { env } from "@/lib/env";
+import { getApiErrorMessageFromBody } from "@/lib/api-error";
 import "@/app/public.css";
 
 type PageStatus = "loading" | "ready" | "invalid" | "expired" | "submitting" | "success";
@@ -95,7 +96,7 @@ export default function PublicInvitePage() {
 
         if (!res.ok) {
           const errorData = await res.json();
-          throw new Error(errorData.detail || "Upload failed");
+          throw new Error(getApiErrorMessageFromBody(errorData, "Unable to upload this document. Please try again."));
         }
 
         const data = await res.json();
@@ -143,21 +144,21 @@ const payload = {
 
       if (res.status === 410) {
         setStatus("expired");
-        toast.error("This invite link has already been used or expired.");
+        const errorData = await res.json();
+        toast.error(getApiErrorMessageFromBody(errorData, "This invite link is no longer valid."));
         return;
       }
 
       if (res.status === 409) {
         const errorData = await res.json();
-        const messages = Array.isArray(errorData.detail) ? errorData.detail : [errorData.detail];
-        messages.forEach((msg: string) => toast.error(msg));
+        toast.error(getApiErrorMessageFromBody(errorData, "This invite could not be completed."));
         setStatus("ready");
         return;
       }
 
       if (res.status === 422) {
         const errorData = await res.json();
-        toast.error(errorData.detail?.[0]?.msg || "Please check your input and try again.");
+        toast.error(getApiErrorMessageFromBody(errorData, "Please check your input and try again."));
         setStatus("ready");
         return;
       }
@@ -238,7 +239,6 @@ const payload = {
   if (status === "success") {
     return (
       <div className="public-root min-h-screen flex items-center justify-center p-4 sm:p-6">
-        <Toaster position="top-center" />
         <div 
           className="max-w-lg w-full rounded-2xl p-8 text-center"
           style={{
@@ -297,7 +297,6 @@ const payload = {
   // --- READY STATE: The Form ---
   return (
     <div className="public-root min-h-screen pb-12" style={{ backgroundColor: '#FFFFFF' }}>
-      <Toaster position="top-center" />
       <NewClientForm
         loading={status === "submitting"}
         formData={formData}

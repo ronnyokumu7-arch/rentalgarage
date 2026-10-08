@@ -7,7 +7,7 @@ import {
   Smartphone, Copy, History, ArrowLeft, BadgeCheck, RefreshCw,
 } from "lucide-react";
 import Link from "next/link";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { useCommissionPayment } from "@/hooks/useCommissionPayment";
 
 const STATUS_STYLES: Record<string, string> = {
@@ -81,8 +81,6 @@ export default function CommissionPayPage() {
 
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
-      <Toaster position="top-center" />
-
       {/* Header */}
       <div className="flex items-center gap-3">
         <Link

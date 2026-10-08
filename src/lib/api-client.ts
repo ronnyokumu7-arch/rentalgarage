@@ -1,6 +1,9 @@
 // src/lib/api-client.ts
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { env } from "@/lib/env";
+import { showAppToast } from "@/lib/app-toast";
+import type { AppToastResponse } from "@/lib/app-toast";
+import { normalizeApiErrorBody } from "@/lib/api-error";
 
 /**
  * @module apiClient
@@ -14,6 +17,8 @@ import { env } from "@/lib/env";
  * - ✅ HARDENED: Delegates refresh to auth-context's single-flight queue.
  * - ✅ HARDENED: Retries once on network errors before logging out.
  * - ✅ HARDENED: Only logs out on definitive auth failures (401/403 from refresh).
+ * - ✅ TOAST BRIDGE: any response carrying a StandardResponse envelope is
+ *   displayed automatically — backend owns the copy, client only renders it.
  * - Logs network timeouts and 5xx server errors for easier debugging.
  */
 
@@ -25,6 +30,41 @@ let refreshHandler: RefreshHandler | null = null;
 
 export function registerRefreshHandler(handler: RefreshHandler | null) {
   refreshHandler = handler;
+}
+
+// ─── TOAST BRIDGE ────────────────────────────────────────────────────────────
+// ✅ Per-request opt-out for pages that render their own messaging:
+//    apiClient.post("/x", body, { skipToast: true })
+declare module "axios" {
+  export interface AxiosRequestConfig {
+    /** Suppress the global StandardResponse toast for this request. */
+    skipToast?: boolean;
+  }
+}
+
+function isStandardResponse(data: unknown): data is AppToastResponse {
+  if (!data || typeof data !== "object") return false;
+  const d = data as Record<string, unknown>;
+  return (
+    typeof d.type === "string" &&
+    typeof d.title === "string" &&
+    typeof d.message === "string"
+  );
+}
+
+// ✅ De-dupe: parallel requests (React Query fan-out) must not stack
+// identical toasts. Same envelope within 2s → shown once.
+let lastToastKey = "";
+let lastToastAt = 0;
+const DEDUPE_WINDOW_MS = 2000;
+
+function showOnce(response: AppToastResponse) {
+  const key = `${response.type}:${response.title}:${response.message}`;
+  const now = Date.now();
+  if (key === lastToastKey && now - lastToastAt < DEDUPE_WINDOW_MS) return;
+  lastToastKey = key;
+  lastToastAt = now;
+  showAppToast(response);
 }
 
 // ─── COOKIE HELPERS ──────────────────────────────────────────────────────────
@@ -77,9 +117,17 @@ apiClient.interceptors.request.use(
 /**
  * Handles global API errors, automatic token refresh, and session expiration.
  * ✅ HARDENED: Uses auth-context's single-flight refresh queue.
+ * ✅ TOAST BRIDGE: displays backend-authored envelopes automatically.
  */
 apiClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // ✅ Success/warning/info envelopes → toast (plain data models have no
+    // `type` field, so they pass through untouched)
+    if (!response.config.skipToast && isStandardResponse(response.data)) {
+      showOnce(response.data);
+    }
+    return response;
+  },
   async (error: AxiosError) => {
     const originalRequest = error.config as InternalAxiosRequestConfig & { _retry?: boolean };
     const status = error.response?.status;
@@ -140,12 +188,30 @@ apiClient.interceptors.response.use(
       }
     }
 
-    // 2. Handle Network Timeouts
+    // 2. ✅ TOAST BRIDGE: display backend-authored error envelopes.
+    //    401s are excluded — the refresh flow owns that UX (and a dead
+    //    refresh ends in a redirect, not a toast).
+    const responseData = error.response?.data;
+    // Preserve the server envelope and bridge its `message` to the legacy
+    // `detail` key while the remaining screens are migrated. This prevents
+    // old callers from inventing or displaying a second error message.
+    if (error.response) {
+      error.response.data = normalizeApiErrorBody(responseData) as typeof error.response.data;
+    }
+    if (
+      status !== 401 &&
+      !originalRequest.skipToast &&
+      isStandardResponse(responseData)
+    ) {
+      showOnce(responseData);
+    }
+
+    // 3. Handle Network Timeouts
     if (error.code === "ECONNABORTED" && error.message.includes("timeout")) {
       console.error("[API Client] Request timed out. The server took too long to respond.");
     }
 
-    // 3. Handle 5xx Server Errors
+    // 4. Handle 5xx Server Errors
     if (status && status >= 500) {
       console.error(`[API Client] Server Error (${status}):`, error.response?.data);
     }

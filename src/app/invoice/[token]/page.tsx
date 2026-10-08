@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useParams } from "next/navigation";
 import { invoicesApi } from "@/lib/api/invoices";
 import { Loader2, AlertCircle, FileText, CheckCircle2, Download, XCircle, Send } from "lucide-react";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
 import { usePublicInvoice } from "@/hooks/public-docs/usePublicInvoice";
 import { brand } from "@/lib/brand";
 import "@/app/public.css";
@@ -160,7 +160,6 @@ export default function PublicInvoicePage() {
       className="min-h-screen py-6 sm:py-12 px-3 sm:px-6 lg:px-8 force-light" 
       style={{ backgroundColor: brand.colors.light.bg }}
     >
-      <Toaster position="top-center" />
       <div className="max-w-4xl mx-auto">
         {/* ✅ Header OUTSIDE main card — matches contract page layout */}
         <PublicInvoiceHeader invoice={invoice} />

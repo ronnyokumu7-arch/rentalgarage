@@ -1,7 +1,6 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { Toaster } from "react-hot-toast";
 import { FileText, CheckCircle2, Download, Loader2 } from "lucide-react";
 import { brand } from "@/lib/brand";
 
@@ -53,7 +52,6 @@ export default function PublicContractViewPage() {
       className="min-h-screen py-6 sm:py-12 px-3 sm:px-6 lg:px-8 force-light"
       style={{ backgroundColor: brand.colors.light.bg }}
     >
-      <Toaster position="top-center" />
       <div className="max-w-4xl mx-auto">
         
         <PublicContractCompanyHeader 

@@ -8,6 +8,7 @@ import { clientsApi } from '@/lib/api/clients';
 import { vehiclesApi } from '@/lib/api/vehicles';
 import { servicesApi } from '@/lib/api/services';
 import { driversApi } from '@/lib/api/drivers';
+import { getApiErrorMessage } from '@/lib/api-error';
 import type { Client, Vehicle, ServiceType, PricingResult, ServiceDefinition, DriverListItem } from '@/lib/types';
 
 export function useNewBooking() {
@@ -163,8 +164,10 @@ export function useNewBooking() {
         if (!err.response) {
           // Network error — no response from server
           setQuoteError(`Network error: ${err.message || 'Cannot reach server'}`);
+        } else if (typeof data?.message === 'string') {
+          setQuoteError(data.message);
         } else if (typeof detail === 'string') {
-          setQuoteError(`[${status}] ${detail}`);
+          setQuoteError(detail);
         } else if (Array.isArray(detail) && detail.length > 0) {
           // Pydantic validation errors
           const msgs = detail.map((d: any) => {
@@ -172,11 +175,11 @@ export function useNewBooking() {
             const msg = String(d.msg || '').replace(/^Value error,?\s*/i, '');
             return loc ? `${loc}: ${msg}` : msg;
           });
-          setQuoteError(`[${status}] ${msgs.join('; ')}`);
+          setQuoteError(msgs.join('; '));
         } else if (typeof data === 'string') {
-          setQuoteError(`[${status}] ${data.slice(0, 300)}`);
+          setQuoteError(data.slice(0, 300));
         } else if (data) {
-          setQuoteError(`[${status}] ${JSON.stringify(data).slice(0, 300)}`);
+          setQuoteError(JSON.stringify(data).slice(0, 300));
         } else {
           setQuoteError(`[${status}] Unknown error — no response body`);
         }
@@ -250,14 +253,11 @@ export function useNewBooking() {
       // Navigate to bookings page (redundant if already there, but ensures clean state)
       router.push('/dashboard/bookings');
     } catch (error: any) {
-      const detail = error.response?.data?.detail;
-      let msg = 'Failed to create booking';
-      if (typeof detail === 'string') {
-        msg = detail;
-      } else if (Array.isArray(detail) && detail.length > 0) {
-        msg = String(detail[0]?.msg || 'Validation failed').replace(/^Value error,?\s*/i, '');
+      // The Axios bridge has already rendered StandardResponse errors. This
+      // fallback is exclusively for a transport/non-standard response.
+      if (!error.response?.data?.message) {
+        toast.error(getApiErrorMessage(error, 'Unable to reach the server. Please try again.'));
       }
-      toast.error(msg);
     } finally {
       setLoading(false);
     }

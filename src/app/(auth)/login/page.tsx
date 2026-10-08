@@ -6,28 +6,8 @@ import Link from "next/link";
 import { Eye, EyeOff, Mail, Lock, ArrowRight, ChevronRight, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/auth-context";
-import axios from "axios";
+import { getApiErrorMessage } from "@/lib/api-error";
 import "@/app/login.css";
-
-type ErrorType = "invalid_credentials" | "suspended" | "inactive" | "unknown";
-
-function getErrorType(error: unknown): ErrorType {
-  if (axios.isAxiosError(error)) {
-    const status = error.response?.status;
-    const detail = error.response?.data?.detail || "";
-    if (status === 401) return "invalid_credentials";
-    if (status === 403 && detail.toLowerCase().includes("suspended")) return "suspended";
-    if (status === 403) return "inactive";
-  }
-  return "unknown";
-}
-
-const ERROR_MESSAGES: Record<ErrorType, string> = {
-  invalid_credentials: "Invalid email or password. Please try again.",
-  suspended: "Your account has been suspended. Contact support.",
-  inactive: "Your account is inactive. Contact support.",
-  unknown: "Something went wrong. Please try again.",
-};
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -36,7 +16,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<ErrorType | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [rememberMe, setRememberMe] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,7 +27,7 @@ export default function LoginPage() {
     try {
       await login(email, password);
     } catch (err) {
-      setError(getErrorType(err));
+      setError(getApiErrorMessage(err, "Unable to sign in right now. Please try again."));
     } finally {
       setLoading(false);
     }
@@ -117,7 +97,7 @@ export default function LoginPage() {
           <div className="w-5 h-5 rounded-full bg-rose-100 dark:bg-rose-900 flex items-center justify-center shrink-0 mt-0.5">
             <span className="text-[11px] font-bold text-rose-600 dark:text-rose-300">!</span>
           </div>
-          <p className="text-xs font-medium leading-relaxed">{ERROR_MESSAGES[error]}</p>
+          <p className="text-xs font-medium leading-relaxed">{error}</p>
         </motion.div>
       )}
 
