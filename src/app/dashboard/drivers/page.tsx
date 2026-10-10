@@ -11,23 +11,25 @@ import {
   Pencil,
   Archive,
   RotateCcw,
-  UserCircle, // ✅ Used in Sidebar
+  UserCircle,
   Filter,
   ChevronRight,
   Briefcase,
-  FileBadge, // ✅ Used in Sidebar for contracts
+  FileBadge,
+  Clock,
+  ShieldCheck,
 } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import FilterDropdown from "@/components/ui/FilterDropdown";
 import DataTable, { RowAction } from "@/components/ui/DataTable";
 import CardGrid from "@/components/ui/CardGrid";
+import ReviewVerificationModal from "@/components/client/ReviewVerificationModal";
 import { useDrivers } from "@/hooks/drivers/useDrivers";
 import type { DriverListItem, DriverStatus, DriverPayMode } from "@/lib/types";
 import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
 
 type DriverTab = "company" | "contract";
 
-// ✅ DEFINE TABS HERE
 const TABS = [
   { id: "company" as const, label: "Company", icon: Users },
   { id: "contract" as const, label: "Contract", icon: Briefcase },
@@ -56,7 +58,14 @@ const PAY_LABELS: Record<DriverPayMode, string> = {
   payroll: "Payroll",
 };
 
-// ✅ Licence health: expired (red) / expiring ≤30d (amber) / valid (muted)
+const VETTING_STATUS_STYLES: Record<string, { bg: string; text: string; label: string }> = {
+  unverified: { bg: "bg-gray-500/10", text: "text-gray-600 dark:text-gray-400", label: "Unverified" },
+  sent: { bg: "bg-blue-500/10", text: "text-blue-600 dark:text-blue-400", label: "Link Sent" },
+  under_review: { bg: "bg-amber-500/10", text: "text-amber-600 dark:text-amber-400", label: "Under Review" },
+  verified: { bg: "bg-emerald-500/10", text: "text-emerald-600 dark:text-emerald-400", label: "Verified" },
+  rejected: { bg: "bg-red-500/10", text: "text-red-600 dark:text-red-400", label: "Rejected" },
+};
+
 const dlState = (expiry?: string | null) => {
   if (!expiry) return { label: "N/A", cls: "text-[var(--color-ink-muted)]" };
   const days = Math.ceil((new Date(expiry).getTime() - Date.now()) / 86400000);
@@ -66,7 +75,7 @@ const dlState = (expiry?: string | null) => {
 };
 
 const emptyForm = {
-  full_name: "", phone: "", email: "", id_number: "", dl_number: "", dl_expiry: "",
+  full_name: "", phone: "", email: "", id_number: "", dl_number: "", dl_expiry: "", dl_issued_date: "",
   status: "available" as DriverStatus,
   pay_mode: "commission" as DriverPayMode,
   daily_fee: "", overtime_hourly_fee: "", night_accommodation_fee: "", delivery_commission: "",
@@ -92,9 +101,10 @@ export default function DriversPage() {
     updateDriver,
     archiveDriver,
     restoreDriver,
+    startVerification,
+    refetch,
   } = useDrivers();
 
-  // ✅ Local pagination (matches useClientsList contract)
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
   const totalPages = Math.max(1, Math.ceil(drivers.length / pageSize));
@@ -112,14 +122,15 @@ export default function DriversPage() {
     return { total, available, onTrip };
   }, [drivers]);
 
-  // Modal state
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
   const [form, setForm] = useState({ ...emptyForm });
   const set = (k: string, v: string) => setForm((p) => ({ ...p, [k]: v }));
 
-  // Pre-fill when editing (after detail loads)
+  const [reviewModalOpen, setReviewModalOpen] = useState(false);
+  const [reviewDriverId, setReviewDriverId] = useState<number | null>(null);
+
   useEffect(() => {
     if (editingId && selectedDriver) {
       setForm({
@@ -129,6 +140,7 @@ export default function DriversPage() {
         id_number: selectedDriver.id_number,
         dl_number: selectedDriver.dl_number,
         dl_expiry: selectedDriver.dl_expiry ? selectedDriver.dl_expiry.split("T")[0] : "",
+        dl_issued_date: (selectedDriver as any).dl_issued_date ? (selectedDriver as any).dl_issued_date.split("T")[0] : "",
         status: selectedDriver.status,
         pay_mode: selectedDriver.pay_mode,
         daily_fee: selectedDriver.daily_fee !== null ? String(selectedDriver.daily_fee) : "",
@@ -162,13 +174,14 @@ export default function DriversPage() {
 
   const handleSubmit = async () => {
     setSaving(true);
-    const payload = {
+    const payload: any = {
       full_name: form.full_name,
       phone: form.phone,
       email: form.email || undefined,
       id_number: form.id_number,
       dl_number: form.dl_number,
       dl_expiry: form.dl_expiry || undefined,
+      dl_issued_date: form.dl_issued_date || undefined,
       status: form.status,
       pay_mode: form.pay_mode,
       daily_fee: num(form.daily_fee),
@@ -181,30 +194,49 @@ export default function DriversPage() {
     if (ok) closeModal();
   };
 
-  // ✅ Reusable row actions for both table and cards
-  const getDriverActions = (driver: DriverListItem): RowAction<DriverListItem>[] => [
-    {
-      label: "Edit Driver",
-      icon: Pencil,
-      onClick: () => openEdit(driver.id),
-    },
-    driver.is_archived
-      ? {
-          label: "Restore Driver",
-          icon: RotateCcw,
-          variant: "primary",
-          onClick: () => restoreDriver(driver.id),
-        }
-      : {
-          label: "Archive Driver",
-          icon: Archive,
-          variant: "danger",
-          separator: true,
-          onClick: () => archiveDriver(driver.id),
+  const getDriverActions = (driver: DriverListItem & { verification_status?: string }): RowAction<DriverListItem>[] => {
+    const vStatus = driver.verification_status || "unverified";
+    
+    return [
+      {
+        label: "Edit Driver",
+        icon: Pencil,
+        onClick: () => openEdit(driver.id),
+      },
+      {
+        label: vStatus === "under_review" 
+          ? "Review Verification" 
+          : vStatus === "rejected" || vStatus === "unverified" 
+          ? "Start Verification" 
+          : "Suspend Driver",
+        icon: vStatus === "under_review" ? Clock : Users,
+        variant: (vStatus === "under_review" || vStatus === "rejected" || vStatus === "unverified") ? "primary" : "default",
+        onClick: () => {
+          if (vStatus === "under_review") {
+            setReviewDriverId(driver.id);
+            setReviewModalOpen(true);
+          } else {
+            startVerification(driver.id);
+          }
         },
-  ];
+      },
+      driver.is_archived
+        ? {
+            label: "Restore Driver",
+            icon: RotateCcw,
+            variant: "primary",
+            onClick: () => restoreDriver(driver.id),
+          }
+        : {
+            label: "Archive Driver",
+            icon: Archive,
+            variant: "danger",
+            separator: true,
+            onClick: () => archiveDriver(driver.id),
+          },
+    ];
+  };
 
-  // ✅ Dynamic Header Info (PREMIUM: Matches Sidebar Icons)
   const currentTabInfo = {
     company: {
       title: "Company Drivers",
@@ -220,24 +252,19 @@ export default function DriversPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header with Premium Tab Switcher */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            {/* ✅ Bare Icon — hidden on mobile, visible from sm: up */}
             <span className="hidden sm:inline-flex">{currentTabInfo.icon}</span>
-
             <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
               {currentTabInfo.title}
             </h1>
           </div>
-          {/* ✅ Subheading aligns to icon's left edge */}
           <p className="text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
             {currentTabInfo.description}
           </p>
         </div>
 
-        {/* ✅ Imported Reusable Premium Tab Switcher */}
         <PremiumTabSwitcher
           tabs={TABS}
           activeTab={activeTab}
@@ -245,12 +272,9 @@ export default function DriversPage() {
         />
       </div>
 
-      {/* Conditional Segment View Engine */}
       {activeTab === "company" ? (
         <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
-          {/* Toolbar: Metrics + Search + Filter + CTA */}
           <div className="p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
-            {/* Metrics Counter */}
             <div className="hidden sm:flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
               <div className="flex items-center gap-2 whitespace-nowrap">
                 <span className="text-xs font-medium text-[var(--color-ink-muted)]">Drivers</span>
@@ -268,7 +292,6 @@ export default function DriversPage() {
               </div>
             </div>
 
-            {/* Controls: Search + Filter + Archived + CTA */}
             <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full xl:w-auto">
               <div className="flex items-center gap-2 flex-1 sm:w-80">
                 <div className="relative flex-1">
@@ -316,13 +339,11 @@ export default function DriversPage() {
             </div>
           </div>
 
-          {/* Loading State */}
           {loading ? (
             <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2">
               <Loader2 className="w-5 h-5 animate-spin" /> Loading drivers...
             </div>
           ) : drivers.length === 0 ? (
-            /* Empty State */
             <div className="p-12 text-center">
               <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
                 <UserCircle size={24} className="text-[var(--color-ink-subtle)]" />
@@ -334,31 +355,27 @@ export default function DriversPage() {
             </div>
           ) : (
             <>
-              {/* ✅ MOBILE: Premium Driver CardGrid with Glass Effect */}
               <div className="block md:hidden">
                 <CardGrid
                   data={paginatedDrivers}
-                  getCardId={(d) => d.id}
+                  getCardId={(d: DriverListItem) => d.id}
                   compact={true}
                   showGlassEffect={true}
                   cardClassName="!p-3 hover:!border-[var(--color-primary)]/40 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] transition-all duration-300"
                   containerClassName="px-2 pb-4"
                   maxHeight="calc(100vh - 160px)"
-
-                  renderCardHeader={({ item }) => {
+                  renderCardHeader={({ item }: { item: DriverListItem }) => {
                     const statusDot: Record<DriverStatus, string> = {
                       available: "bg-emerald-500",
                       on_trip: "bg-[var(--color-primary)]",
                       on_leave: "bg-amber-500",
                       suspended: "bg-red-500",
                     };
+                    const vetting = VETTING_STATUS_STYLES[item.verification_status || "unverified"];
+
                     return (
-                      <div
-                        className="flex items-center justify-between w-full cursor-pointer"
-                        onClick={() => openEdit(item.id)}
-                      >
+                      <div className="flex items-center justify-between w-full cursor-pointer" onClick={() => openEdit(item.id)}>
                         <div className="flex items-center gap-3 min-w-0 flex-1">
-                          {/* Premium Icon Container with Glow */}
                           <div className="relative flex-shrink-0">
                             <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center shadow-md">
                               <UserCircle size={16} className="text-[var(--color-primary)]" />
@@ -369,9 +386,15 @@ export default function DriversPage() {
                           </div>
 
                           <div className="min-w-0 flex-1">
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex items-center gap-1.5 flex-wrap">
                               <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight uppercase">
                                 {item.full_name}
+                              </span>
+                              {item.verification_status === "verified" && (
+                                <ShieldCheck size={14} className="text-emerald-500 flex-shrink-0" />
+                              )}
+                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${vetting.bg} ${vetting.text}`}>
+                                {vetting.label}
                               </span>
                             </div>
                             <div className="flex items-center gap-1 mt-0.5">
@@ -381,22 +404,17 @@ export default function DriversPage() {
                             </div>
                           </div>
                         </div>
-
                         <ChevronRight size={16} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
                       </div>
                     );
                   }}
-
-                  renderCardBody={({ item }) => {
+                  renderCardBody={({ item }: { item: DriverListItem }) => {
                     const dl = dlState(item.dl_expiry);
                     const statusStyle = STATUS_STYLES[item.status] || STATUS_STYLES.suspended;
 
                     return (
                       <div className="mt-3 pt-3 border-t border-[var(--color-surface-border)]/60">
-
-                        {/* Contact & ID Section */}
                         <div className="flex items-center gap-3 mb-3">
-                          {/* Phone */}
                           <div className="flex items-center gap-2 min-w-0 flex-1">
                             <div className="w-7 h-7 rounded-lg bg-[var(--color-surface-hover)]/80 flex items-center justify-center flex-shrink-0">
                               <Phone size={12} className="text-[var(--color-ink-subtle)]" />
@@ -405,21 +423,15 @@ export default function DriversPage() {
                               <p className="text-xs font-semibold text-[var(--color-ink)] truncate leading-tight">
                                 {item.phone}
                               </p>
-                              <span className="text-[9px] text-[var(--color-ink-muted)] font-medium">
-                                Contact
-                              </span>
+                              <span className="text-[9px] text-[var(--color-ink-muted)] font-medium">Contact</span>
                             </div>
                           </div>
-
-                          {/* ID */}
                           <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
                             <div className="min-w-0 text-right">
                               <p className="text-xs font-semibold text-[var(--color-ink)] truncate leading-tight font-mono">
                                 {item.id_number_masked || "N/A"}
                               </p>
-                              <span className="text-[9px] text-[var(--color-ink-muted)] font-medium">
-                                National ID
-                              </span>
+                              <span className="text-[9px] text-[var(--color-ink-muted)] font-medium">National ID</span>
                             </div>
                             <div className="w-7 h-7 rounded-lg bg-[var(--color-surface-hover)]/80 flex items-center justify-center flex-shrink-0">
                               <span className="text-[9px] font-bold text-[var(--color-ink-subtle)]">ID</span>
@@ -427,21 +439,15 @@ export default function DriversPage() {
                           </div>
                         </div>
 
-                        {/* Unified Bottom Status Section - Clean & Minimal */}
                         <div className="rounded-xl px-3 py-2.5 border bg-[var(--color-surface-hover)]/50 border-[var(--color-surface-border)]/50">
                           <div className="flex items-center justify-between">
-                            {/* DL Info */}
                             <div className="flex items-center gap-2 min-w-0">
-                              <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)]">
-                                DL
-                              </span>
+                              <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)]">DL</span>
                               <span className="text-[10px] font-semibold font-mono text-[var(--color-ink)] truncate">
                                 {item.dl_number_masked || "N/A"}
                               </span>
                               <span className={`text-[8px] font-bold ${dl.cls}`}>{dl.label}</span>
                             </div>
-
-                            {/* Status Label */}
                             <div className="flex items-center gap-1.5 flex-shrink-0">
                               <span className={`w-2 h-2 rounded-full ${
                                 item.status === 'available' ? 'bg-emerald-500' :
@@ -457,12 +463,10 @@ export default function DriversPage() {
                       </div>
                     );
                   }}
-
                   rowActions={getDriverActions}
                 />
               </div>
 
-              {/* ✅ DESKTOP: Reusable DataTable */}
               <div className="hidden md:block">
                 <DataTable
                   data={paginatedDrivers}
@@ -470,26 +474,38 @@ export default function DriversPage() {
                     {
                       header: "Driver",
                       accessorKey: "full_name",
-                      cell: ({ row }) => (
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-9 h-9 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center text-[var(--color-ink-subtle)] shrink-0">
-                            <UserCircle size={16} />
+                      cell: ({ row }: { row: { original: DriverListItem } }) => {
+                        const driver = row.original;
+                        const vetting = VETTING_STATUS_STYLES[driver.verification_status || "unverified"];
+                        return (
+                          <div className="flex items-center gap-3 min-w-0">
+                            <div className="w-9 h-9 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center text-[var(--color-ink-subtle)] shrink-0">
+                              <UserCircle size={16} />
+                            </div>
+                            <div className="min-w-0 flex flex-col">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="text-sm font-semibold text-[var(--color-ink)] truncate">
+                                  {driver.full_name}
+                                </span>
+                                {driver.verification_status === "verified" && (
+                                  <ShieldCheck size={14} className="text-emerald-500 flex-shrink-0" />
+                                )}
+                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${vetting.bg} ${vetting.text}`}>
+                                  {vetting.label}
+                                </span>
+                              </div>
+                              <span className="text-xs text-[var(--color-ink-muted)] truncate mt-0.5">
+                                {PAY_LABELS[driver.pay_mode]}
+                              </span>
+                            </div>
                           </div>
-                          <div className="min-w-0 flex flex-col">
-                            <span className="text-sm font-semibold text-[var(--color-ink)] truncate">
-                              {row.original.full_name}
-                            </span>
-                            <span className="text-xs text-[var(--color-ink-muted)] truncate mt-0.5">
-                              {PAY_LABELS[row.original.pay_mode]}
-                            </span>
-                          </div>
-                        </div>
-                      ),
+                        );
+                      },
                     },
                     {
                       header: "Contact",
                       accessorKey: "phone",
-                      cell: ({ row }) => (
+                      cell: ({ row }: { row: { original: DriverListItem } }) => (
                         <div className="flex items-center gap-2 text-sm text-[var(--color-ink)]">
                           <Phone size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
                           <span className="font-medium">{row.original.phone}</span>
@@ -499,7 +515,7 @@ export default function DriversPage() {
                     {
                       header: "National ID",
                       accessorKey: "id_number_masked",
-                      cell: ({ row }) => (
+                      cell: ({ row }: { row: { original: DriverListItem } }) => (
                         <span className="text-sm font-semibold text-[var(--color-ink)] tracking-wide font-mono">
                           {row.original.id_number_masked || "N/A"}
                         </span>
@@ -508,7 +524,7 @@ export default function DriversPage() {
                     {
                       header: "Driving License",
                       accessorKey: "dl_number_masked",
-                      cell: ({ row }) => {
+                      cell: ({ row }: { row: { original: DriverListItem } }) => {
                         const dl = dlState(row.original.dl_expiry);
                         return (
                           <div className="flex items-center gap-2">
@@ -523,7 +539,7 @@ export default function DriversPage() {
                     {
                       header: "Status",
                       accessorKey: "status",
-                      cell: ({ row }) => {
+                      cell: ({ row }: { row: { original: DriverListItem } }) => {
                         const style = STATUS_STYLES[row.original.status];
                         return (
                           <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${style.bg} ${style.text}`}>
@@ -534,8 +550,8 @@ export default function DriversPage() {
                     },
                   ]}
                   rowActions={getDriverActions}
-                  getRowId={(d) => d.id}
-                  onRowClick={(d) => openEdit(d.id)}
+                  getRowId={(d: DriverListItem) => d.id}
+                  onRowClick={(d: DriverListItem) => openEdit(d.id)}
                   loading={loading}
                   emptyMessage="No drivers found"
                   currentPage={currentPage}
@@ -550,7 +566,6 @@ export default function DriversPage() {
           )}
         </div>
       ) : (
-        /* ✅ CONTRACT TAB: Premium "Coming Soon" Placeholder */
         <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-12 flex flex-col items-center justify-center text-center animate-in fade-in duration-300">
           <div className="w-16 h-16 rounded-2xl bg-[var(--color-primary-muted)] flex items-center justify-center mb-4">
             <Briefcase size={24} className="text-[var(--color-primary-text)]" />
@@ -564,7 +579,6 @@ export default function DriversPage() {
         </div>
       )}
 
-      {/* Create / Edit Modal */}
       <Modal
         open={modalOpen}
         onClose={closeModal}
@@ -607,6 +621,11 @@ export default function DriversPage() {
                 <label className={labelClass}>DL Expiry</label>
                 <input className={inputClass} type="date" value={form.dl_expiry} onChange={(e) => set("dl_expiry", e.target.value)} />
               </div>
+            </div>
+
+            <div>
+              <label className={labelClass}>DL Issue Date (Optional)</label>
+              <input className={inputClass} type="date" value={form.dl_issued_date} onChange={(e) => set("dl_issued_date", e.target.value)} />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -669,6 +688,16 @@ export default function DriversPage() {
           </div>
         )}
       </Modal>
+
+      <ReviewVerificationModal
+        isOpen={reviewModalOpen}
+        onClose={() => { setReviewModalOpen(false); setReviewDriverId(null); }}
+        personId={reviewDriverId || 0}
+        personType="driver"
+        onSuccess={() => {
+          if (refetch) refetch();
+        }}
+      />
     </div>
   );
 }

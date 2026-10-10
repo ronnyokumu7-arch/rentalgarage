@@ -1,4 +1,4 @@
-//src/hooks/drivers/useDrivers.ts
+// src/hooks/drivers/useDrivers.tsx
 "use client";
 
 import { useState, useEffect, useMemo, useCallback } from 'react';
@@ -151,6 +151,54 @@ export function useDrivers() {
     }
   };
 
+  // ✅ NEW: Vetting Actions
+  const startVerification = async (id: number) => {
+    try {
+      const res = await driversApi.startVerification(id);
+      toast.success(
+        (t) => (
+          <div className="flex flex-col gap-2">
+            <span className="font-semibold text-sm">Driver verification link generated!</span>
+            <code className="text-[10px] bg-black/5 dark:bg-white/10 p-1.5 rounded break-all font-mono">
+              {res.verification_link}
+            </code>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(res.verification_link);
+                toast.dismiss(t.id);
+                toast.success("Link copied to clipboard!");
+              }}
+              className="text-xs font-bold text-[var(--color-primary)] hover:underline text-left w-fit"
+            >
+              Click to copy link
+            </button>
+          </div>
+        ),
+        { duration: 6000 }
+      );
+      return true;
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || "Failed to start verification");
+      return false;
+    }
+  };
+
+  const reviewDriver = async (id: number, data: { decision: "approve" | "reject"; rejection_notes?: string }) => {
+    try {
+      await driversApi.reviewDriver(id, data);
+      toast.success(`Driver ${data.decision}d successfully`);
+      
+      // ✅ AUTO-REFRESH: notify drivers list to refetch after review
+      window.dispatchEvent(new CustomEvent('driver:updated', { detail: { driverId: id } }));
+      await fetchDrivers();
+      
+      return true;
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || "Failed to review driver");
+      return false;
+    }
+  };
+
   const clearSelection = () => setSelectedDriver(null);
 
   return {
@@ -171,6 +219,8 @@ export function useDrivers() {
     updateDriver,
     archiveDriver,
     restoreDriver,
+    startVerification, // ✅ Exported
+    reviewDriver,      // ✅ Exported
     refresh: fetchDrivers,
     refetch: fetchDrivers,
   };

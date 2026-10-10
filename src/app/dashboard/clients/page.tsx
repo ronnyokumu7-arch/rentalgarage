@@ -18,7 +18,6 @@ import {
   ArrowRight,
   Link2,
   ChevronRight,
-  ShieldCheck,
   UserRound,
   Building,
   UserPlus,
@@ -49,15 +48,6 @@ const CLIENT_STATUS_STYLES: Record<string, { bg: string; text: string; dot: stri
   pending: { bg: "bg-amber-500/10", text: "text-amber-600 dark:text-amber-400", dot: "bg-amber-500", label: "Pending" },
   suspended: { bg: "bg-red-500/10", text: "text-red-600 dark:text-red-400", dot: "bg-red-500", label: "Suspended" },
   inactive: { bg: "bg-gray-500/10", text: "text-gray-600 dark:text-gray-400", dot: "bg-gray-500", label: "Inactive" },
-};
-
-// ✅ NEW: Vetting status styles
-const VETTING_STATUS_STYLES: Record<string, { bg: string; text: string; label: string }> = {
-  unverified: { bg: "bg-gray-500/10", text: "text-gray-600 dark:text-gray-400", label: "Unverified" },
-  sent: { bg: "bg-blue-500/10", text: "text-blue-600 dark:text-blue-400", label: "Link Sent" },
-  under_review: { bg: "bg-amber-500/10", text: "text-amber-600 dark:text-amber-400", label: "Under Review" },
-  verified: { bg: "bg-emerald-500/10", text: "text-emerald-600 dark:text-emerald-400", label: "Verified" },
-  rejected: { bg: "bg-red-500/10", text: "text-red-600 dark:text-red-400", label: "Rejected" },
 };
 
 // ✅ NEW: Driving arrangement labels
@@ -324,7 +314,6 @@ export default function ClientsPage() {
                   maxHeight="calc(100vh - 160px)"
                   renderCardHeader={({ item }: { item: any }) => {
                     const style = CLIENT_STATUS_STYLES[item.status] || CLIENT_STATUS_STYLES.inactive;
-                    const vetting = VETTING_STATUS_STYLES[item.verification_status || "unverified"];
 
                     return (
                       <div className="flex items-center justify-between w-full cursor-pointer" onClick={() => router.push(`/dashboard/clients/${item.id}`)}>
@@ -347,12 +336,6 @@ export default function ClientsPage() {
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
                                 {item.full_name}
-                              </span>
-                              {item.verification_status === "verified" && (
-                                <ShieldCheck size={14} className="text-emerald-500 flex-shrink-0" />
-                              )}
-                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${vetting.bg} ${vetting.text}`}>
-                                {vetting.label}
                               </span>
                             </div>
                             {item.email ? (
@@ -442,7 +425,6 @@ export default function ClientsPage() {
                       accessorKey: "full_name",
                       cell: ({ row }) => {
                         const client = row.original as any;
-                        const vetting = VETTING_STATUS_STYLES[client.verification_status || "unverified"];
                         return (
                           <div className="flex items-center gap-3 min-w-0">
                             <div className="w-9 h-9 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center text-[var(--color-ink-subtle)] shrink-0 overflow-hidden">
@@ -462,12 +444,6 @@ export default function ClientsPage() {
                                 >
                                   {client.full_name}
                                 </button>
-                                {client.verification_status === "verified" && (
-                                  <span title="Verified Account"><ShieldCheck size={14} className="text-emerald-500 flex-shrink-0" /></span>
-                                )}
-                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${vetting.bg} ${vetting.text}`}>
-                                  {vetting.label}
-                                </span>
                               </div>
                               {client.email ? (
                                 <a href={`mailto:${client.email}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-primary)] transition-colors truncate mt-0.5">
