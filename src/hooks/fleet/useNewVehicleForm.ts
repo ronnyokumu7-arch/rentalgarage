@@ -6,7 +6,7 @@ import { vehiclesApi } from "@/lib/api/vehicles";
 import type { VehicleCreate } from "@/lib/types";
 
 export const CAR_DATA: Record<string, string[]> = {
-  Toyota: ["Filder", "Axio", "RAV4", "Vanguard", "Prado", "Hilux", "Corolla", "Harrier", "Land Cruiser V8", "Noah", "Voxy", "Alphard", "Vellfire"],
+  Toyota: ["Vitz", "Filder", "Axio", "RAV4", "Vanguard", "Prado", "Hilux", "Corolla", "Harrier", "Land Cruiser V8", "Noah", "Voxy", "Alphard", "Vellfire"],
   Nissan: ["X-Trail", "Navara", "Patrol", "Note", "Sunny", "Juke", "Kicks", "Serena"],
   Honda: ["Civic", "CR-V", "Accord", "Fit", "HR-V", "Vezel", "Stepwgn", "Spada"],
   Mazda: ["CX-5", "CX-3", "CX-8", "Demio", "Axela", "Atenza", "Verisa"],

@@ -3,11 +3,9 @@ import type { Client, ClientCreate, ClientUpdate, Booking, PaginatedResponse } f
 
 export const clientsApi = {
   // ── Core CRUD ──────────────────────────────────────────────────────────────
-  // ✅ FIXED: Unwrap .items
   list: (params?: { search?: string; status?: string; page?: number; page_size?: number }) =>
     apiClient.get<PaginatedResponse<Client>>("/clients/", { params }).then((r) => r.data.items),
     
-  // ✅ FIXED: Unwrap .items
   listArchived: (params?: { page?: number; page_size?: number }) =>
     apiClient.get<PaginatedResponse<Client>>("/clients/archived", { params }).then((r) => r.data.items),
     
@@ -42,7 +40,14 @@ export const clientsApi = {
   restore: (id: number) =>
     apiClient.post<Client>(`/clients/${id}/restore`).then((r) => r.data), 
 
-  // ─ Document Uploads ───────────────────────────────────────────────────────
+  // ── Vetting & Verification (NEW) ───────────────────────────────────────────
+  startVerification: (id: number) =>
+    apiClient.post<{ verification_link: string; channels_sent: string[]; expires_at: string }>(`/clients/${id}/start-verification`).then((r) => r.data),
+
+  reviewClient: (id: number, data: { decision: "approve" | "reject"; rejection_notes?: string }) =>
+    apiClient.post<{ type: string; message: string }>(`/clients/${id}/review`, data).then((r) => r.data),
+
+  // ── Document Uploads ───────────────────────────────────────────────────────
   uploadAvatar: (id: number, file: File) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -81,7 +86,6 @@ export const clientsApi = {
   },
 
   // ── Related Data ───────────────────────────────────────────────────────────
-  // ✅ FIXED: /bookings endpoint is now paginated, must unwrap .items
   getBookings: (clientId: number) =>
     apiClient
       .get<PaginatedResponse<Booking>>("/bookings", { params: { client_id: clientId } })

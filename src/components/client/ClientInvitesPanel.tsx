@@ -14,7 +14,11 @@ export default function ClientInvitesPanel() {
   const [invites, setInvites] = useState<ClientInvite[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
+  
   const [ttl, setTtl] = useState(7);
+  const [expectedName, setExpectedName] = useState("");
+  const [expectedPhone, setExpectedPhone] = useState("");
+  
   const [shareInvite, setShareInvite] = useState<ClientInvite | null>(null);
   const [copied, setCopied] = useState(false);
   const [revokingId, setRevokingId] = useState<number | null>(null);
@@ -33,15 +37,22 @@ export default function ClientInvitesPanel() {
 
   useEffect(() => { load(); }, [load]);
 
-  const linkFor = (inv: ClientInvite) =>
-    `${window.location.origin}/invite/${inv.token}`;
+  const linkFor = (inv: ClientInvite) => `${window.location.origin}/invite/${inv.token}`;
 
   const handleCreate = async () => {
     setCreating(true);
     try {
-      const res = await clientInvitesApi.create(ttl);
+      // ✅ FIX: Reverted to positional arguments to match the API definition
+      const res = await clientInvitesApi.create(
+        ttl,
+        expectedName.trim() || undefined,
+        expectedPhone.trim() || undefined
+      );
       setShareInvite(res.data);
+      setExpectedName("");
+      setExpectedPhone("");
       await load();
+      toast.success("Invite link generated!");
     } catch {
       toast.error("Failed to generate invite link");
     } finally {
@@ -97,8 +108,7 @@ export default function ClientInvitesPanel() {
 
   return (
     <section className={sectionClass}>
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+      <div className="flex flex-col gap-4 mb-4">
         <div>
           <h3 className="text-sm font-bold text-[var(--color-ink)] flex items-center gap-2">
             <UserPlus size={15} className="text-[var(--color-primary)]" />
@@ -108,30 +118,54 @@ export default function ClientInvitesPanel() {
             Generate single-use onboarding links. Clients submit their own details for review.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <select
-            value={ttl}
-            onChange={(e) => setTtl(Number(e.target.value))}
-            className="px-2 py-2 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink)] text-xs focus:outline-none"
-          >
-            <option value={1}>1 day</option>
-            <option value={7}>7 days</option>
-            <option value={14}>14 days</option>
-            <option value={30}>30 days</option>
-          </select>
-          <button
-            type="button"
-            onClick={handleCreate}
-            disabled={creating}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition-all disabled:opacity-50"
-          >
-            {creating ? <Loader2 size={14} className="animate-spin" /> : <UserPlus size={14} />}
-            Invite Client
-          </button>
+
+        <div className="p-3 rounded-xl bg-[var(--color-surface-hover)]/50 border border-[var(--color-surface-border)] space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
+            <div className="relative sm:col-span-1">
+              <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
+              <input
+                type="text"
+                value={expectedName}
+                onChange={(e) => setExpectedName(e.target.value)}
+                placeholder="Client name (optional)"
+                maxLength={255}
+                className="w-full pl-9 pr-3 py-2 rounded-lg bg-[var(--color-surface)] border border-[var(--color-surface-border)] text-xs text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] transition-all"
+              />
+            </div>
+            <div className="relative sm:col-span-1">
+              <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
+              <input
+                type="tel"
+                value={expectedPhone}
+                onChange={(e) => setExpectedPhone(e.target.value)}
+                placeholder="Phone (optional)"
+                maxLength={50}
+                className="w-full pl-9 pr-3 py-2 rounded-lg bg-[var(--color-surface)] border border-[var(--color-surface-border)] text-xs text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] transition-all"
+              />
+            </div>
+            <select
+              value={ttl}
+              onChange={(e) => setTtl(Number(e.target.value))}
+              className="sm:col-span-1 px-3 py-2 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-xs text-[var(--color-ink)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 transition-all appearance-none"
+            >
+              <option value={1}>1 day</option>
+              <option value={7}>7 days</option>
+              <option value={14}>14 days</option>
+              <option value={30}>30 days</option>
+            </select>
+            <button
+              type="button"
+              onClick={handleCreate}
+              disabled={creating}
+              className="sm:col-span-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition-all disabled:opacity-50"
+            >
+              {creating ? <Loader2 size={14} className="animate-spin" /> : <Link2 size={14} />}
+              Generate Link
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* List */}
       {loading ? (
         <div className="flex justify-center py-6">
           <Loader2 size={18} className="animate-spin text-[var(--color-ink-muted)]" />
@@ -150,7 +184,6 @@ export default function ClientInvitesPanel() {
                 className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 rounded-lg bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)]"
               >
                 <div className="flex-1 min-w-0">
-                  {/* ✅ PRIMARY LINE: Expected client name (if present) + Status chip */}
                   <div className="flex items-center gap-2">
                     {inv.expected_name ? (
                       <div className="flex items-center gap-1.5 min-w-0 flex-1">
@@ -172,7 +205,6 @@ export default function ClientInvitesPanel() {
                     </span>
                   </div>
 
-                  {/* ✅ SECONDARY LINE: Phone + Link tail (if name was shown) */}
                   <div className="mt-1 flex items-center gap-3 text-[10px] text-[var(--color-ink-subtle)]">
                     {inv.expected_phone && (
                       <div className="flex items-center gap-1">
@@ -188,7 +220,6 @@ export default function ClientInvitesPanel() {
                     )}
                   </div>
 
-                  {/* ✅ TERTIARY LINE: Expires/Created dates */}
                   <p className="text-[9px] text-[var(--color-ink-subtle)] mt-1 flex items-center gap-1">
                     <Clock size={9} />
                     Expires {new Date(inv.expires_at).toLocaleDateString()} ·
@@ -196,7 +227,6 @@ export default function ClientInvitesPanel() {
                   </p>
                 </div>
 
-                {/* Actions (live invites only) */}
                 {inv.is_live && (
                   <div className="flex items-center gap-1.5 shrink-0">
                     <button type="button" onClick={() => setShareInvite(inv)} title="Share"
@@ -227,7 +257,6 @@ export default function ClientInvitesPanel() {
         </div>
       )}
 
-      {/* Share Modal */}
       {shareInvite && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
           <div className="bg-[var(--color-surface)] rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-md border border-[var(--color-surface-border)] p-5">

@@ -84,50 +84,109 @@ export interface MessageResponse {
 
 // ── Clients ─────────────────────────────────────────────────────────────────
 export type ClientStatus = "pending" | "active" | "inactive" | "suspended";
+export type ClientVerificationStatus = "unverified" | "sent" | "under_review" | "verified" | "rejected";
+export type DrivingArrangement = "self_drive" | "own_driver" | "chauffeur";
 
 export interface Client {
   id: number;
   tenant_id: number;
+  
+  // ✅ Name split (first_name/last_name are primary, full_name is computed)
+  first_name: string | null;
+  last_name: string | null;
   full_name: string;
+  
   email: string | null;
   phone: string;
-  id_type?: "national_id" | "passport";  // ✅ Identity slot type (national ID or passport)
+  
+  // ✅ Identity slot
+  id_type: "national_id" | "passport";
   id_number: string | null;
+  
+  // ✅ Driving License
   dl_number: string | null;
   dl_expiry: string | null;
+  dl_issued_date: string | null; // ✅ NEW: For experience calculation
+  
+  // ✅ Driving Arrangement
+  driving_arrangement: DrivingArrangement; // ✅ NEW
+  
   status: ClientStatus;
+  
+  // ✅ Vetting Track (read-only on frontend, managed by backend)
+  verification_status: ClientVerificationStatus; // ✅ NEW
+  selfie_with_id_image: string | null; // ✅ NEW
+  vetted_at: string | null; // ✅ NEW
+  rejection_notes: string | null; // ✅ NEW
+  
+  // Addresses & Documents
   residential_address: string | null;
   work_address: string | null;
   id_image_front: string | null;
   id_image_back: string | null;
   dl_image_front: string | null;
   avatar_image: string | null;
+  
+  // Emergency Contact
   next_of_kin_name: string | null;
   next_of_kin_phone: string | null;
+  
+  // Risk Flags
+  is_flagged: boolean;
+  flag_notes: string | null;
+  
+  // Lifecycle
   is_archived: boolean;
   archived_at: string | null;
   created_at: string;
   updated_at: string;
-
-  // ✅ Backend often returns these variations
-  name?: string | null;
-  first_name?: string | null;
-  last_name?: string | null;
-  driver_license_number?: string | null;
 }
 
-export type ClientCreate = Omit<
-  Client,
-  | "id" | "tenant_id" | "status" | "created_at" | "updated_at" 
-  | "is_archived" | "archived_at" | "avatar_image" 
-  | "id_image_front" | "id_image_back" | "dl_image_front"
->;
+// ✅ NEW: Nested driver block for "own_driver" arrangement
+export interface ClientDriverBlock {
+  full_name: string;
+  phone: string;
+  id_number: string;
+  dl_number: string;
+  dl_expiry?: string | null;
+  dl_issued_date?: string | null;
+}
 
-export type ClientCreatePayload = ClientCreate;
+export type ClientCreate = {
+  first_name: string;
+  last_name: string;
+  email?: string | null;
+  phone: string;
+  id_type: "national_id" | "passport";
+  id_number: string;
+  dl_number?: string | null;
+  dl_expiry?: string | null;
+  dl_issued_date?: string | null;
+  residential_address?: string | null;
+  work_address?: string | null;
+  next_of_kin_name?: string | null;
+  next_of_kin_phone?: string | null;
+  driving_arrangement?: DrivingArrangement;
+  driver?: ClientDriverBlock | null; // ✅ NEW: Nested driver details
+};
 
-export type ClientUpdate = Partial<
-  Omit<Client, "id" | "tenant_id" | "created_at" | "updated_at">
->;
+export type ClientUpdate = Partial<{
+  first_name: string;
+  last_name: string;
+  full_name: string;
+  email: string | null;
+  phone: string;
+  id_type: "national_id" | "passport";
+  id_number: string | null;
+  dl_number: string | null;
+  dl_expiry: string | null;
+  dl_issued_date: string | null;
+  residential_address: string | null;
+  work_address: string | null;
+  next_of_kin_name: string | null;
+  next_of_kin_phone: string | null;
+  driving_arrangement: DrivingArrangement;
+}>;
 
 // ── Vehicles ────────────────────────────────────────────────────────────────
 export type VehicleStatus =
@@ -256,10 +315,13 @@ export interface InvestorEarning {
   created_at: string;
 }
 
-// ─── Drivers ────────────────────────────────────────────────────────────────
+// ─── Drivers ───────────────────────────────────────────────────────────────
 export type DriverEmploymentType = "in_house" | "contracted";
 export type DriverStatus = "available" | "on_trip" | "on_leave" | "suspended";
 export type DriverPayMode = "commission" | "fixed_per_job" | "payroll";
+
+// ✅ NEW: Vetting track for drivers
+export type DriverVerificationStatus = "unverified" | "sent" | "under_review" | "verified" | "rejected";
 
 export interface DriverBase {
   full_name: string;
@@ -268,6 +330,7 @@ export interface DriverBase {
   id_number: string;
   dl_number: string;
   dl_expiry?: string | null;
+  dl_issued_date?: string | null; // ✅ NEW: For experience calculation
 }
 
 export interface DriverCreate extends DriverBase {
@@ -291,6 +354,7 @@ export interface DriverUpdate {
   id_number?: string;
   dl_number?: string;
   dl_expiry?: string | null;
+  dl_issued_date?: string | null; // ✅ NEW
   employment_type?: DriverEmploymentType;
   status?: DriverStatus;
   pay_mode?: DriverPayMode;
@@ -307,16 +371,27 @@ export interface DriverUpdate {
 export interface Driver {
   id: number;
   tenant_id: number;
+  client_id?: number | null; // ✅ NEW: Link to personal driver arrangement
+  
   full_name: string;
   phone: string;
   email?: string | null;
   id_number: string;
   dl_number: string;
   dl_expiry?: string | null;
+  dl_issued_date?: string | null; // ✅ NEW
+  
   profile_photo_key?: string | null;
   id_front_key?: string | null;
   id_back_key?: string | null;
   dl_photo_key?: string | null;
+  
+  // ✅ NEW: Vetting Track
+  verification_status: DriverVerificationStatus;
+  selfie_with_id_key?: string | null;
+  vetted_at?: string | null;
+  rejection_notes?: string | null;
+
   employment_type: DriverEmploymentType;
   status: DriverStatus;
   pay_mode: DriverPayMode;
@@ -345,6 +420,7 @@ export interface DriverListItem {
   created_at: string;
   id_number_masked?: string | null;
   dl_number_masked?: string | null;
+  verification_status: DriverVerificationStatus; // ✅ NEW
 }
 
 // ─── Bookings ────────────────────────────────────────────────────────────────

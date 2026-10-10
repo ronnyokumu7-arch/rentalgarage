@@ -1,8 +1,7 @@
-//src/hooks/clients/useClientsList.ts
-
+// src/hooks/clients/useClientsList.tsx
 "use client";
-import { confirmAction } from "@/lib/utils/confirmAction";
 
+import { confirmAction } from "@/lib/utils/confirmAction";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { clientsApi } from "@/lib/api/clients";
@@ -37,22 +36,18 @@ export function useClientsList() {
     }
   }, [view]);
 
-  // ✅ LIVE REFRESH: focus + visibility (factory)
   useLiveRefresh(fetchClients, pathname === "/dashboard/clients");
 
-  // Initial fetch + fetch when view changes
   useEffect(() => {
     fetchClients();
   }, [fetchClients]);
 
-  // ✅ BULLETPROOF: Refetch on route change to clients page
   useEffect(() => {
     if (pathname === "/dashboard/clients") {
       fetchClients();
     }
   }, [pathname, fetchClients]);
 
-  // ✅ AUTO-REFRESH: listen for client creation + invite creation
   useEffect(() => {
     const handleClientEvent = () => {
       if (pathname === "/dashboard/clients") {
@@ -79,6 +74,8 @@ export function useClientsList() {
       result = result.filter(
         (c) =>
           c.full_name.toLowerCase().includes(q) ||
+          c.first_name?.toLowerCase().includes(q) ||
+          c.last_name?.toLowerCase().includes(q) ||
           c.email?.toLowerCase().includes(q) ||
           c.phone.toLowerCase().includes(q) ||
           c.id_number?.toLowerCase().includes(q) ||
@@ -104,21 +101,35 @@ export function useClientsList() {
   const pendingClients = clients.filter((c) => c.status === "pending").length;
 
   const handleVerify = async (clientId: number) => {
-    const client = clients.find((c) => c.id === clientId);
-    if (client) {
-      const isDlExpired = client.dl_expiry ? new Date(client.dl_expiry) < new Date() : false;
-      if (isDlExpired || !client.id_image_front || !client.dl_image_front) {
-        toast.error("Action blocked: Expired or missing compliance documents. Please renew DL and upload documents first.");
-        return;
-      }
-    }
     setActionLoadingId(clientId);
     try {
-      await clientsApi.activate(clientId);
-      toast.success("Client verified successfully");
+      const result = await clientsApi.startVerification(clientId);
+      
+      toast.success(
+        (t) => (
+          <div className="flex flex-col gap-2">
+            <span className="font-semibold text-sm">Verification link generated!</span>
+            <code className="text-[10px] bg-black/5 dark:bg-white/10 p-1.5 rounded break-all font-mono">
+              {result.verification_link}
+            </code>
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(result.verification_link);
+                toast.dismiss(t.id);
+                toast.success("Link copied to clipboard!");
+              }}
+              className="text-xs font-bold text-[var(--color-primary)] hover:underline text-left w-fit"
+            >
+              Click to copy link
+            </button>
+          </div>
+        ),
+        { duration: 6000 }
+      );
+      
       await fetchClients();
     } catch (error: any) {
-      toast.error(error.response?.data?.detail || "Failed to verify client");
+      toast.error(error.response?.data?.message || error.response?.data?.detail || "Failed to start verification");
     } finally {
       setActionLoadingId(null);
       setOpenDropdownId(null);

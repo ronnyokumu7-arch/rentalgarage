@@ -1,119 +1,194 @@
 // src/hooks/bookings/useClientProfile.ts
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useState, useEffect, useCallback } from "react";
+import { useParams } from "next/navigation";
+import toast from "react-hot-toast";
+
 import { clientsApi } from "@/lib/api/clients";
-import type { Booking, Client } from "@/lib/types";
+import { invoicesApi } from "@/lib/api/invoices";
+import { contractsApi } from "@/lib/api/contracts";
+import type { Client, Invoice, Contract } from "@/lib/types";
 
-export function useClientProfile(booking: Booking | null | undefined) {
-  const [fetchedClient, setFetchedClient] = useState<Client | null>(null);
-  const [loading, setLoading] = useState(false);
+export interface ClientStats {
+  totalBookings: number;
+  totalRevenue: number;
+  activeContracts: number;
+  outstandingBalance: number;
+  currencyCode: string;
+}
 
-  // Extract embedded client or client ID from booking payload
-  const embeddedClient = (booking as any)?.client || (booking as any)?.client_details;
-  const clientId = booking?.client_id || (booking as any)?.client?.id;
+export function useClientProfile() {
+  const params = useParams();
+  const clientId = Number(params.id);
+
+  const [client, setClient] = useState<Client | null>(null);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [contracts, setContracts] = useState<Contract[]>([]);
+  const [stats, setStats] = useState<ClientStats>({
+    totalBookings: 0,
+    totalRevenue: 0,
+    activeContracts: 0,
+    outstandingBalance: 0,
+    currencyCode: "KES",
+  });
+  
+  const [loading, setLoading] = useState(true);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const fetchData = useCallback(async () => {
+    if (!clientId) return;
+    setLoading(true);
+    try {
+      const clientData = await clientsApi.get(clientId);
+      setClient(clientData);
+
+      const bookings = await clientsApi.getBookings(clientId);
+      const clientBookingIds = bookings.map((b) => b.id);
+
+      const [allInvoices, allContracts] = await Promise.allSettled([
+        invoicesApi.list(),
+        contractsApi.list(),
+      ]);
+
+      const validInvoices = allInvoices.status === "fulfilled" ? allInvoices.value : [];
+      const validContracts = allContracts.status === "fulfilled" ? allContracts.value : [];
+
+      const clientInvoices = validInvoices.filter((inv) => clientBookingIds.includes(inv.booking_id!));
+      const clientContracts = validContracts.filter((c) => c.booking_id && clientBookingIds.includes(c.booking_id));
+
+      const totalBookings = bookings.length;
+      const totalRevenue = clientInvoices.reduce((sum, inv) => sum + Number(inv.amount_paid || 0), 0);
+      const activeContracts = clientContracts.filter((c) => c.status !== "void").length;
+      const outstandingBalance = clientInvoices
+        .filter((inv) => inv.status !== "paid" && inv.status !== "void")
+        .reduce((sum, inv) => sum + (Number(inv.amount_due || 0) - Number(inv.amount_paid || 0)), 0);
+
+      setStats({
+        totalBookings,
+        totalRevenue,
+        activeContracts,
+        outstandingBalance,
+        currencyCode: clientInvoices[0]?.currency_code || "KES",
+      });
+
+      setInvoices(
+        clientInvoices
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          .slice(0, 3)
+      );
+      setContracts(
+        clientContracts
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+          .slice(0, 3)
+      );
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || "Failed to load client profile");
+    } finally {
+      setLoading(false);
+    }
+  }, [clientId]);
 
   useEffect(() => {
-    // 1. If embedded client already has full details (including full_name/name), skip extra API calls
-    if (
-      embeddedClient && 
-      ((embeddedClient as any).full_name || embeddedClient.name || embeddedClient.first_name)
-    ) {
-      setFetchedClient(null);
-      return;
+    fetchData();
+  }, [fetchData]);
+
+  const handleUpdateClient = async (data: Partial<Client>) => {
+    setActionLoading(true);
+    try {
+      const cleanData: any = {};
+      for (const [key, value] of Object.entries(data)) {
+        if (value !== null) {
+          cleanData[key] = value;
+        }
+      }
+
+      const updated = await clientsApi.update(clientId, cleanData);
+      setClient(updated);
+      toast.success("Details updated successfully");
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || "Failed to update details");
+    } finally {
+      setActionLoading(false);
     }
+  };
 
-    // 2. Fetch full client details if missing or only client_id is available
-    let isMounted = true;
+  const handleUploadDocument = async (
+    type: "avatar" | "id_front" | "id_back" | "dl_front",
+    file: File
+  ) => {
+    setActionLoading(true);
+    try {
+      let updated: Client;
+      
+      if (type === "avatar") {
+        updated = await clientsApi.uploadAvatar(clientId, file);
+      } else if (type === "id_front") {
+        updated = await clientsApi.uploadIdFront(clientId, file);
+      } else if (type === "id_back") {
+        updated = await clientsApi.uploadIdBack(clientId, file);
+      } else if (type === "dl_front") {
+        updated = await clientsApi.uploadDlFront(clientId, file);
+      } else {
+        throw new Error("Invalid upload type");
+      }
 
-    if (clientId && !fetchedClient && !loading) {
-      setLoading(true);
-      clientsApi
-        .get(clientId) //
-        .then((data) => {
-          if (isMounted) setFetchedClient(data);
-        })
-        .catch((err) => {
-          console.error("Failed to fetch client profile details:", err);
-          if (isMounted) setFetchedClient(null);
-        })
-        .finally(() => {
-          if (isMounted) setLoading(false);
-        });
+      setClient(updated);
+      toast.success(`${type.replace("_", " ")} uploaded successfully!`);
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || "Upload failed");
+    } finally {
+      setActionLoading(false);
     }
+  };
 
-    return () => {
-      isMounted = false;
-    };
-  }, [clientId, embeddedClient]);
-
-  return useMemo(() => {
-    // Priority: fetched API client > embedded booking client
-    const client: Client | null = fetchedClient || embeddedClient || null;
-
-    if (!client) {
-      return {
-        client: null,
-        hasClient: false,
-        loading,
-        fullName: "Unassigned Client",
-        isVerified: false,
-        avatarInitials: "??",
-        phone: "Not provided",
-        email: "No email linked",
-        licenseNumber: "Pending verification",
-      };
+  const handleStatusAction = async (action: "suspend" | "reactivate") => {
+    if (!client) return;
+    setActionLoading(true);
+    try {
+      let updated: Client;
+      if (action === "suspend") {
+        updated = await clientsApi.suspend(client.id);
+        toast.success("Client suspended successfully.", { icon: "⏸️" });
+      } else {
+        updated = await clientsApi.reactivate(client.id);
+        const wasPending = client.status === "pending";
+        toast.success(
+          wasPending ? "Client verified successfully!" : "Client reactivated successfully!",
+          { icon: "✅" }
+        );
+      }
+      setClient(updated);
+    } catch (error: any) {
+      toast.error(error.response?.data?.detail || `Failed to ${action} client`);
+    } finally {
+      setActionLoading(false);
     }
+  };
 
-    // Name Resolution Hierarchy:
-    // 1. full_name (matches SQLAlchemy model column)
-    // 2. name property
-    // 3. first_name + last_name
-    // 4. Fallback: email username prefix
-    // 5. Fallback: Client ID
-    let fullName = (client as any).full_name || client.name || "";
+  // ✅ FIX 1: Changed client.name to client.full_name
+  const getClientDisplayName = () => {
+    if (!client) return "";
+    return client.full_name || "";
+  };
 
-    if (!fullName && (client.first_name || client.last_name)) {
-      fullName = `${client.first_name || ""} ${client.last_name || ""}`.trim();
-    }
+  // ✅ FIX 2: Changed client.driver_license_number to client.dl_number
+  const getClientDlNumber = () => {
+    if (!client) return "";
+    return client.dl_number || "";
+  };
 
-    if (!fullName && client.email) {
-      const emailUser = client.email.split("@")[0];
-      fullName = emailUser.charAt(0).toUpperCase() + emailUser.slice(1);
-    }
-
-    if (!fullName) {
-      fullName = `Client #${client.id}`;
-    }
-
-    // Generate Avatar Initials (e.g., "John Doe" -> "JD", "Molly" -> "MO")
-    const names = fullName.trim().split(/\s+/);
-    const avatarInitials = names.length >= 2 
-      ? `${names[0][0]}${names[1][0]}`.toUpperCase()
-      : fullName.slice(0, 2).toUpperCase();
-
-    // Verification check (Checking dl_number / driver_license_number or explicit flag)
-    const licenseNumber = 
-      (client as any).dl_number || 
-      client.driver_license_number || 
-      (client as any)?.license_number || 
-      null;
-
-    const isVerified = Boolean(
-      (client as any).is_verified || 
-      licenseNumber
-    );
-
-    return {
-      client,
-      hasClient: true,
-      loading,
-      fullName,
-      avatarInitials,
-      isVerified,
-      phone: client.phone || (client as any)?.phone_number || "Not provided",
-      email: client.email || "No email linked",
-      licenseNumber: licenseNumber || "Pending verification",
-    };
-  }, [fetchedClient, embeddedClient, loading]);
+  return {
+    client,
+    invoices,
+    contracts,
+    stats,
+    loading,
+    actionLoading,
+    handleUpdateClient,
+    handleUploadDocument,
+    handleStatusAction,
+    getClientDisplayName,
+    getClientDlNumber,
+  };
 }
