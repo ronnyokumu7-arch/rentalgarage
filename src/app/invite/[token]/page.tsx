@@ -1,4 +1,3 @@
-// src/app/(public)/invite/[token]/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -18,34 +17,42 @@ export default function PublicInvitePage() {
 
   const [status, setStatus] = useState<PageStatus>("loading");
   const [branding, setBranding] = useState<{ name: string; logo?: string; phone?: string; email?: string } | null>(null);
+  
+  // ✅ FIX 1: Initialize ALL fields that NewClientForm expects and backend requires
   const [formData, setFormData] = useState<Record<string, string>>({
-    full_name: "", email: "", phone: "", 
-    id_type: "national_id", id_number: "", 
-    dl_number: "", dl_expiry: "", 
-    residential_address: "", work_address: "", 
-    next_of_kin_name: "", next_of_kin_phone: ""
+    first_name: "",
+    last_name: "",
+    email: "",
+    phone: "",
+    id_type: "national_id",
+    id_number: "",
+    dl_number: "",
+    dl_expiry: "",
+    dl_issued_date: "",
+    residential_address: "",
+    work_address: "",
+    next_of_kin_name: "",
+    next_of_kin_phone: "",
+    driving_arrangement: "self_drive",
+    driver_full_name: "",
+    driver_phone: "",
+    driver_id_number: "",
+    driver_dl_number: "",
+    driver_dl_expiry: "",
+    driver_dl_issued_date: "",
   });
 
-  // ✅ Real file states (replacing dummyFile)
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [idFrontFile, setIdFrontFile] = useState<File | null>(null);
   const [idBackFile, setIdBackFile] = useState<File | null>(null);
   const [dlFrontFile, setDlFrontFile] = useState<File | null>(null);
 
-  // 1. Fetch Invite Preview (Branding + Validity)
   useEffect(() => {
     const fetchPreview = async () => {
       try {
         const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/clients/invite/${token}`);
-        
-        if (res.status === 410) {
-          setStatus("expired");
-          return;
-        }
-        if (!res.ok) {
-          setStatus("invalid");
-          return;
-        }
+        if (res.status === 410) { setStatus("expired"); return; }
+        if (!res.ok) { setStatus("invalid"); return; }
 
         const data = await res.json();
         setBranding({
@@ -68,20 +75,18 @@ export default function PublicInvitePage() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // 2. Handle Form Submission (Upload-then-Create flow)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // ✅ Validate required docs
-    if (!idFrontFile || !dlFrontFile) {
-      toast.error("ID Front and DL Front are required");
+    // ✅ FIX 2: Backend strictly requires ID Front and ID Back
+    if (!idFrontFile || !idBackFile) {
+      toast.error("ID Front and ID Back photos are required");
       return;
     }
 
     setStatus("submitting");
 
     try {
-      // 1. Upload documents first (if any files are selected)
       const uploadedUrls: Record<string, string> = {};
       const uploadPromises: Promise<void>[] = [];
 
@@ -96,7 +101,7 @@ export default function PublicInvitePage() {
 
         if (!res.ok) {
           const errorData = await res.json();
-          throw new Error(getApiErrorMessageFromBody(errorData, "Unable to upload this document. Please try again."));
+          throw new Error(getApiErrorMessageFromBody(errorData, "Unable to upload this document."));
         }
 
         const data = await res.json();
@@ -112,24 +117,47 @@ export default function PublicInvitePage() {
         await Promise.all(uploadPromises);
       }
 
-// 2. Submit form with uploaded URLs
-const payload = {
-  full_name: formData.full_name,
-  email: formData.email || null,
-  phone: formData.phone,
-  id_type: formData.id_type || "national_id",
-  id_number: formData.id_number || null,
-  dl_number: formData.dl_number || null,
-  dl_expiry: formData.dl_expiry || null,
-  residential_address: formData.residential_address || null,
-  work_address: formData.work_address || null,
-  next_of_kin_name: formData.next_of_kin_name || null,
-  next_of_kin_phone: formData.next_of_kin_phone || null,
-  avatar_image: uploadedUrls.avatar || null,
-  id_image_front: uploadedUrls.id_front || null,
-  id_image_back: uploadedUrls.id_back || null,
-  dl_image_front: uploadedUrls.dl_front || null,
-};
+      // ✅ FIX 3: Perfectly match the backend ClientIntakeCreate contract
+      const payload = {
+        // Required Strings
+        first_name: formData.first_name?.trim() || "",
+        last_name: formData.last_name?.trim() || "",
+        phone: formData.phone?.trim() || "",
+        id_type: formData.id_type || "national_id",
+        id_number: formData.id_number?.trim().toUpperCase() || "",
+
+        // Optional Strings (MUST be undefined, NOT null or "")
+        email: formData.email?.trim() || undefined,
+        dl_number: formData.dl_number?.trim().toUpperCase() || undefined,
+        residential_address: formData.residential_address?.trim() || undefined,
+        work_address: formData.work_address?.trim() || undefined,
+        next_of_kin_name: formData.next_of_kin_name?.trim() || undefined,
+        next_of_kin_phone: formData.next_of_kin_phone?.trim() || undefined,
+
+        // Dates (MUST be undefined or valid date string, NOT null)
+        dl_expiry: formData.dl_expiry || undefined,
+        dl_issued_date: formData.dl_issued_date || undefined,
+
+        driving_arrangement: formData.driving_arrangement || "self_drive",
+
+        // Nested Driver Object (MUST be null if not own_driver)
+        driver: formData.driving_arrangement === "own_driver" 
+          ? {
+              full_name: formData.driver_full_name?.trim() || "",
+              phone: formData.driver_phone?.trim() || "",
+              id_number: formData.driver_id_number?.trim().toUpperCase() || "",
+              dl_number: formData.driver_dl_number?.trim().toUpperCase() || "",
+              dl_expiry: formData.driver_dl_expiry || undefined,
+              dl_issued_date: formData.driver_dl_issued_date || undefined,
+            }
+          : null,
+
+        // Document URLs (Backend requires id_image_front/back as strings)
+        avatar_image: uploadedUrls.avatar || undefined,
+        id_image_front: uploadedUrls.id_front || "", 
+        id_image_back: uploadedUrls.id_back || "",   
+        dl_image_front: uploadedUrls.dl_front || undefined,
+      };
 
       const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/clients/invite/${token}`, {
         method: "POST",
@@ -151,13 +179,14 @@ const payload = {
 
       if (res.status === 409) {
         const errorData = await res.json();
-        toast.error(getApiErrorMessageFromBody(errorData, "This invite could not be completed."));
+        toast.error(getApiErrorMessageFromBody(errorData, "These details are already registered."));
         setStatus("ready");
         return;
       }
 
       if (res.status === 422) {
         const errorData = await res.json();
+        console.error("422 Validation Error:", errorData); // Logs exact failing field to console
         toast.error(getApiErrorMessageFromBody(errorData, "Please check your input and try again."));
         setStatus("ready");
         return;
@@ -166,13 +195,12 @@ const payload = {
       throw new Error("Submission failed");
     } catch (err: any) {
       console.error("Submission error:", err);
-      toast.error(err.message || "Failed to upload documents");
+      toast.error(err.message || "Failed to submit application");
       setStatus("ready");
     }
   };
 
-  // --- UI STATES ---
-
+  // --- UI STATES (Loading, Invalid, Expired, Success) ---
   if (status === "loading") {
     return (
       <div className="public-root min-h-screen flex items-center justify-center p-4">
@@ -187,24 +215,12 @@ const payload = {
   if (status === "invalid") {
     return (
       <div className="public-root min-h-screen flex items-center justify-center p-4 sm:p-6">
-        <div 
-          className="max-w-md w-full rounded-xl p-8 text-center"
-          style={{
-            background: '#FFFFFF',
-            boxShadow: '0 12px 24px -4px rgba(28, 25, 23, 0.10)',
-            border: '1px solid rgba(28, 25, 23, 0.10)',
-          }}
-        >
-          <div 
-            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-            style={{ backgroundColor: 'rgba(185, 28, 28, 0.10)' }}
-          >
-            <AlertCircle className="h-8 w-8" style={{ color: '#B91C1C' }} />
+        <div className="max-w-md w-full rounded-xl p-8 text-center bg-white shadow-lg border border-stone-200">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-red-100">
+            <AlertCircle className="h-8 w-8 text-red-700" />
           </div>
-          <h1 className="text-xl font-bold mb-2" style={{ color: '#1C1917' }}>Invalid Invite Link</h1>
-          <p className="text-sm mb-6" style={{ color: '#57534E' }}>
-            This link is invalid, broken, or could not be found. Please contact the agency to request a new onboarding link.
-          </p>
+          <h1 className="text-xl font-bold mb-2 text-stone-900">Invalid Invite Link</h1>
+          <p className="text-sm text-stone-600">This link is invalid or broken. Please contact the agency for a new link.</p>
         </div>
       </div>
     );
@@ -213,24 +229,12 @@ const payload = {
   if (status === "expired") {
     return (
       <div className="public-root min-h-screen flex items-center justify-center p-4 sm:p-6">
-        <div 
-          className="max-w-md w-full rounded-xl p-8 text-center"
-          style={{
-            background: '#FFFFFF',
-            boxShadow: '0 12px 24px -4px rgba(28, 25, 23, 0.10)',
-            border: '1px solid rgba(28, 25, 23, 0.10)',
-          }}
-        >
-          <div 
-            className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
-            style={{ backgroundColor: 'rgba(180, 83, 9, 0.10)' }}
-          >
-            <Clock className="h-8 w-8" style={{ color: '#B45309' }} />
+        <div className="max-w-md w-full rounded-xl p-8 text-center bg-white shadow-lg border border-stone-200">
+          <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-amber-100">
+            <Clock className="h-8 w-8 text-amber-700" />
           </div>
-          <h1 className="text-xl font-bold mb-2" style={{ color: '#1C1917' }}>Invite Expired or Used</h1>
-          <p className="text-sm mb-6" style={{ color: '#57534E' }}>
-            This single-use link has either expired or has already been used to create an account. Please contact the agency for assistance.
-          </p>
+          <h1 className="text-xl font-bold mb-2 text-stone-900">Invite Expired or Used</h1>
+          <p className="text-sm text-stone-600">This single-use link has expired or been used. Please contact the agency.</p>
         </div>
       </div>
     );
@@ -239,54 +243,26 @@ const payload = {
   if (status === "success") {
     return (
       <div className="public-root min-h-screen flex items-center justify-center p-4 sm:p-6">
-        <div 
-          className="max-w-lg w-full rounded-2xl p-8 text-center"
-          style={{
-            background: '#FFFFFF',
-            boxShadow: '0 20px 32px -6px rgba(28, 25, 23, 0.12)',
-            border: '1px solid rgba(28, 25, 23, 0.10)',
-          }}
-        >
-          <div 
-            className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5"
-            style={{ backgroundColor: 'rgba(4, 120, 87, 0.10)' }}
-          >
-            <CheckCircle2 className="h-10 w-10" style={{ color: '#047857' }} />
+        <div className="max-w-lg w-full rounded-2xl p-8 text-center bg-white shadow-xl border border-stone-200">
+          <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5 bg-emerald-100">
+            <CheckCircle2 className="h-10 w-10 text-emerald-700" />
           </div>
-          <h1 className="text-2xl font-extrabold mb-3" style={{ color: '#1C1917' }}>Application Submitted!</h1>
-          <p className="text-sm leading-relaxed mb-6" style={{ color: '#57534E' }}>
-            Thank you, <span className="font-bold" style={{ color: '#1C1917' }}>{formData.full_name}</span>. Your profile has been successfully submitted to <span className="font-bold" style={{ color: '#1C1917' }}>{branding?.name}</span>.
+          <h1 className="text-2xl font-extrabold mb-3 text-stone-900">Application Submitted!</h1>
+          <p className="text-sm leading-relaxed mb-6 text-stone-600">
+            Thank you, <span className="font-bold text-stone-900">{formData.first_name} {formData.last_name}</span>. Your profile has been submitted to <span className="font-bold text-stone-900">{branding?.name}</span>.
           </p>
-          
-          <div 
-            className="rounded-xl p-4 text-left space-y-3 mb-6"
-            style={{
-              background: 'rgba(29, 78, 216, 0.05)',
-              border: '1px solid rgba(29, 78, 216, 0.20)',
-            }}
-          >
-            <h3 
-              className="text-sm font-bold flex items-center gap-2"
-              style={{ color: '#1D4ED8' }}
-            >
+          <div className="rounded-xl p-4 text-left space-y-3 mb-6 bg-blue-50 border border-blue-200">
+            <h3 className="text-sm font-bold flex items-center gap-2 text-blue-800">
               <ShieldCheck size={16} /> What happens next?
             </h3>
-            <ul className="text-xs space-y-2" style={{ color: '#1D4ED8' }}>
-              <li className="flex items-start gap-2">
-                <span className="font-bold">1.</span> The agency will review your details and verify your identity.
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="font-bold">2.</span> Once approved, your account will be activated.
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="font-bold">3.</span> You will receive a notification when your account is ready to use.
-              </li>
+            <ul className="text-xs space-y-2 text-blue-800">
+              <li className="flex items-start gap-2"><span className="font-bold">1.</span> The agency will review your details.</li>
+              <li className="flex items-start gap-2"><span className="font-bold">2.</span> Once approved, your account will be activated.</li>
             </ul>
           </div>
-
-          <p className="text-[10px]" style={{ color: '#78716C' }}>
+          <p className="text-[10px] text-stone-500">
             You can safely close this window. {branding?.phone && (
-              <>If you have questions, call the agency at <a href={`tel:${branding.phone}`} className="font-bold hover:underline" style={{ color: '#6D28D9' }}>{branding.phone}</a>.</>
+              <>Questions? Call <a href={`tel:${branding.phone}`} className="font-bold hover:underline text-purple-700">{branding.phone}</a>.</>
             )}
           </p>
         </div>
@@ -296,7 +272,7 @@ const payload = {
 
   // --- READY STATE: The Form ---
   return (
-    <div className="public-root min-h-screen pb-12" style={{ backgroundColor: '#FFFFFF' }}>
+    <div className="public-root min-h-screen pb-12 bg-white">
       <NewClientForm
         loading={status === "submitting"}
         formData={formData}

@@ -1,4 +1,3 @@
-// src/app/vetting/[token]/page.tsx
 "use client";
 
 import { useState, useEffect, useRef } from "react";
@@ -40,6 +39,7 @@ export default function VettingPage() {
       try {
         const res = await apiClient.get<VettingPreview>(`/vetting/preview/${token}`);
         setPreview(res.data);
+        setLoading(false); // ✅ FIX: Stop loading on success
       } catch (err: any) {
         if (err.response?.status === 410) {
           setError("This verification link has expired or was already used. Please contact the agency for a new link.");
