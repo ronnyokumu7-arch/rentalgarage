@@ -365,7 +365,6 @@ interface TabDef {
 }
 
 function AlertsSlide({ alerts }: { alerts: NeedsAttentionData }) {
-  // ✅ Build candidate tabs with literal-typed ids so `.filter()` doesn't widen to `string`
   const allTabs: TabDef[] = [
     { id: "overdue", label: "Late", icon: Clock, count: alerts.overdueReturns.length },
     { id: "service", label: "Service", icon: Wrench, count: alerts.serviceDue.length },
@@ -738,11 +737,21 @@ function DocsList({
    Shared
 ────────────────────────────────────────────────────────────────────── */
 
+/**
+ * ✅ One-sided bleed: the track extends past the container's right edge
+ * (so the next card peeks under the card border), but the first card's left
+ * edge aligns flush with the section header, tab switcher, and slide title.
+ *
+ * Mechanism:
+ *   - `-mr-4` extends the track past the right padding.
+ *   - No `-ml-4` — the left side keeps the slide's natural `p-4` inset.
+ *   - `pr-4` pads the track's right end so the last card doesn't slam the edge.
+ */
 function InnerCarousel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="-mx-4">
+    <div className="-mr-4">
       <div
-        className="flex gap-2 overflow-x-auto snap-x snap-mandatory scroll-smooth px-4 pb-1"
+        className="flex gap-2 overflow-x-auto snap-x snap-mandatory scroll-smooth pr-4 pb-1"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {children}
