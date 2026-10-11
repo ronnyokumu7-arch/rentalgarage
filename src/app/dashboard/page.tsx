@@ -10,15 +10,15 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { useDashboardStats } from "@/hooks/dashboard/useDashboardStats";
+import { useNeedsAttention } from "@/hooks/dashboard/useNeedsAttention";
 import ActionCenterWidget from "@/components/dashboard/ActionCenterWidget";
 import RecentActivityWidget from "@/components/dashboard/RecentActivityWidget";
 import FleetCalendar from "@/components/calendar/FleetCalendar";
 import SoftLockBanner from "@/components/dashboard/SoftLockBanner";
 import DesktopStatCard from "@/components/dashboard/DesktopStatCard";
 import MobileStatsCarousel from "@/components/dashboard/MobileStatsCarousel";
-import {
-  MobileHeroEarnings, MobileAlerts, MobileFleetStatus,
-} from "@/components/dashboard/MobileDashboardCards";
+import { MobileHeroEarnings } from "@/components/dashboard/MobileDashboardCards";
+import MobileCarouselCard from "@/components/dashboard/MobileCarouselCard";
 import { DesktopFleetStatus, DesktopAlerts } from "@/components/dashboard/DesktopSidePanels";
 import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
 
@@ -31,7 +31,21 @@ const TABS = [
 export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState("overview");
   const [isMobile, setIsMobile] = useState(false);
-  const { loading, stats, alerts, vehicles, commission, mtdRevenue, lastMonthRevenue, monthOverMonthPercent, isPositiveGrowth } = useDashboardStats();
+
+  // ✅ Rich dashboard stats (revenue, vehicles, commission)
+  const {
+    loading,
+    stats,
+    vehicles,
+    commission,
+    mtdRevenue,
+    lastMonthRevenue,
+    monthOverMonthPercent,
+    isPositiveGrowth,
+  } = useDashboardStats();
+
+  // ✅ Rich needs-attention data (service due, overdue, expiring docs)
+  const alerts = useNeedsAttention();
 
   useEffect(() => {
     const checkMobile = () => {
@@ -45,10 +59,12 @@ export default function DashboardPage() {
     };
 
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  // ✅ Wait for dashboard stats only — the alerts hook has its own loading state
+  //    inside the widgets (they gracefully handle empty arrays during load).
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -123,11 +139,12 @@ export default function DashboardPage() {
                   </div>
                 )}
 
-                {/* Mobile Order: Fleet Status -> Recent Activity -> Action Center -> Alerts */}
-                <MobileFleetStatus vehicles={vehicles} />
+                {/* ✅ Carousel: Fleet Status / Alerts / Promo */}
+                <MobileCarouselCard vehicles={vehicles} alerts={alerts} />
+
+                {/* Mobile Order: Carousel -> Recent Activity -> Action Center */}
                 <RecentActivityWidget />
                 <ActionCenterWidget />
-                <MobileAlerts alerts={alerts} />
               </div>
             ) : (
               <>
