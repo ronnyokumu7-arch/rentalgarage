@@ -1,3 +1,4 @@
+// src/app/dashboard/clients/page.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -32,6 +33,7 @@ import SecureImage from "@/components/ui/SecureImage";
 import CardGrid from "@/components/ui/CardGrid";
 import ReviewVerificationModal from "@/components/client/ReviewVerificationModal";
 import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
+import MobileClientsToolbar from "@/components/client/MobileClientsToolbar";
 
 type ClientSegment = "individual" | "corporate" | "invites";
 
@@ -49,7 +51,7 @@ const CLIENT_STATUS_STYLES: Record<string, { bg: string; text: string; dot: stri
   inactive: { bg: "bg-gray-500/10", text: "text-gray-600 dark:text-gray-400", dot: "bg-gray-500", label: "Inactive" },
 };
 
-// ✅ NEW: Driving arrangement labels
+// ✅ Driving arrangement labels
 const ARRANGEMENT_LABELS: Record<string, string> = {
   self_drive: "Self Drive",
   own_driver: "Own Driver",
@@ -59,8 +61,8 @@ const ARRANGEMENT_LABELS: Record<string, string> = {
 export default function ClientsPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<ClientSegment>("individual");
-  
-  // ✅ NEW: Review Modal State
+
+  // ✅ Review Modal State
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [reviewClientId, setReviewClientId] = useState<number | null>(null);
 
@@ -94,6 +96,17 @@ export default function ClientsPage() {
     return { total, active, inactive };
   }, [filteredClients]);
 
+  // ✅ Status options — shared between desktop toolbar and mobile toolbar
+  const statusOptions = useMemo(
+    () => [
+      { label: "Active", value: "active", count: clientMetrics.active },
+      { label: "Pending", value: "pending", count: pendingClients },
+      { label: "Suspended", value: "suspended", count: clientMetrics.inactive },
+      { label: "Inactive", value: "inactive", count: clientMetrics.inactive },
+    ],
+    [clientMetrics.active, clientMetrics.inactive, pendingClients]
+  );
+
   const currentTabInfo = useMemo(() => {
     if (activeTab === "individual") {
       return {
@@ -123,10 +136,10 @@ export default function ClientsPage() {
       onClick: () => router.push(`/dashboard/clients/${client.id}`),
     },
     {
-      label: client.verification_status === "under_review" 
-        ? "Review Verification" 
-        : client.verification_status === "rejected" || client.status === "pending" 
-        ? "Start Verification" 
+      label: client.verification_status === "under_review"
+        ? "Review Verification"
+        : client.verification_status === "rejected" || client.status === "pending"
+        ? "Start Verification"
         : "Suspend Client",
       icon: client.verification_status === "under_review" ? Clock : Shield,
       variant: (client.verification_status === "under_review" || client.verification_status === "rejected" || client.status === "pending") ? "primary" : "default",
@@ -156,60 +169,65 @@ export default function ClientsPage() {
     },
   ].filter((action) => !!action.label) as RowAction<any>[];
 
-  if (activeTab === "invites") {
-    return (
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3">
-              <span className="hidden sm:inline-flex">{currentTabInfo.icon}</span>
-              <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
-                {currentTabInfo.title}
-              </h1>
-            </div>
-            <p className="text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
-              {currentTabInfo.description}
-            </p>
+  return (
+    <div className="space-y-6">
+      {/* ─── HEADER (all tabs) ─────────────────────────────────────── */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-3">
+            <span className="hidden sm:inline-flex">{currentTabInfo.icon}</span>
+            <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
+              {currentTabInfo.title}
+            </h1>
           </div>
-          <div className="self-start sm:self-auto">
-            <PremiumTabSwitcher
-              tabs={TABS}
-              activeTab={activeTab}
-              onTabChange={(tabId) => setActiveTab(tabId as ClientSegment)}
-            />
-          </div>
+          <p className="text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
+            {currentTabInfo.description}
+          </p>
         </div>
-        <ClientInvitesPanel />
+        {/* ✅ DESKTOP ONLY — mobile uses the toolbar's segment dropdown */}
+        <div className="hidden md:block self-start sm:self-auto">
+          <PremiumTabSwitcher
+            tabs={TABS}
+            activeTab={activeTab}
+            onTabChange={(tabId) => setActiveTab(tabId as ClientSegment)}
+          />
+        </div>
       </div>
-    );
-  }
 
-  if (activeTab === "individual") {
-    return (
-      <div className="space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3">
-              <span className="hidden sm:inline-flex">{currentTabInfo.icon}</span>
-              <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
-                {currentTabInfo.title}
-              </h1>
-            </div>
-            <p className="text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
-              {currentTabInfo.description}
-            </p>
-          </div>
-          <div className="self-start sm:self-auto">
-            <PremiumTabSwitcher
-              tabs={TABS}
-              activeTab={activeTab}
-              onTabChange={(tabId) => setActiveTab(tabId as ClientSegment)}
-            />
-          </div>
+      {/* ─── MOBILE TOOLBAR (all tabs, single shared instance) ────── */}
+      <div className="md:hidden">
+        <MobileClientsToolbar
+          activeSegment={activeTab}
+          onSegmentChange={setActiveTab}
+          statusFilter={statusFilter}
+          onStatusChange={setStatusFilter}
+          statusOptions={statusOptions}
+          search={search}
+          onSearchChange={setSearch}
+        />
+      </div>
+
+      {/* ─── TAB CONTENT ──────────────────────────────────────────── */}
+
+      {/* INVITES TAB */}
+      {activeTab === "invites" && <ClientInvitesPanel />}
+
+      {/* CORPORATE TAB (placeholder) */}
+      {activeTab === "corporate" && (
+        <div className="p-12 text-center bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] animate-in fade-in duration-300">
+          <Building2 size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" />
+          <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">Corporate Client Hub</h3>
+          <p className="text-sm text-[var(--color-ink-muted)] max-w-md mx-auto">
+            Commercial profiles, group company multi-driver billing, agency agreements, and decentralized corporate contract tracking systems coming soon.
+          </p>
         </div>
+      )}
 
+      {/* INDIVIDUAL TAB */}
+      {activeTab === "individual" && (
         <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
-          <div className="p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
+          {/* ─── DESKTOP TOOLBAR (unchanged, hidden on mobile) ─── */}
+          <div className="hidden md:flex p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
             <div className="hidden sm:flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
               <div className="flex items-center justify-center gap-1.5 min-w-0 text-center sm:flex-1">
                 <span className="text-xs font-medium text-[var(--color-ink-muted)]">Clients</span>
@@ -243,12 +261,7 @@ export default function ClientsPage() {
                 <FilterDropdown
                   filterId="client-status"
                   label="Status"
-                  options={[
-                    { label: "Active", value: "active", count: clientMetrics.active },
-                    { label: "Pending", value: "pending", count: pendingClients },
-                    { label: "Suspended", value: "suspended", count: clientMetrics.inactive },
-                    { label: "Inactive", value: "inactive", count: clientMetrics.inactive },
-                  ]}
+                  options={statusOptions}
                   value={statusFilter}
                   onChange={setStatusFilter}
                   icon={Filter}
@@ -531,44 +544,18 @@ export default function ClientsPage() {
             </>
           )}
         </div>
+      )}
 
-        {/* ✅ REVIEW VERIFICATION MODAL */}
-        <ReviewVerificationModal
-          isOpen={reviewModalOpen}
-          onClose={() => { setReviewModalOpen(false); setReviewClientId(null); }}
-          personId={reviewClientId || 0}
-          personType="client"
-          onSuccess={() => {
-            // ✅ This triggers the real-time refresh of the client list
-            refetch(); 
-          }}
-        />
-      </div>
-    );
-  }
-
-  // Corporate tab placeholder
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <span className="hidden sm:inline-flex">{currentTabInfo.icon}</span>
-            <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">{currentTabInfo.title}</h1>
-          </div>
-          <p className="text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">{currentTabInfo.description}</p>
-        </div>
-        <div className="self-start sm:self-auto">
-          <PremiumTabSwitcher tabs={TABS} activeTab={activeTab} onTabChange={(tabId) => setActiveTab(tabId as ClientSegment)} />
-        </div>
-      </div>
-      <div className="p-12 text-center bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] animate-in fade-in duration-300">
-        <Building2 size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" />
-        <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">Corporate Client Hub</h3>
-        <p className="text-sm text-[var(--color-ink-muted)] max-w-md mx-auto">
-          Commercial profiles, group company multi-driver billing, agency agreements, and decentralized corporate contract tracking systems coming soon.
-        </p>
-      </div>
+      {/* ✅ REVIEW VERIFICATION MODAL */}
+      <ReviewVerificationModal
+        isOpen={reviewModalOpen}
+        onClose={() => { setReviewModalOpen(false); setReviewClientId(null); }}
+        personId={reviewClientId || 0}
+        personType="client"
+        onSuccess={() => {
+          refetch();
+        }}
+      />
     </div>
   );
 }

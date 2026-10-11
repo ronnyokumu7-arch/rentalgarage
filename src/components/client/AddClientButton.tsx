@@ -1,3 +1,4 @@
+// src/components/client/AddClientButton.tsx
 "use client";
 
 import { useState } from "react";
@@ -10,16 +11,17 @@ export default function AddClientButton() {
 
   return (
     <>
-      {/* 📱 MOBILE: Button that opens the modal */}
+      {/* 📱 MOBILE: Ghost "New" with weighted purple outline */}
       <button
         onClick={() => setModalOpen(true)}
-        className="md:hidden h-10 px-4 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.98] shrink-0"
+        className="md:hidden h-9 px-3 rounded-xl border-2 border-[var(--color-primary)] text-[var(--color-primary)] text-sm font-bold flex items-center justify-center gap-1.5 transition-all hover:bg-[var(--color-primary)]/10 active:bg-[var(--color-primary)]/15 active:scale-[0.98] shrink-0"
+        aria-label="Add new client"
       >
         <UserPlus size={16} strokeWidth={2.5} />
-        Add Client
+        New
       </button>
 
-      {/* 💻 DESKTOP: Link to the dedicated full page */}
+      {/* 💻 DESKTOP: unchanged */}
       <Link
         href="/dashboard/clients/new"
         className="hidden md:flex h-10 px-4 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-bold items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.98] shrink-0"
