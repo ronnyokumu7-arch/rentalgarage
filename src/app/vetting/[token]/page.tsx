@@ -39,7 +39,7 @@ export default function VettingPage() {
       try {
         const res = await apiClient.get<VettingPreview>(`/vetting/preview/${token}`);
         setPreview(res.data);
-        setLoading(false); // ✅ FIX: Stop loading on success
+        setLoading(false);
       } catch (err: any) {
         if (err.response?.status === 410) {
           setError("This verification link has expired or was already used. Please contact the agency for a new link.");
@@ -83,7 +83,7 @@ export default function VettingPage() {
       // 2. Submit Vetting
       setSubmitting(true);
       await apiClient.post(`/vetting/${token}/submit`, {
-        selfie_with_id: "uploaded", // Payload expects this key, value doesn't matter as backend checks DB
+        selfie_with_id: "uploaded",
       });
 
       setStep("success");
@@ -94,6 +94,16 @@ export default function VettingPage() {
     } finally {
       setUploading(false);
       setSubmitting(false);
+    }
+  };
+
+  const handleCloseWindow = () => {
+    // Try to close the window
+    if (window.opener || window.self !== window.top) {
+      window.close();
+    } else {
+      // Fallback: redirect to a public page (not dashboard)
+      window.location.href = "/";
     }
   };
 
@@ -115,10 +125,14 @@ export default function VettingPage() {
           <h2 className="text-lg font-bold text-[var(--color-ink)] mb-2">Link Invalid</h2>
           <p className="text-sm text-[var(--color-ink-muted)] mb-6">{error || "This link is no longer valid."}</p>
           <button
-            onClick={() => router.push("/")}
+            onClick={() => {
+  window.close();
+  // Fallback for browsers that block window.close()
+  setTimeout(() => router.push("/"), 200);
+}}
             className="w-full py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition-all"
           >
-            Go to Homepage
+            Close Window
           </button>
         </div>
       </div>
@@ -137,12 +151,18 @@ export default function VettingPage() {
             Thank you, {preview.person_first_name}. Your identity has been securely submitted and is now under review by {preview.tenant_name}. 
             You will be notified once your account is activated.
           </p>
-          <button
-            onClick={() => router.push("/")}
-            className="w-full py-3 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition-all"
-          >
-            Return to Homepage
-          </button>
+          
+          <div className="space-y-3">
+            <button
+              onClick={handleCloseWindow}
+              className="w-full py-3 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition-all"
+            >
+              Close This Window
+            </button>
+            <p className="text-[10px] text-[var(--color-ink-subtle)]">
+              You can safely close this window. We'll notify you when your verification is complete.
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -215,7 +235,7 @@ export default function VettingPage() {
                   ref={fileInputRef}
                   type="file"
                   accept="image/*"
-                  capture="user" // ✅ Forces front-facing camera on mobile
+                  capture="user"
                   className="hidden"
                   onChange={handleFileChange}
                 />
