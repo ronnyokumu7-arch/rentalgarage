@@ -1,4 +1,3 @@
-// src/app/dashboard/clients/page.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -540,7 +539,8 @@ export default function ClientsPage() {
           personId={reviewClientId || 0}
           personType="client"
           onSuccess={() => {
-            refetch(); // Refresh the list to reflect the new status
+            // ✅ This triggers the real-time refresh of the client list
+            refetch(); 
           }}
         />
       </div>

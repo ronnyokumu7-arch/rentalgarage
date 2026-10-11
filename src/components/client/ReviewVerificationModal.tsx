@@ -60,8 +60,12 @@ export default function ReviewVerificationModal({
       }
       
       toast.success(`Verification ${decision}d successfully`);
-      onSuccess?.();
-      onClose();
+      
+      // ✅ CRITICAL: Small delay to let backend process and parent component refresh data
+      setTimeout(() => {
+        onSuccess?.();
+        onClose();
+      }, 300);
     } catch (error: any) {
       toast.error(error.response?.data?.message || `Failed to ${decision} verification`);
     } finally {
