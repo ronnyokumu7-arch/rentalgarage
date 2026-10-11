@@ -24,7 +24,7 @@ export interface ActivityData {
   client_phone?: string;
   // Optional: extra metadata for the header (e.g., "3 Days", "REF XYZ")
   meta?: string;
-  // ✅ NEW: Priority from backend (1=Low, 2=Normal, 3=High, 4=Critical)
+  // ✅ Priority from backend (1=Low, 2=Normal, 3=High, 4=Critical)
   priority?: number;
 }
 
@@ -173,9 +173,9 @@ export default function UnifiedActivityCard({ activity, onCardClick }: UnifiedAc
               <span className="text-sm font-bold text-[var(--color-ink)] truncate">
                 {activity.title}
               </span>
-              {/* ✅ Premium Checkmark for success events */}
+              {/* ✅ Premium Checkmark for success events — hidden on mobile to save space */}
               {(activity.type === "payment_received" || activity.type === "invoice_paid" || activity.type === "booking_confirmed") && (
-                <CheckCircle2 size={14} className="text-emerald-500 flex-shrink-0" />
+                <CheckCircle2 size={14} className="text-emerald-500 flex-shrink-0 hidden md:inline-flex" />
               )}
               {/* ✅ Priority badge for high/critical */}
               {isCritical && (
