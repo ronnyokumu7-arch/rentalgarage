@@ -18,7 +18,7 @@ import SoftLockBanner from "@/components/dashboard/SoftLockBanner";
 import DesktopStatCard from "@/components/dashboard/DesktopStatCard";
 import MobileStatsCarousel from "@/components/dashboard/MobileStatsCarousel";
 import { MobileHeroEarnings } from "@/components/dashboard/MobileDashboardCards";
-import MobileCarouselCard from "@/components/dashboard/MobileCarouselCard";
+import MobileCarouselCard from "@/components/dashboard/mobile-carousel/MobileCarouselCard";
 import { DesktopFleetStatus, DesktopAlerts } from "@/components/dashboard/DesktopSidePanels";
 import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
 
