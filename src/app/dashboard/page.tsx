@@ -123,11 +123,11 @@ export default function DashboardPage() {
                   </div>
                 )}
 
-                {/* Mobile Order: Alerts -> Recent Activity -> Action Center -> Fleet Status */}
-                <MobileAlerts alerts={alerts} />
+                {/* Mobile Order: Fleet Status -> Recent Activity -> Action Center -> Alerts */}
+                <MobileFleetStatus vehicles={vehicles} />
                 <RecentActivityWidget />
                 <ActionCenterWidget />
-                <MobileFleetStatus vehicles={vehicles} />
+                <MobileAlerts alerts={alerts} />
               </div>
             ) : (
               <>
