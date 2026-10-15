@@ -6,7 +6,8 @@ import type { Vehicle } from "@/lib/types";
 
 interface VehicleSearchProps {
   selectedVehicleId: string;
-  vehicles: Vehicle[];
+  vehicles: Vehicle[];          // filtered list — for dropdown
+  allVehicles?: Vehicle[];      // ✅ full list — for display resolution
   searchQuery: string;
   onSearchChange: (query: string) => void;
   onSelect: (vehicle: Vehicle) => void;
@@ -15,26 +16,37 @@ interface VehicleSearchProps {
 export default function VehicleSearch({
   selectedVehicleId,
   vehicles,
+  allVehicles,
   searchQuery,
   onSearchChange,
-  onSelect
+  onSelect,
 }: VehicleSearchProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const selectedVehicle = vehicles.find(v => v.id.toString() === selectedVehicleId);
+  // ✅ Resolve display from FULL list when available; fall back to filtered.
+  // Prevents silent selection failure when the selected vehicle isn't in the
+  // current filtered/sliced list (e.g. found via search then search cleared).
+  const pool = allVehicles ?? vehicles;
+  const selectedVehicle = pool.find((v) => v.id.toString() === selectedVehicleId);
 
   return (
     <div className="relative">
       <label className="block text-[10px] font-semibold uppercase tracking-wider text-[var(--color-ink-muted)] mb-1.5">
         Vehicle <span className="text-[var(--color-danger)]">*</span>
       </label>
-      
+
       {/* Search Input */}
       <div className="relative">
         <Car size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" />
         <input
           type="text"
-          value={isOpen ? searchQuery : selectedVehicle ? `${selectedVehicle.make} ${selectedVehicle.model} (${selectedVehicle.plate_number})` : searchQuery}
+          value={
+            isOpen
+              ? searchQuery
+              : selectedVehicle
+              ? `${selectedVehicle.make} ${selectedVehicle.model} (${selectedVehicle.plate_number})`
+              : searchQuery
+          }
           onChange={(e) => {
             onSearchChange(e.target.value);
             setIsOpen(true);
@@ -100,8 +112,8 @@ export default function VehicleSearch({
                         KES {Number(vehicle.daily_rate).toLocaleString()}/day
                       </span>
                       <span className={`text-[9px] px-1.5 py-0.5 rounded-full ${
-                        vehicle.status === "available" 
-                          ? "bg-emerald-500/10 text-emerald-500" 
+                        vehicle.status === "available"
+                          ? "bg-emerald-500/10 text-emerald-500"
                           : "bg-amber-500/10 text-amber-500"
                       }`}>
                         {vehicle.status}
@@ -117,8 +129,8 @@ export default function VehicleSearch({
 
       {/* Click outside handler */}
       {isOpen && (
-        <div 
-          className="fixed inset-0 z-40" 
+        <div
+          className="fixed inset-0 z-40"
           onClick={() => setIsOpen(false)}
         />
       )}

@@ -29,7 +29,8 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
     setClientSearch, setVehicleSearch, setDriverSearch,
     updateField, getSelectedClient, getSelectedVehicle, getSelectedDriver,
     handleSubmit, quote, quoteLoading,
-    allClients, quoteError,  // ✅ NEW: needed for display + error surfacing
+    allClients, allVehicles, allDrivers,  // ✅ NEW: full lists for display resolution
+    quoteError,
   } = useNewBooking();
 
   const selectedClient = getSelectedClient();
@@ -89,7 +90,7 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
           <ClientSearch
             selectedClientId={formData.client_id}
             clients={clients}
-            allClients={allClients}  // ✅ NEW: resolves display from full list
+            allClients={allClients}
             searchQuery={clientSearch}
             onSearchChange={setClientSearch}
             onSelect={(client) => {
@@ -101,6 +102,7 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
           <VehicleSearch
             selectedVehicleId={formData.vehicle_id}
             vehicles={vehicles}
+            allVehicles={allVehicles}          /* ✅ NEW */
             searchQuery={vehicleSearch}
             onSearchChange={setVehicleSearch}
             onSelect={(vehicle) => {
@@ -114,6 +116,7 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
               <DriverSearch
                 selectedDriverId={formData.driver_id}
                 drivers={drivers}
+                allDrivers={allDrivers}          /* ✅ NEW */
                 searchQuery={driverSearch}
                 onSearchChange={setDriverSearch}
                 onSelect={(driver) => {
@@ -165,7 +168,6 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
             value={formData.pickup_at}
             onChange={(datetime) => {
               updateField('pickup_at', datetime);
-              // ✅ Default return = pickup + 24h, ONLY once pickup is chosen
               if (!formData.scheduled_return_at || new Date(formData.scheduled_return_at) <= new Date(datetime)) {
                 const d = new Date(datetime);
                 d.setDate(d.getDate() + 1);
@@ -231,7 +233,7 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
           serviceType={(formData.service_type as ServiceType) || "selfdrive"}
           quote={quote}
           quoteLoading={quoteLoading}
-          quoteError={quoteError}  // ✅ NEW: shows real error if quote failed
+          quoteError={quoteError}
         />
 
         {!formId && (

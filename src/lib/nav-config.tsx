@@ -15,6 +15,8 @@ export interface NavItem {
   href?: string;
   icon: React.ElementType;
   children?: NavChild[];
+  /** Hidden from the mobile navigation drawer. Desktop sidebar keeps it. */
+  hiddenOnMobile?: boolean;
 }
 
 // ── OPTIMIZED PREMIUM ICON COMPONENTS ────────────────────────────────────────
@@ -91,11 +93,11 @@ export const tenantAdminNav: NavItem[] = [
   { label: "Clients", href: "/dashboard/clients", icon: PremiumContactIcon },
   { label: "Fleet", href: "/dashboard/fleet", icon: CarFront },
   { label: "Drivers", href: "/dashboard/drivers", icon: PremiumDriversIcon },
-  { label: "Investors", href: "/dashboard/investors", icon: Users }, // ✅ ADDED
+  { label: "Investors", href: "/dashboard/investors", icon: Users },
   { label: "Users", href: "/dashboard/users", icon: PremiumUsersIcon },
   { label: "Financials", href: "/dashboard/financials", icon: PremiumWalletIcon },
   { label: "Reports", href: "/dashboard/reports", icon: PremiumBarChartIcon },
-  { label: "Tasks", href: "/dashboard/tasks", icon: PremiumTasksIcon },
+  { label: "Tasks", href: "/dashboard/tasks", icon: PremiumTasksIcon, hiddenOnMobile: true },
   { label: "Settings", href: "/dashboard/settings", icon: PremiumSettingsIcon },
 ];
 

@@ -6,7 +6,8 @@ import type { DriverListItem } from "@/lib/types";
 
 interface DriverSearchProps {
   selectedDriverId: string;
-  drivers: DriverListItem[];
+  drivers: DriverListItem[];       // filtered list — for dropdown
+  allDrivers?: DriverListItem[];   // ✅ full list — for display resolution
   searchQuery: string;
   onSearchChange: (query: string) => void;
   onSelect: (driver: DriverListItem) => void;
@@ -15,18 +16,21 @@ interface DriverSearchProps {
 export default function DriverSearch({
   selectedDriverId,
   drivers,
+  allDrivers,
   searchQuery,
   onSearchChange,
-  onSelect
+  onSelect,
 }: DriverSearchProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const selectedDriver = drivers.find(d => d.id.toString() === selectedDriverId);
+  // ✅ Resolve display from FULL list when available; fall back to filtered.
+  const pool = allDrivers ?? drivers;
+  const selectedDriver = pool.find((d) => d.id.toString() === selectedDriverId);
 
   const statusLabel = (status: string) => {
     switch (status) {
-      case 'available': return 'Available';
-      case 'on_trip': return 'On Trip';
+      case "available": return "Available";
+      case "on_trip": return "On Trip";
       default: return status;
     }
   };
@@ -36,13 +40,19 @@ export default function DriverSearch({
       <label className="block text-[10px] font-semibold uppercase tracking-wider text-[var(--color-ink-muted)] mb-1.5">
         Driver <span className="text-[10px] font-normal normal-case">(optional)</span>
       </label>
-      
+
       {/* Search Input */}
       <div className="relative">
         <UserCircle size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" />
         <input
           type="text"
-          value={isOpen ? searchQuery : selectedDriver ? `${selectedDriver.full_name} (${selectedDriver.phone})` : searchQuery}
+          value={
+            isOpen
+              ? searchQuery
+              : selectedDriver
+              ? `${selectedDriver.full_name} (${selectedDriver.phone})`
+              : searchQuery
+          }
           onChange={(e) => {
             onSearchChange(e.target.value);
             setIsOpen(true);
@@ -90,9 +100,9 @@ export default function DriverSearch({
                         {driver.full_name}
                       </div>
                       <span className={`px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase ${
-                        driver.status === 'available' 
-                          ? 'bg-[var(--color-success-bg)] text-[var(--color-success-text)]'
-                          : 'bg-[var(--color-primary-muted)] text-[var(--color-primary-text)]'
+                        driver.status === "available"
+                          ? "bg-[var(--color-success-bg)] text-[var(--color-success-text)]"
+                          : "bg-[var(--color-primary-muted)] text-[var(--color-primary-text)]"
                       }`}>
                         {statusLabel(driver.status)}
                       </span>
@@ -130,8 +140,8 @@ export default function DriverSearch({
 
       {/* Click outside handler */}
       {isOpen && (
-        <div 
-          className="fixed inset-0 z-40" 
+        <div
+          className="fixed inset-0 z-40"
           onClick={() => setIsOpen(false)}
         />
       )}

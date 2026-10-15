@@ -100,7 +100,12 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
 
   const openGroupItem = navItems.find((i) => i.label === openGroup);
   const settingsItem = navItems.find((item) => item.label === "Settings");
-  const regularNavItems = navItems.filter((item) => item.label !== "Settings");
+  // ✅ Mobile-only filter: hide items flagged as desktop-only (Settings handled separately)
+  const regularNavItems = navItems.filter((item) => {
+    if (item.label === "Settings") return false;
+    if (isMobile && item.hiddenOnMobile) return false;
+    return true;
+  });
 
   const fullName = user?.full_name || user?.email || "User";
   const userInitial = fullName.charAt(0).toUpperCase();
@@ -116,20 +121,43 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
                    transition-colors duration-300
                    ${isMobile ? 'w-72 h-full' : 'h-full w-20'}`}
       >
-        {/* ── Logo & Mobile Close Button ──────────────────────────────────── */}
-        <div className="h-16 flex items-center justify-between px-4 flex-shrink-0 border-b border-[var(--color-surface-border)]">
-          <Link href="/dashboard" className="group" onClick={() => isMobile && onClose?.()}>
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-[11px] text-white tracking-tight select-none bg-gradient-brand shadow-lg shadow-primary/30 transition-all duration-300 group-hover:scale-105 group-hover:shadow-primary/40">
-              RG
-            </div>
-          </Link>
-          
+        {/* ── Top Section: Profile (mobile) / Logo (desktop) + Close ────── */}
+        <div className="flex items-center justify-between gap-3 px-4 py-3.5 flex-shrink-0 border-b border-[var(--color-surface-border)]">
+          {isMobile ? (
+            /* Mobile: user profile in top section */
+            <Link
+              href={user?.role === "super_admin" ? `/super-admin/users/${user?.id}` : `/dashboard/users/${user?.id}`}
+              onClick={() => onClose?.()}
+              className="flex items-center gap-3 min-w-0 flex-1 group"
+            >
+              <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm text-white bg-gradient-to-br from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20 flex-shrink-0 transition-transform duration-200 group-hover:scale-105">
+                {userInitial}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-[13px] font-bold text-[var(--color-ink)] truncate leading-tight">
+                  {fullName}
+                </p>
+                <p className="text-[10px] font-medium text-[var(--color-ink-muted)] truncate leading-tight mt-0.5">
+                  {companyName}
+                </p>
+              </div>
+            </Link>
+          ) : (
+            /* Desktop: logo */
+            <Link href="/dashboard" className="group">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-[11px] text-white tracking-tight select-none bg-gradient-brand shadow-lg shadow-primary/30 transition-all duration-300 group-hover:scale-105 group-hover:shadow-primary/40">
+                RG
+              </div>
+            </Link>
+          )}
+
           {isMobile && onClose && (
             <button
               onClick={onClose}
-              className="p-2 rounded-lg text-[var(--color-ink-muted)] hover:text-[var(--color-ink-primary)] hover:bg-[var(--color-surface-hover)] transition-all"
+              aria-label="Close menu"
+              className="flex items-center justify-center w-9 h-9 rounded-xl text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-all active:scale-95 flex-shrink-0"
             >
-              <X size={20} />
+              <X size={18} strokeWidth={2} />
             </button>
           )}
         </div>
@@ -252,37 +280,8 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
           })}
         </nav>
 
-        {/* ── Bottom Section: User Profile (Mobile Only) + Settings & Logout ── */}
-        <div className={`px-3 pb-4 flex-shrink-0 space-y-1.5 border-t border-[var(--color-surface-border)] pt-3`}>
-          
-          {/* User Profile Card (Mobile Only) */}
-          {isMobile && (
-            <div className="mb-2">
-              <div className="flex items-center gap-3 p-3 rounded-xl bg-[var(--color-surface-hover)]/50 border border-[var(--color-surface-border)]">
-                <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm text-white bg-gradient-to-br from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20 flex-shrink-0">
-                  {userInitial}
-                </div>
-                
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-bold text-[var(--color-ink)] truncate leading-tight">
-                    {fullName}
-                  </p>
-                  <p className="text-[10px] font-medium text-[var(--color-ink-muted)] truncate">
-                    {companyName}
-                  </p>
-                </div>
-                
-                <Link 
-                  href={user?.role === "super_admin" ? `/super-admin/users/${user?.id}` : `/dashboard/users/${user?.id}`}
-                  onClick={() => isMobile && onClose?.()}
-                  className="p-1.5 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface)] hover:text-[var(--color-primary)] transition-all"
-                >
-                  <ChevronRight size={16} />
-                </Link>
-              </div>
-            </div>
-          )}
-
+        {/* ── Bottom Section: Settings & Logout ────────────────────────────── */}
+        <div className="px-3 pb-4 flex-shrink-0 space-y-1.5 border-t border-[var(--color-surface-border)] pt-3">
           {settingsItem && (
             <Link
               href={settingsItem.href || "#"}

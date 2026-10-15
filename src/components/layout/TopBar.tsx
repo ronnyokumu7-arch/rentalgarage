@@ -1,12 +1,13 @@
+// src/components/layout/TopBar.tsx
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  Search, Bell, Sun, Moon, User, Settings,
+  Search, Sun, Moon, User, Settings,
   LogOut, ChevronRight, Command, Briefcase,
-  Menu, Sparkles, X, HelpCircle, Shield,
+  MoreVertical, Sparkles, X, HelpCircle, Shield,
   CreditCard
 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
@@ -197,12 +198,6 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
           {isDark ? <Sun size={17} strokeWidth={1.8} /> : <Moon size={17} strokeWidth={1.8} />}
         </button>
 
-        {/* Notifications */}
-        <button className="relative w-9 h-9 rounded-xl flex items-center justify-center text-ink-muted hover:bg-surface-hover hover:text-ink transition-all duration-200 active:scale-95">
-          <Bell size={17} strokeWidth={1.8} />
-          <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-        </button>
-
         {/* Divider */}
         <div className="w-px h-6 bg-surface-border mx-0.5 sm:mx-1" />
 
@@ -313,14 +308,14 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
           )}
         </div>
 
-        {/* ✅ Hamburger Menu - Moved to FAR RIGHT (Mobile Only) */}
+        {/* ✅ 3-Dot Menu Toggle (Mobile Only) */}
         {onMenuToggle && (
           <button
             onClick={onMenuToggle}
             className="lg:hidden flex items-center justify-center w-9 h-9 rounded-xl text-ink-muted hover:bg-surface-hover hover:text-ink transition-all duration-200 active:scale-95"
             aria-label="Toggle menu"
           >
-            {isMobileMenuOpen ? <X size={18} strokeWidth={2} /> : <Menu size={18} strokeWidth={2} />}
+            {isMobileMenuOpen ? <X size={18} strokeWidth={2} /> : <MoreVertical size={18} strokeWidth={2} />}
           </button>
         )}
       </div>
