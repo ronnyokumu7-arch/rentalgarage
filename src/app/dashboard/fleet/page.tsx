@@ -1,7 +1,8 @@
+// src/app/dashboard/fleet/page.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Car, Plus, BarChart3, Wrench, CarFront, LineChart, Wrench as WrenchIcon } from "lucide-react";
+import { Car, Plus, BarChart3, Wrench, CarFront, LineChart, Wrench as WrenchIcon, Filter } from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { useFleetList } from "@/hooks/fleet/useFleetList";
 import FleetList from "@/components/fleet/FleetList";
@@ -10,6 +11,8 @@ import InvestorVehiclePricingModal from "@/components/fleet/InvestorVehiclePrici
 import { bookingsApi } from "@/lib/api/bookings";
 import type { Booking } from "@/lib/types";
 import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
+import MobilePageToolbar from "@/components/ui/MobilePageToolbar";
+import MobileFloatingSegment from "@/components/ui/MobileFloatingSegment";
 
 type TabMode = "fleet" | "performance" | "garage";
 
@@ -26,6 +29,8 @@ const TABS: TabItem[] = [
   { id: "garage", label: "Garage", icon: Wrench },
 ];
 
+const MOBILE_TABS: TabItem[] = TABS.filter((t) => !t.hiddenOnMobile);
+
 export default function FleetPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<TabMode>("fleet");
@@ -33,21 +38,20 @@ export default function FleetPage() {
 
   const fleetData = useFleetList();
 
-  // Fetch active rentals for trip progress bar
   useEffect(() => {
     async function fetchActiveRentals() {
       try {
         const allBookings = await bookingsApi.list({
           page: 1,
-          page_size: 100
+          page_size: 100,
         });
 
         const active = allBookings.filter(
-          b => b.status === 'active' || b.status === 'confirmed'
+          (b) => b.status === "active" || b.status === "confirmed"
         );
 
         const rentalMap: Record<number, Booking> = {};
-        active.forEach(booking => {
+        active.forEach((booking) => {
           if (booking.vehicle_id) {
             rentalMap[booking.vehicle_id] = booking;
           }
@@ -55,12 +59,23 @@ export default function FleetPage() {
 
         setActiveRentals(rentalMap);
       } catch (error) {
-        console.error('Failed to fetch active rentals:', error);
+        console.error("Failed to fetch active rentals:", error);
       }
     }
 
     fetchActiveRentals();
   }, []);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      if (window.innerWidth < 768 && activeTab === "performance") {
+        setActiveTab("fleet");
+      }
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, [activeTab]);
 
   const currentTabInfo = useMemo(() => {
     if (activeTab === "fleet") {
@@ -84,14 +99,27 @@ export default function FleetPage() {
     };
   }, [activeTab]);
 
+  const statusOptions = useMemo(() => {
+    const opts = [
+      { value: "pending_activation", label: "Pending Activation" },
+      { value: "available", label: "Available" },
+      { value: "rented", label: "Rented" },
+      { value: "maintenance", label: "Maintenance" },
+      { value: "retired", label: "Retired" },
+    ];
+    return opts.map((o) => ({
+      ...o,
+      count: fleetData.filteredVehicles.filter((v) => v.status === o.value).length,
+    }));
+  }, [fleetData.filteredVehicles]);
+
   return (
     <div className="space-y-6">
-      {/* Header with Premium Tab Switcher */}
+      {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
             <span className="hidden sm:inline-flex">{currentTabInfo.icon}</span>
-
             <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
               {currentTabInfo.title}
             </h1>
@@ -101,24 +129,73 @@ export default function FleetPage() {
           </p>
         </div>
 
-        <PremiumTabSwitcher
-          tabs={TABS}
-          activeTab={activeTab}
-          onTabChange={(tabId) => setActiveTab(tabId as TabMode)}
-        />
-      </div>
-
-      {/* Segment View Engine */}
-      {activeTab === "fleet" ? (
-        <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
-          <FleetList
-            {...fleetData}
-            activeRentals={activeRentals}
-            // ✅ EXPLICITLY PASS MODAL SETTERS FOR TYPE SAFETY
-            setPricingVehicle={fleetData.setPricingVehicle}
-            setIsPricingModalOpen={fleetData.setIsPricingModalOpen}
+        <div className="hidden md:block">
+          <PremiumTabSwitcher
+            tabs={TABS}
+            activeTab={activeTab}
+            onTabChange={(tabId) => setActiveTab(tabId as TabMode)}
           />
         </div>
+      </div>
+
+      {/* ─── TAB CONTENT ──────────────────────────────────────────── */}
+      {activeTab === "fleet" ? (
+        <>
+          {/* ✅ MOBILE: single card — toolbar + list share ONE container */}
+          <div className="md:hidden bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
+            <div className="p-3 border-b border-[var(--color-surface-border)]">
+              <MobilePageToolbar
+                search={fleetData.search}
+                onSearchChange={fleetData.setSearch}
+                searchPlaceholder="Search make, model, plate..."
+                segment={activeTab}
+                onSegmentChange={(value) => setActiveTab(value as TabMode)}
+                segments={MOBILE_TABS.map((t) => ({ id: t.id, label: t.label, icon: t.icon }))}
+                segmentMenuMode="toggle"
+                segmentTriggerIcon={Wrench}
+                filters={[
+                  {
+                    id: "fleet-status",
+                    label: "Status",
+                    options: statusOptions,
+                    value: fleetData.statusFilter || null,
+                    onChange: (value) =>
+                      fleetData.setStatusFilter(
+                        (value || "") as typeof fleetData.statusFilter
+                      ),
+                    icon: Filter,
+                  },
+                ]}
+                primaryAction={
+                  <button
+                    onClick={() => router.push("/dashboard/fleet/new")}
+                    className="w-full h-10 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.99]"
+                  >
+                    <Plus size={16} strokeWidth={2.5} />
+                    Add Vehicle
+                  </button>
+                }
+              />
+            </div>
+
+            <FleetList
+              {...fleetData}
+              activeRentals={activeRentals}
+              setPricingVehicle={fleetData.setPricingVehicle}
+              setIsPricingModalOpen={fleetData.setIsPricingModalOpen}
+            />
+          </div>
+
+          {/* ✅ DESKTOP: existing card structure (unchanged) */}
+          <div className="hidden md:block bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
+            <FleetList
+              {...fleetData}
+              activeRentals={activeRentals}
+              setPricingVehicle={fleetData.setPricingVehicle}
+              setIsPricingModalOpen={fleetData.setIsPricingModalOpen}
+            />
+          </div>
+        </>
       ) : activeTab === "performance" ? (
         <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-12 text-center animate-in fade-in duration-300">
           <BarChart3 size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" />
@@ -217,7 +294,7 @@ export default function FleetPage() {
         </div>
       )}
 
-      {/* Quick Garage Modal */}
+      {/* Modals */}
       <QuickGarageModal
         vehicle={fleetData.garageVehicle}
         open={fleetData.garageModalOpen}
@@ -228,7 +305,6 @@ export default function FleetPage() {
         onSave={fleetData.handleGarageSave}
       />
 
-      {/* ✅ NEW: Investor Vehicle Pricing & Activation Modal */}
       <InvestorVehiclePricingModal
         vehicle={fleetData.pricingVehicle}
         isOpen={fleetData.isPricingModalOpen}
@@ -239,18 +315,15 @@ export default function FleetPage() {
         onSuccess={fleetData.refetch}
       />
 
-      {/* FLOATING ACTION BUTTON */}
+      {/* Floating segment toggle — Garage tab only (mobile) */}
       {activeTab === "garage" && (
-        <button
-          onClick={() => router.push("/dashboard/fleet/new")}
-          className="fixed bottom-20 right-6 md:bottom-8 md:right-8 z-50 group flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white rounded-full shadow-[var(--shadow-xl)] hover:scale-105 active:scale-95 transition-all duration-300 ease-out"
-          title="Add New Vehicle"
-        >
-          <Plus size={24} className="sm:w-7 sm:h-7 group-hover:rotate-90 transition-transform duration-300" />
-          <span className="hidden md:block absolute right-full mr-4 px-3 py-1.5 bg-[var(--color-surface)] text-[var(--color-ink)] text-xs font-bold rounded-lg shadow-[var(--shadow-dropdown)] opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap border border-[var(--color-surface-border)]">
-            Add Vehicle
-          </span>
-        </button>
+        <MobileFloatingSegment
+          segments={MOBILE_TABS.map((t) => ({ id: t.id, label: t.label, icon: t.icon }))}
+          active={activeTab}
+          onChange={(id) => setActiveTab(id as TabMode)}
+          toggleTarget="fleet"
+          triggerIcon={CarFront}
+        />
       )}
     </div>
   );

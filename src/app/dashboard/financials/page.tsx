@@ -19,11 +19,18 @@ import ContractsTab from "@/components/financials/ContractsTab";
 import PaymentsTab from "@/components/financials/PaymentsTab";
 import OverviewTab from "@/components/financials/OverviewTab";
 import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
+import MobileFloatingSegment from "@/components/ui/MobileFloatingSegment";
 
 const TABS = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "invoices", label: "Invoices", icon: Receipt },
   { id: "contracts", label: "Contracts", icon: FileText },
+  { id: "payments", label: "Payments", icon: DollarSign },
+];
+
+// ✅ Mobile only exposes Overview + Payments. Invoices/Contracts stay desktop-only.
+const MOBILE_TABS = [
+  { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "payments", label: "Payments", icon: DollarSign },
 ];
 
@@ -64,6 +71,25 @@ export default function FinancialsPage() {
       setActiveTab(tabFromUrl);
     }
   }, [searchParams, activeTab]);
+
+  // ✅ Guard: Invoices + Contracts are desktop-only — reset if mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      if (
+        window.innerWidth < 768 &&
+        activeTab !== "overview" &&
+        activeTab !== "payments"
+      ) {
+        setActiveTab("overview");
+        // Also clean the URL so refresh lands correctly
+        router.replace(`/dashboard/financials?tab=overview`, { scroll: false });
+      }
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
 
   const handleTabChange = (tabId: string) => {
     setActiveTab(tabId);
@@ -134,20 +160,39 @@ export default function FinancialsPage() {
         </div>
       </div>
 
-      {/* ✅ Premium Sliding Tab Switcher - Using Reusable Component */}
-      <PremiumTabSwitcher
-        tabs={TABS}
-        activeTab={activeTab}
-        onTabChange={handleTabChange}
-      />
+      {/* ✅ DESKTOP ONLY — mobile uses the floating switcher */}
+      <div className="hidden md:block">
+        <PremiumTabSwitcher
+          tabs={TABS}
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+        />
+      </div>
 
       {/* Tab Content Area */}
       <div className="animate-in fade-in duration-200 min-h-[400px] pt-2">
         {activeTab === "overview" && <OverviewTab />}
-        {activeTab === "invoices" && <InvoicesTab />}
-        {activeTab === "contracts" && <ContractsTab />}
         {activeTab === "payments" && <PaymentsTab />}
+        {activeTab === "invoices" && (
+          <div className="hidden md:block">
+            <InvoicesTab />
+          </div>
+        )}
+        {activeTab === "contracts" && (
+          <div className="hidden md:block">
+            <ContractsTab />
+          </div>
+        )}
       </div>
+
+      {/* ✅ FLOATING SEGMENT TOGGLE — mobile only, Overview ↔ Payments */}
+      <MobileFloatingSegment
+        segments={MOBILE_TABS.map((t) => ({ id: t.id, label: t.label, icon: t.icon }))}
+        active={activeTab}
+        onChange={(id) => handleTabChange(id)}
+        toggleTarget={activeTab === "payments" ? "overview" : "payments"}
+        triggerIcon={activeTab === "payments" ? LayoutDashboard : Banknote}
+      />
     </div>
   );
 }

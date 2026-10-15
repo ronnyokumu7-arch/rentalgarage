@@ -1,7 +1,7 @@
 // src/app/dashboard/users/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Users, CalendarClock, ShieldCheck, UserCog, CalendarRange, KeyRound } from "lucide-react";
 import RosterTab from "@/components/users/manage/RosterTab";
 import SchedulerTab from "@/components/users/manage/SchedulerTab";
@@ -10,14 +10,33 @@ import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
 
 export type UserMainTab = "roster" | "scheduler" | "roles";
 
-const TABS = [
+interface TabItem {
+  id: UserMainTab;
+  label: string;
+  icon: React.ElementType;
+  hiddenOnMobile?: boolean;
+}
+
+const TABS: TabItem[] = [
   { id: "roster", label: "Roster", icon: Users },
-  { id: "scheduler", label: "Scheduler", icon: CalendarClock },
-  { id: "roles", label: "Roles", icon: ShieldCheck },
+  { id: "scheduler", label: "Scheduler", icon: CalendarClock, hiddenOnMobile: true },
+  { id: "roles", label: "Roles", icon: ShieldCheck, hiddenOnMobile: true },
 ];
 
 export default function UsersPage() {
   const [activeTab, setActiveTab] = useState<UserMainTab>("roster");
+
+  // ✅ Guard: Scheduler + Roles are desktop-only — reset if mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      if (window.innerWidth < 768 && activeTab !== "roster") {
+        setActiveTab("roster");
+      }
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, [activeTab]);
 
   // ✅ Dynamic Header Info (PREMIUM: No circles, just clean bare icons)
   const currentTabInfo = {
@@ -57,19 +76,29 @@ export default function UsersPage() {
           </p>
         </div>
 
-        {/* ✅ Imported Reusable Premium Tab Switcher */}
-        <PremiumTabSwitcher
-          tabs={TABS}
-          activeTab={activeTab}
-          onTabChange={(tabId) => setActiveTab(tabId as UserMainTab)}
-        />
+        {/* ✅ DESKTOP ONLY — mobile uses RosterTab's toolbar segment */}
+        <div className="hidden md:block">
+          <PremiumTabSwitcher
+            tabs={TABS}
+            activeTab={activeTab}
+            onTabChange={(tabId) => setActiveTab(tabId as UserMainTab)}
+          />
+        </div>
       </div>
 
       {/* Conditional Segment View Engine */}
       <div className="animate-in fade-in duration-200">
         {activeTab === "roster" && <RosterTab />}
-        {activeTab === "scheduler" && <SchedulerTab />}
-        {activeTab === "roles" && <RolesTab />}
+        {activeTab === "scheduler" && (
+          <div className="hidden md:block">
+            <SchedulerTab />
+          </div>
+        )}
+        {activeTab === "roles" && (
+          <div className="hidden md:block">
+            <RolesTab />
+          </div>
+        )}
       </div>
     </div>
   );

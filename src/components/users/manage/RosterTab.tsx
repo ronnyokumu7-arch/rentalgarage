@@ -4,6 +4,7 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";
 import toast from "react-hot-toast";
+import { Briefcase, Filter, Shield } from "lucide-react";
 import { usersApi } from "@/lib/api/users";
 import type { User } from "@/lib/types";
 import { useAuth } from "@/context/auth-context";
@@ -12,6 +13,8 @@ import { confirmAction } from "@/lib/utils/confirmAction";
 
 import UsersToolbar from "@/components/users/UsersToolbar";
 import UsersTable from "@/components/users/UsersTable";
+import MobilePageToolbar from "@/components/ui/MobilePageToolbar";
+import AddUserButton from "@/components/users/AddUserButton";
 
 const QuickInviteModal = dynamic(() => import("@/components/users/QuickInviteModal"), {
   ssr: false,
@@ -65,11 +68,18 @@ export default function RosterTab() {
 
   // Display strategy:
   // - Desktop (≥640px): Paginated list filtered by current Category tab
-  // - Mobile (<640px): Unpaginated FULL combined list (Executive + Staff), respecting search & department filter
+  // - Mobile (<640px): Unpaginated, category-filtered list (Executive OR Staff), respecting search & department filter
   const displayUsers = useMemo(() => {
     if (!isMobile) return paginatedUsers;
 
     return users.filter((u) => {
+      // Category filter — Executive vs Staff
+      const isExecutive = u.role === "tenant_admin" || u.role === "super_admin";
+      const isStaff = u.role === "tenant_staff";
+      if (category === "executive" && !isExecutive) return false;
+      if (category === "staff" && !isStaff) return false;
+
+      // Search filter
       if (search) {
         const q = search.toLowerCase();
         const matchName = u.full_name?.toLowerCase().includes(q);
@@ -77,12 +87,15 @@ export default function RosterTab() {
         const matchJob = u.job_title?.toLowerCase().includes(q);
         if (!matchName && !matchEmail && !matchJob) return false;
       }
+
+      // Department filter
       if (departmentFilter) {
         if (u.department !== departmentFilter) return false;
       }
+
       return true;
     });
-  }, [isMobile, paginatedUsers, users, search, departmentFilter]);
+  }, [isMobile, paginatedUsers, users, category, search, departmentFilter]);
 
   // Local Interaction State — Add Manually flow
   const [showAddManually, setShowAddManually] = useState(false);
@@ -105,12 +118,12 @@ export default function RosterTab() {
   }, [users]);
 
   // ─── ADD MANUALLY (admin fills everything → account ready immediately) ─────
-  const handleAddManuallySubmit = useCallback(async (data: { 
-    full_name: string; 
-    email: string; 
+  const handleAddManuallySubmit = useCallback(async (data: {
+    full_name: string;
+    email: string;
     phone_number?: string;
     role: "tenant_admin" | "tenant_staff";
-    department: string; 
+    department: string;
     job_title: string;
     password: string;
   }) => {
@@ -126,13 +139,12 @@ export default function RosterTab() {
         role: data.role,
         is_active: true,
       };
-      
+
       const newUser = await usersApi.create(payload);
       updateUserLocally(newUser);
       setAddManuallySuccess(`Account created! Credentials emailed to ${data.email}`);
-      
-      // ✅ AUTO-REFRESH: notify users list to refetch (new user appears instantly across tabs)
-      window.dispatchEvent(new CustomEvent('user:created'));
+
+      window.dispatchEvent(new CustomEvent("user:created"));
     } catch (error: unknown) {
       toast.error(getErrorMessage(error, "Failed to create account"));
     } finally {
@@ -146,8 +158,8 @@ export default function RosterTab() {
   }, []);
 
   // ─── INVITE USER (name + phone + locked role → user completes onboarding) ──
-  const handleInviteSubmit = useCallback(async (data: { 
-    full_name: string; 
+  const handleInviteSubmit = useCallback(async (data: {
+    full_name: string;
     phone_number?: string;
     role: "tenant_admin" | "tenant_staff";
     department: string;
@@ -163,9 +175,8 @@ export default function RosterTab() {
         job_title: data.job_title,
       });
       setInviteLink(result.invite_link);
-      
-      // ✅ AUTO-REFRESH: notify users list to refetch (invite appears instantly)
-      window.dispatchEvent(new CustomEvent('user:created'));
+
+      window.dispatchEvent(new CustomEvent("user:created"));
     } catch (error: unknown) {
       toast.error(getErrorMessage(error, "Failed to generate invite link"));
     } finally {
@@ -192,11 +203,10 @@ export default function RosterTab() {
       updateUserLocally({
         ...userToSuspend,
         is_suspended: !userToSuspend.is_suspended,
-        is_active: userToSuspend.is_suspended
+        is_active: userToSuspend.is_suspended,
       });
-      
-      // ✅ AUTO-REFRESH: notify users list to refetch (status change)
-      window.dispatchEvent(new CustomEvent('user:updated', { detail: { userId: userToSuspend.id } }));
+
+      window.dispatchEvent(new CustomEvent("user:updated", { detail: { userId: userToSuspend.id } }));
     } catch (error: unknown) {
       toast.error(getErrorMessage(error, "Action failed"));
     } finally {
@@ -210,11 +220,10 @@ export default function RosterTab() {
     try {
       await usersApi.update(userId, { is_onboarded: true });
       toast.success("User verified successfully");
-      const updatedUser = users.find(u => u.id === userId);
+      const updatedUser = users.find((u) => u.id === userId);
       if (updatedUser) updateUserLocally({ ...updatedUser, is_onboarded: true });
-      
-      // ✅ AUTO-REFRESH: notify users list to refetch (verification status change)
-      window.dispatchEvent(new CustomEvent('user:updated', { detail: { userId } }));
+
+      window.dispatchEvent(new CustomEvent("user:updated", { detail: { userId } }));
     } catch (error: unknown) {
       toast.error(getErrorMessage(error, "Failed to verify user"));
     } finally {
@@ -263,9 +272,8 @@ export default function RosterTab() {
       await usersApi.delete(userId);
       toast.success("User deleted successfully");
       removeUserLocally(userId);
-      
-      // ✅ AUTO-REFRESH: notify users list to refetch (user removed)
-      window.dispatchEvent(new CustomEvent('user:updated', { detail: { userId } }));
+
+      window.dispatchEvent(new CustomEvent("user:updated", { detail: { userId } }));
     } catch (error: unknown) {
       toast.error(getErrorMessage(error, "Failed to delete user"));
     } finally {
@@ -274,43 +282,109 @@ export default function RosterTab() {
     }
   }, [removeUserLocally]);
 
+  // ✅ Toggle trigger icon — dynamic (destination-based)
+  // On Executive → shows Briefcase (destination: Staff)
+  // On Staff → shows Shield (destination: Executive)
+  const toggleTriggerIcon = category === "staff" ? Shield : Briefcase;
+
   return (
-    <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
-      <UsersToolbar
-        category={category}
-        setCategory={setCategory}
-        search={search}
-        setSearch={setSearch}
-        departmentFilter={departmentFilter}
-        setDepartmentFilter={setDepartmentFilter}
-        departmentOptions={departmentOptions}
-        totalUsers={totalUsers}
-        activeUsers={activeUsers}
-        inactiveUsers={inactiveUsers}
-        onQuickAdd={() => setShowAddManually(true)}
-        onInvite={() => setShowInvite(true)}
-      />
+    <>
+      {/* ✅ MOBILE: single card — toolbar + list share ONE container */}
+      <div className="md:hidden bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
+        <div className="p-3 border-b border-[var(--color-surface-border)]">
+          <MobilePageToolbar
+            search={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Search users..."
+            segment={category}
+            onSegmentChange={(value) => setCategory(value as "executive" | "staff")}
+            segments={[
+              { id: "executive", label: "Executive", icon: Shield },
+              { id: "staff", label: "Staff", icon: Briefcase },
+            ]}
+            segmentMenuMode="toggle"
+            segmentTriggerIcon={toggleTriggerIcon}
+            filters={
+              departmentOptions.length > 0
+                ? [
+                    {
+                      id: "user-department",
+                      label: "Department",
+                      options: departmentOptions,
+                      value: departmentFilter,
+                      onChange: setDepartmentFilter,
+                      icon: Filter,
+                    },
+                  ]
+                : []
+            }
+            primaryAction={
+              <AddUserButton
+                onQuickAdd={() => setShowAddManually(true)}
+                onInvite={() => setShowInvite(true)}
+              />
+            }
+          />
+        </div>
 
-      <UsersTable
-        users={displayUsers}
-        loading={loading}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        setCurrentPage={setCurrentPage}
-        totalItems={isMobile ? displayUsers.length : filteredUsers.length}
-        pageSize={7}
-        actionLoadingId={actionLoadingId}
-        openDropdownId={openDropdownId}
-        setOpenDropdownId={setOpenDropdownId}
-        onSuspend={handleSuspend}
-        onVerify={handleVerify}
-        onResetLink={handleResetLink}
-        onSendVerification={handleSendVerification}
-        onDelete={handleDelete}
-        currentUserRole={user?.role || "tenant_staff"}
-      />
+        <UsersTable
+          users={displayUsers}
+          loading={loading}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          setCurrentPage={setCurrentPage}
+          totalItems={isMobile ? displayUsers.length : filteredUsers.length}
+          pageSize={7}
+          actionLoadingId={actionLoadingId}
+          openDropdownId={openDropdownId}
+          setOpenDropdownId={setOpenDropdownId}
+          onSuspend={handleSuspend}
+          onVerify={handleVerify}
+          onResetLink={handleResetLink}
+          onSendVerification={handleSendVerification}
+          onDelete={handleDelete}
+          currentUserRole={user?.role || "tenant_staff"}
+        />
+      </div>
 
-      {/* Add Manually Modal (admin fills everything) */}
+      {/* ✅ DESKTOP: existing card structure */}
+      <div className="hidden md:block bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
+        <UsersToolbar
+          category={category}
+          setCategory={setCategory}
+          search={search}
+          setSearch={setSearch}
+          departmentFilter={departmentFilter}
+          setDepartmentFilter={setDepartmentFilter}
+          departmentOptions={departmentOptions}
+          totalUsers={totalUsers}
+          activeUsers={activeUsers}
+          inactiveUsers={inactiveUsers}
+          onQuickAdd={() => setShowAddManually(true)}
+          onInvite={() => setShowInvite(true)}
+        />
+
+        <UsersTable
+          users={displayUsers}
+          loading={loading}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          setCurrentPage={setCurrentPage}
+          totalItems={isMobile ? displayUsers.length : filteredUsers.length}
+          pageSize={7}
+          actionLoadingId={actionLoadingId}
+          openDropdownId={openDropdownId}
+          setOpenDropdownId={setOpenDropdownId}
+          onSuspend={handleSuspend}
+          onVerify={handleVerify}
+          onResetLink={handleResetLink}
+          onSendVerification={handleSendVerification}
+          onDelete={handleDelete}
+          currentUserRole={user?.role || "tenant_staff"}
+        />
+      </div>
+
+      {/* Add Manually Modal */}
       <QuickInviteModal
         isOpen={showAddManually}
         onClose={handleCloseAddManually}
@@ -319,7 +393,7 @@ export default function RosterTab() {
         successMessage={addManuallySuccess}
       />
 
-      {/* Invite User Modal (name + phone → shareable link) */}
+      {/* Invite User Modal */}
       <InviteUserModal
         isOpen={showInvite}
         onClose={handleCloseInvite}
@@ -327,6 +401,6 @@ export default function RosterTab() {
         loading={inviteLoading}
         inviteLink={inviteLink}
       />
-    </div>
+    </>
   );
 }

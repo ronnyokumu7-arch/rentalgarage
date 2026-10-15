@@ -27,13 +27,23 @@ import ReviewVerificationModal from "@/components/client/ReviewVerificationModal
 import { useDrivers } from "@/hooks/drivers/useDrivers";
 import type { DriverListItem, DriverStatus, DriverPayMode } from "@/lib/types";
 import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
+import MobilePageToolbar from "@/components/ui/MobilePageToolbar";
 
 type DriverTab = "company" | "contract";
 
-const TABS = [
-  { id: "company" as const, label: "Company", icon: Users },
-  { id: "contract" as const, label: "Contract", icon: Briefcase },
+interface TabItem {
+  id: DriverTab;
+  label: string;
+  icon: React.ElementType;
+  hiddenOnMobile?: boolean;
+}
+
+const TABS: TabItem[] = [
+  { id: "company", label: "Company", icon: Users },
+  { id: "contract", label: "Contract", icon: Briefcase, hiddenOnMobile: true },
 ];
+
+const MOBILE_TABS: TabItem[] = TABS.filter((t) => !t.hiddenOnMobile);
 
 const inputClass = "w-full px-3 py-2.5 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/30 focus:border-[var(--color-primary)] outline-none transition-all text-sm";
 const labelClass = "block text-[10px] font-semibold uppercase tracking-wider text-[var(--color-ink-muted)] mb-1.5";
@@ -115,12 +125,34 @@ export default function DriversPage() {
 
   useEffect(() => setCurrentPage(1), [search, statusFilter, includeArchived]);
 
+  // ✅ Guard: Contract tab is desktop-only — reset to company if mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      if (window.innerWidth < 768 && activeTab === "contract") {
+        setActiveTab("company");
+      }
+    };
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, [activeTab]);
+
   const driverMetrics = useMemo(() => {
     const total = drivers.length;
     const available = drivers.filter((d) => d.status === "available").length;
     const onTrip = drivers.filter((d) => d.status === "on_trip").length;
     return { total, available, onTrip };
   }, [drivers]);
+
+  const statusOptions = useMemo(
+    () => [
+      { label: "Available", value: "available", count: driverMetrics.available },
+      { label: "On Trip", value: "on_trip", count: driverMetrics.onTrip },
+      { label: "On Leave", value: "on_leave" },
+      { label: "Suspended", value: "suspended" },
+    ],
+    [driverMetrics.available, driverMetrics.onTrip]
+  );
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -196,7 +228,7 @@ export default function DriversPage() {
 
   const getDriverActions = (driver: DriverListItem & { verification_status?: string }): RowAction<DriverListItem>[] => {
     const vStatus = driver.verification_status || "unverified";
-    
+
     return [
       {
         label: "Edit Driver",
@@ -204,10 +236,10 @@ export default function DriversPage() {
         onClick: () => openEdit(driver.id),
       },
       {
-        label: vStatus === "under_review" 
-          ? "Review Verification" 
-          : vStatus === "rejected" || vStatus === "unverified" 
-          ? "Start Verification" 
+        label: vStatus === "under_review"
+          ? "Review Verification"
+          : vStatus === "rejected" || vStatus === "unverified"
+          ? "Start Verification"
           : "Suspend Driver",
         icon: vStatus === "under_review" ? Clock : Users,
         variant: (vStatus === "under_review" || vStatus === "rejected" || vStatus === "unverified") ? "primary" : "default",
@@ -265,308 +297,354 @@ export default function DriversPage() {
           </p>
         </div>
 
-        <PremiumTabSwitcher
-          tabs={TABS}
-          activeTab={activeTab}
-          onTabChange={(tabId) => setActiveTab(tabId as DriverTab)}
-        />
+        {/* ✅ DESKTOP ONLY — mobile uses the toolbar toggle */}
+        <div className="hidden md:block">
+          <PremiumTabSwitcher
+            tabs={TABS}
+            activeTab={activeTab}
+            onTabChange={(tabId) => setActiveTab(tabId as DriverTab)}
+          />
+        </div>
       </div>
 
       {activeTab === "company" ? (
-        <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
-          <div className="p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
-            <div className="hidden sm:flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
-              <div className="flex items-center gap-2 whitespace-nowrap">
-                <span className="text-xs font-medium text-[var(--color-ink-muted)]">Drivers</span>
-                <span className="text-xs font-bold text-[var(--color-ink)] tabular-nums">{driverMetrics.total}</span>
-              </div>
-              <div className="w-px h-3 bg-[var(--color-surface-border)] flex-shrink-0" />
-              <div className="flex items-center gap-2 whitespace-nowrap">
-                <span className="text-xs font-medium text-[var(--color-ink-muted)]">Available</span>
-                <span className="text-xs font-bold text-[var(--color-success-text)] tabular-nums">{driverMetrics.available}</span>
-              </div>
-              <div className="w-px h-3 bg-[var(--color-surface-border)] flex-shrink-0" />
-              <div className="flex items-center gap-2 whitespace-nowrap">
-                <span className="text-xs font-medium text-[var(--color-ink-muted)]">On Trip</span>
-                <span className="text-xs font-bold text-[var(--color-primary-text)] tabular-nums">{driverMetrics.onTrip}</span>
-              </div>
+        <>
+          {/* ✅ MOBILE: single card — toolbar + list share ONE container */}
+          <div className="md:hidden bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
+            <div className="p-3 border-b border-[var(--color-surface-border)]">
+              <MobilePageToolbar
+                search={search}
+                onSearchChange={setSearch}
+                searchPlaceholder="Search drivers..."
+                segment={activeTab}
+                onSegmentChange={(value) => setActiveTab(value as DriverTab)}
+                segments={MOBILE_TABS.map((t) => ({ id: t.id, label: t.label, icon: t.icon }))}
+                segmentMenuMode="toggle"
+                segmentTriggerIcon={Briefcase}
+                filters={[
+                  {
+                    id: "driver-status",
+                    label: "Status",
+                    options: statusOptions,
+                    value: statusFilter || null,
+                    onChange: (v) => setStatusFilter((v || "") as DriverStatus | ""),
+                    icon: Filter,
+                  },
+                ]}
+                primaryAction={
+                  <button
+                    onClick={openCreate}
+                    className="w-full h-10 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.99]"
+                  >
+                    <Plus size={16} strokeWidth={2.5} />
+                    Add Driver
+                  </button>
+                }
+              />
             </div>
 
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full xl:w-auto">
-              <div className="flex items-center gap-2 flex-1 sm:w-80">
-                <div className="relative flex-1">
-                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search drivers..."
-                    className="w-full pl-9 pr-4 py-2 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all text-sm"
+            {loading ? (
+              <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2">
+                <Loader2 className="w-5 h-5 animate-spin" /> Loading drivers...
+              </div>
+            ) : drivers.length === 0 ? (
+              <div className="p-12 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
+                  <UserCircle size={24} className="text-[var(--color-ink-subtle)]" />
+                </div>
+                <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No drivers yet</h3>
+                <p className="text-sm text-[var(--color-ink-muted)] mb-4">
+                  Add your first in-house driver to start assigning deliveries.
+                </p>
+              </div>
+            ) : (
+              <CardGrid
+                data={paginatedDrivers}
+                getCardId={(d: DriverListItem) => d.id}
+                compact={true}
+                showGlassEffect={true}
+                cardClassName="!p-3 hover:!border-[var(--color-primary)]/40 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] transition-all duration-300"
+                containerClassName="px-2 pb-4"
+                maxHeight="calc(100vh - 160px)"
+                renderCardHeader={({ item }: { item: DriverListItem }) => {
+                  const statusDot: Record<DriverStatus, string> = {
+                    available: "bg-emerald-500",
+                    on_trip: "bg-[var(--color-primary)]",
+                    on_leave: "bg-amber-500",
+                    suspended: "bg-red-500",
+                  };
+                  const vetting = VETTING_STATUS_STYLES[item.verification_status || "unverified"];
+
+                  return (
+                    <div className="flex items-center justify-between w-full cursor-pointer" onClick={() => openEdit(item.id)}>
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
+                        <div className="relative flex-shrink-0">
+                          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center shadow-md">
+                            <UserCircle size={16} className="text-[var(--color-primary)]" />
+                          </div>
+                          <div className="absolute -top-0.5 -right-0.5">
+                            <div className={`w-3 h-3 rounded-full ${statusDot[item.status]} ring-2 ring-[var(--color-surface)] shadow-sm`} />
+                          </div>
+                        </div>
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight uppercase">
+                              {item.full_name}
+                            </span>
+                            {item.verification_status === "verified" && (
+                              <ShieldCheck size={14} className="text-emerald-500 flex-shrink-0" />
+                            )}
+                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${vetting.bg} ${vetting.text}`}>
+                              {vetting.label}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <span className="text-[10px] text-[var(--color-ink-muted)] font-medium">
+                              {PAY_LABELS[item.pay_mode]}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      <ChevronRight size={16} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
+                    </div>
+                  );
+                }}
+                renderCardBody={({ item }: { item: DriverListItem }) => {
+                  const dl = dlState(item.dl_expiry);
+                  const statusStyle = STATUS_STYLES[item.status] || STATUS_STYLES.suspended;
+
+                  return (
+                    <div className="mt-3 pt-3 border-t border-[var(--color-surface-border)]/60">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          <div className="w-7 h-7 rounded-lg bg-[var(--color-surface-hover)]/80 flex items-center justify-center flex-shrink-0">
+                            <Phone size={12} className="text-[var(--color-ink-subtle)]" />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-xs font-semibold text-[var(--color-ink)] truncate leading-tight">
+                              {item.phone}
+                            </p>
+                            <span className="text-[9px] text-[var(--color-ink-muted)] font-medium">Contact</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
+                          <div className="min-w-0 text-right">
+                            <p className="text-xs font-semibold text-[var(--color-ink)] truncate leading-tight font-mono">
+                              {item.id_number_masked || "N/A"}
+                            </p>
+                            <span className="text-[9px] text-[var(--color-ink-muted)] font-medium">National ID</span>
+                          </div>
+                          <div className="w-7 h-7 rounded-lg bg-[var(--color-surface-hover)]/80 flex items-center justify-center flex-shrink-0">
+                            <span className="text-[9px] font-bold text-[var(--color-ink-subtle)]">ID</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="rounded-xl px-3 py-2.5 border bg-[var(--color-surface-hover)]/50 border-[var(--color-surface-border)]/50">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)]">DL</span>
+                            <span className="text-[10px] font-semibold font-mono text-[var(--color-ink)] truncate">
+                              {item.dl_number_masked || "N/A"}
+                            </span>
+                            <span className={`text-[8px] font-bold ${dl.cls}`}>{dl.label}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 flex-shrink-0">
+                            <span className={`w-2 h-2 rounded-full ${
+                              item.status === 'available' ? 'bg-emerald-500' :
+                              item.status === 'on_trip' ? 'bg-blue-500' :
+                              item.status === 'on_leave' ? 'bg-amber-500' : 'bg-red-500'
+                            } flex-shrink-0`} />
+                            <span className={`text-[9px] font-bold uppercase tracking-wide ${statusStyle.text}`}>
+                              {STATUS_LABELS[item.status]}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }}
+                rowActions={getDriverActions}
+              />
+            )}
+          </div>
+
+          {/* ✅ DESKTOP: existing card structure */}
+          <div className="hidden md:block bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
+            <div className="p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
+              <div className="hidden sm:flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
+                <div className="flex items-center gap-2 whitespace-nowrap">
+                  <span className="text-xs font-medium text-[var(--color-ink-muted)]">Drivers</span>
+                  <span className="text-xs font-bold text-[var(--color-ink)] tabular-nums">{driverMetrics.total}</span>
+                </div>
+                <div className="w-px h-3 bg-[var(--color-surface-border)] flex-shrink-0" />
+                <div className="flex items-center gap-2 whitespace-nowrap">
+                  <span className="text-xs font-medium text-[var(--color-ink-muted)]">Available</span>
+                  <span className="text-xs font-bold text-[var(--color-success-text)] tabular-nums">{driverMetrics.available}</span>
+                </div>
+                <div className="w-px h-3 bg-[var(--color-surface-border)] flex-shrink-0" />
+                <div className="flex items-center gap-2 whitespace-nowrap">
+                  <span className="text-xs font-medium text-[var(--color-ink-muted)]">On Trip</span>
+                  <span className="text-xs font-bold text-[var(--color-primary-text)] tabular-nums">{driverMetrics.onTrip}</span>
+                </div>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full xl:w-auto">
+                <div className="flex items-center gap-2 flex-1 sm:w-80">
+                  <div className="relative flex-1">
+                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
+                    <input
+                      type="text"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Search drivers..."
+                      className="w-full pl-9 pr-4 py-2 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all text-sm"
+                    />
+                  </div>
+
+                  <FilterDropdown
+                    filterId="driver-status"
+                    label="Status"
+                    options={statusOptions}
+                    value={statusFilter}
+                    onChange={(v) => setStatusFilter(v as DriverStatus | "")}
+                    icon={Filter}
                   />
                 </div>
 
-                <FilterDropdown
-                  filterId="driver-status"
-                  label="Status"
-                  options={[
-                    { label: "Available", value: "available", count: driverMetrics.available },
-                    { label: "On Trip", value: "on_trip", count: driverMetrics.onTrip },
-                    { label: "On Leave", value: "on_leave" },
-                    { label: "Suspended", value: "suspended" },
-                  ]}
-                  value={statusFilter}
-                  onChange={(v) => setStatusFilter(v as DriverStatus | "")}
-                  icon={Filter}
-                />
+                <label className="flex items-center gap-2 text-xs font-semibold text-[var(--color-ink-muted)] whitespace-nowrap cursor-pointer px-2">
+                  <input
+                    type="checkbox"
+                    checked={includeArchived}
+                    onChange={(e) => setIncludeArchived(e.target.checked)}
+                    className="accent-[var(--color-primary)]"
+                  />
+                  Show archived
+                </label>
+
+                <button
+                  onClick={openCreate}
+                  className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] shadow-lg shadow-[var(--color-primary)]/20 transition-all active:scale-[0.98]"
+                >
+                  <Plus size={16} /> Add Driver
+                </button>
               </div>
-
-              <label className="flex items-center gap-2 text-xs font-semibold text-[var(--color-ink-muted)] whitespace-nowrap cursor-pointer px-2">
-                <input
-                  type="checkbox"
-                  checked={includeArchived}
-                  onChange={(e) => setIncludeArchived(e.target.checked)}
-                  className="accent-[var(--color-primary)]"
-                />
-                Show archived
-              </label>
-
-              <button
-                onClick={openCreate}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] shadow-lg shadow-[var(--color-primary)]/20 transition-all active:scale-[0.98]"
-              >
-                <Plus size={16} /> Add Driver
-              </button>
             </div>
-          </div>
 
-          {loading ? (
-            <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2">
-              <Loader2 className="w-5 h-5 animate-spin" /> Loading drivers...
-            </div>
-          ) : drivers.length === 0 ? (
-            <div className="p-12 text-center">
-              <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
-                <UserCircle size={24} className="text-[var(--color-ink-subtle)]" />
+            {loading ? (
+              <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2">
+                <Loader2 className="w-5 h-5 animate-spin" /> Loading drivers...
               </div>
-              <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No drivers yet</h3>
-              <p className="text-sm text-[var(--color-ink-muted)] mb-4">
-                Add your first in-house driver to start assigning deliveries.
-              </p>
-            </div>
-          ) : (
-            <>
-              <div className="block md:hidden">
-                <CardGrid
-                  data={paginatedDrivers}
-                  getCardId={(d: DriverListItem) => d.id}
-                  compact={true}
-                  showGlassEffect={true}
-                  cardClassName="!p-3 hover:!border-[var(--color-primary)]/40 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] transition-all duration-300"
-                  containerClassName="px-2 pb-4"
-                  maxHeight="calc(100vh - 160px)"
-                  renderCardHeader={({ item }: { item: DriverListItem }) => {
-                    const statusDot: Record<DriverStatus, string> = {
-                      available: "bg-emerald-500",
-                      on_trip: "bg-[var(--color-primary)]",
-                      on_leave: "bg-amber-500",
-                      suspended: "bg-red-500",
-                    };
-                    const vetting = VETTING_STATUS_STYLES[item.verification_status || "unverified"];
-
-                    return (
-                      <div className="flex items-center justify-between w-full cursor-pointer" onClick={() => openEdit(item.id)}>
-                        <div className="flex items-center gap-3 min-w-0 flex-1">
-                          <div className="relative flex-shrink-0">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center shadow-md">
-                              <UserCircle size={16} className="text-[var(--color-primary)]" />
-                            </div>
-                            <div className="absolute -top-0.5 -right-0.5">
-                              <div className={`w-3 h-3 rounded-full ${statusDot[item.status]} ring-2 ring-[var(--color-surface)] shadow-sm`} />
-                            </div>
+            ) : drivers.length === 0 ? (
+              <div className="p-12 text-center">
+                <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
+                  <UserCircle size={24} className="text-[var(--color-ink-subtle)]" />
+                </div>
+                <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No drivers yet</h3>
+                <p className="text-sm text-[var(--color-ink-muted)] mb-4">
+                  Add your first in-house driver to start assigning deliveries.
+                </p>
+              </div>
+            ) : (
+              <DataTable
+                data={paginatedDrivers}
+                columns={[
+                  {
+                    header: "Driver",
+                    accessorKey: "full_name",
+                    cell: ({ row }: { row: { original: DriverListItem } }) => {
+                      const driver = row.original;
+                      const vetting = VETTING_STATUS_STYLES[driver.verification_status || "unverified"];
+                      return (
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-9 h-9 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center text-[var(--color-ink-subtle)] shrink-0">
+                            <UserCircle size={16} />
                           </div>
-
-                          <div className="min-w-0 flex-1">
+                          <div className="min-w-0 flex flex-col">
                             <div className="flex items-center gap-1.5 flex-wrap">
-                              <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight uppercase">
-                                {item.full_name}
+                              <span className="text-sm font-semibold text-[var(--color-ink)] truncate">
+                                {driver.full_name}
                               </span>
-                              {item.verification_status === "verified" && (
+                              {driver.verification_status === "verified" && (
                                 <ShieldCheck size={14} className="text-emerald-500 flex-shrink-0" />
                               )}
                               <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${vetting.bg} ${vetting.text}`}>
                                 {vetting.label}
                               </span>
                             </div>
-                            <div className="flex items-center gap-1 mt-0.5">
-                              <span className="text-[10px] text-[var(--color-ink-muted)] font-medium">
-                                {PAY_LABELS[item.pay_mode]}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                        <ChevronRight size={16} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
-                      </div>
-                    );
-                  }}
-                  renderCardBody={({ item }: { item: DriverListItem }) => {
-                    const dl = dlState(item.dl_expiry);
-                    const statusStyle = STATUS_STYLES[item.status] || STATUS_STYLES.suspended;
-
-                    return (
-                      <div className="mt-3 pt-3 border-t border-[var(--color-surface-border)]/60">
-                        <div className="flex items-center gap-3 mb-3">
-                          <div className="flex items-center gap-2 min-w-0 flex-1">
-                            <div className="w-7 h-7 rounded-lg bg-[var(--color-surface-hover)]/80 flex items-center justify-center flex-shrink-0">
-                              <Phone size={12} className="text-[var(--color-ink-subtle)]" />
-                            </div>
-                            <div className="min-w-0">
-                              <p className="text-xs font-semibold text-[var(--color-ink)] truncate leading-tight">
-                                {item.phone}
-                              </p>
-                              <span className="text-[9px] text-[var(--color-ink-muted)] font-medium">Contact</span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
-                            <div className="min-w-0 text-right">
-                              <p className="text-xs font-semibold text-[var(--color-ink)] truncate leading-tight font-mono">
-                                {item.id_number_masked || "N/A"}
-                              </p>
-                              <span className="text-[9px] text-[var(--color-ink-muted)] font-medium">National ID</span>
-                            </div>
-                            <div className="w-7 h-7 rounded-lg bg-[var(--color-surface-hover)]/80 flex items-center justify-center flex-shrink-0">
-                              <span className="text-[9px] font-bold text-[var(--color-ink-subtle)]">ID</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="rounded-xl px-3 py-2.5 border bg-[var(--color-surface-hover)]/50 border-[var(--color-surface-border)]/50">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2 min-w-0">
-                              <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)]">DL</span>
-                              <span className="text-[10px] font-semibold font-mono text-[var(--color-ink)] truncate">
-                                {item.dl_number_masked || "N/A"}
-                              </span>
-                              <span className={`text-[8px] font-bold ${dl.cls}`}>{dl.label}</span>
-                            </div>
-                            <div className="flex items-center gap-1.5 flex-shrink-0">
-                              <span className={`w-2 h-2 rounded-full ${
-                                item.status === 'available' ? 'bg-emerald-500' :
-                                item.status === 'on_trip' ? 'bg-blue-500' :
-                                item.status === 'on_leave' ? 'bg-amber-500' : 'bg-red-500'
-                              } flex-shrink-0`} />
-                              <span className={`text-[9px] font-bold uppercase tracking-wide ${statusStyle.text}`}>
-                                {STATUS_LABELS[item.status]}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  }}
-                  rowActions={getDriverActions}
-                />
-              </div>
-
-              <div className="hidden md:block">
-                <DataTable
-                  data={paginatedDrivers}
-                  columns={[
-                    {
-                      header: "Driver",
-                      accessorKey: "full_name",
-                      cell: ({ row }: { row: { original: DriverListItem } }) => {
-                        const driver = row.original;
-                        const vetting = VETTING_STATUS_STYLES[driver.verification_status || "unverified"];
-                        return (
-                          <div className="flex items-center gap-3 min-w-0">
-                            <div className="w-9 h-9 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center text-[var(--color-ink-subtle)] shrink-0">
-                              <UserCircle size={16} />
-                            </div>
-                            <div className="min-w-0 flex flex-col">
-                              <div className="flex items-center gap-1.5 flex-wrap">
-                                <span className="text-sm font-semibold text-[var(--color-ink)] truncate">
-                                  {driver.full_name}
-                                </span>
-                                {driver.verification_status === "verified" && (
-                                  <ShieldCheck size={14} className="text-emerald-500 flex-shrink-0" />
-                                )}
-                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${vetting.bg} ${vetting.text}`}>
-                                  {vetting.label}
-                                </span>
-                              </div>
-                              <span className="text-xs text-[var(--color-ink-muted)] truncate mt-0.5">
-                                {PAY_LABELS[driver.pay_mode]}
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      },
-                    },
-                    {
-                      header: "Contact",
-                      accessorKey: "phone",
-                      cell: ({ row }: { row: { original: DriverListItem } }) => (
-                        <div className="flex items-center gap-2 text-sm text-[var(--color-ink)]">
-                          <Phone size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                          <span className="font-medium">{row.original.phone}</span>
-                        </div>
-                      ),
-                    },
-                    {
-                      header: "National ID",
-                      accessorKey: "id_number_masked",
-                      cell: ({ row }: { row: { original: DriverListItem } }) => (
-                        <span className="text-sm font-semibold text-[var(--color-ink)] tracking-wide font-mono">
-                          {row.original.id_number_masked || "N/A"}
-                        </span>
-                      ),
-                    },
-                    {
-                      header: "Driving License",
-                      accessorKey: "dl_number_masked",
-                      cell: ({ row }: { row: { original: DriverListItem } }) => {
-                        const dl = dlState(row.original.dl_expiry);
-                        return (
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm font-semibold text-[var(--color-ink)] tracking-wide font-mono">
-                              {row.original.dl_number_masked || "N/A"}
+                            <span className="text-xs text-[var(--color-ink-muted)] truncate mt-0.5">
+                              {PAY_LABELS[driver.pay_mode]}
                             </span>
-                            <span className={`text-[10px] ${dl.cls}`}>{dl.label}</span>
                           </div>
-                        );
-                      },
+                        </div>
+                      );
                     },
-                    {
-                      header: "Status",
-                      accessorKey: "status",
-                      cell: ({ row }: { row: { original: DriverListItem } }) => {
-                        const style = STATUS_STYLES[row.original.status];
-                        return (
-                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${style.bg} ${style.text}`}>
-                            {STATUS_LABELS[row.original.status]}
+                  },
+                  {
+                    header: "Contact",
+                    accessorKey: "phone",
+                    cell: ({ row }: { row: { original: DriverListItem } }) => (
+                      <div className="flex items-center gap-2 text-sm text-[var(--color-ink)]">
+                        <Phone size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                        <span className="font-medium">{row.original.phone}</span>
+                      </div>
+                    ),
+                  },
+                  {
+                    header: "National ID",
+                    accessorKey: "id_number_masked",
+                    cell: ({ row }: { row: { original: DriverListItem } }) => (
+                      <span className="text-sm font-semibold text-[var(--color-ink)] tracking-wide font-mono">
+                        {row.original.id_number_masked || "N/A"}
+                      </span>
+                    ),
+                  },
+                  {
+                    header: "Driving License",
+                    accessorKey: "dl_number_masked",
+                    cell: ({ row }: { row: { original: DriverListItem } }) => {
+                      const dl = dlState(row.original.dl_expiry);
+                      return (
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-[var(--color-ink)] tracking-wide font-mono">
+                            {row.original.dl_number_masked || "N/A"}
                           </span>
-                        );
-                      },
+                          <span className={`text-[10px] ${dl.cls}`}>{dl.label}</span>
+                        </div>
+                      );
                     },
-                  ]}
-                  rowActions={getDriverActions}
-                  getRowId={(d: DriverListItem) => d.id}
-                  onRowClick={(d: DriverListItem) => openEdit(d.id)}
-                  loading={loading}
-                  emptyMessage="No drivers found"
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  totalItems={drivers.length}
-                  pageSize={pageSize}
-                  onPageChange={setCurrentPage}
-                  viewMode="desktop"
-                />
-              </div>
-            </>
-          )}
-        </div>
+                  },
+                  {
+                    header: "Status",
+                    accessorKey: "status",
+                    cell: ({ row }: { row: { original: DriverListItem } }) => {
+                      const style = STATUS_STYLES[row.original.status];
+                      return (
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${style.bg} ${style.text}`}>
+                          {STATUS_LABELS[row.original.status]}
+                        </span>
+                      );
+                    },
+                  },
+                ]}
+                rowActions={getDriverActions}
+                getRowId={(d: DriverListItem) => d.id}
+                onRowClick={(d: DriverListItem) => openEdit(d.id)}
+                loading={loading}
+                emptyMessage="No drivers found"
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={drivers.length}
+                pageSize={pageSize}
+                onPageChange={setCurrentPage}
+                viewMode="desktop"
+              />
+            )}
+          </div>
+        </>
       ) : (
-        <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-12 flex flex-col items-center justify-center text-center animate-in fade-in duration-300">
+        <div className="hidden md:block bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-12 flex flex-col items-center justify-center text-center animate-in fade-in duration-300">
           <div className="w-16 h-16 rounded-2xl bg-[var(--color-primary-muted)] flex items-center justify-center mb-4">
             <Briefcase size={24} className="text-[var(--color-primary-text)]" />
           </div>

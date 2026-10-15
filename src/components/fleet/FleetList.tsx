@@ -27,7 +27,6 @@ interface FleetListProps {
   setOpenDropdownId: (id: number | null) => void;
   setGarageVehicle: (v: Vehicle | null) => void;
   setGarageModalOpen: (open: boolean) => void;
-  // ✅ NEW: Props for the Investor Pricing Modal
   setPricingVehicle: (v: Vehicle | null) => void;
   setIsPricingModalOpen: (open: boolean) => void;
   handleStatusAction: (id: number, action: string) => void;
@@ -92,8 +91,8 @@ export default function FleetList({
   setOpenDropdownId: _setOpenDropdownId,
   setGarageVehicle,
   setGarageModalOpen,
-  setPricingVehicle, // ✅ NEW
-  setIsPricingModalOpen, // ✅ NEW
+  setPricingVehicle,
+  setIsPricingModalOpen,
   handleStatusAction,
   handleArchive,
   handleRetire,
@@ -138,7 +137,6 @@ export default function FleetList({
           onClick: () => handleStatusAction(vehicle.id, "activate"),
         });
       } else if (vehicle.owner_id) {
-        // ✅ NEW: Edit Lease Agreement for investor vehicles that are already active/rented/maintenance
         actions.push({
           label: "Edit Lease Agreement",
           icon: DollarSign,
@@ -234,7 +232,8 @@ export default function FleetList({
 
   return (
     <>
-      <div className="p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
+      {/* ✅ DESKTOP TOOLBAR — hidden on mobile; mobile uses MobilePageToolbar */}
+      <div className="hidden md:flex p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
         <div className="hidden sm:flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
           <div className="flex items-center gap-2 whitespace-nowrap">
             <span className="text-xs font-medium text-[var(--color-ink-muted)]">Available</span>
@@ -312,10 +311,10 @@ export default function FleetList({
         </div>
       ) : (
         <>
-          {/* ✅ MOBILE: Premium Fleet CardGrid */}
+          {/* ✅ MOBILE: Premium Fleet CardGrid — full unpaginated list, scroll for all */}
           <div className="block md:hidden">
             <CardGrid
-              data={paginatedVehicles}
+              data={filteredVehicles}
               getCardId={(v) => v.id}
               compact={true}
               showGlassEffect={true}
@@ -458,7 +457,7 @@ export default function FleetList({
             />
           </div>
 
-          {/* ✅ DESKTOP: DataTable */}
+          {/* ✅ DESKTOP: DataTable — paginated */}
           <div className="hidden md:block">
             <DataTable
               data={paginatedVehicles}

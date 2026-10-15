@@ -2,7 +2,7 @@
 
 import { Search, Filter } from "lucide-react";
 import FilterDropdown from "@/components/ui/FilterDropdown";
-import NewBookingButton from "../NewBookingButton"; // ✅ NEW IMPORT
+import NewBookingButton from "../NewBookingButton";
 
 interface BookingsToolbarProps {
   search: string;
@@ -24,7 +24,7 @@ export default function BookingsToolbar({
   completedCount,
 }: BookingsToolbarProps) {
   return (
-    <div className="p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
+    <div className="hidden md:flex p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
       {/* Metrics Counter Panel */}
       <div className="hidden sm:flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
         <div className="flex items-center justify-center gap-1.5 min-w-0 text-center">
@@ -75,7 +75,6 @@ export default function BookingsToolbar({
           />
         </div>
 
-        {/* ✅ REPLACED: Standard button with the new Dropdown NewBookingButton */}
         <NewBookingButton />
       </div>
     </div>

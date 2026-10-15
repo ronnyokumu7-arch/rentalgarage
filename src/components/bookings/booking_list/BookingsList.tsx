@@ -19,21 +19,20 @@ export default function BookingsList({
     upcomingCount, activeTripsCount, completedCount,
     handleConfirm, handleStartTrip, handleCompleteTrip,
     handleCancel, handleNoShow, handleCopyContractLink,
-    handleCopyQuotationLink, hasContract, hasQuotation, // ✅ NEW: quotation link + doc awareness
+    handleCopyQuotationLink, hasContract, hasQuotation,
   } = bookingsData;
 
-  // ✅ Shared actions context (router is supplied inside each view component)
   const actionsCtx = {
     onExtendBooking,
     handleConfirm, handleStartTrip, handleCompleteTrip,
     handleCancel, handleNoShow, handleCopyContractLink,
-    handleCopyQuotationLink, hasContract, hasQuotation, // ✅ NEW: pass through to factory
+    handleCopyQuotationLink, hasContract, hasQuotation,
   };
 
   const loading = bookingsLoading || isReferenceDataLoading;
 
   return (
-    <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300 font-sans">
+    <div className="md:bg-[var(--color-surface)] md:rounded-2xl md:border md:border-[var(--color-surface-border)] md:shadow-[var(--shadow-card)] md:overflow-hidden animate-in fade-in duration-300 font-sans">
       <BookingsToolbar
         search={search} setSearch={setSearch}
         statusFilter={statusFilter} setStatusFilter={setStatusFilter}
@@ -58,11 +57,13 @@ export default function BookingsList({
         </div>
       ) : (
         <>
+          {/* ✅ MOBILE: full unpaginated filtered list — user scrolls to see everything */}
           <BookingsListMobile
-            bookings={paginatedBookings}
+            bookings={filteredBookings}
             clientMap={clientMap} vehicleMap={vehicleMap}
             actionsCtx={actionsCtx}
           />
+          {/* ✅ DESKTOP: paginated table */}
           <BookingsListDesktop
             bookings={paginatedBookings}
             clientMap={clientMap} vehicleMap={vehicleMap}
