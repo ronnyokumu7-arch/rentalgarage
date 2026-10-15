@@ -1,3 +1,4 @@
+// src/components/bookings/NewBookingButton.tsx
 "use client";
 
 import { useState, useRef, useEffect } from "react";
@@ -40,18 +41,18 @@ export default function NewBookingButton() {
   };
 
   return (
-    <div className="relative w-full sm:w-auto" ref={menuRef}>
+    <div className="relative w-full md:w-auto" ref={menuRef}>
       <button
         onClick={() => setMenuOpen(!menuOpen)}
-        className="w-full sm:w-auto h-9 px-4 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm"
+        className="w-full md:w-auto h-10 px-4 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.99] shrink-0"
       >
-        <CalendarPlus size={14} strokeWidth={2.5} />
+        <CalendarPlus size={16} strokeWidth={2.5} />
         New Booking
-        <ChevronDown size={14} className={`transition-transform ${menuOpen ? "rotate-180" : ""}`} />
+        <ChevronDown size={16} className={`transition-transform ${menuOpen ? "rotate-180" : ""}`} />
       </button>
 
       {menuOpen && (
-        <div className="absolute right-0 top-full mt-2 w-full sm:w-64 bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-xl shadow-lg z-40 animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute right-0 top-full mt-2 w-full md:w-64 bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-xl shadow-lg z-40 animate-in fade-in zoom-in-95 duration-150">
           {/* Self-Drive Option */}
           <button
             onClick={handleSelfDrive}
@@ -67,9 +68,9 @@ export default function NewBookingButton() {
               </div>
             </div>
           </button>
-          
+
           <div className="border-t border-[var(--color-surface-border)]" />
-          
+
           {/* Airport Transfer Option */}
           <button
             onClick={handleAirportTransfer}
@@ -85,9 +86,9 @@ export default function NewBookingButton() {
               </div>
             </div>
           </button>
-          
+
           <div className="border-t border-[var(--color-surface-border)]" />
-          
+
           {/* Chauffeur Option */}
           <button
             onClick={handleChauffeur}
@@ -107,17 +108,17 @@ export default function NewBookingButton() {
       )}
 
       {/* Modals */}
-      <SelfDriveBookingModal 
-        isOpen={activeModal === "selfdrive"} 
-        onClose={() => setActiveModal(null)} 
+      <SelfDriveBookingModal
+        isOpen={activeModal === "selfdrive"}
+        onClose={() => setActiveModal(null)}
       />
-      <AirportTransferModal 
-        isOpen={activeModal === "airport"} 
-        onClose={() => setActiveModal(null)} 
+      <AirportTransferModal
+        isOpen={activeModal === "airport"}
+        onClose={() => setActiveModal(null)}
       />
-      <ChauffeurBookingModal 
-        isOpen={activeModal === "chauffeur"} 
-        onClose={() => setActiveModal(null)} 
+      <ChauffeurBookingModal
+        isOpen={activeModal === "chauffeur"}
+        onClose={() => setActiveModal(null)}
       />
     </div>
   );

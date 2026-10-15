@@ -35,18 +35,18 @@ export default function AddUserButton({ onQuickAdd, onInvite }: AddUserButtonPro
   };
 
   return (
-    <div className="relative w-full sm:w-auto" ref={menuRef}>
+    <div className="relative w-full md:w-auto" ref={menuRef}>
       <button
         onClick={() => setMenuOpen(!menuOpen)}
-        className="w-full sm:w-auto h-9 px-4 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm"
+        className="w-full md:w-auto h-10 px-4 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.99] shrink-0"
       >
-        <UserPlus size={14} strokeWidth={2.5} />
+        <UserPlus size={16} strokeWidth={2.5} />
         Add Member
-        <ChevronDown size={14} className={`transition-transform ${menuOpen ? "rotate-180" : ""}`} />
+        <ChevronDown size={16} className={`transition-transform ${menuOpen ? "rotate-180" : ""}`} />
       </button>
 
       {menuOpen && (
-        <div className="absolute right-0 top-full mt-2 w-full sm:w-56 bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-xl shadow-lg z-40 animate-in fade-in zoom-in-95 duration-150">
+        <div className="absolute right-0 top-full mt-2 w-full md:w-56 bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-xl shadow-lg z-40 animate-in fade-in zoom-in-95 duration-150">
           <button
             onClick={handleAddManually}
             className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors first:rounded-t-xl"
