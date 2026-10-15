@@ -9,13 +9,15 @@ import DriverSearch from '../DriverSearch';
 import BookingSummary from '../BookingSummary';
 import AddressAutocomplete from '@/components/ui/AddressAutocomplete';
 import PremiumDateAndTimePicker from './PremiumDateAndTimePicker';
-import PremiumSwitch, { SwitchTab } from '@/components/ui/PremiumSwitch';
 import type { ServiceType } from '@/lib/types';
 
-const bookingTabs: SwitchTab[] = [
+const bookingTabs = [
   { id: 'selfdrive', label: 'Self-Drive', icon: Car },
   { id: 'chauffeur', label: 'Chauffeur', icon: Users },
 ];
+
+// ✅ Sections use the same container pattern as NewClientForm / Add Client modal
+const sectionClass = "bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] p-4 sm:p-5";
 
 interface BookingFormProps {
   formId?: string;
@@ -29,7 +31,7 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
     setClientSearch, setVehicleSearch, setDriverSearch,
     updateField, getSelectedClient, getSelectedVehicle, getSelectedDriver,
     handleSubmit, quote, quoteLoading,
-    allClients, allVehicles, allDrivers,  // ✅ NEW: full lists for display resolution
+    allClients, allVehicles, allDrivers,
     quoteError,
   } = useNewBooking();
 
@@ -70,18 +72,35 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
 
   return (
     <form id={formId} onSubmit={onSubmit} className="w-full space-y-6">
-      {/* ── Mode Switcher ────────────────────────────────────────── */}
-      <PremiumSwitch
-        tabs={bookingTabs}
-        activeTab={bookingMode}
-        onChange={(id) => setBookingMode(id as 'selfdrive' | 'chauffeur')}
-      />
+
+      {/* ── Mode Switcher — tab underline pattern (matches Add Client modal) ── */}
+      <div className="flex border-b border-[var(--color-surface-border)]">
+        {bookingTabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = bookingMode === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setBookingMode(tab.id as 'selfdrive' | 'chauffeur')}
+              className={`flex-1 py-3 text-sm font-bold flex items-center justify-center gap-2 transition-all border-b-2 ${
+                isActive
+                  ? 'text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5 rounded-t-lg'
+                  : 'text-[var(--color-ink-muted)] border-transparent hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] rounded-t-lg'
+              }`}
+            >
+              <Icon size={16} />
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
 
       {/* ── Section 1: Client, Vehicle & Driver ────────────────── */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-6 h-6 rounded-md bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
-            <User size={14} />
+      <section className={sectionClass}>
+        <div className="flex items-center gap-2.5 mb-4">
+          <div className="w-7 h-7 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
+            <User size={16} />
           </div>
           <h3 className="text-sm font-bold text-[var(--color-ink)]">Client, Vehicle & Driver</h3>
         </div>
@@ -102,7 +121,7 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
           <VehicleSearch
             selectedVehicleId={formData.vehicle_id}
             vehicles={vehicles}
-            allVehicles={allVehicles}          /* ✅ NEW */
+            allVehicles={allVehicles}
             searchQuery={vehicleSearch}
             onSearchChange={setVehicleSearch}
             onSelect={(vehicle) => {
@@ -116,7 +135,7 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
               <DriverSearch
                 selectedDriverId={formData.driver_id}
                 drivers={drivers}
-                allDrivers={allDrivers}          /* ✅ NEW */
+                allDrivers={allDrivers}
                 searchQuery={driverSearch}
                 onSearchChange={setDriverSearch}
                 onSelect={(driver) => {
@@ -149,13 +168,13 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
             </p>
           )}
         </div>
-      </div>
+      </section>
 
       {/* ── Section 2: Service Type & Schedule ────────────────── */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-6 h-6 rounded-md bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-            <CalendarDays size={14} />
+      <section className={sectionClass}>
+        <div className="flex items-center gap-2.5 mb-4">
+          <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+            <CalendarDays size={16} />
           </div>
           <h3 className="text-sm font-bold text-[var(--color-ink)]">Service Type & Schedule</h3>
         </div>
@@ -186,13 +205,13 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
             required
           />
         </div>
-      </div>
+      </section>
 
       {/* ── Section 3: Pickup & Return Locations ────────────────── */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-6 h-6 rounded-md bg-purple-500/10 text-purple-500 flex items-center justify-center">
-            <MapPin size={14} />
+      <section className={sectionClass}>
+        <div className="flex items-center gap-2.5 mb-4">
+          <div className="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center">
+            <MapPin size={16} />
           </div>
           <h3 className="text-sm font-bold text-[var(--color-ink)]">Pickup & Return Locations</h3>
         </div>
@@ -219,10 +238,10 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
             placeholder="Enter the destination address..."
           />
         </div>
-      </div>
+      </section>
 
       {/* ── Right Sidebar: Summary & Submit ────────────────────── */}
-      <div className="lg:sticky lg:top-4 space-y-3 pt-4 border-t border-[var(--color-surface-border)]">
+      <div className="lg:sticky lg:top-4 space-y-3">
         <BookingSummary
           client={selectedClient}
           vehicle={selectedVehicle}

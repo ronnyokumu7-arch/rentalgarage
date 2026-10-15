@@ -62,39 +62,49 @@ export function useNewBooking() {
     fetchData();
   }, []);
 
+  // ─── Client filtering ────────────────────────────────────────────────────
+  // No cap — the dropdown's max-h-80 overflow-y-auto handles the visual limit.
   const filteredClients = useMemo(() => {
-    if (!clientSearch.trim()) return clients.slice(0, 10);
+    if (!clientSearch.trim()) return clients;
     const search = clientSearch.toLowerCase();
     return clients.filter(client =>
       client.full_name.toLowerCase().includes(search) ||
       client.id_number?.toLowerCase().includes(search) ||
       client.dl_number?.toLowerCase().includes(search) ||
       client.phone.toLowerCase().includes(search)
-    ).slice(0, 10);
+    );
   }, [clients, clientSearch]);
 
+  // ─── Vehicle filtering ───────────────────────────────────────────────────
+  // ✅ Only bookable vehicles (status === 'available') reach the dropdown.
+  // Prevents selecting retired/maintenance vehicles that the backend will
+  // reject on create/quote. No cap — scroll handles the visual limit.
   const filteredVehicles = useMemo(() => {
-    if (!vehicleSearch.trim()) return vehicles.slice(0, 10);
+    const bookable = vehicles.filter(v => v.status === 'available');
+    if (!vehicleSearch.trim()) return bookable;
     const search = vehicleSearch.toLowerCase();
-    return vehicles.filter(vehicle =>
+    return bookable.filter(vehicle =>
       vehicle.make.toLowerCase().includes(search) ||
       vehicle.model.toLowerCase().includes(search) ||
       vehicle.plate_number.toLowerCase().includes(search)
-    ).slice(0, 10);
+    );
   }, [vehicles, vehicleSearch]);
 
+  // ─── Driver filtering ────────────────────────────────────────────────────
+  // ✅ Only assignable drivers (available | on_trip, not archived).
+  // No cap — scroll handles the visual limit.
   const filteredDrivers = useMemo(() => {
     const assignable = drivers.filter(d =>
       !d.is_archived && (d.status === 'available' || d.status === 'on_trip')
     );
-    if (!driverSearch.trim()) return assignable.slice(0, 10);
+    if (!driverSearch.trim()) return assignable;
     const search = driverSearch.toLowerCase();
     return assignable.filter(driver =>
       driver.full_name.toLowerCase().includes(search) ||
       driver.phone.toLowerCase().includes(search) ||
       driver.id_number_masked?.toLowerCase().includes(search) ||
       driver.dl_number_masked?.toLowerCase().includes(search)
-    ).slice(0, 10);
+    );
   }, [drivers, driverSearch]);
 
   const servicesByCategory = useMemo(() => {
@@ -122,7 +132,6 @@ export function useNewBooking() {
       return;
     }
 
-    // ✅ Validate dates parse correctly before sending
     const pickupISO = toISO(formData.pickup_at);
     const returnISO = toISO(formData.scheduled_return_at);
 
@@ -156,20 +165,17 @@ export function useNewBooking() {
       } catch (err: any) {
         setQuote(null);
 
-        // ✅ VERBOSE: surface the ACTUAL error so we can diagnose
         const status = err.response?.status;
         const data = err.response?.data;
         const detail = data?.detail;
 
         if (!err.response) {
-          // Network error — no response from server
           setQuoteError(`Network error: ${err.message || 'Cannot reach server'}`);
         } else if (typeof data?.message === 'string') {
           setQuoteError(data.message);
         } else if (typeof detail === 'string') {
           setQuoteError(detail);
         } else if (Array.isArray(detail) && detail.length > 0) {
-          // Pydantic validation errors
           const msgs = detail.map((d: any) => {
             const loc = d.loc ? d.loc.join(' → ') : '';
             const msg = String(d.msg || '').replace(/^Value error,?\s*/i, '');
@@ -205,6 +211,9 @@ export function useNewBooking() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  // ✅ Selection lookups resolve against the FULL source arrays — NOT the
+  // filtered lists. Prevents silent-selection failures when a vehicle/driver
+  // found via search would otherwise drop out of the filtered view.
   const getSelectedClient = () => clients.find(c => c.id.toString() === formData.client_id);
   const getSelectedVehicle = () => vehicles.find(v => v.id.toString() === formData.vehicle_id);
   const getSelectedDriver = () => drivers.find(d => d.id.toString() === formData.driver_id);
@@ -246,15 +255,12 @@ export function useNewBooking() {
 
       await bookingsApi.create(payload);
       toast.success('Booking created successfully!');
-      
-      // ✅ AUTO-REFRESH: notify bookings list to refetch (works across all modal types)
+
+      // ✅ AUTO-REFRESH: notify bookings list to refetch
       window.dispatchEvent(new CustomEvent('booking:created'));
-      
-      // Navigate to bookings page (redundant if already there, but ensures clean state)
+
       router.push('/dashboard/bookings');
     } catch (error: any) {
-      // The Axios bridge has already rendered StandardResponse errors. This
-      // fallback is exclusively for a transport/non-standard response.
       if (!error.response?.data?.message) {
         toast.error(getApiErrorMessage(error, 'Unable to reach the server. Please try again.'));
       }
