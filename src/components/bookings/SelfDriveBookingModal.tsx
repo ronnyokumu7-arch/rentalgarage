@@ -34,7 +34,7 @@ export default function SelfDriveBookingModal({ isOpen, onClose }: SelfDriveBook
         <div className="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 border-b border-[var(--color-surface-border)] bg-[var(--color-surface)] rounded-t-2xl sm:rounded-t-none">
           <div>
             <h2 className="text-base sm:text-lg font-bold text-[var(--color-ink)] tracking-tight">
-              New Self-Drive Booking
+              New Booking
             </h2>
             <p className="text-xs sm:text-sm text-[var(--color-ink-muted)] mt-0.5">
               Create a new rental reservation

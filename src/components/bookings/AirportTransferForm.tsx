@@ -10,6 +10,9 @@ import BookingSummary from './BookingSummary';
 import AddressAutocomplete from '@/components/ui/AddressAutocomplete';
 import PremiumDateAndTimePicker from './booking_form/PremiumDateAndTimePicker';
 
+// ✅ Sections use the same container pattern as BookingForm / NewClientForm
+const sectionClass = "bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] p-4 sm:p-5";
+
 interface AirportTransferFormProps {
   formId?: string;
   onClose?: () => void;
@@ -22,6 +25,7 @@ export default function AirportTransferForm({ formId, onClose }: AirportTransfer
     setClientSearch, setVehicleSearch, setDriverSearch,
     updateField, getSelectedClient, getSelectedVehicle, getSelectedDriver,
     handleSubmit, quote, quoteLoading,
+    allClients, allVehicles, allDrivers,   // ✅ full lists for display resolution
   } = useNewBooking();
 
   const selectedClient = getSelectedClient();
@@ -43,11 +47,12 @@ export default function AirportTransferForm({ formId, onClose }: AirportTransfer
 
   return (
     <form id={formId} onSubmit={onSubmit} className="w-full space-y-6">
-      {/* ── Section 1: Client, Vehicle & Driver ────────────────── */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-6 h-6 rounded-md bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
-            <User size={14} />
+
+      {/* ── Section 1: Client & Vehicle ──────────────────────────── */}
+      <section className={sectionClass}>
+        <div className="flex items-center gap-2.5 mb-4">
+          <div className="w-7 h-7 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
+            <User size={16} />
           </div>
           <h3 className="text-sm font-bold text-[var(--color-ink)]">Client & Vehicle</h3>
         </div>
@@ -56,6 +61,7 @@ export default function AirportTransferForm({ formId, onClose }: AirportTransfer
           <ClientSearch
             selectedClientId={formData.client_id}
             clients={clients}
+            allClients={allClients}
             searchQuery={clientSearch}
             onSearchChange={setClientSearch}
             onSelect={(client) => {
@@ -67,6 +73,7 @@ export default function AirportTransferForm({ formId, onClose }: AirportTransfer
           <VehicleSearch
             selectedVehicleId={formData.vehicle_id}
             vehicles={vehicles}
+            allVehicles={allVehicles}
             searchQuery={vehicleSearch}
             onSearchChange={setVehicleSearch}
             onSelect={(vehicle) => {
@@ -78,6 +85,7 @@ export default function AirportTransferForm({ formId, onClose }: AirportTransfer
           <DriverSearch
             selectedDriverId={formData.driver_id}
             drivers={drivers}
+            allDrivers={allDrivers}
             searchQuery={driverSearch}
             onSearchChange={setDriverSearch}
             onSelect={(driver) => {
@@ -86,13 +94,13 @@ export default function AirportTransferForm({ formId, onClose }: AirportTransfer
             }}
           />
         </div>
-      </div>
+      </section>
 
       {/* ── Section 2: Pickup & Drop-off Schedule ────────────────── */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-6 h-6 rounded-md bg-sky-500/10 text-sky-500 flex items-center justify-center">
-            <Plane size={14} />
+      <section className={sectionClass}>
+        <div className="flex items-center gap-2.5 mb-4">
+          <div className="w-7 h-7 rounded-lg bg-sky-500/10 text-sky-500 flex items-center justify-center">
+            <Plane size={16} />
           </div>
           <h3 className="text-sm font-bold text-[var(--color-ink)]">Pickup & Drop-off Schedule</h3>
         </div>
@@ -125,13 +133,13 @@ export default function AirportTransferForm({ formId, onClose }: AirportTransfer
             required
           />
         </div>
-      </div>
+      </section>
 
       {/* ── Section 3: Locations ──────────────────────────────────── */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-6 h-6 rounded-md bg-purple-500/10 text-purple-500 flex items-center justify-center">
-            <MapPin size={14} />
+      <section className={sectionClass}>
+        <div className="flex items-center gap-2.5 mb-4">
+          <div className="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center">
+            <MapPin size={16} />
           </div>
           <h3 className="text-sm font-bold text-[var(--color-ink)]">Locations</h3>
         </div>
@@ -158,10 +166,10 @@ export default function AirportTransferForm({ formId, onClose }: AirportTransfer
             placeholder="Enter the destination address..."
           />
         </div>
-      </div>
+      </section>
 
       {/* ── Right Sidebar: Summary & Submit ────────────────────── */}
-      <div className="lg:sticky lg:top-4 space-y-3 pt-4 border-t border-[var(--color-surface-border)]">
+      <div className="lg:sticky lg:top-4 space-y-3">
         <BookingSummary
           client={selectedClient}
           vehicle={selectedVehicle}

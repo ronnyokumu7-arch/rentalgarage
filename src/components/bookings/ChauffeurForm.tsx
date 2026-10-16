@@ -9,12 +9,14 @@ import DriverSearch from './DriverSearch';
 import BookingSummary from './BookingSummary';
 import AddressAutocomplete from '@/components/ui/AddressAutocomplete';
 import PremiumDateAndTimePicker from './booking_form/PremiumDateAndTimePicker';
-import PremiumSwitch, { SwitchTab } from '@/components/ui/PremiumSwitch';
 
-const chauffeurTabs: SwitchTab[] = [
+const chauffeurTabs = [
   { id: 'pro_driver', label: 'Chauffeur', icon: Users },
   { id: 'wedding', label: 'Wedding', icon: Users },
 ];
+
+// ✅ Sections use the same container pattern as BookingForm / NewClientForm
+const sectionClass = "bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] p-4 sm:p-5";
 
 interface ChauffeurFormProps {
   formId?: string;
@@ -28,16 +30,22 @@ export default function ChauffeurForm({ formId, onClose }: ChauffeurFormProps) {
     setClientSearch, setVehicleSearch, setDriverSearch,
     updateField, getSelectedClient, getSelectedVehicle, getSelectedDriver,
     handleSubmit, quote, quoteLoading, quoteError,
-    allClients,
+    allClients, allVehicles, allDrivers,
   } = useNewBooking();
 
   const selectedClient = getSelectedClient();
   const selectedVehicle = getSelectedVehicle();
   const selectedDriver = getSelectedDriver();
 
-  const [subService, setSubService] = useState<'pro_driver' | 'wedding'>(
-    (formData.service_type as 'pro_driver' | 'wedding') || 'pro_driver'
-  );
+  // ✅ Default to a valid sub-service if formData.service_type is still a
+  // stale value (e.g. 'selfdrive' inherited from useNewBooking's initial state).
+  // Prevents both tabs rendering inactive on first mount.
+  const initialSubService: 'pro_driver' | 'wedding' =
+    formData.service_type === 'pro_driver' || formData.service_type === 'wedding'
+      ? formData.service_type
+      : 'pro_driver';
+
+  const [subService, setSubService] = useState<'pro_driver' | 'wedding'>(initialSubService);
 
   useEffect(() => {
     if (formData.service_type !== subService) {
@@ -65,18 +73,35 @@ export default function ChauffeurForm({ formId, onClose }: ChauffeurFormProps) {
 
   return (
     <form id={formId} onSubmit={onSubmit} className="w-full space-y-6">
-      {/* ── Sub-Service Switcher ────────────────────────────────────── */}
-      <PremiumSwitch
-        tabs={chauffeurTabs}
-        activeTab={subService}
-        onChange={(id) => setSubService(id as 'pro_driver' | 'wedding')}
-      />
+
+      {/* ── Sub-Service Switcher — tab underline pattern (matches Add Client modal) ── */}
+      <div className="flex border-b border-[var(--color-surface-border)]">
+        {chauffeurTabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = subService === tab.id;
+          return (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setSubService(tab.id as 'pro_driver' | 'wedding')}
+              className={`flex-1 py-3 text-sm font-bold flex items-center justify-center gap-2 transition-all border-b-2 ${
+                isActive
+                  ? 'text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5 rounded-t-lg'
+                  : 'text-[var(--color-ink-muted)] border-transparent hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] rounded-t-lg'
+              }`}
+            >
+              <Icon size={16} />
+              {tab.label}
+            </button>
+          );
+        })}
+      </div>
 
       {/* ── Section 1: Client, Vehicle & Driver ────────────────── */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-6 h-6 rounded-md bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
-            <User size={14} />
+      <section className={sectionClass}>
+        <div className="flex items-center gap-2.5 mb-4">
+          <div className="w-7 h-7 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
+            <User size={16} />
           </div>
           <h3 className="text-sm font-bold text-[var(--color-ink)]">Client, Vehicle & Driver</h3>
         </div>
@@ -97,6 +122,7 @@ export default function ChauffeurForm({ formId, onClose }: ChauffeurFormProps) {
           <VehicleSearch
             selectedVehicleId={formData.vehicle_id}
             vehicles={vehicles}
+            allVehicles={allVehicles}
             searchQuery={vehicleSearch}
             onSearchChange={setVehicleSearch}
             onSelect={(vehicle) => {
@@ -108,6 +134,7 @@ export default function ChauffeurForm({ formId, onClose }: ChauffeurFormProps) {
           <DriverSearch
             selectedDriverId={formData.driver_id}
             drivers={drivers}
+            allDrivers={allDrivers}
             searchQuery={driverSearch}
             onSearchChange={setDriverSearch}
             onSelect={(driver) => {
@@ -136,13 +163,13 @@ export default function ChauffeurForm({ formId, onClose }: ChauffeurFormProps) {
             </label>
           )}
         </div>
-      </div>
+      </section>
 
       {/* ── Section 2: Service Type & Schedule ────────────────── */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-6 h-6 rounded-md bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-            <CalendarDays size={14} />
+      <section className={sectionClass}>
+        <div className="flex items-center gap-2.5 mb-4">
+          <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
+            <CalendarDays size={16} />
           </div>
           <h3 className="text-sm font-bold text-[var(--color-ink)]">Service Type & Schedule</h3>
         </div>
@@ -174,13 +201,13 @@ export default function ChauffeurForm({ formId, onClose }: ChauffeurFormProps) {
             required
           />
         </div>
-      </div>
+      </section>
 
       {/* ── Section 3: Pickup & Return Locations ────────────────── */}
-      <div>
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-6 h-6 rounded-md bg-purple-500/10 text-purple-500 flex items-center justify-center">
-            <MapPin size={14} />
+      <section className={sectionClass}>
+        <div className="flex items-center gap-2.5 mb-4">
+          <div className="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center">
+            <MapPin size={16} />
           </div>
           <h3 className="text-sm font-bold text-[var(--color-ink)]">Pickup & Return Locations</h3>
         </div>
@@ -207,10 +234,10 @@ export default function ChauffeurForm({ formId, onClose }: ChauffeurFormProps) {
             placeholder="Enter the destination address..."
           />
         </div>
-      </div>
+      </section>
 
       {/* ── Right Sidebar: Summary & Submit ────────────────────── */}
-      <div className="lg:sticky lg:top-4 space-y-3 pt-4 border-t border-[var(--color-surface-border)]">
+      <div className="lg:sticky lg:top-4 space-y-3">
         <BookingSummary
           client={selectedClient}
           vehicle={selectedVehicle}

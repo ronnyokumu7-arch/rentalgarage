@@ -32,7 +32,7 @@ export default function ChauffeurBookingModal({ isOpen, onClose }: ChauffeurBook
         {/* 1. Sticky Header */}
         <div className="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-3 sm:py-4 border-b border-[var(--color-surface-border)] bg-[var(--color-bg)] rounded-t-2xl sm:rounded-t-none">
           <h2 className="text-base sm:text-lg font-bold text-[var(--color-ink)]">
-            New Chauffeur Booking
+            New Booking
           </h2>
           <button
             onClick={onClose}

@@ -13,7 +13,7 @@ export default function AirportTransferModal({ isOpen, onClose }: AirportTransfe
     <Modal 
       open={isOpen} 
       onClose={onClose} 
-      title="New Airport Transfer Booking" 
+      title="Airport Transfer Booking" 
       size="xl" // ✅ Gives the 2-column form plenty of breathing room on desktop
     >
       {/* Pass formId so the Modal's footer button can trigger submission */}
