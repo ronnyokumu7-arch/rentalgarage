@@ -5,14 +5,16 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  Search, Sun, Moon, User, Settings, Bell,
-  LogOut, ChevronRight, Command, Briefcase,
-  MoreVertical, Sparkles, X, HelpCircle, Shield,
+  Search, Sun, Moon, User, Bell,
+  LogOut, ChevronRight, Command,
+  MoreVertical, Sparkles, X, HelpCircle,
   CreditCard, Users, CalendarDays, Car, ChevronDown,
+  Building2
 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
 import MobileSearchModal from "@/components/search/MobileSearchModal";
 import DesktopSearchDropdown from "@/components/search/DesktopSearchDropdown";
+import SecureImage from "@/components/ui/SecureImage";
 
 interface TopbarProps {
   onMenuToggle?: () => void;
@@ -138,51 +140,33 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
   const companyName = user?.role === "super_admin" ? "Rental Garage" : tenant?.name || "Agency";
   const isSuperAdmin = user?.role === "super_admin";
   const fullName = user?.full_name || user?.email || "User";
-
-  const tenantLogoUrl = tenant?.profile?.logo_url || null;
+  
+  const jobTitle = user?.job_title || (isSuperAdmin ? "System Admin" : user?.role?.replace("_", " ") || "Team Member");
 
   const renderAvatar = (size: "md" | "lg") => {
     const dims = { md: "w-9 h-9", lg: "w-12 h-12" };
     const iconSizes = { md: 16, lg: 22 };
 
-    if (user?.avatar_url) {
-      return (
-        <img
-          src={user.avatar_url}
-          alt={fullName}
-          className={`${dims[size]} rounded-full object-cover border border-surface-border`}
-        />
-      );
-    }
-
-    return (
+    const fallbackAvatar = (
       <div
         className={`${dims[size]} rounded-full flex items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-600 shadow-md shadow-blue-500/20 ring-2 ring-surface`}
       >
         <User size={iconSizes[size]} className="text-white" strokeWidth={2} />
       </div>
     );
-  };
 
-  const renderRoleIcon = (role?: string) => {
-    if (!role) return <Briefcase size={12} className="text-ink-subtle" />;
-    const roleLower = role.toLowerCase();
-    if (roleLower.includes("admin") || roleLower.includes("super")) {
-      return <Shield size={12} className="text-primary" />;
+    if (user?.avatar_url) {
+      return (
+        <SecureImage
+          src={user.avatar_url}
+          alt={fullName}
+          className={`${dims[size]} rounded-full object-cover border border-surface-border`}
+          fallback={fallbackAvatar}
+        />
+      );
     }
-    if (roleLower.includes("manager") || roleLower.includes("owner")) {
-      return <Briefcase size={12} className="text-primary" />;
-    }
-    return <User size={12} className="text-ink-subtle" />;
-  };
 
-  const getRoleLabel = (role?: string) => {
-    if (!role) return "User";
-    const roleLower = role.toLowerCase();
-    if (roleLower.includes("super_admin") || roleLower.includes("superadmin")) return "Super Admin";
-    if (roleLower.includes("tenant_admin") || roleLower.includes("admin")) return "Admin";
-    if (roleLower.includes("manager")) return "Manager";
-    return role.replace("_", " ");
+    return fallbackAvatar;
   };
 
   const renderScopeMark = (scope: SearchScope, size: number = 13) => {
@@ -322,13 +306,12 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
                 }}
                 onBlur={() => {
                   setSearchFocused(false);
-                  // Delay so clicks inside dropdown register first
                   window.setTimeout(() => {
                     if (
                       desktopSearchRef.current &&
                       !desktopSearchRef.current.contains(document.activeElement)
                     ) {
-                      // noop — the outside-click handler manages closing
+                      // noop
                     }
                   }, 150);
                 }}
@@ -343,7 +326,6 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
               </div>
             </div>
 
-            {/* ✅ Desktop live results dropdown */}
             {desktopDropdownOpen && searchQuery.trim().length > 0 && (
               <DesktopSearchDropdown
                 query={searchQuery}
@@ -391,70 +373,54 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
             >
               <div className="relative flex-shrink-0">
                 {renderAvatar("md")}
-                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-bg" />
               </div>
             </button>
 
             {showUserMenu && (
               <div className="absolute right-0 top-[calc(100%+8px)] w-[calc(100vw-2rem)] sm:w-[300px] max-w-[300px] rounded-2xl bg-surface border border-surface-border shadow-[var(--shadow-dropdown)] z-[9999] overflow-hidden animate-in slide-up fade-in duration-200">
+                
+                {/* Header */}
                 <div className="px-4 pt-4 pb-3 border-b border-surface-border">
                   <div className="flex items-center gap-3">
                     <div className="relative flex-shrink-0">
                       {renderAvatar("lg")}
-                      <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-surface" />
+                      <span className="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-emerald-400" />
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-bold text-ink truncate leading-tight">{fullName}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <div className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border border-primary/20 bg-primary-muted text-primary">
-                          {renderRoleIcon(user?.role)}
-                          {getRoleLabel(user?.role)}
-                        </div>
-                        {user?.is_active === false && (
-                          <span className="text-[10px] text-danger font-medium">Inactive</span>
-                        )}
-                      </div>
+                      <p className="text-[11px] text-ink-muted truncate mt-0.5 capitalize flex items-center gap-1.5">
+                        <span className="font-medium text-ink-subtle">{jobTitle}</span>
+                        <span className="text-ink-faint font-light">|</span>
+                        <span className="truncate">{companyName}</span>
+                      </p>
                     </div>
-                  </div>
-
-                  <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-xl bg-gradient-to-r from-primary-muted to-primary-subtle border border-primary/20">
-                    {tenantLogoUrl ? (
-                      <img
-                        src={tenantLogoUrl}
-                        alt={companyName}
-                        className="w-5 h-5 rounded-md object-contain bg-white flex-shrink-0"
-                      />
-                    ) : (
-                      <div className="w-5 h-5 rounded-md flex items-center justify-center text-white font-bold text-[10px] flex-shrink-0 bg-gradient-to-br from-blue-600 to-indigo-600">
-                        {(companyName[0] || "A").toUpperCase()}
-                      </div>
-                    )}
-                    <p className="text-[12px] font-medium text-primary-text truncate">{companyName}</p>
-                    <Sparkles size={12} className="text-primary ml-auto opacity-60" />
                   </div>
                 </div>
 
+                {/* Links */}
                 <div className="px-2 py-2 space-y-0.5">
                   <Link
                     href={isSuperAdmin ? `/super-admin/users/${user?.id}` : `/dashboard/users/${user?.id}`}
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-ink hover:bg-surface-hover transition-all duration-150 group"
                   >
                     <User size={16} strokeWidth={1.8} className="text-ink-muted group-hover:text-primary transition-colors" />
-                    <span className="flex-1 font-medium">View Profile</span>
+                    <span className="flex-1 font-medium">User Profile</span>
                     <ChevronRight size={14} className="text-ink-subtle opacity-0 group-hover:opacity-100 transition-opacity" />
                   </Link>
 
+                  {/* ✅ Deep link to Business Profile module inside Settings */}
                   <Link
-                    href={isSuperAdmin ? "/super-admin/settings" : "/dashboard/settings"}
+                    href={isSuperAdmin ? "/super-admin/settings" : "/dashboard/settings?tab=general&module=business"}
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-ink hover:bg-surface-hover transition-all duration-150 group"
                   >
-                    <Settings size={16} strokeWidth={1.8} className="text-ink-muted group-hover:text-primary transition-colors" />
-                    <span className="flex-1 font-medium">Settings</span>
+                    <Building2 size={16} strokeWidth={1.8} className="text-ink-muted group-hover:text-primary transition-colors" />
+                    <span className="flex-1 font-medium">Business Profile</span>
                     <ChevronRight size={14} className="text-ink-subtle opacity-0 group-hover:opacity-100 transition-opacity" />
                   </Link>
 
+                  {/* ✅ Deep link to Invoices tab inside Financials */}
                   <Link
-                    href="/dashboard/financials"
+                    href="/dashboard/financials?tab=invoices"
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-ink hover:bg-surface-hover transition-all duration-150 group"
                   >
                     <CreditCard size={16} strokeWidth={1.8} className="text-ink-muted group-hover:text-primary transition-colors" />
@@ -474,20 +440,22 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
 
                 <div className="h-px bg-surface-border mx-3 my-1" />
 
+                {/* Footer */}
                 <div className="px-2 py-2">
                   <button
                     onClick={logout}
                     className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-danger-text hover:bg-danger-bg dark:hover:bg-rose-500/10 transition-all duration-150 group"
                   >
-                    <LogOut size={16} strokeWidth={1.8} className="text-danger-text" />
-                    <span className="flex-1">Sign out</span>
+                    <LogOut size={16} strokeWidth={1.8} className="text-danger-text group-hover:text-danger-text" />
+                    <span className="flex-1 text-left">Sign out</span>
                   </button>
                 </div>
+
               </div>
             )}
           </div>
 
-          {/* ✅ Mobile Search Trigger */}
+          {/* Mobile Search Trigger */}
           <button
             onClick={() => setMobileSearchOpen(true)}
             className="sm:hidden flex items-center justify-center w-9 h-9 rounded-xl text-ink-muted hover:bg-surface-hover hover:text-ink transition-all duration-200 active:scale-95"
@@ -508,7 +476,6 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
         </div>
       </header>
 
-      {/* ✅ Mobile Search Overlay */}
       <MobileSearchModal
         open={mobileSearchOpen}
         onClose={() => setMobileSearchOpen(false)}
