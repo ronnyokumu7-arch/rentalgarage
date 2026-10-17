@@ -41,7 +41,6 @@ export interface UserCreatePayload {
   dl_image_url?: string | null;
 }
 
-// ✅ NEW: Invite flow — admin provides only name + phone (+ optional role details)
 export interface UserInviteCreatePayload {
   full_name: string;
   phone_number?: string | null;
@@ -50,7 +49,6 @@ export interface UserInviteCreatePayload {
   job_title?: string | null;
 }
 
-// ✅ NEW: Invite response — includes the shareable link
 export interface UserInviteResponse extends User {
   invite_token: string;
   invite_link: string;
@@ -63,7 +61,7 @@ export interface UserUpdatePayload {
   is_active?: boolean;
   is_suspended?: boolean;
   theme_preference?: string;
-  density_preference?: string; // ✅ ADDED: Fixes UserNotificationsCard.tsx:26 error
+  density_preference?: string;
   suspension_reason?: string | null;
   password?: string;
   phone_number?: string | null;
@@ -121,7 +119,6 @@ export const usersApi = {
   create: (data: UserCreatePayload) =>
     apiClient.post<User>("/users/", data).then((r) => r.data),
 
-  // ✅ NEW: Generate a shareable invite link (user completes their own onboarding)
   createInvite: (data: UserInviteCreatePayload) =>
     apiClient.post<UserInviteResponse>("/users/invite", data).then((r) => r.data),
 
@@ -133,6 +130,21 @@ export const usersApi = {
 
   update: (id: number, data: UserUpdatePayload) =>
     apiClient.patch<User>(`/users/${id}`, data).then((r) => r.data),
+
+  // ✅ NEW: self-update path — uses /me instead of /{id}, different permissions
+  updateMe: (data: UserUpdatePayload) =>
+    apiClient.patch<User>("/users/me", data).then((r) => r.data),
+
+  // ✅ NEW: self avatar upload (multipart) — returns the updated user
+  uploadMyAvatar: (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiClient
+      .post<User>("/users/me/avatar", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then((r) => r.data);
+  },
 
   suspend: (id: number, reason?: string) =>
     apiClient.post<User>(`/users/${id}/suspend`, null, { params: { reason } }).then((r) => r.data),

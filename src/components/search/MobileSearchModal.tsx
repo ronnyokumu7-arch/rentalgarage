@@ -22,7 +22,7 @@ import { useGlobalSearch, type SearchScope } from "@/hooks/useGlobalSearch";
 ────────────────────────────────────────────────────────────────────── */
 
 interface SearchScopeDef {
-  id: string;
+  id: SearchScope;
   label: string;
   placeholder: string;
   icon?: React.ElementType;
@@ -40,7 +40,7 @@ const PER_CATEGORY_PREVIEW = 5;
 const DEBOUNCE_MS = 300;
 
 /* ──────────────────────────────────────────────────────────────────────
-   Status pill colors
+   Status colors
 ────────────────────────────────────────────────────────────────────── */
 
 const CLIENT_STATUS: Record<string, string> = {
@@ -71,10 +71,19 @@ const VEHICLE_STATUS: Record<string, string> = {
 ────────────────────────────────────────────────────────────────────── */
 
 const formatDateShort = (dateStr: string): string => {
-  if (!dateStr) return "—";
+  if (!dateStr) return "";
   const d = new Date(dateStr);
-  if (Number.isNaN(d.getTime())) return "—";
+  if (Number.isNaN(d.getTime())) return "";
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+};
+
+const formatDateRange = (start: string, end: string): string => {
+  const s = formatDateShort(start);
+  const e = formatDateShort(end);
+  if (!s && !e) return "";
+  if (!s) return `→ ${e}`;
+  if (!e) return `${s} →`;
+  return `${s} → ${e}`;
 };
 
 /* ──────────────────────────────────────────────────────────────────────
@@ -195,20 +204,29 @@ export default function MobileSearchModal({ open, onClose }: MobileSearchModalPr
     return <Sparkles size={size} strokeWidth={2.25} className="flex-shrink-0 text-primary" />;
   };
 
-  // Preview slices
-  const preview = useMemo(() => ({
-    pages: results.pages.slice(0, PER_CATEGORY_PREVIEW),
-    bookings: results.bookings.slice(0, PER_CATEGORY_PREVIEW),
-    clients: results.clients.slice(0, PER_CATEGORY_PREVIEW),
-    vehicles: results.vehicles.slice(0, PER_CATEGORY_PREVIEW),
-  }), [results]);
+  // ✅ Scope-aware preview — only slices categories in the active scope.
+  const preview = useMemo(() => {
+    const scope = activeScope.id;
+    const showPages = scope === "all";
+    const showClients = scope === "all" || scope === "clients";
+    const showBookings = scope === "all" || scope === "bookings";
+    const showFleet = scope === "all" || scope === "fleet";
+
+    return {
+      pages: showPages ? results.pages.slice(0, PER_CATEGORY_PREVIEW) : [],
+      bookings: showBookings ? results.bookings.slice(0, PER_CATEGORY_PREVIEW) : [],
+      clients: showClients ? results.clients.slice(0, PER_CATEGORY_PREVIEW) : [],
+      vehicles: showFleet ? results.vehicles.slice(0, PER_CATEGORY_PREVIEW) : [],
+    };
+  }, [activeScope.id, results]);
 
   const hasQuery = debouncedQuery.trim().length > 0;
   const hasAnyResults =
-    results.pages.length +
-    results.bookings.length +
-    results.clients.length +
-    results.vehicles.length > 0;
+    preview.pages.length +
+      preview.bookings.length +
+      preview.clients.length +
+      preview.vehicles.length >
+    0;
 
   if (!open) return null;
 
@@ -242,7 +260,7 @@ export default function MobileSearchModal({ open, onClose }: MobileSearchModalPr
             </button>
 
             {showScopeMenu && (
-              <div className="absolute left-0 top-full mt-2 w-48 bg-surface border border-surface-border rounded-xl shadow-[var(--shadow-dropdown)] z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+              <div className="absolute left-0 top-full mt-2 w-48 bg-surface border border-surface-border rounded-xl shadow-[var(--shadow-lg)] z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
                 <div className="px-3 py-2 border-b border-surface-border">
                   <p className="text-[10px] font-bold uppercase tracking-wider text-ink-muted">Search in</p>
                 </div>
@@ -261,7 +279,7 @@ export default function MobileSearchModal({ open, onClose }: MobileSearchModalPr
                         className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-medium transition-colors ${
                           isActive
                             ? "bg-primary/10 text-primary"
-                            : "text-ink hover:bg-surface-hover"
+                            : "text-ink hover:bg-[var(--color-surface-hover)]"
                         }`}
                       >
                         <span className="flex items-center justify-center w-4 h-4 flex-shrink-0">
@@ -318,13 +336,14 @@ export default function MobileSearchModal({ open, onClose }: MobileSearchModalPr
           </div>
         )}
 
+        {/* ✅ Empty state respects scope — says "No clients" instead of "No matches" */}
         {hasQuery && !hasAnyResults && !loading && (
           <div className="flex flex-col items-center justify-center py-16 text-center px-6">
             <div className="w-14 h-14 rounded-2xl bg-surface-hover flex items-center justify-center mb-3">
               <SearchIcon size={22} className="text-ink-subtle" />
             </div>
             <p className="text-sm font-bold text-ink mb-1">
-              No matches for "{debouncedQuery}"
+              No {activeScope.id === "all" ? "matches" : activeScope.label.toLowerCase()} for &ldquo;{debouncedQuery}&rdquo;
             </p>
             <p className="text-xs text-ink-muted max-w-xs">
               Try a different keyword or check the spelling.
@@ -372,7 +391,7 @@ export default function MobileSearchModal({ open, onClose }: MobileSearchModalPr
                       b.client_name,
                       b.vehicle_plate,
                       b.vehicle_name,
-                      `${formatDateShort(b.start_date)} → ${formatDateShort(b.end_date)}`,
+                      formatDateRange(b.start_date, b.end_date),
                     ].filter(Boolean).join(" · ")}
                     status={b.status}
                     statusColor={BOOKING_STATUS[b.status] ?? "text-gray-500"}
@@ -450,7 +469,9 @@ export default function MobileSearchModal({ open, onClose }: MobileSearchModalPr
             >
               <SearchIcon size={16} className="text-ink-muted flex-shrink-0" />
               <span className="flex-1 text-sm font-semibold text-ink truncate">
-                See all results for "{debouncedQuery}"
+                {activeScope.id === "all"
+                  ? `See all results for "${debouncedQuery}"`
+                  : `See all ${activeScope.label.toLowerCase()} for "${debouncedQuery}"`}
               </span>
               <ArrowUpRight size={16} className="text-ink-subtle flex-shrink-0" />
             </button>
@@ -498,7 +519,7 @@ function ResultSection({
 }
 
 /* ──────────────────────────────────────────────────────────────────────
-   Flat row — matches Firefox / native list pattern
+   Flat row
 ────────────────────────────────────────────────────────────────────── */
 
 function FlatRow({
@@ -527,9 +548,7 @@ function FlatRow({
       <Icon size={18} strokeWidth={1.8} className={`${iconColor} flex-shrink-0`} />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="text-sm font-semibold text-ink truncate">
-            {primary}
-          </span>
+          <span className="text-sm font-semibold text-ink truncate">{primary}</span>
           {status && statusColor && (
             <span className={`text-[9px] font-bold uppercase tracking-wide ${statusColor}`}>
               {status}
@@ -537,9 +556,7 @@ function FlatRow({
           )}
         </div>
         {secondary && (
-          <p className="text-xs text-ink-muted truncate mt-0.5">
-            {secondary}
-          </p>
+          <p className="text-xs text-ink-muted truncate mt-0.5">{secondary}</p>
         )}
       </div>
       <ChevronRight size={16} className="text-ink-subtle flex-shrink-0" />

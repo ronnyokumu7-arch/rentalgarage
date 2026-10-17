@@ -1,7 +1,7 @@
 // src/app/dashboard/clients/page.tsx
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useMemo, useEffect } from "react";
 import {
   Users,
@@ -35,6 +35,10 @@ import ReviewVerificationModal from "@/components/client/ReviewVerificationModal
 import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
 import MobilePageToolbar from "@/components/ui/MobilePageToolbar";
 
+/* ──────────────────────────────────────────────────────────────────────
+   Tabs config
+────────────────────────────────────────────────────────────────────── */
+
 type ClientSegment = "individual" | "corporate" | "invites";
 
 interface TabItem {
@@ -46,32 +50,61 @@ interface TabItem {
 
 const TABS: TabItem[] = [
   { id: "individual", label: "Individual", icon: UserIcon },
-  { id: "corporate", label: "Corporate", icon: Building2 },
-  { id: "invites", label: "Invites", icon: Link2, hiddenOnMobile: true },
+  { id: "corporate",  label: "Corporate",  icon: Building2 },
+  { id: "invites",    label: "Invites",    icon: Link2, hiddenOnMobile: true },
 ];
 
 const MOBILE_TABS: TabItem[] = TABS.filter((t) => !t.hiddenOnMobile);
+const VALID_TABS = new Set<ClientSegment>(["individual", "corporate", "invites"]);
 
-// ✅ GLOBAL: Shared status styles for both mobile and desktop
+/* ──────────────────────────────────────────────────────────────────────
+   Shared status styles + labels
+────────────────────────────────────────────────────────────────────── */
+
 const CLIENT_STATUS_STYLES: Record<string, { bg: string; text: string; dot: string; label: string }> = {
-  active: { bg: "bg-emerald-500/10", text: "text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500", label: "Active" },
-  pending: { bg: "bg-amber-500/10", text: "text-amber-600 dark:text-amber-400", dot: "bg-amber-500", label: "Pending" },
-  suspended: { bg: "bg-red-500/10", text: "text-red-600 dark:text-red-400", dot: "bg-red-500", label: "Suspended" },
-  inactive: { bg: "bg-gray-500/10", text: "text-gray-600 dark:text-gray-400", dot: "bg-gray-500", label: "Inactive" },
+  active:    { bg: "bg-emerald-500/10", text: "text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500", label: "Active" },
+  pending:   { bg: "bg-amber-500/10",   text: "text-amber-600 dark:text-amber-400",     dot: "bg-amber-500",   label: "Pending" },
+  suspended: { bg: "bg-red-500/10",     text: "text-red-600 dark:text-red-400",         dot: "bg-red-500",     label: "Suspended" },
+  inactive:  { bg: "bg-gray-500/10",    text: "text-gray-600 dark:text-gray-400",       dot: "bg-gray-500",    label: "Inactive" },
 };
 
-// ✅ Driving arrangement labels
 const ARRANGEMENT_LABELS: Record<string, string> = {
   self_drive: "Self Drive",
   own_driver: "Own Driver",
-  chauffeur: "Chauffeur",
+  chauffeur:  "Chauffeur",
 };
+
+/* ──────────────────────────────────────────────────────────────────────
+   Component
+────────────────────────────────────────────────────────────────────── */
 
 export default function ClientsPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<ClientSegment>("individual");
+  const searchParams = useSearchParams();
 
-  // ✅ Review Modal State
+  /* ✅ URL-driven tab — deep links land on the right tab on any viewport */
+  const tabFromUrl = searchParams.get("tab") as ClientSegment | null;
+  const initialTab: ClientSegment =
+    tabFromUrl && VALID_TABS.has(tabFromUrl) ? tabFromUrl : "individual";
+  const [activeTab, setActiveTab] = useState<ClientSegment>(initialTab);
+
+  /* Sync FROM URL — handles search results, back/forward, manual edits */
+  useEffect(() => {
+    const t = searchParams.get("tab") as ClientSegment | null;
+    if (t && VALID_TABS.has(t) && t !== activeTab) {
+      setActiveTab(t);
+    }
+  }, [searchParams, activeTab]);
+
+  const handleTabChange = (tabId: string) => {
+    if (!VALID_TABS.has(tabId as ClientSegment)) return;
+    const next = tabId as ClientSegment;
+    if (next === activeTab) return;
+    setActiveTab(next);
+    router.push(`/dashboard/clients?tab=${next}`, { scroll: false });
+  };
+
+  /* Review modal state */
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [reviewClientId, setReviewClientId] = useState<number | null>(null);
 
@@ -94,110 +127,109 @@ export default function ClientsPage() {
     refetch,
   } = useClientsList();
 
-  // ✅ Guard: Invites is desktop-only — reset to individual if somehow active on mobile
-  useEffect(() => {
-    const checkMobile = () => {
-      if (window.innerWidth < 768 && activeTab === "invites") {
-        setActiveTab("individual");
-      }
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, [activeTab]);
-
   const clientMetrics = useMemo(() => {
     const total = filteredClients.length;
-    const active = filteredClients.filter((client) =>
-      client.status !== 'suspended' && (client as any).bookingsCount > 0
+    const active = filteredClients.filter(
+      (client) => client.status !== "suspended" && (client as any).bookingsCount > 0,
     ).length;
-    const inactive = filteredClients.filter((client) =>
-      client.status === 'suspended' || (client as any).bookingsCount === 0
+    const inactive = filteredClients.filter(
+      (client) => client.status === "suspended" || (client as any).bookingsCount === 0,
     ).length;
     return { total, active, inactive };
   }, [filteredClients]);
 
-  // ✅ Status options — shared between desktop toolbar and mobile toolbar
   const statusOptions = useMemo(
     () => [
-      { label: "Active", value: "active", count: clientMetrics.active },
-      { label: "Pending", value: "pending", count: pendingClients },
+      { label: "Active",    value: "active",    count: clientMetrics.active },
+      { label: "Pending",   value: "pending",   count: pendingClients },
       { label: "Suspended", value: "suspended", count: clientMetrics.inactive },
-      { label: "Inactive", value: "inactive", count: clientMetrics.inactive },
+      { label: "Inactive",  value: "inactive",  count: clientMetrics.inactive },
     ],
-    [clientMetrics.active, clientMetrics.inactive, pendingClients]
+    [clientMetrics.active, clientMetrics.inactive, pendingClients],
   );
 
   const currentTabInfo = useMemo(() => {
     if (activeTab === "individual") {
       return {
         title: "Individual Clients",
-        description: "Manage individual customer accounts, personal verification steps, and driver records.",
+        description:
+          "Manage individual customer accounts, personal verification steps, and driver records.",
         icon: <UserRound size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
       };
     }
     if (activeTab === "corporate") {
       return {
         title: "Corporate Clients",
-        description: "Oversee commercial agency relationships, corporate profiles, and company contracts.",
+        description:
+          "Oversee commercial agency relationships, corporate profiles, and company contracts.",
         icon: <Building size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
       };
     }
     return {
       title: "Client Invites",
-      description: "Generate single-use onboarding links and manage pending invitations.",
+      description:
+        "Generate single-use onboarding links and manage pending invitations.",
       icon: <UserPlus size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
     };
   }, [activeTab]);
 
-  const getClientActions = (client: any): RowAction<any>[] => [
-    {
-      label: "View Full Profile",
-      icon: UserIcon,
-      onClick: () => router.push(`/dashboard/clients/${client.id}`),
-    },
-    {
-      label: client.verification_status === "under_review"
-        ? "Review Verification"
-        : client.verification_status === "rejected" || client.status === "pending"
-        ? "Start Verification"
-        : "Suspend Client",
-      icon: client.verification_status === "under_review" ? Clock : Shield,
-      variant: (client.verification_status === "under_review" || client.verification_status === "rejected" || client.status === "pending") ? "primary" : "default",
-      onClick: () => {
-        if (client.verification_status === "under_review") {
-          setReviewClientId(client.id);
-          setReviewModalOpen(true);
-        } else {
-          handleVerify(client.id);
-        }
+  const getClientActions = (client: any): RowAction<any>[] =>
+    [
+      {
+        label: "View Full Profile",
+        icon: UserIcon,
+        onClick: () => router.push(`/dashboard/clients/${client.id}`),
       },
-      disabled: client.status !== "pending" && client.status !== "active" && client.verification_status !== "rejected" && client.verification_status !== "under_review",
-    },
-    {
-      label: client.status === "suspended" ? "Reactivate Client" : undefined,
-      icon: Shield,
-      variant: "primary",
-      onClick: () => handleReactivate(client.id),
-      disabled: client.status !== "suspended",
-    },
-    {
-      label: "Archive Client",
-      icon: Archive,
-      variant: "danger",
-      separator: true,
-      onClick: () => handleArchive(client.id),
-    },
-  ].filter((action) => !!action.label) as RowAction<any>[];
+      {
+        label:
+          client.verification_status === "under_review"
+            ? "Review Verification"
+            : client.verification_status === "rejected" || client.status === "pending"
+              ? "Start Verification"
+              : "Suspend Client",
+        icon: client.verification_status === "under_review" ? Clock : Shield,
+        variant:
+          client.verification_status === "under_review" ||
+          client.verification_status === "rejected" ||
+          client.status === "pending"
+            ? "primary"
+            : "default",
+        onClick: () => {
+          if (client.verification_status === "under_review") {
+            setReviewClientId(client.id);
+            setReviewModalOpen(true);
+          } else {
+            handleVerify(client.id);
+          }
+        },
+        disabled:
+          client.status !== "pending" &&
+          client.status !== "active" &&
+          client.verification_status !== "rejected" &&
+          client.verification_status !== "under_review",
+      },
+      {
+        label: client.status === "suspended" ? "Reactivate Client" : undefined,
+        icon: Shield,
+        variant: "primary",
+        onClick: () => handleReactivate(client.id),
+        disabled: client.status !== "suspended",
+      },
+      {
+        label: "Archive Client",
+        icon: Archive,
+        variant: "danger",
+        separator: true,
+        onClick: () => handleArchive(client.id),
+      },
+    ].filter((action) => !!action.label) as RowAction<any>[];
 
-  // ✅ Toolbar toggle trigger icon — dynamic by tab (destination-based)
-  // Individual → Building2 (destination is Corporate)
-  // Corporate → Users (destination is Individual)
+  /* Destination-based toggle icon — Corporate → Users, Individual → Building2 */
   const toolbarTriggerIcon = activeTab === "corporate" ? Users : Building2;
 
   return (
     <div className="space-y-6">
-      {/* ─── HEADER (all tabs) ─────────────────────────────────────── */}
+      {/* ─── HEADER ──────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
@@ -210,21 +242,20 @@ export default function ClientsPage() {
             {currentTabInfo.description}
           </p>
         </div>
-        {/* ✅ DESKTOP ONLY — mobile uses the toolbar's toggle */}
         <div className="hidden md:block">
           <PremiumTabSwitcher
             tabs={TABS}
             activeTab={activeTab}
-            onTabChange={(tabId) => setActiveTab(tabId as ClientSegment)}
+            onTabChange={handleTabChange}
           />
         </div>
       </div>
 
-      {/* ─── TAB CONTENT ──────────────────────────────────────────── */}
+      {/* ─── TAB CONTENT ────────────────────────────────────────── */}
 
-      {/* INVITES TAB — desktop only */}
+      {/* INVITES TAB — mobile browse hides it, but deep links still render */}
       {activeTab === "invites" && (
-        <div className="hidden md:block">
+        <div className="animate-in fade-in duration-300">
           <ClientInvitesPanel />
         </div>
       )}
@@ -232,7 +263,7 @@ export default function ClientsPage() {
       {/* CORPORATE TAB */}
       {activeTab === "corporate" && (
         <>
-          {/* ✅ MOBILE: single card — toolbar + content share ONE container */}
+          {/* MOBILE */}
           <div className="md:hidden bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
             <div className="p-3 border-b border-[var(--color-surface-border)]">
               <MobilePageToolbar
@@ -240,7 +271,7 @@ export default function ClientsPage() {
                 onSearchChange={setSearch}
                 searchPlaceholder="Search clients..."
                 segment={activeTab}
-                onSegmentChange={(value) => setActiveTab(value as ClientSegment)}
+                onSegmentChange={(value) => handleTabChange(value)}
                 segments={MOBILE_TABS.map((t) => ({ id: t.id, label: t.label, icon: t.icon }))}
                 segmentMenuMode="toggle"
                 segmentTriggerIcon={toolbarTriggerIcon}
@@ -260,19 +291,27 @@ export default function ClientsPage() {
 
             <div className="p-12 text-center animate-in fade-in">
               <Building2 size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" />
-              <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">Corporate Client Hub</h3>
+              <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">
+                Corporate Client Hub
+              </h3>
               <p className="text-sm text-[var(--color-ink-muted)] max-w-md mx-auto">
-                Commercial profiles, group company multi-driver billing, agency agreements, and decentralized corporate contract tracking systems coming soon.
+                Commercial profiles, group company multi-driver billing, agency
+                agreements, and decentralized corporate contract tracking
+                systems coming soon.
               </p>
             </div>
           </div>
 
-          {/* ✅ DESKTOP: existing card structure */}
+          {/* DESKTOP */}
           <div className="hidden md:block p-12 text-center bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] animate-in fade-in duration-300">
             <Building2 size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" />
-            <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">Corporate Client Hub</h3>
+            <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">
+              Corporate Client Hub
+            </h3>
             <p className="text-sm text-[var(--color-ink-muted)] max-w-md mx-auto">
-              Commercial profiles, group company multi-driver billing, agency agreements, and decentralized corporate contract tracking systems coming soon.
+              Commercial profiles, group company multi-driver billing, agency
+              agreements, and decentralized corporate contract tracking
+              systems coming soon.
             </p>
           </div>
         </>
@@ -281,7 +320,7 @@ export default function ClientsPage() {
       {/* INDIVIDUAL TAB */}
       {activeTab === "individual" && (
         <>
-          {/* ✅ MOBILE: single card — toolbar + list share ONE container */}
+          {/* MOBILE */}
           <div className="md:hidden bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
             <div className="p-3 border-b border-[var(--color-surface-border)]">
               <MobilePageToolbar
@@ -289,7 +328,7 @@ export default function ClientsPage() {
                 onSearchChange={setSearch}
                 searchPlaceholder="Search clients..."
                 segment={activeTab}
-                onSegmentChange={(value) => setActiveTab(value as ClientSegment)}
+                onSegmentChange={(value) => handleTabChange(value)}
                 segments={MOBILE_TABS.map((t) => ({ id: t.id, label: t.label, icon: t.icon }))}
                 segmentMenuMode="toggle"
                 segmentTriggerIcon={toolbarTriggerIcon}
@@ -323,7 +362,8 @@ export default function ClientsPage() {
               <div className="w-full flex items-center justify-between px-4 py-3 bg-blue-500/10 border-b border-blue-500/20 text-blue-700 dark:text-blue-400 text-sm font-semibold">
                 <span className="flex items-center gap-2">
                   <Filter size={14} />
-                  Viewing {filteredClients.length} pending {filteredClients.length === 1 ? "client" : "clients"}
+                  Viewing {filteredClients.length} pending{" "}
+                  {filteredClients.length === 1 ? "client" : "clients"}
                 </span>
                 <button
                   type="button"
@@ -344,8 +384,12 @@ export default function ClientsPage() {
                 <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
                   <Users size={24} className="text-[var(--color-ink-subtle)]" />
                 </div>
-                <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No clients found</h3>
-                <p className="text-sm text-[var(--color-ink-muted)] mb-4">Try adjusting your search query or filters.</p>
+                <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">
+                  No clients found
+                </h3>
+                <p className="text-sm text-[var(--color-ink-muted)] mb-4">
+                  Try adjusting your search query or filters.
+                </p>
               </div>
             ) : (
               <CardGrid
@@ -357,10 +401,14 @@ export default function ClientsPage() {
                 containerClassName="px-2 pb-4"
                 maxHeight="calc(100vh - 160px)"
                 renderCardHeader={({ item }: { item: any }) => {
-                  const style = CLIENT_STATUS_STYLES[item.status] || CLIENT_STATUS_STYLES.inactive;
+                  const style =
+                    CLIENT_STATUS_STYLES[item.status] || CLIENT_STATUS_STYLES.inactive;
 
                   return (
-                    <div className="flex items-center justify-between w-full cursor-pointer" onClick={() => router.push(`/dashboard/clients/${item.id}`)}>
+                    <div
+                      className="flex items-center justify-between w-full cursor-pointer"
+                      onClick={() => router.push(`/dashboard/clients/${item.id}`)}
+                    >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className="relative flex-shrink-0">
                           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center overflow-hidden shadow-md">
@@ -368,11 +416,15 @@ export default function ClientsPage() {
                               src={item.avatar_image}
                               alt={item.full_name}
                               className="w-full h-full object-cover"
-                              fallback={<UserIcon size={16} className="text-[var(--color-primary)]" />}
+                              fallback={
+                                <UserIcon size={16} className="text-[var(--color-primary)]" />
+                              }
                             />
                           </div>
                           <div className="absolute -top-0.5 -right-0.5">
-                            <div className={`w-3 h-3 rounded-full ${style.dot} ring-2 ring-[var(--color-surface)] shadow-sm`} />
+                            <div
+                              className={`w-3 h-3 rounded-full ${style.dot} ring-2 ring-[var(--color-surface)] shadow-sm`}
+                            />
                           </div>
                         </div>
 
@@ -385,22 +437,31 @@ export default function ClientsPage() {
                           {item.email ? (
                             <div className="flex items-center gap-1 mt-0.5">
                               <Mail size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                              <span className="text-[10px] text-[var(--color-ink-muted)] truncate">{item.email}</span>
+                              <span className="text-[10px] text-[var(--color-ink-muted)] truncate">
+                                {item.email}
+                              </span>
                             </div>
                           ) : (
-                            <span className="text-[10px] text-[var(--color-ink-subtle)] italic">No email</span>
+                            <span className="text-[10px] text-[var(--color-ink-subtle)] italic">
+                              No email
+                            </span>
                           )}
                         </div>
                       </div>
-                      <ChevronRight size={16} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
+                      <ChevronRight
+                        size={16}
+                        className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1"
+                      />
                     </div>
                   );
                 }}
                 renderCardBody={({ item }: { item: any }) => {
                   const dlExpiryDate = item.dl_expiry;
                   const isDLValid = dlExpiryDate ? new Date(dlExpiryDate) > new Date() : false;
-                  const style = CLIENT_STATUS_STYLES[item.status] || CLIENT_STATUS_STYLES.inactive;
-                  const arrangement = ARRANGEMENT_LABELS[item.driving_arrangement || "self_drive"];
+                  const style =
+                    CLIENT_STATUS_STYLES[item.status] || CLIENT_STATUS_STYLES.inactive;
+                  const arrangement =
+                    ARRANGEMENT_LABELS[item.driving_arrangement || "self_drive"];
 
                   return (
                     <div className="mt-3 pt-3 border-t border-[var(--color-surface-border)]/60 space-y-3">
@@ -410,45 +471,73 @@ export default function ClientsPage() {
                             <Phone size={12} className="text-[var(--color-ink-subtle)]" />
                           </div>
                           <div className="min-w-0">
-                            <p className="text-xs font-semibold text-[var(--color-ink)] truncate leading-tight">{item.phone || "No phone"}</p>
-                            <span className="text-[9px] text-[var(--color-ink-muted)] font-medium">Contact</span>
+                            <p className="text-xs font-semibold text-[var(--color-ink)] truncate leading-tight">
+                              {item.phone || "No phone"}
+                            </p>
+                            <span className="text-[9px] text-[var(--color-ink-muted)] font-medium">
+                              Contact
+                            </span>
                           </div>
                         </div>
                         <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
                           <div className="min-w-0 text-right">
-                            <p className="text-xs font-semibold text-[var(--color-ink)] truncate leading-tight font-mono">{item.id_number || "N/A"}</p>
-                            <span className="text-[9px] text-[var(--color-ink-muted)] font-medium">National ID</span>
+                            <p className="text-xs font-semibold text-[var(--color-ink)] truncate leading-tight font-mono">
+                              {item.id_number || "N/A"}
+                            </p>
+                            <span className="text-[9px] text-[var(--color-ink-muted)] font-medium">
+                              National ID
+                            </span>
                           </div>
                           <div className="w-7 h-7 rounded-lg bg-[var(--color-surface-hover)]/80 flex items-center justify-center flex-shrink-0">
-                            <span className="text-[9px] font-bold text-[var(--color-ink-subtle)]">ID</span>
+                            <span className="text-[9px] font-bold text-[var(--color-ink-subtle)]">
+                              ID
+                            </span>
                           </div>
                         </div>
                       </div>
 
-                      <div className={`rounded-xl px-3 py-2.5 border ${
-                        item.status === 'suspended' ? 'bg-red-500/10 border-red-500/20' :
-                        item.status === 'pending' ? 'bg-amber-500/10 border-amber-500/20' :
-                        'bg-[var(--color-surface-hover)]/50 border-[var(--color-surface-border)]/50'
-                      }`}>
+                      <div
+                        className={`rounded-xl px-3 py-2.5 border ${
+                          item.status === "suspended"
+                            ? "bg-red-500/10 border-red-500/20"
+                            : item.status === "pending"
+                              ? "bg-amber-500/10 border-amber-500/20"
+                              : "bg-[var(--color-surface-hover)]/50 border-[var(--color-surface-border)]/50"
+                        }`}
+                      >
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2 min-w-0 flex-1">
                             <Car size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                            <span className="text-[10px] font-semibold text-[var(--color-ink)] truncate">{arrangement}</span>
+                            <span className="text-[10px] font-semibold text-[var(--color-ink)] truncate">
+                              {arrangement}
+                            </span>
                             {item.dl_number && (
                               <>
-                                <span className="text-[9px] text-[var(--color-ink-subtle)]">·</span>
-                                <span className="text-[10px] font-mono text-[var(--color-ink)] truncate">{item.dl_number.replace(/^DL[-\s]?/i, '')}</span>
+                                <span className="text-[9px] text-[var(--color-ink-subtle)]">
+                                  ·
+                                </span>
+                                <span className="text-[10px] font-mono text-[var(--color-ink)] truncate">
+                                  {item.dl_number.replace(/^DL[-\s]?/i, "")}
+                                </span>
                                 {dlExpiryDate && (
-                                  <span className={`text-[8px] font-bold ${isDLValid ? 'text-emerald-500' : 'text-red-500'}`}>
-                                    {isDLValid ? 'VALID' : 'EXPIRED'}
+                                  <span
+                                    className={`text-[8px] font-bold ${isDLValid ? "text-emerald-500" : "text-red-500"}`}
+                                  >
+                                    {isDLValid ? "VALID" : "EXPIRED"}
                                   </span>
                                 )}
                               </>
                             )}
                           </div>
                           <div className="flex items-center gap-1.5 flex-shrink-0 ml-2">
-                            <span className={`w-2 h-2 rounded-full ${style.dot} flex-shrink-0`} />
-                            <span className={`text-[9px] font-bold uppercase tracking-wide ${style.text}`}>{style.label}</span>
+                            <span
+                              className={`w-2 h-2 rounded-full ${style.dot} flex-shrink-0`}
+                            />
+                            <span
+                              className={`text-[9px] font-bold uppercase tracking-wide ${style.text}`}
+                            >
+                              {style.label}
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -460,30 +549,45 @@ export default function ClientsPage() {
             )}
           </div>
 
-          {/* ✅ DESKTOP: existing card structure */}
+          {/* DESKTOP */}
           <div className="hidden md:block bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
             <div className="flex p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
               <div className="hidden sm:flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
                 <div className="flex items-center justify-center gap-1.5 min-w-0 text-center sm:flex-1">
-                  <span className="text-xs font-medium text-[var(--color-ink-muted)]">Clients</span>
-                  <span className="text-xs font-bold text-[var(--color-ink)] tabular-nums">{clientMetrics.total}</span>
+                  <span className="text-xs font-medium text-[var(--color-ink-muted)]">
+                    Clients
+                  </span>
+                  <span className="text-xs font-bold text-[var(--color-ink)] tabular-nums">
+                    {clientMetrics.total}
+                  </span>
                 </div>
                 <div className="w-px h-3 bg-[var(--color-surface-border)] flex-shrink-0" />
                 <div className="flex items-center justify-center gap-1.5 min-w-0 text-center sm:flex-1">
-                  <span className="text-xs font-medium text-[var(--color-ink-muted)]">Active</span>
-                  <span className="text-xs font-bold text-[var(--color-success-text)] tabular-nums">{clientMetrics.active}</span>
+                  <span className="text-xs font-medium text-[var(--color-ink-muted)]">
+                    Active
+                  </span>
+                  <span className="text-xs font-bold text-[var(--color-success-text)] tabular-nums">
+                    {clientMetrics.active}
+                  </span>
                 </div>
                 <div className="w-px h-3 bg-[var(--color-surface-border)] flex-shrink-0" />
                 <div className="flex items-center justify-center gap-1.5 min-w-0 text-center sm:flex-1">
-                  <span className="text-xs font-medium text-[var(--color-ink-muted)]">Inactive</span>
-                  <span className="text-xs font-bold text-[var(--color-danger-text)] tabular-nums">{clientMetrics.inactive}</span>
+                  <span className="text-xs font-medium text-[var(--color-ink-muted)]">
+                    Inactive
+                  </span>
+                  <span className="text-xs font-bold text-[var(--color-danger-text)] tabular-nums">
+                    {clientMetrics.inactive}
+                  </span>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full xl:w-auto">
                 <div className="flex items-center gap-2 flex-1 sm:w-80">
                   <div className="relative flex-1">
-                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
+                    <Search
+                      size={16}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                    />
                     <input
                       type="text"
                       value={search}
@@ -523,7 +627,8 @@ export default function ClientsPage() {
               <div className="w-full flex items-center justify-between px-4 py-3 bg-blue-500/10 border-b border-blue-500/20 text-blue-700 dark:text-blue-400 text-sm font-semibold">
                 <span className="flex items-center gap-2">
                   <Filter size={14} />
-                  Viewing {filteredClients.length} pending {filteredClients.length === 1 ? "client" : "clients"}
+                  Viewing {filteredClients.length} pending{" "}
+                  {filteredClients.length === 1 ? "client" : "clients"}
                 </span>
                 <button
                   type="button"
@@ -544,8 +649,12 @@ export default function ClientsPage() {
                 <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
                   <Users size={24} className="text-[var(--color-ink-subtle)]" />
                 </div>
-                <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No clients found</h3>
-                <p className="text-sm text-[var(--color-ink-muted)] mb-4">Try adjusting your search query or filters.</p>
+                <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">
+                  No clients found
+                </h3>
+                <p className="text-sm text-[var(--color-ink-muted)] mb-4">
+                  Try adjusting your search query or filters.
+                </p>
               </div>
             ) : (
               <DataTable
@@ -570,19 +679,31 @@ export default function ClientsPage() {
                             <div className="flex items-center gap-1.5 min-w-0 flex-wrap">
                               <button
                                 type="button"
-                                onClick={(e) => { e.stopPropagation(); router.push(`/dashboard/clients/${client.id}`); }}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  router.push(`/dashboard/clients/${client.id}`);
+                                }}
                                 className="text-sm font-semibold text-[var(--color-ink)] truncate hover:text-[var(--color-primary)] transition-colors text-left"
                               >
                                 {client.full_name}
                               </button>
                             </div>
                             {client.email ? (
-                              <a href={`mailto:${client.email}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-primary)] transition-colors truncate mt-0.5">
-                                <Mail size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                              <a
+                                href={`mailto:${client.email}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="flex items-center gap-1.5 text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-primary)] transition-colors truncate mt-0.5"
+                              >
+                                <Mail
+                                  size={12}
+                                  className="text-[var(--color-ink-subtle)] flex-shrink-0"
+                                />
                                 <span className="truncate">{client.email}</span>
                               </a>
                             ) : (
-                              <p className="text-xs text-[var(--color-ink-muted)] truncate mt-0.5">No email</p>
+                              <p className="text-xs text-[var(--color-ink-muted)] truncate mt-0.5">
+                                No email
+                              </p>
                             )}
                           </div>
                         </div>
@@ -594,7 +715,10 @@ export default function ClientsPage() {
                     accessorKey: "phone",
                     cell: ({ row }) => (
                       <div className="flex items-center gap-2 text-sm text-[var(--color-ink)]">
-                        <Phone size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                        <Phone
+                          size={12}
+                          className="text-[var(--color-ink-subtle)] flex-shrink-0"
+                        />
                         <span className="font-medium">{row.original.phone}</span>
                       </div>
                     ),
@@ -604,9 +728,13 @@ export default function ClientsPage() {
                     accessorKey: "id_number",
                     cell: ({ row }) =>
                       row.original.id_number ? (
-                        <span className="text-sm font-semibold text-[var(--color-ink)] tracking-wide font-mono">{row.original.id_number}</span>
+                        <span className="text-sm font-semibold text-[var(--color-ink)] tracking-wide font-mono">
+                          {row.original.id_number}
+                        </span>
                       ) : (
-                        <span className="text-sm text-[var(--color-ink-subtle)] italic">Not provided</span>
+                        <span className="text-sm text-[var(--color-ink-subtle)] italic">
+                          Not provided
+                        </span>
                       ),
                   },
                   {
@@ -617,8 +745,13 @@ export default function ClientsPage() {
                       const arr = client.driving_arrangement || "self_drive";
                       return (
                         <div className="flex items-center gap-1.5 text-sm text-[var(--color-ink)]">
-                          <Car size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                          <span className="font-medium">{ARRANGEMENT_LABELS[arr] || arr}</span>
+                          <Car
+                            size={12}
+                            className="text-[var(--color-ink-subtle)] flex-shrink-0"
+                          />
+                          <span className="font-medium">
+                            {ARRANGEMENT_LABELS[arr] || arr}
+                          </span>
                         </div>
                       );
                     },
@@ -628,9 +761,13 @@ export default function ClientsPage() {
                     accessorKey: "dl_number",
                     cell: ({ row }) =>
                       row.original.dl_number ? (
-                        <span className="text-sm font-semibold text-[var(--color-ink)] tracking-wide font-mono">{row.original.dl_number}</span>
+                        <span className="text-sm font-semibold text-[var(--color-ink)] tracking-wide font-mono">
+                          {row.original.dl_number}
+                        </span>
                       ) : (
-                        <span className="text-sm text-[var(--color-ink-subtle)] italic">Not provided</span>
+                        <span className="text-sm text-[var(--color-ink-subtle)] italic">
+                          Not provided
+                        </span>
                       ),
                   },
                   {
@@ -638,9 +775,13 @@ export default function ClientsPage() {
                     accessorKey: "status",
                     cell: ({ row }) => {
                       const client = row.original as any;
-                      const style = CLIENT_STATUS_STYLES[client.status] || CLIENT_STATUS_STYLES.inactive;
+                      const style =
+                        CLIENT_STATUS_STYLES[client.status] ||
+                        CLIENT_STATUS_STYLES.inactive;
                       return (
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${style.bg} ${style.text}`}>
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${style.bg} ${style.text}`}
+                        >
                           {style.label}
                         </span>
                       );
@@ -664,10 +805,13 @@ export default function ClientsPage() {
         </>
       )}
 
-      {/* ✅ REVIEW VERIFICATION MODAL */}
+      {/* ─── REVIEW VERIFICATION MODAL ──────────────────────────── */}
       <ReviewVerificationModal
         isOpen={reviewModalOpen}
-        onClose={() => { setReviewModalOpen(false); setReviewClientId(null); }}
+        onClose={() => {
+          setReviewModalOpen(false);
+          setReviewClientId(null);
+        }}
         personId={reviewClientId || 0}
         personType="client"
         onSuccess={() => {

@@ -1,8 +1,17 @@
 // src/app/dashboard/fleet/page.tsx
 "use client";
 
-import { useRouter } from "next/navigation";
-import { Car, Plus, BarChart3, Wrench, CarFront, LineChart, Wrench as WrenchIcon, Filter } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  Car,
+  Plus,
+  BarChart3,
+  Wrench,
+  CarFront,
+  LineChart,
+  Wrench as WrenchIcon,
+  Filter,
+} from "lucide-react";
 import { useState, useMemo, useEffect } from "react";
 import { useFleetList } from "@/hooks/fleet/useFleetList";
 import FleetList from "@/components/fleet/FleetList";
@@ -14,6 +23,10 @@ import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
 import MobilePageToolbar from "@/components/ui/MobilePageToolbar";
 import MobileFloatingSegment from "@/components/ui/MobileFloatingSegment";
 
+/* ──────────────────────────────────────────────────────────────────────
+   Tabs config
+────────────────────────────────────────────────────────────────────── */
+
 type TabMode = "fleet" | "performance" | "garage";
 
 interface TabItem {
@@ -24,20 +37,48 @@ interface TabItem {
 }
 
 const TABS: TabItem[] = [
-  { id: "fleet", label: "Vehicles", icon: Car },
+  { id: "fleet",       label: "Vehicles",    icon: Car },
   { id: "performance", label: "Performance", icon: BarChart3, hiddenOnMobile: true },
-  { id: "garage", label: "Garage", icon: Wrench },
+  { id: "garage",      label: "Garage",      icon: Wrench },
 ];
 
 const MOBILE_TABS: TabItem[] = TABS.filter((t) => !t.hiddenOnMobile);
+const VALID_TABS = new Set<TabMode>(["fleet", "performance", "garage"]);
+
+/* ──────────────────────────────────────────────────────────────────────
+   Component
+────────────────────────────────────────────────────────────────────── */
 
 export default function FleetPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<TabMode>("fleet");
-  const [activeRentals, setActiveRentals] = useState<Record<number, Booking>>({});
+  const searchParams = useSearchParams();
 
+  /* ✅ URL-driven tab — deep links land on the right tab on any viewport */
+  const tabFromUrl = searchParams.get("tab") as TabMode | null;
+  const initialTab: TabMode =
+    tabFromUrl && VALID_TABS.has(tabFromUrl) ? tabFromUrl : "fleet";
+  const [activeTab, setActiveTab] = useState<TabMode>(initialTab);
+
+  const [activeRentals, setActiveRentals] = useState<Record<number, Booking>>({});
   const fleetData = useFleetList();
 
+  /* Sync FROM URL */
+  useEffect(() => {
+    const t = searchParams.get("tab") as TabMode | null;
+    if (t && VALID_TABS.has(t) && t !== activeTab) {
+      setActiveTab(t);
+    }
+  }, [searchParams, activeTab]);
+
+  const handleTabChange = (tabId: string) => {
+    if (!VALID_TABS.has(tabId as TabMode)) return;
+    const next = tabId as TabMode;
+    if (next === activeTab) return;
+    setActiveTab(next);
+    router.push(`/dashboard/fleet?tab=${next}`, { scroll: false });
+  };
+
+  /* Fetch active rentals map */
   useEffect(() => {
     async function fetchActiveRentals() {
       try {
@@ -47,7 +88,7 @@ export default function FleetPage() {
         });
 
         const active = allBookings.filter(
-          (b) => b.status === "active" || b.status === "confirmed"
+          (b) => b.status === "active" || b.status === "confirmed",
         );
 
         const rentalMap: Record<number, Booking> = {};
@@ -66,35 +107,27 @@ export default function FleetPage() {
     fetchActiveRentals();
   }, []);
 
-  useEffect(() => {
-    const checkMobile = () => {
-      if (window.innerWidth < 768 && activeTab === "performance") {
-        setActiveTab("fleet");
-      }
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, [activeTab]);
-
   const currentTabInfo = useMemo(() => {
     if (activeTab === "fleet") {
       return {
         title: "Fleet Management",
-        description: "Oversee your vehicles, track performance statuses, and manage your garage pipelines.",
+        description:
+          "Oversee your vehicles, track performance statuses, and manage your garage pipelines.",
         icon: <CarFront size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
       };
     }
     if (activeTab === "performance") {
       return {
         title: "Performance Analytics",
-        description: "Deep insights into your fleet's performance, utilization, and profitability.",
+        description:
+          "Deep insights into your fleet's performance, utilization, and profitability.",
         icon: <LineChart size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
       };
     }
     return {
       title: "Garage Operations",
-      description: "Onboard new vehicles, manage maintenance, and track service schedules.",
+      description:
+        "Onboard new vehicles, manage maintenance, and track service schedules.",
       icon: <WrenchIcon size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
     };
   }, [activeTab]);
@@ -102,16 +135,25 @@ export default function FleetPage() {
   const statusOptions = useMemo(() => {
     const opts = [
       { value: "pending_activation", label: "Pending Activation" },
-      { value: "available", label: "Available" },
-      { value: "rented", label: "Rented" },
-      { value: "maintenance", label: "Maintenance" },
-      { value: "retired", label: "Retired" },
+      { value: "available",          label: "Available" },
+      { value: "rented",             label: "Rented" },
+      { value: "maintenance",        label: "Maintenance" },
+      { value: "retired",            label: "Retired" },
     ];
     return opts.map((o) => ({
       ...o,
       count: fleetData.filteredVehicles.filter((v) => v.status === o.value).length,
     }));
   }, [fleetData.filteredVehicles]);
+
+  /* ✅ Floating escape target:
+     - On mobile-browse tabs (fleet / garage): toggle back to "fleet" when on garage.
+     - On desktop-only tab (performance): toggle back to "fleet" (escape hatch).
+     - On "fleet": don't render (nothing to escape to). */
+  const showFloating =
+    activeTab === "garage" || activeTab === "performance";
+  const floatingToggleTarget: TabMode = "fleet";
+  const floatingTriggerIcon = activeTab === "performance" ? BarChart3 : CarFront;
 
   return (
     <div className="space-y-6">
@@ -133,7 +175,7 @@ export default function FleetPage() {
           <PremiumTabSwitcher
             tabs={TABS}
             activeTab={activeTab}
-            onTabChange={(tabId) => setActiveTab(tabId as TabMode)}
+            onTabChange={handleTabChange}
           />
         </div>
       </div>
@@ -141,7 +183,7 @@ export default function FleetPage() {
       {/* ─── TAB CONTENT ──────────────────────────────────────────── */}
       {activeTab === "fleet" ? (
         <>
-          {/* ✅ MOBILE: single card — toolbar + list share ONE container */}
+          {/* MOBILE */}
           <div className="md:hidden bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
             <div className="p-3 border-b border-[var(--color-surface-border)]">
               <MobilePageToolbar
@@ -149,7 +191,7 @@ export default function FleetPage() {
                 onSearchChange={fleetData.setSearch}
                 searchPlaceholder="Search make, model, plate..."
                 segment={activeTab}
-                onSegmentChange={(value) => setActiveTab(value as TabMode)}
+                onSegmentChange={(value) => handleTabChange(value)}
                 segments={MOBILE_TABS.map((t) => ({ id: t.id, label: t.label, icon: t.icon }))}
                 segmentMenuMode="toggle"
                 segmentTriggerIcon={Wrench}
@@ -161,7 +203,7 @@ export default function FleetPage() {
                     value: fleetData.statusFilter || null,
                     onChange: (value) =>
                       fleetData.setStatusFilter(
-                        (value || "") as typeof fleetData.statusFilter
+                        (value || "") as typeof fleetData.statusFilter,
                       ),
                     icon: Filter,
                   },
@@ -186,7 +228,7 @@ export default function FleetPage() {
             />
           </div>
 
-          {/* ✅ DESKTOP: existing card structure (unchanged) */}
+          {/* DESKTOP */}
           <div className="hidden md:block bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
             <FleetList
               {...fleetData}
@@ -197,14 +239,19 @@ export default function FleetPage() {
           </div>
         </>
       ) : activeTab === "performance" ? (
+        /* ✅ Renders at every viewport when deep-linked */
         <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-12 text-center animate-in fade-in duration-300">
           <BarChart3 size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" />
-          <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">Performance Analytics</h3>
+          <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">
+            Performance Analytics
+          </h3>
           <p className="text-sm text-[var(--color-ink-muted)] max-w-md mx-auto">
-            Advanced fleet performance metrics, real-time vehicle utilization analysis, and customized profitability timelines coming soon.
+            Advanced fleet performance metrics, real-time vehicle utilization
+            analysis, and customized profitability timelines coming soon.
           </p>
         </div>
       ) : (
+        /* Garage tab — renders at every viewport */
         <div className="space-y-6 animate-in fade-in duration-300">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
             {/* Quick Garage Card */}
@@ -212,7 +259,7 @@ export default function FleetPage() {
               className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-4 sm:p-6 group cursor-pointer hover:border-[var(--color-primary)]/30 transition-all flex flex-row sm:flex-col items-start gap-3.5 sm:gap-0"
               onClick={() => {
                 const awaitingVehicle = fleetData.filteredVehicles.find(
-                  (v) => v.mileage_due === true
+                  (v) => v.mileage_due === true,
                 );
                 if (awaitingVehicle) {
                   fleetData.setGarageVehicle(awaitingVehicle);
@@ -232,9 +279,15 @@ export default function FleetPage() {
                 </p>
                 <div className="flex items-center gap-2 text-xs font-semibold text-[var(--color-primary)]">
                   <span>
-                    {fleetData.filteredVehicles.filter((v) => v.mileage_due).length} vehicles pending mileage
+                    {
+                      fleetData.filteredVehicles.filter((v) => v.mileage_due)
+                        .length
+                    }{" "}
+                    vehicles pending mileage
                   </span>
-                  <span className="group-hover:translate-x-1 transition-transform">→</span>
+                  <span className="group-hover:translate-x-1 transition-transform">
+                    →
+                  </span>
                 </div>
               </div>
             </div>
@@ -253,9 +306,16 @@ export default function FleetPage() {
                 </p>
                 <div className="flex items-center gap-2 text-xs font-semibold text-[var(--color-primary)]">
                   <span>
-                    {fleetData.filteredVehicles.filter((v) => v.status === "maintenance").length} in maintenance
+                    {
+                      fleetData.filteredVehicles.filter(
+                        (v) => v.status === "maintenance",
+                      ).length
+                    }{" "}
+                    in maintenance
                   </span>
-                  <span className="group-hover:translate-x-1 transition-transform">→</span>
+                  <span className="group-hover:translate-x-1 transition-transform">
+                    →
+                  </span>
                 </div>
               </div>
             </div>
@@ -274,7 +334,9 @@ export default function FleetPage() {
                 </p>
                 <div className="flex items-center gap-2 text-xs font-semibold text-[var(--color-primary)]">
                   <span>View schedule</span>
-                  <span className="group-hover:translate-x-1 transition-transform">→</span>
+                  <span className="group-hover:translate-x-1 transition-transform">
+                    →
+                  </span>
                 </div>
               </div>
             </div>
@@ -288,7 +350,8 @@ export default function FleetPage() {
               Garage Hub
             </h3>
             <p className="text-sm text-[var(--color-ink-muted)] max-w-md">
-              Comprehensive maintenance scheduling, parts inventory, mechanic assignments, and automated service reminders coming soon.
+              Comprehensive maintenance scheduling, parts inventory, mechanic
+              assignments, and automated service reminders coming soon.
             </p>
           </div>
         </div>
@@ -315,14 +378,20 @@ export default function FleetPage() {
         onSuccess={fleetData.refetch}
       />
 
-      {/* Floating segment toggle — Garage tab only (mobile) */}
-      {activeTab === "garage" && (
+      {/* ✅ Floating toggle — appears on garage (mobile browse) and
+             performance (desktop-only, deep-linked on mobile). Tapping
+             it returns the user to the mobile-friendly "Vehicles" tab. */}
+      {showFloating && (
         <MobileFloatingSegment
-          segments={MOBILE_TABS.map((t) => ({ id: t.id, label: t.label, icon: t.icon }))}
+          segments={MOBILE_TABS.map((t) => ({
+            id: t.id,
+            label: t.label,
+            icon: t.icon,
+          }))}
           active={activeTab}
-          onChange={(id) => setActiveTab(id as TabMode)}
-          toggleTarget="fleet"
-          triggerIcon={CarFront}
+          onChange={(id) => handleTabChange(id)}
+          toggleTarget={floatingToggleTarget}
+          triggerIcon={floatingTriggerIcon}
         />
       )}
     </div>

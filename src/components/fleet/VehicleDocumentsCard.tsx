@@ -6,9 +6,18 @@ import type { Vehicle } from "@/lib/types";
 
 interface VehicleDocumentsCardProps {
   vehicle: Vehicle;
+  onViewDocument?: (url: string, label: string) => void;
 }
 
-function DocTile({ title, url }: { title: string; url: string | null }) {
+function DocTile({
+  title,
+  url,
+  onView,
+}: {
+  title: string;
+  url: string | null;
+  onView?: () => void;
+}) {
   const isAvailable = Boolean(url);
 
   return (
@@ -17,8 +26,8 @@ function DocTile({ title, url }: { title: string; url: string | null }) {
       <div className="flex items-start justify-between gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
           <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${
-            isAvailable 
-              ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20" 
+            isAvailable
+              ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20"
               : "bg-[var(--color-surface-hover)] text-[var(--color-ink-subtle)] border border-[var(--color-surface-border)]"
           }`}>
             <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -31,7 +40,7 @@ function DocTile({ title, url }: { title: string; url: string | null }) {
           </div>
         </div>
 
-        {/* Status Badge: Always show 'Active' when present, but hide 'Missing' badge on desktop (lg:hidden) to avoid clutter */}
+        {/* Status Badge */}
         {isAvailable ? (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex-shrink-0">
             <CheckCircle2 size={10} /> Active
@@ -45,15 +54,14 @@ function DocTile({ title, url }: { title: string; url: string | null }) {
 
       {/* Action Toolbar */}
       <div className="pt-2.5 border-t border-[var(--color-surface-border)]/60 flex items-center justify-end gap-2">
-        {isAvailable && url && (
-          <a
-            href={url}
-            target="_blank"
-            rel="noopener noreferrer"
+        {isAvailable && url && onView && (
+          <button
+            type="button"
+            onClick={onView}
             className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[var(--color-ink)] bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-border)] active:scale-95 transition-all"
           >
             <Eye size={14} /> View
-          </a>
+          </button>
         )}
         <button
           type="button"
@@ -66,8 +74,15 @@ function DocTile({ title, url }: { title: string; url: string | null }) {
   );
 }
 
-export default function VehicleDocumentsCard({ vehicle }: VehicleDocumentsCardProps) {
-  const uploadedCount = [vehicle.insurance_doc, vehicle.registration_doc, vehicle.inspection_doc].filter(Boolean).length;
+export default function VehicleDocumentsCard({
+  vehicle,
+  onViewDocument,
+}: VehicleDocumentsCardProps) {
+  const uploadedCount = [
+    vehicle.insurance_doc,
+    vehicle.registration_doc,
+    vehicle.inspection_doc,
+  ].filter(Boolean).length;
 
   return (
     <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-2xl p-4 sm:p-6 shadow-[var(--shadow-card)] space-y-3.5 sm:space-y-4">
@@ -81,9 +96,33 @@ export default function VehicleDocumentsCard({ vehicle }: VehicleDocumentsCardPr
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-4">
-        <DocTile title="Insurance Certificate" url={vehicle.insurance_doc} />
-        <DocTile title="Registration Book" url={vehicle.registration_doc} />
-        <DocTile title="Inspection Report" url={vehicle.inspection_doc} />
+        <DocTile
+          title="Insurance Certificate"
+          url={vehicle.insurance_doc}
+          onView={
+            vehicle.insurance_doc
+              ? () => onViewDocument?.(vehicle.insurance_doc!, "Insurance Certificate")
+              : undefined
+          }
+        />
+        <DocTile
+          title="Registration Book"
+          url={vehicle.registration_doc}
+          onView={
+            vehicle.registration_doc
+              ? () => onViewDocument?.(vehicle.registration_doc!, "Registration Book")
+              : undefined
+          }
+        />
+        <DocTile
+          title="Inspection Report"
+          url={vehicle.inspection_doc}
+          onView={
+            vehicle.inspection_doc
+              ? () => onViewDocument?.(vehicle.inspection_doc!, "Inspection Report")
+              : undefined
+          }
+        />
       </div>
     </div>
   );

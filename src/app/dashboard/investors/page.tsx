@@ -1,8 +1,8 @@
-// src/app/dashboard/agency/investors/page.tsx
+// src/app/dashboard/investors/page.tsx
 "use client";
 
-import { useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useMemo, useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Users,
   UserPlus,
@@ -26,6 +26,7 @@ import { useInvestorsList } from "@/hooks/investor/useInvestorsList";
 import type { User } from "@/lib/types";
 
 type InvestorStatus = "active" | "pending";
+const VALID_STATUSES = new Set<InvestorStatus>(["active", "pending"]);
 
 // ✅ Mirrors CLIENT_STATUS_STYLES shape exactly
 const INVESTOR_STATUS_STYLES: Record<
@@ -53,14 +54,49 @@ const PAGE_SIZE = 10;
 
 export default function AgencyInvestorsPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { investors, loading } = useInvestorsList();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  
+  // ✅ Hydrate from URL
+  const initialSearch = searchParams.get("q") || "";
+  const statusParam = searchParams.get("status") as InvestorStatus | null;
+  const initialStatus = statusParam && VALID_STATUSES.has(statusParam) ? statusParam : null;
+
+  const [search, setSearch] = useState(initialSearch);
+  const [statusFilter, setStatusFilter] = useState<string | null>(initialStatus);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // ✅ Derived metrics — mirrors clients page pill group
+  // ✅ Sync FROM URL (handles browser back/forward, deep links)
+  useEffect(() => {
+    const q = searchParams.get("q") || "";
+    if (q !== search) setSearch(q);
+
+    const s = searchParams.get("status") as InvestorStatus | null;
+    const validS = s && VALID_STATUSES.has(s) ? s : null;
+    if (validS !== statusFilter) setStatusFilter(validS);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  // ✅ Sync TO URL (keeps state sharable/bookmarkable)
+  useEffect(() => {
+    const params = new URLSearchParams();
+    if (search.trim()) params.set("q", search.trim());
+    if (statusFilter) params.set("status", statusFilter);
+
+    const str = params.toString();
+    const newUrl = `/dashboard/investors${str ? `?${str}` : ""}`;
+    
+    // Only push if the URL actually differs to avoid infinite loops
+    if (window.location.pathname + window.location.search !== newUrl) {
+      router.replace(newUrl, { scroll: false });
+    }
+    setCurrentPage(1);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search, statusFilter]);
+
+  // ✅ Derived metrics
   const metrics = useMemo(() => {
     const total = investors.length;
     const active = investors.filter(
@@ -99,14 +135,14 @@ export default function AgencyInvestorsPage() {
     [filteredInvestors, safePage],
   );
 
-  // ✅ Row actions — 3-dots menu (UI only; wire handlers to real endpoints later)
+  // ✅ Row actions
   const getInvestorActions = (investor: User): RowAction<User>[] =>
     [
       {
         label: "View Profile",
         icon: UserIcon,
         onClick: () =>
-          router.push(`/dashboard/agency/investors/${investor.id}`),
+          router.push(`/dashboard/investors/${investor.id}`),
       },
       {
         label: "Resend Invite",
@@ -130,11 +166,10 @@ export default function AgencyInvestorsPage() {
 
   return (
     <div className="space-y-6">
-      {/* ✅ Header — exact shell from clients/users */}
+      {/* ✅ Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            {/* ✅ Bare Icon — hidden on mobile, visible from sm: up */}
             <span className="hidden sm:inline-flex">
               <Users
                 size={28}
@@ -147,7 +182,6 @@ export default function AgencyInvestorsPage() {
               Investors
             </h1>
           </div>
-          {/* ✅ Subheading aligns to icon's left edge */}
           <p className="text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
             Manage your host investors, track their vehicles, and oversee lease
             agreements.
@@ -157,7 +191,7 @@ export default function AgencyInvestorsPage() {
 
       {/* ✅ Canonical surface card */}
       <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
-        {/* ✅ Toolbar — mirrors clients page */}
+        {/* Toolbar */}
         <div className="p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
           {/* Metrics pill group */}
           <div className="hidden sm:flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
@@ -200,10 +234,7 @@ export default function AgencyInvestorsPage() {
                 <input
                   type="text"
                   value={search}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    setCurrentPage(1);
-                  }}
+                  onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search investors..."
                   className="w-full pl-9 pr-4 py-2 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all text-sm"
                 />
@@ -221,10 +252,7 @@ export default function AgencyInvestorsPage() {
                   },
                 ]}
                 value={statusFilter}
-                onChange={(value) => {
-                  setStatusFilter(value);
-                  setCurrentPage(1);
-                }}
+                onChange={(value) => setStatusFilter(value)}
                 icon={Filter}
               />
             </div>
@@ -291,7 +319,7 @@ export default function AgencyInvestorsPage() {
                     <div
                       className="flex items-center justify-between w-full cursor-pointer"
                       onClick={() =>
-                        router.push(`/dashboard/agency/investors/${item.id}`)
+                        router.push(`/dashboard/investors/${item.id}`)
                       }
                     >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -438,7 +466,7 @@ export default function AgencyInvestorsPage() {
                               onClick={(e) => {
                                 e.stopPropagation();
                                 router.push(
-                                  `/dashboard/agency/investors/${investor.id}`,
+                                  `/dashboard/investors/${investor.id}`,
                                 );
                               }}
                               className="text-sm font-semibold text-[var(--color-ink)] truncate hover:text-[var(--color-primary)] transition-colors text-left"
@@ -523,7 +551,7 @@ export default function AgencyInvestorsPage() {
                 rowActions={getInvestorActions}
                 getRowId={(investor) => String(investor.id)}
                 onRowClick={(investor) =>
-                  router.push(`/dashboard/agency/investors/${investor.id}`)
+                  router.push(`/dashboard/investors/${investor.id}`)
                 }
                 loading={loading}
                 emptyMessage="No investors found matching your criteria."

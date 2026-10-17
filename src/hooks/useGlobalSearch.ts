@@ -6,11 +6,21 @@ import { clientsApi } from "@/lib/api/clients";
 import { bookingsApi } from "@/lib/api/bookings";
 import { vehiclesApi } from "@/lib/api/vehicles";
 import { useAuth } from "@/context/auth-context";
-import { tenantAdminNav, superAdminNav, investorNav } from "@/lib/nav-config";
 import type { Client, Booking, Vehicle } from "@/lib/types";
+import type { LucideIcon } from "lucide-react";
+import {
+  getPagesForRole,
+  toPageResult,
+  type RegistrySection,
+} from "@/lib/search/page-registry";
+import {
+  statusesInText,
+  statusesForEntity,
+  isPureStatusQuery,
+} from "@/lib/search/status-registry";
 
 /* ──────────────────────────────────────────────────────────────────────
-   Types
+   Public types
 ────────────────────────────────────────────────────────────────────── */
 
 export type SearchScope = "all" | "clients" | "bookings" | "fleet";
@@ -53,10 +63,9 @@ export interface PageResult {
   label: string;
   description: string;
   href: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
+  section: RegistrySection;
 }
-
-export type SearchResult = ClientResult | BookingResult | VehicleResult | PageResult;
 
 export interface GroupedResults {
   pages: PageResult[];
@@ -64,6 +73,8 @@ export interface GroupedResults {
   bookings: BookingResult[];
   vehicles: VehicleResult[];
   total: number;
+  /** Statuses the query implicitly referenced, for UI chips. */
+  detectedStatuses: string[];
 }
 
 export interface UseGlobalSearchReturn {
@@ -78,95 +89,155 @@ export interface UseGlobalSearchReturn {
 ────────────────────────────────────────────────────────────────────── */
 
 const PER_CATEGORY_CAP = 50;
+const STATUS_ONLY_PAGE_BOOST = 10;
 
 /* ──────────────────────────────────────────────────────────────────────
-   Page aliases — augment the auto-derived nav entries with synonyms
+   Text helpers
 ────────────────────────────────────────────────────────────────────── */
 
-const PAGE_ALIASES: Record<string, string[]> = {
-  "/dashboard/bookings": ["booking", "reservation", "reservations", "trip", "trips", "rental", "rentals"],
-  "/dashboard/clients": ["client", "customer", "customers", "individual", "corporate"],
-  "/dashboard/fleet": ["vehicle", "vehicles", "car", "cars", "garage", "maintenance"],
-  "/dashboard/drivers": ["driver", "chauffeur", "chauffeurs"],
-  "/dashboard/financials": ["finance", "invoice", "invoices", "payment", "payments", "contract", "contracts", "billing", "revenue"],
-  "/dashboard/reports": ["analytics", "insights", "metrics"],
-  "/dashboard/users": ["user", "team", "staff", "roster", "employee", "employees", "roles"],
-  "/dashboard/tasks": ["task", "todo", "todos"],
-  "/dashboard/settings": ["setting", "preferences", "config", "profile"],
-  "/dashboard/investors": ["investor", "investors", "lease", "leases"],
-  "/dashboard/vault": ["archive", "archived", "vault"],
-  "/super-admin": ["dashboard", "home"],
-  "/super-admin/agencies": ["agency", "agencies", "tenant", "tenants"],
-  "/super-admin/subscriptions": ["subscription", "subscriptions", "plan", "plans", "billing"],
-  "/super-admin/reports": ["analytics", "insights", "metrics"],
-  "/super-admin/system": ["config", "infra", "infrastructure", "system"],
-  "/super-admin/settings": ["setting", "preferences", "config"],
-  "/super-admin/support": ["help", "support", "ticket", "tickets"],
-};
+function tokenize(q: string): string[] {
+  return q
+    .toLowerCase()
+    .replace(/[^a-z0-9_\s-]/g, " ")
+    .split(/\s+/)
+    .filter(Boolean);
+}
 
-const PAGE_DESCRIPTIONS: Record<string, string> = {
-  "/dashboard": "Overview of your rental business",
-  "/dashboard/bookings": "Reservations, trips, and calendar",
-  "/dashboard/clients": "Individual and corporate clients",
-  "/dashboard/fleet": "Vehicles, garage, maintenance",
-  "/dashboard/drivers": "Company and contract drivers",
-  "/dashboard/financials": "Invoices, payments, contracts",
-  "/dashboard/reports": "Analytics and insights",
-  "/dashboard/users": "Team roster, scheduler, roles",
-  "/dashboard/tasks": "Task management",
-  "/dashboard/settings": "Account and agency settings",
-  "/dashboard/investors": "Investor vehicles and leases",
-  "/dashboard/vault": "Archived records",
-  "/super-admin": "Platform overview",
-  "/super-admin/agencies": "All agencies on the platform",
-  "/super-admin/subscriptions": "Plans and billing cycles",
-  "/super-admin/reports": "Platform-wide analytics",
-  "/super-admin/system": "System configuration and health",
-  "/super-admin/settings": "Platform settings",
-  "/super-admin/support": "Support tickets and inquiries",
-};
+/** Does any token match any haystack string (substring, both directions)? */
+function anyTokenMatches(
+  tokens: string[],
+  haystacks: Array<string | null | undefined>,
+): boolean {
+  const clean = haystacks.filter(
+    (h): h is string => typeof h === "string" && h.length > 0,
+  );
+  if (clean.length === 0 || tokens.length === 0) return false;
+
+  for (const tok of tokens) {
+    for (const hay of clean) {
+      const h = hay.toLowerCase();
+      if (h.includes(tok) || tok.includes(h)) return true;
+    }
+  }
+  return false;
+}
 
 /* ──────────────────────────────────────────────────────────────────────
-   Filter helpers
+   Entity matchers — text AND status-aware
 ────────────────────────────────────────────────────────────────────── */
 
-const matchesClient = (c: Client, q: string): boolean =>
-  !!(
-    c.full_name?.toLowerCase().includes(q) ||
-    c.phone?.toLowerCase().includes(q) ||
-    c.email?.toLowerCase().includes(q) ||
-    c.id_number?.toLowerCase().includes(q) ||
-    c.dl_number?.toLowerCase().includes(q)
-  );
+function matchesClientText(c: Client, tokens: string[]): boolean {
+  return anyTokenMatches(tokens, [
+    c.full_name,
+    c.first_name,
+    c.last_name,
+    c.phone,
+    c.email,
+    c.id_number,
+    c.dl_number,
+  ]);
+}
 
-const matchesBooking = (b: Booking, q: string): boolean => {
-  const client = b.client as any;
-  const vehicle = b.vehicle as any;
-  return !!(
-    b.booking_number?.toLowerCase().includes(q) ||
-    b.id.toString().includes(q) ||
-    b.destination?.toLowerCase().includes(q) ||
-    b.pickup_location?.toLowerCase().includes(q) ||
-    b.return_location?.toLowerCase().includes(q) ||
-    b.client_name?.toLowerCase().includes(q) ||
-    b.client_phone?.toLowerCase().includes(q) ||
-    client?.full_name?.toLowerCase().includes(q) ||
-    client?.phone?.toLowerCase().includes(q) ||
-    b.vehicle_name?.toLowerCase().includes(q) ||
-    b.vehicle_plate?.toLowerCase().includes(q) ||
-    vehicle?.make?.toLowerCase().includes(q) ||
-    vehicle?.model?.toLowerCase().includes(q) ||
-    vehicle?.plate_number?.toLowerCase().includes(q)
+function clientHasStatus(c: Client, statuses: Set<string>): boolean {
+  if (statuses.size === 0) return true;
+  // Client rows carry `status` (ClientStatus). Verification statuses live
+  // in `verification_status` — match against either when the query lists
+  // a verification term.
+  const verificationStatuses = new Set(
+    statusesForEntity("client_verification").map((s) => s.value),
   );
-};
+  for (const s of statuses) {
+    if (verificationStatuses.has(s) && c.verification_status === s) return true;
+    if (c.status === s) return true;
+  }
+  return false;
+}
 
-const matchesVehicle = (v: Vehicle, q: string): boolean =>
-  !!(
-    v.make?.toLowerCase().includes(q) ||
-    v.model?.toLowerCase().includes(q) ||
-    v.plate_number?.toLowerCase().includes(q) ||
-    v.vin?.toLowerCase().includes(q)
+function matchesBookingText(b: Booking, tokens: string[]): boolean {
+  const client = b.client as Client | undefined;
+  const vehicle = b.vehicle as Vehicle | undefined;
+  return anyTokenMatches(tokens, [
+    b.booking_number,
+    String(b.id),
+    b.destination,
+    b.pickup_location,
+    b.return_location,
+    b.client_name,
+    b.client_phone,
+    client?.full_name,
+    client?.first_name,
+    client?.last_name,
+    client?.phone,
+    b.vehicle_name,
+    b.vehicle_plate,
+    vehicle?.make,
+    vehicle?.model,
+    vehicle?.plate_number,
+  ]);
+}
+
+function bookingHasStatus(b: Booking, statuses: Set<string>): boolean {
+  if (statuses.size === 0) return true;
+  const cancellationReasons = new Set(
+    statusesForEntity("cancellation_reason").map((s) => s.value),
   );
+  for (const s of statuses) {
+    // Booking statuses
+    if (b.status === s) return true;
+    // Cancellation reasons — matched against `cancellation_reason`, not status
+    if (cancellationReasons.has(s) && b.cancellation_reason === s) return true;
+  }
+  return false;
+}
+
+function matchesVehicleText(v: Vehicle, tokens: string[]): boolean {
+  return anyTokenMatches(tokens, [
+    v.make,
+    v.model,
+    v.plate_number,
+    v.vin,
+  ]);
+}
+
+function vehicleHasStatus(v: Vehicle, statuses: Set<string>): boolean {
+  if (statuses.size === 0) return true;
+  for (const s of statuses) {
+    if (v.status === s) return true;
+  }
+  return false;
+}
+
+/* ──────────────────────────────────────────────────────────────────────
+   Page matcher — text, alias, or status-keyword
+────────────────────────────────────────────────────────────────────── */
+
+function pageMatches(
+  entry: ReturnType<typeof getPagesForRole>[number],
+  tokens: string[],
+  rawLower: string,
+  detectedStatuses: Set<string>,
+): boolean {
+  // 1. Label / description / section / aliases / statusKeywords
+  const haystacks: string[] = [
+    entry.label,
+    entry.description,
+    entry.section,
+    ...entry.aliases,
+    ...(entry.statusKeywords ?? []),
+  ];
+
+  if (anyTokenMatches(tokens, haystacks)) return true;
+  if (haystacks.some((h) => h.toLowerCase().includes(rawLower))) return true;
+
+  // 2. Status keyword cross-match
+  if (detectedStatuses.size > 0 && entry.statusKeywords) {
+    for (const k of entry.statusKeywords) {
+      if (detectedStatuses.has(k)) return true;
+    }
+  }
+
+  return false;
+}
 
 /* ──────────────────────────────────────────────────────────────────────
    Hook
@@ -182,36 +253,10 @@ export function useGlobalSearch(query: string): UseGlobalSearchReturn {
 
   const inFlight = useRef(false);
 
-  /* ── ✅ ROLE-BASED PAGE REGISTRY ────────────────────────────────────
-     Derived from the user's own nav config — no cross-role leakage.
-     Super admins only see super-admin pages; tenant users only their
-     own tenant nav; investors only their own.                                */
-  const navForRole = useMemo(() => {
-    if (!user) return [];
-    switch (user.role) {
-      case "super_admin":
-        return superAdminNav;
-      case "investor":
-        return investorNav;
-      case "tenant_admin":
-      case "tenant_staff":
-      default:
-        return tenantAdminNav;
-    }
-  }, [user]);
+  /* Role-scoped pages — the only gate. Viewport never matters here. */
+  const pagesForRole = useMemo(() => getPagesForRole(user?.role), [user?.role]);
 
-  const pageRegistry = useMemo<PageResult[]>(() => {
-    return navForRole
-      .filter((item): item is typeof item & { href: string } => !!item.href)
-      .map((item) => ({
-        type: "page" as const,
-        label: item.label,
-        description: PAGE_DESCRIPTIONS[item.href] ?? "",
-        href: item.href,
-        icon: item.icon,
-      }));
-  }, [navForRole]);
-
+  /* Data fetch — unchanged. */
   const fetchAll = useCallback(async () => {
     if (inFlight.current) return;
     inFlight.current = true;
@@ -239,21 +284,78 @@ export function useGlobalSearch(query: string): UseGlobalSearchReturn {
     fetchAll();
   }, [fetchAll]);
 
+  /* Result computation — the interesting part. */
   const results = useMemo<GroupedResults>(() => {
-    const q = query.trim().toLowerCase();
-    if (!q) {
-      return { pages: [], clients: [], bookings: [], vehicles: [], total: 0 };
+    const raw = query.trim();
+    if (!raw) {
+      return {
+        pages: [],
+        clients: [],
+        bookings: [],
+        vehicles: [],
+        total: 0,
+        detectedStatuses: [],
+      };
     }
 
-    // ✅ Pages — role-scoped + alias-aware
-    const pageResults: PageResult[] = pageRegistry.filter((page) => {
-      if (page.label.toLowerCase().includes(q)) return true;
-      const aliases = PAGE_ALIASES[page.href] ?? [];
-      return aliases.some((alias) => alias.toLowerCase().includes(q));
-    });
+    const tokens = tokenize(raw);
+    const rawLower = raw.toLowerCase();
 
-    const clientResults: ClientResult[] = clients
-      .filter((c) => matchesClient(c, q))
+    /* 1. Status detection — from typed text. */
+    const detectedStatuses = statusesInText(raw);
+    const isPureStatus = isPureStatusQuery(raw);
+
+    /* 2. Filter to statuses that make sense for each entity. */
+    const clientStatuses = new Set(
+      Array.from(detectedStatuses).filter((s) =>
+        statusesForEntity("client").some((d) => d.value === s) ||
+        statusesForEntity("client_verification").some((d) => d.value === s),
+      ),
+    );
+    const bookingStatuses = new Set(
+      Array.from(detectedStatuses).filter(
+        (s) =>
+          statusesForEntity("booking").some((d) => d.value === s) ||
+          statusesForEntity("cancellation_reason").some((d) => d.value === s),
+      ),
+    );
+    const vehicleStatuses = new Set(
+      Array.from(detectedStatuses).filter((s) =>
+        statusesForEntity("vehicle").some((d) => d.value === s),
+      ),
+    );
+
+    /* 3. Pages — role-scoped, status-aware, weighted. */
+    const pages: PageResult[] = [];
+    const pageWeights: Array<{ result: PageResult; weight: number }> = [];
+
+    for (const entry of pagesForRole) {
+      if (!pageMatches(entry, tokens, rawLower, detectedStatuses)) continue;
+
+      let weight = entry.weight ?? 0;
+      // Pure-status query → boost pages whose statusKeywords matched
+      if (
+        isPureStatus &&
+        (entry.statusKeywords ?? []).some((k) => detectedStatuses.has(k))
+      ) {
+        weight += STATUS_ONLY_PAGE_BOOST;
+      }
+      pageWeights.push({ result: toPageResult(entry), weight });
+    }
+
+    pageWeights.sort((a, b) => b.weight - a.weight);
+    for (const { result } of pageWeights) pages.push(result);
+
+    /* 4. Data rows — text match AND status match. */
+    const textTokensForEntities = isPureStatus ? [] : tokens;
+
+    const clientsOut: ClientResult[] = clients
+      .filter(
+        (c) =>
+          (textTokensForEntities.length === 0 ||
+            matchesClientText(c, textTokensForEntities)) &&
+          clientHasStatus(c, clientStatuses),
+      )
       .slice(0, PER_CATEGORY_CAP)
       .map((c) => ({
         type: "client",
@@ -265,8 +367,13 @@ export function useGlobalSearch(query: string): UseGlobalSearchReturn {
         id_number: c.id_number ?? null,
       }));
 
-    const bookingResults: BookingResult[] = bookings
-      .filter((b) => matchesBooking(b, q))
+    const bookingsOut: BookingResult[] = bookings
+      .filter(
+        (b) =>
+          (textTokensForEntities.length === 0 ||
+            matchesBookingText(b, textTokensForEntities)) &&
+          bookingHasStatus(b, bookingStatuses),
+      )
       .slice(0, PER_CATEGORY_CAP)
       .map((b) => ({
         type: "booking",
@@ -283,8 +390,13 @@ export function useGlobalSearch(query: string): UseGlobalSearchReturn {
         end_date: b.end_date,
       }));
 
-    const vehicleResults: VehicleResult[] = vehicles
-      .filter((v) => matchesVehicle(v, q))
+    const vehiclesOut: VehicleResult[] = vehicles
+      .filter(
+        (v) =>
+          (textTokensForEntities.length === 0 ||
+            matchesVehicleText(v, textTokensForEntities)) &&
+          vehicleHasStatus(v, vehicleStatuses),
+      )
       .slice(0, PER_CATEGORY_CAP)
       .map((v) => ({
         type: "vehicle",
@@ -297,17 +409,18 @@ export function useGlobalSearch(query: string): UseGlobalSearchReturn {
       }));
 
     return {
-      pages: pageResults,
-      clients: clientResults,
-      bookings: bookingResults,
-      vehicles: vehicleResults,
+      pages,
+      clients: clientsOut,
+      bookings: bookingsOut,
+      vehicles: vehiclesOut,
       total:
-        pageResults.length +
-        clientResults.length +
-        bookingResults.length +
-        vehicleResults.length,
+        pages.length +
+        clientsOut.length +
+        bookingsOut.length +
+        vehiclesOut.length,
+      detectedStatuses: Array.from(detectedStatuses),
     };
-  }, [query, pageRegistry, clients, bookings, vehicles]);
+  }, [query, pagesForRole, clients, bookings, vehicles]);
 
   return { loading, error, results, refetch: fetchAll };
 }

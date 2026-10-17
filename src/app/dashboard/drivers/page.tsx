@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Users,
   Plus,
@@ -29,6 +30,10 @@ import type { DriverListItem, DriverStatus, DriverPayMode } from "@/lib/types";
 import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
 import MobilePageToolbar from "@/components/ui/MobilePageToolbar";
 
+/* ──────────────────────────────────────────────────────────────────────
+   Tabs config
+────────────────────────────────────────────────────────────────────── */
+
 type DriverTab = "company" | "contract";
 
 interface TabItem {
@@ -39,19 +44,26 @@ interface TabItem {
 }
 
 const TABS: TabItem[] = [
-  { id: "company", label: "Company", icon: Users },
+  { id: "company",  label: "Company",  icon: Users },
   { id: "contract", label: "Contract", icon: Briefcase, hiddenOnMobile: true },
 ];
 
 const MOBILE_TABS: TabItem[] = TABS.filter((t) => !t.hiddenOnMobile);
+const VALID_TABS = new Set<DriverTab>(["company", "contract"]);
 
-const inputClass = "w-full px-3 py-2.5 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/30 focus:border-[var(--color-primary)] outline-none transition-all text-sm";
-const labelClass = "block text-[10px] font-semibold uppercase tracking-wider text-[var(--color-ink-muted)] mb-1.5";
+/* ──────────────────────────────────────────────────────────────────────
+   Shared styles / labels
+────────────────────────────────────────────────────────────────────── */
+
+const inputClass =
+  "w-full px-3 py-2.5 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/30 focus:border-[var(--color-primary)] outline-none transition-all text-sm";
+const labelClass =
+  "block text-[10px] font-semibold uppercase tracking-wider text-[var(--color-ink-muted)] mb-1.5";
 
 const STATUS_STYLES: Record<DriverStatus, { bg: string; text: string }> = {
   available: { bg: "bg-[var(--color-success-bg)]", text: "text-[var(--color-success-text)]" },
-  on_trip: { bg: "bg-[var(--color-primary-muted)]", text: "text-[var(--color-primary-text)]" },
-  on_leave: { bg: "bg-[var(--color-warning-bg)]", text: "text-[var(--color-warning-text)]" },
+  on_trip:   { bg: "bg-[var(--color-primary-muted)]", text: "text-[var(--color-primary-text)]" },
+  on_leave:  { bg: "bg-[var(--color-warning-bg)]", text: "text-[var(--color-warning-text)]" },
   suspended: { bg: "bg-[var(--color-danger-bg)]", text: "text-[var(--color-danger-text)]" },
 };
 
@@ -69,11 +81,11 @@ const PAY_LABELS: Record<DriverPayMode, string> = {
 };
 
 const VETTING_STATUS_STYLES: Record<string, { bg: string; text: string; label: string }> = {
-  unverified: { bg: "bg-gray-500/10", text: "text-gray-600 dark:text-gray-400", label: "Unverified" },
-  sent: { bg: "bg-blue-500/10", text: "text-blue-600 dark:text-blue-400", label: "Link Sent" },
-  under_review: { bg: "bg-amber-500/10", text: "text-amber-600 dark:text-amber-400", label: "Under Review" },
-  verified: { bg: "bg-emerald-500/10", text: "text-emerald-600 dark:text-emerald-400", label: "Verified" },
-  rejected: { bg: "bg-red-500/10", text: "text-red-600 dark:text-red-400", label: "Rejected" },
+  unverified:   { bg: "bg-gray-500/10",    text: "text-gray-600 dark:text-gray-400",     label: "Unverified" },
+  sent:         { bg: "bg-blue-500/10",    text: "text-blue-600 dark:text-blue-400",     label: "Link Sent" },
+  under_review: { bg: "bg-amber-500/10",   text: "text-amber-600 dark:text-amber-400",   label: "Under Review" },
+  verified:     { bg: "bg-emerald-500/10", text: "text-emerald-600 dark:text-emerald-400", label: "Verified" },
+  rejected:     { bg: "bg-red-500/10",     text: "text-red-600 dark:text-red-400",       label: "Rejected" },
 };
 
 const dlState = (expiry?: string | null) => {
@@ -91,8 +103,34 @@ const emptyForm = {
   daily_fee: "", overtime_hourly_fee: "", night_accommodation_fee: "", delivery_commission: "",
 };
 
+/* ──────────────────────────────────────────────────────────────────────
+   Component
+────────────────────────────────────────────────────────────────────── */
+
 export default function DriversPage() {
-  const [activeTab, setActiveTab] = useState<DriverTab>("company");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  /* ✅ URL-driven tab */
+  const tabFromUrl = searchParams.get("tab") as DriverTab | null;
+  const initialTab: DriverTab =
+    tabFromUrl && VALID_TABS.has(tabFromUrl) ? tabFromUrl : "company";
+  const [activeTab, setActiveTab] = useState<DriverTab>(initialTab);
+
+  useEffect(() => {
+    const t = searchParams.get("tab") as DriverTab | null;
+    if (t && VALID_TABS.has(t) && t !== activeTab) {
+      setActiveTab(t);
+    }
+  }, [searchParams, activeTab]);
+
+  const handleTabChange = (tabId: string) => {
+    if (!VALID_TABS.has(tabId as DriverTab)) return;
+    const next = tabId as DriverTab;
+    if (next === activeTab) return;
+    setActiveTab(next);
+    router.push(`/dashboard/drivers?tab=${next}`, { scroll: false });
+  };
 
   const {
     loading,
@@ -125,18 +163,6 @@ export default function DriversPage() {
 
   useEffect(() => setCurrentPage(1), [search, statusFilter, includeArchived]);
 
-  // ✅ Guard: Contract tab is desktop-only — reset to company if mobile
-  useEffect(() => {
-    const checkMobile = () => {
-      if (window.innerWidth < 768 && activeTab === "contract") {
-        setActiveTab("company");
-      }
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, [activeTab]);
-
   const driverMetrics = useMemo(() => {
     const total = drivers.length;
     const available = drivers.filter((d) => d.status === "available").length;
@@ -147,11 +173,11 @@ export default function DriversPage() {
   const statusOptions = useMemo(
     () => [
       { label: "Available", value: "available", count: driverMetrics.available },
-      { label: "On Trip", value: "on_trip", count: driverMetrics.onTrip },
-      { label: "On Leave", value: "on_leave" },
+      { label: "On Trip",   value: "on_trip",   count: driverMetrics.onTrip },
+      { label: "On Leave",  value: "on_leave" },
       { label: "Suspended", value: "suspended" },
     ],
-    [driverMetrics.available, driverMetrics.onTrip]
+    [driverMetrics.available, driverMetrics.onTrip],
   );
 
   const [modalOpen, setModalOpen] = useState(false);
@@ -172,13 +198,18 @@ export default function DriversPage() {
         id_number: selectedDriver.id_number,
         dl_number: selectedDriver.dl_number,
         dl_expiry: selectedDriver.dl_expiry ? selectedDriver.dl_expiry.split("T")[0] : "",
-        dl_issued_date: (selectedDriver as any).dl_issued_date ? (selectedDriver as any).dl_issued_date.split("T")[0] : "",
+        dl_issued_date: (selectedDriver as any).dl_issued_date
+          ? (selectedDriver as any).dl_issued_date.split("T")[0]
+          : "",
         status: selectedDriver.status,
         pay_mode: selectedDriver.pay_mode,
         daily_fee: selectedDriver.daily_fee !== null ? String(selectedDriver.daily_fee) : "",
-        overtime_hourly_fee: selectedDriver.overtime_hourly_fee !== null ? String(selectedDriver.overtime_hourly_fee) : "",
-        night_accommodation_fee: selectedDriver.night_accommodation_fee !== null ? String(selectedDriver.night_accommodation_fee) : "",
-        delivery_commission: selectedDriver.delivery_commission !== null ? String(selectedDriver.delivery_commission) : "",
+        overtime_hourly_fee:
+          selectedDriver.overtime_hourly_fee !== null ? String(selectedDriver.overtime_hourly_fee) : "",
+        night_accommodation_fee:
+          selectedDriver.night_accommodation_fee !== null ? String(selectedDriver.night_accommodation_fee) : "",
+        delivery_commission:
+          selectedDriver.delivery_commission !== null ? String(selectedDriver.delivery_commission) : "",
       });
     }
   }, [editingId, selectedDriver]);
@@ -226,7 +257,9 @@ export default function DriversPage() {
     if (ok) closeModal();
   };
 
-  const getDriverActions = (driver: DriverListItem & { verification_status?: string }): RowAction<DriverListItem>[] => {
+  const getDriverActions = (
+    driver: DriverListItem & { verification_status?: string },
+  ): RowAction<DriverListItem>[] => {
     const vStatus = driver.verification_status || "unverified";
 
     return [
@@ -236,13 +269,17 @@ export default function DriversPage() {
         onClick: () => openEdit(driver.id),
       },
       {
-        label: vStatus === "under_review"
-          ? "Review Verification"
-          : vStatus === "rejected" || vStatus === "unverified"
-          ? "Start Verification"
-          : "Suspend Driver",
+        label:
+          vStatus === "under_review"
+            ? "Review Verification"
+            : vStatus === "rejected" || vStatus === "unverified"
+              ? "Start Verification"
+              : "Suspend Driver",
         icon: vStatus === "under_review" ? Clock : Users,
-        variant: (vStatus === "under_review" || vStatus === "rejected" || vStatus === "unverified") ? "primary" : "default",
+        variant:
+          vStatus === "under_review" || vStatus === "rejected" || vStatus === "unverified"
+            ? "primary"
+            : "default",
         onClick: () => {
           if (vStatus === "under_review") {
             setReviewDriverId(driver.id);
@@ -269,21 +306,28 @@ export default function DriversPage() {
     ];
   };
 
-  const currentTabInfo = {
-    company: {
-      title: "Company Drivers",
-      description: "In-house driver pool — delivery tasks & chauffeur assignments.",
-      icon: <UserCircle size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
-    },
-    contract: {
-      title: "Contract Drivers",
-      description: "External contracted drivers, freelancers, and temporary staffing.",
-      icon: <FileBadge size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
-    },
-  }[activeTab];
+  const currentTabInfo = useMemo(
+    () =>
+      ({
+        company: {
+          title: "Company Drivers",
+          description:
+            "In-house driver pool — delivery tasks & chauffeur assignments.",
+          icon: <UserCircle size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+        },
+        contract: {
+          title: "Contract Drivers",
+          description:
+            "External contracted drivers, freelancers, and temporary staffing.",
+          icon: <FileBadge size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+        },
+      })[activeTab],
+    [activeTab],
+  );
 
   return (
     <div className="space-y-6">
+      {/* ─── HEADER ──────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
@@ -297,19 +341,19 @@ export default function DriversPage() {
           </p>
         </div>
 
-        {/* ✅ DESKTOP ONLY — mobile uses the toolbar toggle */}
         <div className="hidden md:block">
           <PremiumTabSwitcher
             tabs={TABS}
             activeTab={activeTab}
-            onTabChange={(tabId) => setActiveTab(tabId as DriverTab)}
+            onTabChange={handleTabChange}
           />
         </div>
       </div>
 
+      {/* ─── TAB CONTENT ──────────────────────────────────────────── */}
       {activeTab === "company" ? (
         <>
-          {/* ✅ MOBILE: single card — toolbar + list share ONE container */}
+          {/* MOBILE */}
           <div className="md:hidden bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
             <div className="p-3 border-b border-[var(--color-surface-border)]">
               <MobilePageToolbar
@@ -317,7 +361,7 @@ export default function DriversPage() {
                 onSearchChange={setSearch}
                 searchPlaceholder="Search drivers..."
                 segment={activeTab}
-                onSegmentChange={(value) => setActiveTab(value as DriverTab)}
+                onSegmentChange={handleTabChange}
                 segments={MOBILE_TABS.map((t) => ({ id: t.id, label: t.label, icon: t.icon }))}
                 segmentMenuMode="toggle"
                 segmentTriggerIcon={Briefcase}
@@ -352,7 +396,9 @@ export default function DriversPage() {
                 <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
                   <UserCircle size={24} className="text-[var(--color-ink-subtle)]" />
                 </div>
-                <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No drivers yet</h3>
+                <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">
+                  No drivers yet
+                </h3>
                 <p className="text-sm text-[var(--color-ink-muted)] mb-4">
                   Add your first in-house driver to start assigning deliveries.
                 </p>
@@ -373,17 +419,23 @@ export default function DriversPage() {
                     on_leave: "bg-amber-500",
                     suspended: "bg-red-500",
                   };
-                  const vetting = VETTING_STATUS_STYLES[item.verification_status || "unverified"];
+                  const vetting =
+                    VETTING_STATUS_STYLES[item.verification_status || "unverified"];
 
                   return (
-                    <div className="flex items-center justify-between w-full cursor-pointer" onClick={() => openEdit(item.id)}>
+                    <div
+                      className="flex items-center justify-between w-full cursor-pointer"
+                      onClick={() => openEdit(item.id)}
+                    >
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className="relative flex-shrink-0">
                           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center shadow-md">
                             <UserCircle size={16} className="text-[var(--color-primary)]" />
                           </div>
                           <div className="absolute -top-0.5 -right-0.5">
-                            <div className={`w-3 h-3 rounded-full ${statusDot[item.status]} ring-2 ring-[var(--color-surface)] shadow-sm`} />
+                            <div
+                              className={`w-3 h-3 rounded-full ${statusDot[item.status]} ring-2 ring-[var(--color-surface)] shadow-sm`}
+                            />
                           </div>
                         </div>
 
@@ -393,9 +445,14 @@ export default function DriversPage() {
                               {item.full_name}
                             </span>
                             {item.verification_status === "verified" && (
-                              <ShieldCheck size={14} className="text-emerald-500 flex-shrink-0" />
+                              <ShieldCheck
+                                size={14}
+                                className="text-emerald-500 flex-shrink-0"
+                              />
                             )}
-                            <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${vetting.bg} ${vetting.text}`}>
+                            <span
+                              className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${vetting.bg} ${vetting.text}`}
+                            >
                               {vetting.label}
                             </span>
                           </div>
@@ -406,7 +463,10 @@ export default function DriversPage() {
                           </div>
                         </div>
                       </div>
-                      <ChevronRight size={16} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
+                      <ChevronRight
+                        size={16}
+                        className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1"
+                      />
                     </div>
                   );
                 }}
@@ -425,7 +485,9 @@ export default function DriversPage() {
                             <p className="text-xs font-semibold text-[var(--color-ink)] truncate leading-tight">
                               {item.phone}
                             </p>
-                            <span className="text-[9px] text-[var(--color-ink-muted)] font-medium">Contact</span>
+                            <span className="text-[9px] text-[var(--color-ink-muted)] font-medium">
+                              Contact
+                            </span>
                           </div>
                         </div>
                         <div className="flex items-center gap-2 min-w-0 flex-1 justify-end">
@@ -433,10 +495,14 @@ export default function DriversPage() {
                             <p className="text-xs font-semibold text-[var(--color-ink)] truncate leading-tight font-mono">
                               {item.id_number_masked || "N/A"}
                             </p>
-                            <span className="text-[9px] text-[var(--color-ink-muted)] font-medium">National ID</span>
+                            <span className="text-[9px] text-[var(--color-ink-muted)] font-medium">
+                              National ID
+                            </span>
                           </div>
                           <div className="w-7 h-7 rounded-lg bg-[var(--color-surface-hover)]/80 flex items-center justify-center flex-shrink-0">
-                            <span className="text-[9px] font-bold text-[var(--color-ink-subtle)]">ID</span>
+                            <span className="text-[9px] font-bold text-[var(--color-ink-subtle)]">
+                              ID
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -444,19 +510,31 @@ export default function DriversPage() {
                       <div className="rounded-xl px-3 py-2.5 border bg-[var(--color-surface-hover)]/50 border-[var(--color-surface-border)]/50">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2 min-w-0">
-                            <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)]">DL</span>
+                            <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)]">
+                              DL
+                            </span>
                             <span className="text-[10px] font-semibold font-mono text-[var(--color-ink)] truncate">
                               {item.dl_number_masked || "N/A"}
                             </span>
-                            <span className={`text-[8px] font-bold ${dl.cls}`}>{dl.label}</span>
+                            <span className={`text-[8px] font-bold ${dl.cls}`}>
+                              {dl.label}
+                            </span>
                           </div>
                           <div className="flex items-center gap-1.5 flex-shrink-0">
-                            <span className={`w-2 h-2 rounded-full ${
-                              item.status === 'available' ? 'bg-emerald-500' :
-                              item.status === 'on_trip' ? 'bg-blue-500' :
-                              item.status === 'on_leave' ? 'bg-amber-500' : 'bg-red-500'
-                            } flex-shrink-0`} />
-                            <span className={`text-[9px] font-bold uppercase tracking-wide ${statusStyle.text}`}>
+                            <span
+                              className={`w-2 h-2 rounded-full ${
+                                item.status === "available"
+                                  ? "bg-emerald-500"
+                                  : item.status === "on_trip"
+                                    ? "bg-blue-500"
+                                    : item.status === "on_leave"
+                                      ? "bg-amber-500"
+                                      : "bg-red-500"
+                              } flex-shrink-0`}
+                            />
+                            <span
+                              className={`text-[9px] font-bold uppercase tracking-wide ${statusStyle.text}`}
+                            >
                               {STATUS_LABELS[item.status]}
                             </span>
                           </div>
@@ -470,30 +548,39 @@ export default function DriversPage() {
             )}
           </div>
 
-          {/* ✅ DESKTOP: existing card structure */}
+          {/* DESKTOP */}
           <div className="hidden md:block bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
             <div className="p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
               <div className="hidden sm:flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
                 <div className="flex items-center gap-2 whitespace-nowrap">
                   <span className="text-xs font-medium text-[var(--color-ink-muted)]">Drivers</span>
-                  <span className="text-xs font-bold text-[var(--color-ink)] tabular-nums">{driverMetrics.total}</span>
+                  <span className="text-xs font-bold text-[var(--color-ink)] tabular-nums">
+                    {driverMetrics.total}
+                  </span>
                 </div>
                 <div className="w-px h-3 bg-[var(--color-surface-border)] flex-shrink-0" />
                 <div className="flex items-center gap-2 whitespace-nowrap">
                   <span className="text-xs font-medium text-[var(--color-ink-muted)]">Available</span>
-                  <span className="text-xs font-bold text-[var(--color-success-text)] tabular-nums">{driverMetrics.available}</span>
+                  <span className="text-xs font-bold text-[var(--color-success-text)] tabular-nums">
+                    {driverMetrics.available}
+                  </span>
                 </div>
                 <div className="w-px h-3 bg-[var(--color-surface-border)] flex-shrink-0" />
                 <div className="flex items-center gap-2 whitespace-nowrap">
                   <span className="text-xs font-medium text-[var(--color-ink-muted)]">On Trip</span>
-                  <span className="text-xs font-bold text-[var(--color-primary-text)] tabular-nums">{driverMetrics.onTrip}</span>
+                  <span className="text-xs font-bold text-[var(--color-primary-text)] tabular-nums">
+                    {driverMetrics.onTrip}
+                  </span>
                 </div>
               </div>
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full xl:w-auto">
                 <div className="flex items-center gap-2 flex-1 sm:w-80">
                   <div className="relative flex-1">
-                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
+                    <Search
+                      size={16}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                    />
                     <input
                       type="text"
                       value={search}
@@ -541,7 +628,9 @@ export default function DriversPage() {
                 <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
                   <UserCircle size={24} className="text-[var(--color-ink-subtle)]" />
                 </div>
-                <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No drivers yet</h3>
+                <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">
+                  No drivers yet
+                </h3>
                 <p className="text-sm text-[var(--color-ink-muted)] mb-4">
                   Add your first in-house driver to start assigning deliveries.
                 </p>
@@ -555,7 +644,8 @@ export default function DriversPage() {
                     accessorKey: "full_name",
                     cell: ({ row }: { row: { original: DriverListItem } }) => {
                       const driver = row.original;
-                      const vetting = VETTING_STATUS_STYLES[driver.verification_status || "unverified"];
+                      const vetting =
+                        VETTING_STATUS_STYLES[driver.verification_status || "unverified"];
                       return (
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="w-9 h-9 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center text-[var(--color-ink-subtle)] shrink-0">
@@ -567,9 +657,14 @@ export default function DriversPage() {
                                 {driver.full_name}
                               </span>
                               {driver.verification_status === "verified" && (
-                                <ShieldCheck size={14} className="text-emerald-500 flex-shrink-0" />
+                                <ShieldCheck
+                                  size={14}
+                                  className="text-emerald-500 flex-shrink-0"
+                                />
                               )}
-                              <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${vetting.bg} ${vetting.text}`}>
+                              <span
+                                className={`text-[9px] font-bold px-1.5 py-0.5 rounded-full ${vetting.bg} ${vetting.text}`}
+                              >
                                 {vetting.label}
                               </span>
                             </div>
@@ -586,7 +681,10 @@ export default function DriversPage() {
                     accessorKey: "phone",
                     cell: ({ row }: { row: { original: DriverListItem } }) => (
                       <div className="flex items-center gap-2 text-sm text-[var(--color-ink)]">
-                        <Phone size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                        <Phone
+                          size={12}
+                          className="text-[var(--color-ink-subtle)] flex-shrink-0"
+                        />
                         <span className="font-medium">{row.original.phone}</span>
                       </div>
                     ),
@@ -621,7 +719,9 @@ export default function DriversPage() {
                     cell: ({ row }: { row: { original: DriverListItem } }) => {
                       const style = STATUS_STYLES[row.original.status];
                       return (
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${style.bg} ${style.text}`}>
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${style.bg} ${style.text}`}
+                        >
                           {STATUS_LABELS[row.original.status]}
                         </span>
                       );
@@ -644,7 +744,8 @@ export default function DriversPage() {
           </div>
         </>
       ) : (
-        <div className="hidden md:block bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-12 flex flex-col items-center justify-center text-center animate-in fade-in duration-300">
+        /* ✅ Contract tab — renders at every viewport when deep-linked */
+        <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-12 flex flex-col items-center justify-center text-center animate-in fade-in duration-300">
           <div className="w-16 h-16 rounded-2xl bg-[var(--color-primary-muted)] flex items-center justify-center mb-4">
             <Briefcase size={24} className="text-[var(--color-primary-text)]" />
           </div>
@@ -652,11 +753,14 @@ export default function DriversPage() {
             Contract Drivers Hub
           </h3>
           <p className="text-sm text-[var(--color-ink-muted)] max-w-md">
-            External contractor management, freelance driver invoicing, temporary staffing, and on-demand availability tracking coming soon.
+            External contractor management, freelance driver invoicing,
+            temporary staffing, and on-demand availability tracking coming
+            soon.
           </p>
         </div>
       )}
 
+      {/* ─── CREATE / EDIT MODAL ────────────────────────────────── */}
       <Modal
         open={modalOpen}
         onClose={closeModal}
@@ -672,44 +776,90 @@ export default function DriversPage() {
           <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className={labelClass}>Full Name <span className="text-[var(--color-danger)]">*</span></label>
-                <input className={inputClass} value={form.full_name} onChange={(e) => set("full_name", e.target.value)} placeholder="e.g. James Mwangi" />
+                <label className={labelClass}>
+                  Full Name <span className="text-[var(--color-danger)]">*</span>
+                </label>
+                <input
+                  className={inputClass}
+                  value={form.full_name}
+                  onChange={(e) => set("full_name", e.target.value)}
+                  placeholder="e.g. James Mwangi"
+                />
               </div>
               <div>
-                <label className={labelClass}>Phone <span className="text-[var(--color-danger)]">*</span></label>
-                <input className={inputClass} value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+2547..." />
+                <label className={labelClass}>
+                  Phone <span className="text-[var(--color-danger)]">*</span>
+                </label>
+                <input
+                  className={inputClass}
+                  value={form.phone}
+                  onChange={(e) => set("phone", e.target.value)}
+                  placeholder="+2547..."
+                />
               </div>
             </div>
 
             <div>
               <label className={labelClass}>Email (optional)</label>
-              <input className={inputClass} type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="driver@company.com" />
+              <input
+                className={inputClass}
+                type="email"
+                value={form.email}
+                onChange={(e) => set("email", e.target.value)}
+                placeholder="driver@company.com"
+              />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className={labelClass}>ID Number <span className="text-[var(--color-danger)]">*</span></label>
-                <input className={inputClass} value={form.id_number} onChange={(e) => set("id_number", e.target.value)} />
+                <label className={labelClass}>
+                  ID Number <span className="text-[var(--color-danger)]">*</span>
+                </label>
+                <input
+                  className={inputClass}
+                  value={form.id_number}
+                  onChange={(e) => set("id_number", e.target.value)}
+                />
               </div>
               <div>
-                <label className={labelClass}>DL Number <span className="text-[var(--color-danger)]">*</span></label>
-                <input className={inputClass} value={form.dl_number} onChange={(e) => set("dl_number", e.target.value)} />
+                <label className={labelClass}>
+                  DL Number <span className="text-[var(--color-danger)]">*</span>
+                </label>
+                <input
+                  className={inputClass}
+                  value={form.dl_number}
+                  onChange={(e) => set("dl_number", e.target.value)}
+                />
               </div>
               <div>
                 <label className={labelClass}>DL Expiry</label>
-                <input className={inputClass} type="date" value={form.dl_expiry} onChange={(e) => set("dl_expiry", e.target.value)} />
+                <input
+                  className={inputClass}
+                  type="date"
+                  value={form.dl_expiry}
+                  onChange={(e) => set("dl_expiry", e.target.value)}
+                />
               </div>
             </div>
 
             <div>
               <label className={labelClass}>DL Issue Date (Optional)</label>
-              <input className={inputClass} type="date" value={form.dl_issued_date} onChange={(e) => set("dl_issued_date", e.target.value)} />
+              <input
+                className={inputClass}
+                type="date"
+                value={form.dl_issued_date}
+                onChange={(e) => set("dl_issued_date", e.target.value)}
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className={labelClass}>Status</label>
-                <select className={inputClass} value={form.status} onChange={(e) => set("status", e.target.value)}>
+                <select
+                  className={inputClass}
+                  value={form.status}
+                  onChange={(e) => set("status", e.target.value)}
+                >
                   <option value="available">Available</option>
                   <option value="on_trip">On Trip</option>
                   <option value="on_leave">On Leave</option>
@@ -718,7 +868,11 @@ export default function DriversPage() {
               </div>
               <div>
                 <label className={labelClass}>Pay Mode</label>
-                <select className={inputClass} value={form.pay_mode} onChange={(e) => set("pay_mode", e.target.value)}>
+                <select
+                  className={inputClass}
+                  value={form.pay_mode}
+                  onChange={(e) => set("pay_mode", e.target.value)}
+                >
                   <option value="commission">Commission</option>
                   <option value="fixed_per_job">Fixed / Job</option>
                 </select>
@@ -728,24 +882,53 @@ export default function DriversPage() {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
               <div>
                 <label className={labelClass}>Daily Fee</label>
-                <input className={inputClass} type="number" step="0.01" value={form.daily_fee} onChange={(e) => set("daily_fee", e.target.value)} placeholder="—" />
+                <input
+                  className={inputClass}
+                  type="number"
+                  step="0.01"
+                  value={form.daily_fee}
+                  onChange={(e) => set("daily_fee", e.target.value)}
+                  placeholder="—"
+                />
               </div>
               <div>
                 <label className={labelClass}>OT Hr Fee</label>
-                <input className={inputClass} type="number" step="0.01" value={form.overtime_hourly_fee} onChange={(e) => set("overtime_hourly_fee", e.target.value)} placeholder="—" />
+                <input
+                  className={inputClass}
+                  type="number"
+                  step="0.01"
+                  value={form.overtime_hourly_fee}
+                  onChange={(e) => set("overtime_hourly_fee", e.target.value)}
+                  placeholder="—"
+                />
               </div>
               <div>
                 <label className={labelClass}>Night Fee</label>
-                <input className={inputClass} type="number" step="0.01" value={form.night_accommodation_fee} onChange={(e) => set("night_accommodation_fee", e.target.value)} placeholder="—" />
+                <input
+                  className={inputClass}
+                  type="number"
+                  step="0.01"
+                  value={form.night_accommodation_fee}
+                  onChange={(e) => set("night_accommodation_fee", e.target.value)}
+                  placeholder="—"
+                />
               </div>
               <div>
                 <label className={labelClass}>Delivery Comm.</label>
-                <input className={inputClass} type="number" step="0.01" value={form.delivery_commission} onChange={(e) => set("delivery_commission", e.target.value)} placeholder="—" />
+                <input
+                  className={inputClass}
+                  type="number"
+                  step="0.01"
+                  value={form.delivery_commission}
+                  onChange={(e) => set("delivery_commission", e.target.value)}
+                  placeholder="—"
+                />
               </div>
             </div>
 
             <p className="text-[10px] text-[var(--color-ink-muted)]">
-              Blank fee fields fall back to your tenant service pricing config. ID/DL numbers are masked in list views.
+              Blank fee fields fall back to your tenant service pricing config.
+              ID/DL numbers are masked in list views.
             </p>
 
             <div className="flex items-center justify-end gap-3 pt-3 border-t border-[var(--color-surface-border)]">
@@ -757,7 +940,13 @@ export default function DriversPage() {
               </button>
               <button
                 onClick={handleSubmit}
-                disabled={saving || !form.full_name || !form.phone || !form.id_number || !form.dl_number}
+                disabled={
+                  saving ||
+                  !form.full_name ||
+                  !form.phone ||
+                  !form.id_number ||
+                  !form.dl_number
+                }
                 className="px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {saving ? "Saving..." : editingId ? "Save Changes" : "Create Driver"}
@@ -769,7 +958,10 @@ export default function DriversPage() {
 
       <ReviewVerificationModal
         isOpen={reviewModalOpen}
-        onClose={() => { setReviewModalOpen(false); setReviewDriverId(null); }}
+        onClose={() => {
+          setReviewModalOpen(false);
+          setReviewDriverId(null);
+        }}
         personId={reviewDriverId || 0}
         personType="driver"
         onSuccess={() => {

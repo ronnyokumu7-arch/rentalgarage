@@ -1,12 +1,33 @@
 // src/app/dashboard/settings/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useMemo, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
-  Building2, ShieldCheck, Palette, Bell, CreditCard,
-  ChevronRight, ChevronLeft, Puzzle, Database, Key,
-  Globe, Lock, BarChart3, UserCheck, Receipt, Landmark,
-  HardDrive, Activity, Webhook, SlidersHorizontal, UserCog, Landmark as LandmarkIcon, ServerCog, ShieldHalf,
+  Building2,
+  ShieldCheck,
+  Palette,
+  Bell,
+  CreditCard,
+  ChevronRight,
+  ChevronLeft,
+  Puzzle,
+  Database,
+  Key,
+  Globe,
+  Lock,
+  BarChart3,
+  UserCheck,
+  Receipt,
+  Landmark,
+  HardDrive,
+  Activity,
+  Webhook,
+  SlidersHorizontal,
+  UserCog,
+  Landmark as LandmarkIcon,
+  ServerCog,
+  ShieldHalf,
   ScrollText,
 } from "lucide-react";
 
@@ -18,6 +39,10 @@ import UserManagementSettings from "@/components/settings/UserManagementSettings
 import BillingSubscriptionSettings from "@/components/settings/BillingSubscriptionSettings";
 import PaymentMethodsSettings from "@/components/settings/PaymentMethodsSettings";
 import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
+
+/* ──────────────────────────────────────────────────────────────────────
+   Types & config
+────────────────────────────────────────────────────────────────────── */
 
 type TabId = "general" | "team" | "financials" | "system" | "advanced";
 
@@ -32,58 +57,144 @@ interface SettingModule {
 }
 
 const TABS = [
-  { id: "general", label: "General", icon: SlidersHorizontal },
-  { id: "team", label: "Team & Access", icon: UserCog },
-  { id: "financials", label: "Financials", icon: LandmarkIcon },
-  { id: "system", label: "System", icon: ServerCog },
-  { id: "advanced", label: "Advanced", icon: ShieldHalf },
+  { id: "general",    label: "General",       icon: SlidersHorizontal },
+  { id: "team",       label: "Team & Access", icon: UserCog },
+  { id: "financials", label: "Financials",    icon: LandmarkIcon },
+  { id: "system",     label: "System",        icon: ServerCog },
+  { id: "advanced",   label: "Advanced",      icon: ShieldHalf },
 ];
+
+const VALID_TABS = new Set<TabId>([
+  "general",
+  "team",
+  "financials",
+  "system",
+  "advanced",
+]);
 
 const SETTINGS_MODULES: SettingModule[] = [
   // General
-  { id: "business", title: "Business Profile", description: "Manage your agency details, logo, and official contact information.", icon: Building2, theme: "blue", tab: "general" },
-  { id: "policies", title: "Business Policies", description: "Customize contract clauses — fuel policy, liability, terms & conditions.", icon: ScrollText, theme: "emerald", tab: "general", badge: "New" },
-  { id: "appearance", title: "Appearance", description: "Customize dashboard themes, regional formats, and display preferences.", icon: Palette, theme: "purple", tab: "general" },
-  { id: "notifications", title: "Notifications", description: "Control email alerts, booking reminders, and system warnings.", icon: Bell, theme: "amber", tab: "general" },
-  { id: "regional", title: "Regional Settings", description: "Set timezone, currency, date formats, and language preferences.", icon: Globe, theme: "emerald", tab: "general" },
+  { id: "business",      title: "Business Profile",   description: "Manage your agency details, logo, and official contact information.", icon: Building2, theme: "blue",    tab: "general" },
+  { id: "policies",      title: "Business Policies",  description: "Customize contract clauses — fuel policy, liability, terms & conditions.", icon: ScrollText, theme: "emerald", tab: "general", badge: "New" },
+  { id: "appearance",    title: "Appearance",         description: "Customize dashboard themes, regional formats, and display preferences.", icon: Palette, theme: "purple",  tab: "general" },
+  { id: "notifications", title: "Notifications",      description: "Control email alerts, booking reminders, and system warnings.", icon: Bell, theme: "amber",           tab: "general" },
+  { id: "regional",      title: "Regional Settings",  description: "Set timezone, currency, date formats, and language preferences.", icon: Globe, theme: "emerald",       tab: "general" },
   // Team
-  { id: "roles", title: "Team & Roles", description: "Configure staff access, job titles, and granular permission matrices.", icon: ShieldCheck, theme: "emerald", tab: "team" },
-  { id: "users", title: "User Management", description: "Invite, activate, suspend, and manage team member accounts.", icon: UserCheck, theme: "blue", tab: "team" },
-  { id: "auth", title: "Authentication", description: "Configure 2FA, session timeouts, and password policies.", icon: Lock, theme: "rose", tab: "team" },
+  { id: "roles",         title: "Team & Roles",       description: "Configure staff access, job titles, and granular permission matrices.", icon: ShieldCheck, theme: "emerald", tab: "team" },
+  { id: "users",         title: "User Management",    description: "Invite, activate, suspend, and manage team member accounts.", icon: UserCheck, theme: "blue",           tab: "team" },
+  { id: "auth",          title: "Authentication",     description: "Configure 2FA, session timeouts, and password policies.", icon: Lock, theme: "rose",                   tab: "team" },
   // Financials
-  { id: "billing", title: "Billing & Subscription", description: "Manage your subscription plan, payment methods, and invoices.", icon: CreditCard, theme: "rose", tab: "financials" },
-  { id: "invoices", title: "Invoice Settings", description: "Configure invoice templates, tax rates, and payment terms.", icon: Receipt, theme: "blue", tab: "financials", badge: "New" },
-  { id: "payments", title: "Payment Methods", description: "Add and manage accepted payment methods and gateways.", icon: Landmark, theme: "emerald", tab: "financials" },
+  { id: "billing",       title: "Billing & Subscription", description: "Manage your subscription plan, payment methods, and invoices.", icon: CreditCard, theme: "rose",  tab: "financials" },
+  { id: "invoices",      title: "Invoice Settings",   description: "Configure invoice templates, tax rates, and payment terms.", icon: Receipt, theme: "blue",           tab: "financials", badge: "New" },
+  { id: "payments",      title: "Payment Methods",    description: "Add and manage accepted payment methods and gateways.", icon: Landmark, theme: "emerald",            tab: "financials" },
   // System
-  { id: "integrations", title: "Integrations", description: "Connect external APIs, webhooks, and third-party services.", icon: Puzzle, theme: "slate", tab: "system" },
-  { id: "webhooks", title: "Webhooks", description: "Manage webhook endpoints and event subscriptions.", icon: Webhook, theme: "purple", tab: "system", badge: "Beta" },
-  { id: "api-keys", title: "API Keys", description: "Generate and manage API keys for external integrations.", icon: Key, theme: "amber", tab: "system" },
-  { id: "audit", title: "Audit Logs", description: "View system activity, user actions, and security events.", icon: Activity, theme: "blue", tab: "system" },
+  { id: "integrations",  title: "Integrations",       description: "Connect external APIs, webhooks, and third-party services.", icon: Puzzle, theme: "slate",            tab: "system" },
+  { id: "webhooks",      title: "Webhooks",           description: "Manage webhook endpoints and event subscriptions.", icon: Webhook, theme: "purple",                    tab: "system", badge: "Beta" },
+  { id: "api-keys",      title: "API Keys",           description: "Generate and manage API keys for external integrations.", icon: Key, theme: "amber",                  tab: "system" },
+  { id: "audit",         title: "Audit Logs",         description: "View system activity, user actions, and security events.", icon: Activity, theme: "blue",              tab: "system" },
   // Advanced
-  { id: "data", title: "Data Management", description: "Export, import, and manage your rental data and records.", icon: Database, theme: "blue", tab: "advanced" },
-  { id: "backup", title: "Backup & Recovery", description: "Configure automatic backups and disaster recovery settings.", icon: HardDrive, theme: "emerald", tab: "advanced" },
-  { id: "health", title: "System Health", description: "Monitor system performance, uptime, and resource usage.", icon: BarChart3, theme: "purple", tab: "advanced" },
+  { id: "data",          title: "Data Management",    description: "Export, import, and manage your rental data and records.", icon: Database, theme: "blue",               tab: "advanced" },
+  { id: "backup",        title: "Backup & Recovery",  description: "Configure automatic backups and disaster recovery settings.", icon: HardDrive, theme: "emerald",      tab: "advanced" },
+  { id: "health",        title: "System Health",      description: "Monitor system performance, uptime, and resource usage.", icon: BarChart3, theme: "purple",             tab: "advanced" },
 ];
 
 const getThemeClasses = (theme: string) => {
   const themes: Record<string, { iconBg: string; iconText: string }> = {
-    blue: { iconBg: "bg-[var(--color-primary-muted)]", iconText: "text-[var(--color-primary-text)]" },
-    emerald: { iconBg: "bg-[var(--color-success-bg)]", iconText: "text-[var(--color-success-text)]" },
-    purple: { iconBg: "bg-[var(--color-primary-muted)]", iconText: "text-[var(--color-primary-text)]" },
-    amber: { iconBg: "bg-[var(--color-warning-bg)]", iconText: "text-[var(--color-warning-text)]" },
-    rose: { iconBg: "bg-[var(--color-danger-bg)]", iconText: "text-[var(--color-danger-text)]" },
-    slate: { iconBg: "bg-[var(--color-surface-hover)]", iconText: "text-[var(--color-ink-muted)]" },
+    blue:    { iconBg: "bg-[var(--color-primary-muted)]", iconText: "text-[var(--color-primary-text)]" },
+    emerald: { iconBg: "bg-[var(--color-success-bg)]",    iconText: "text-[var(--color-success-text)]" },
+    purple:  { iconBg: "bg-[var(--color-primary-muted)]", iconText: "text-[var(--color-primary-text)]" },
+    amber:   { iconBg: "bg-[var(--color-warning-bg)]",    iconText: "text-[var(--color-warning-text)]" },
+    rose:    { iconBg: "bg-[var(--color-danger-bg)]",     iconText: "text-[var(--color-danger-text)]" },
+    slate:   { iconBg: "bg-[var(--color-surface-hover)]", iconText: "text-[var(--color-ink-muted)]" },
   };
   return themes[theme] || themes.blue;
 };
 
+/* ──────────────────────────────────────────────────────────────────────
+   Component
+────────────────────────────────────────────────────────────────────── */
+
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<TabId>("general");
-  const [activeModule, setActiveModule] = useState<SettingModule | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  /* ✅ URL is the source of truth for BOTH tab and module. */
+  const tabFromUrl = searchParams.get("tab");
+  const moduleFromUrl = searchParams.get("module");
+
+  const initialTab: TabId = useMemo(() => {
+    if (tabFromUrl && VALID_TABS.has(tabFromUrl as TabId)) {
+      return tabFromUrl as TabId;
+    }
+    // If no tab but a module is specified, derive tab from the module.
+    if (moduleFromUrl) {
+      const m = SETTINGS_MODULES.find((mod) => mod.id === moduleFromUrl);
+      if (m) return m.tab;
+    }
+    return "general";
+  }, [tabFromUrl, moduleFromUrl]);
+
+  const initialModule: SettingModule | null = useMemo(() => {
+    if (!moduleFromUrl) return null;
+    return SETTINGS_MODULES.find((m) => m.id === moduleFromUrl) ?? null;
+  }, [moduleFromUrl]);
+
+  const [activeTab, setActiveTab] = useState<TabId>(initialTab);
+  const [activeModule, setActiveModule] = useState<SettingModule | null>(initialModule);
+
+  /* Sync FROM URL — handles deep links, browser back/forward, manual edits */
+  useEffect(() => {
+    if (tabFromUrl && VALID_TABS.has(tabFromUrl as TabId)) {
+      const t = tabFromUrl as TabId;
+      if (t !== activeTab) setActiveTab(t);
+    } else if (moduleFromUrl) {
+      const m = SETTINGS_MODULES.find((mod) => mod.id === moduleFromUrl);
+      if (m && m.tab !== activeTab) setActiveTab(m.tab);
+    }
+
+    const next = moduleFromUrl
+      ? SETTINGS_MODULES.find((mod) => mod.id === moduleFromUrl) ?? null
+      : null;
+    if (next?.id !== activeModule?.id) setActiveModule(next);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]);
+
+  /* ✅ Navigate to a tab — clears module, sets tab in URL */
+  const handleTabChange = (tabId: string) => {
+    if (!VALID_TABS.has(tabId as TabId)) return;
+    const next = tabId as TabId;
+    if (next === activeTab && activeModule === null) return;
+
+    setActiveTab(next);
+    setActiveModule(null);
+
+    const params = new URLSearchParams();
+    params.set("tab", next);
+    router.push(`/dashboard/settings?${params.toString()}`, { scroll: false });
+  };
+
+  /* ✅ Open a module — sets both tab and module */
+  const handleModuleOpen = (module: SettingModule) => {
+    setActiveModule(module);
+    setActiveTab(module.tab);
+
+    const params = new URLSearchParams();
+    params.set("tab", module.tab);
+    params.set("module", module.id);
+    router.push(`/dashboard/settings?${params.toString()}`, { scroll: false });
+  };
+
+  /* ✅ Close module — keep tab, drop module */
+  const handleModuleClose = () => {
+    setActiveModule(null);
+
+    const params = new URLSearchParams();
+    params.set("tab", activeTab);
+    router.push(`/dashboard/settings?${params.toString()}`, { scroll: false });
+  };
 
   const filteredModules = SETTINGS_MODULES.filter((m) => m.tab === activeTab);
 
-  // ✅ Dynamic Header Info (PREMIUM: No circles, just clean bare icons)
   const currentTabInfo = {
     general: {
       title: "General Settings",
@@ -114,13 +225,12 @@ export default function SettingsPage() {
 
   return (
     <div className="space-y-6">
-      {/* Premium Header & Tab Switcher */}
+      {/* ─── HEADER ──────────────────────────────────────────────── */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div className="flex items-center gap-4">
-          {/* Back Button (Only shows when inside a module) */}
           {activeModule && (
             <button
-              onClick={() => setActiveModule(null)}
+              onClick={handleModuleClose}
               className="p-2.5 rounded-xl text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] transition-all active:scale-95"
               title="Back to Settings Hub"
             >
@@ -129,35 +239,31 @@ export default function SettingsPage() {
           )}
           <div>
             <div className="flex items-center gap-3">
-              {/* ✅ Bare Icon — hidden on mobile, visible from sm: up; also hidden when inside a module */}
               <span className="hidden sm:inline-flex">
                 {!activeModule && currentTabInfo.icon}
               </span>
-
               <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
                 {activeModule ? activeModule.title : currentTabInfo.title}
               </h1>
             </div>
-            {/* ✅ Subheading aligns to icon's left edge */}
             <p className="text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
               {activeModule ? activeModule.description : currentTabInfo.description}
             </p>
           </div>
         </div>
 
-        {/* ✅ Imported Reusable Premium Tab Switcher */}
         {!activeModule && (
           <PremiumTabSwitcher
             tabs={TABS}
             activeTab={activeTab}
-            onTabChange={(tabId) => setActiveTab(tabId as TabId)}
+            onTabChange={handleTabChange}
           />
         )}
       </div>
 
-      {/* MAIN CONTENT AREA: Hub vs Workspace */}
+      {/* ─── MAIN CONTENT ────────────────────────────────────────── */}
       {!activeModule ? (
-        // ── THE HUB: Grid of Modules ──
+        /* HUB — grid of modules */
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 animate-in fade-in duration-300">
           {filteredModules.map((module) => {
             const Icon = module.icon;
@@ -165,23 +271,28 @@ export default function SettingsPage() {
             return (
               <div
                 key={module.id}
-                onClick={() => setActiveModule(module)}
+                onClick={() => handleModuleOpen(module)}
                 className="group relative flex items-center gap-4 p-5 rounded-2xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] hover:border-[var(--color-primary)]/50 hover:shadow-[var(--shadow-lg)] transition-all duration-200 cursor-pointer"
               >
-                {/* ✅ Keep the container HERE for grid cards, as it's an intentional design element */}
-                <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${theme.iconBg} ${theme.iconText} group-hover:scale-105 transition-transform duration-200`}>
+                <div
+                  className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${theme.iconBg} ${theme.iconText} group-hover:scale-105 transition-transform duration-200`}
+                >
                   <Icon size={22} strokeWidth={1.8} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <h3 className="text-base font-semibold text-[var(--color-ink)] truncate">{module.title}</h3>
+                    <h3 className="text-base font-semibold text-[var(--color-ink)] truncate">
+                      {module.title}
+                    </h3>
                     {module.badge && (
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[var(--color-primary-muted)] text-[var(--color-primary-text)]">
                         {module.badge}
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-[var(--color-ink-muted)] mt-0.5 line-clamp-2">{module.description}</p>
+                  <p className="text-sm text-[var(--color-ink-muted)] mt-0.5 line-clamp-2">
+                    {module.description}
+                  </p>
                 </div>
                 <ChevronRight
                   size={18}
@@ -192,10 +303,8 @@ export default function SettingsPage() {
           })}
         </div>
       ) : (
-        // ── THE WORKSPACE: Individual Module View ──
+        /* WORKSPACE — individual module */
         <div className="animate-in slide-in-from-right-4 fade-in duration-300">
-
-          {/* ✅ DYNAMIC ROUTING: Render specific module components, or fallback placeholder */}
           {activeModule.id === "business" ? (
             <BusinessProfileSettings />
           ) : activeModule.id === "policies" ? (
@@ -212,15 +321,22 @@ export default function SettingsPage() {
             <PaymentMethodsSettings />
           ) : (
             <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-2xl shadow-[var(--shadow-card)] p-8 min-h-[400px] flex flex-col items-center justify-center text-center">
-              <div className={`w-16 h-16 rounded-2xl ${getThemeClasses(activeModule.theme).iconBg} flex items-center justify-center mb-4`}>
-                <activeModule.icon size={32} className={getThemeClasses(activeModule.theme).iconText} />
+              <div
+                className={`w-16 h-16 rounded-2xl ${getThemeClasses(activeModule.theme).iconBg} flex items-center justify-center mb-4`}
+              >
+                <activeModule.icon
+                  size={32}
+                  className={getThemeClasses(activeModule.theme).iconText}
+                />
               </div>
-              <h3 className="text-lg font-bold text-[var(--color-ink)] mb-2">{activeModule.title} Workspace</h3>
+              <h3 className="text-lg font-bold text-[var(--color-ink)] mb-2">
+                {activeModule.title} Workspace
+              </h3>
               <p className="text-sm text-[var(--color-ink-muted)] max-w-md mb-6">
                 This module is currently under construction. Check back soon for updates!
               </p>
               <button
-                onClick={() => setActiveModule(null)}
+                onClick={handleModuleClose}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/5 hover:bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 transition-all active:scale-95"
               >
                 <ChevronLeft size={14} /> Back to Settings Hub

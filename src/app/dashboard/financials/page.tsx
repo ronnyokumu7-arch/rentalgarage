@@ -1,7 +1,7 @@
 // src/app/dashboard/financials/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   FileText,
@@ -21,21 +21,30 @@ import OverviewTab from "@/components/financials/OverviewTab";
 import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
 import MobileFloatingSegment from "@/components/ui/MobileFloatingSegment";
 
-const TABS = [
+/* ──────────────────────────────────────────────────────────────────────
+   Config
+────────────────────────────────────────────────────────────────────── */
+
+type TabId = "overview" | "invoices" | "contracts" | "payments";
+
+const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "invoices", label: "Invoices", icon: Receipt },
   { id: "contracts", label: "Contracts", icon: FileText },
   { id: "payments", label: "Payments", icon: DollarSign },
 ];
 
-// ✅ Mobile only exposes Overview + Payments. Invoices/Contracts stay desktop-only.
-const MOBILE_TABS = [
+// ✅ Mobile *browse* path offers only these two.
+// Invoices + Contracts still render on mobile when reached via deep link
+// (search results, bookmarks, browser back/forward).
+const MOBILE_TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "payments", label: "Payments", icon: DollarSign },
 ];
 
-// Quick stats for each tab
-const TAB_STATS: Record<string, { label: string; value: string; change: string; positive: boolean }[]> = {
+const VALID_TABS = new Set<TabId>(["overview", "invoices", "contracts", "payments"]);
+
+const TAB_STATS: Record<TabId, { label: string; value: string; change: string; positive: boolean }[]> = {
   overview: [
     { label: "Total Revenue", value: "KES 48,000", change: "+12.5%", positive: true },
     { label: "Pending Invoices", value: "KES 72,000", change: "-8.3%", positive: false },
@@ -58,101 +67,115 @@ const TAB_STATS: Record<string, { label: string; value: string; change: string; 
   ],
 };
 
+/* ──────────────────────────────────────────────────────────────────────
+   Component
+────────────────────────────────────────────────────────────────────── */
+
 export default function FinancialsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const initialTab = searchParams.get("tab") || "overview";
-  const [activeTab, setActiveTab] = useState(initialTab);
+  // Derive the initial tab from the URL — safe fallback if tab is unknown.
+  const initialTab: TabId = (() => {
+    const t = searchParams.get("tab") as TabId | null;
+    return t && VALID_TABS.has(t) ? t : "overview";
+  })();
 
+  const [activeTab, setActiveTab] = useState<TabId>(initialTab);
+
+  // ✅ Sync FROM URL — handles deep links, browser back/forward, and manual edits.
+  // Never bounces on mobile; the tab simply renders.
   useEffect(() => {
-    const tabFromUrl = searchParams.get("tab");
-    if (tabFromUrl && tabFromUrl !== activeTab) {
-      setActiveTab(tabFromUrl);
+    const t = searchParams.get("tab") as TabId | null;
+    if (t && VALID_TABS.has(t) && t !== activeTab) {
+      setActiveTab(t);
     }
   }, [searchParams, activeTab]);
 
-  // ✅ Guard: Invoices + Contracts are desktop-only — reset if mobile
-  useEffect(() => {
-    const checkMobile = () => {
-      if (
-        window.innerWidth < 768 &&
-        activeTab !== "overview" &&
-        activeTab !== "payments"
-      ) {
-        setActiveTab("overview");
-        // Also clean the URL so refresh lands correctly
-        router.replace(`/dashboard/financials?tab=overview`, { scroll: false });
-      }
-    };
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
-
+  // Single source of tab-change plumbing — always keeps URL in sync.
   const handleTabChange = (tabId: string) => {
-    setActiveTab(tabId);
-    router.push(`/dashboard/financials?tab=${tabId}`, { scroll: false });
+    if (!VALID_TABS.has(tabId as TabId)) return;
+    const next = tabId as TabId;
+    if (next === activeTab) return;
+    setActiveTab(next);
+    router.push(`/dashboard/financials?tab=${next}`, { scroll: false });
   };
 
-  const currentStats = TAB_STATS[activeTab] || TAB_STATS.overview;
+  const currentStats = useMemo(
+    () => TAB_STATS[activeTab] ?? TAB_STATS.overview,
+    [activeTab],
+  );
 
-  // ✅ Dynamic Header Info (PREMIUM: No circles, just clean bare icons)
-  const currentTabInfo = {
-    overview: {
-      title: "Financials",
-      description: "Complete financial health at a glance",
-      icon: <PiggyBank size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
-    },
-    invoices: {
-      title: "Invoices",
-      description: "Create, send, and track all invoices",
-      icon: <FilePlus2 size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
-    },
-    contracts: {
-      title: "Contracts",
-      description: "Manage your rental contracts seamlessly",
-      icon: <FileSignature size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
-    },
-    payments: {
-      title: "Payments",
-      description: "Monitor and reconcile incoming payments",
-      icon: <Banknote size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
-    },
-  }[activeTab] || {
-    title: "Financials",
-    description: "Complete financial health at a glance",
-    icon: <PiggyBank size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
-  };
+  const currentTabInfo = useMemo(
+    () =>
+      ({
+        overview: {
+          title: "Financials",
+          description: "Complete financial health at a glance",
+          icon: <PiggyBank size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+        },
+        invoices: {
+          title: "Invoices",
+          description: "Create, send, and track all invoices",
+          icon: <FilePlus2 size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+        },
+        contracts: {
+          title: "Contracts",
+          description: "Manage your rental contracts seamlessly",
+          icon: <FileSignature size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+        },
+        payments: {
+          title: "Payments",
+          description: "Monitor and reconcile incoming payments",
+          icon: <Banknote size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+        },
+      })[activeTab],
+    [activeTab],
+  );
+
+  // ✅ The floating segment treats any deep-linked tab (invoices/contracts)
+  // as "not a mobile tab" — highlight Overview as the escape target so
+  // users have an obvious way back into the mobile browse flow.
+  const isOnMobileTab = MOBILE_TABS.some((t) => t.id === activeTab);
+  const floatingActive = isOnMobileTab ? activeTab : "overview";
+  const floatingToggleTarget: TabId =
+    activeTab === "payments" ? "overview" : "payments";
+  const FloatingTriggerIcon =
+    activeTab === "payments" ? LayoutDashboard : Banknote;
 
   return (
     <div className="space-y-6 antialiased">
-
-      {/* Premium Header - Clean & Minimal */}
+      {/* ─── Header ─────────────────────────────────────────────── */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
-            {/* ✅ Bare Icon — hidden on mobile, visible from sm: up */}
             <span className="hidden sm:inline-flex">{currentTabInfo.icon}</span>
-
             <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
               {currentTabInfo.title}
             </h1>
           </div>
-          {/* ✅ Subheading aligns to icon's left edge */}
           <p className="text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
             {currentTabInfo.description}
           </p>
         </div>
 
-        {/* Quick Stats - Desktop Only */}
+        {/* Quick stats — desktop only */}
         <div className="hidden lg:flex items-center gap-6">
           {currentStats.map((stat, index) => (
             <div key={index} className="text-right">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)]">{stat.label}</p>
-              <p className="text-base font-extrabold text-[var(--color-ink)] tabular-nums">{stat.value}</p>
-              <p className={`text-[10px] font-bold ${stat.positive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"}`}>
+              <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)]">
+                {stat.label}
+              </p>
+              <p className="text-base font-extrabold text-[var(--color-ink)] tabular-nums">
+                {stat.value}
+              </p>
+              <p
+                className={`text-[10px] font-bold ${
+                  stat.positive
+                    ? "text-emerald-600 dark:text-emerald-400"
+                    : "text-rose-600 dark:text-rose-400"
+                }`}
+              >
                 {stat.change}
               </p>
             </div>
@@ -160,7 +183,7 @@ export default function FinancialsPage() {
         </div>
       </div>
 
-      {/* ✅ DESKTOP ONLY — mobile uses the floating switcher */}
+      {/* ─── Desktop tab switcher ───────────────────────────────── */}
       <div className="hidden md:block">
         <PremiumTabSwitcher
           tabs={TABS}
@@ -169,29 +192,27 @@ export default function FinancialsPage() {
         />
       </div>
 
-      {/* Tab Content Area */}
+      {/* ─── Tab content — renders at every viewport ─────────────── */}
+      {/* Deep-linked Invoices / Contracts now render on mobile too.
+          Mobile browse stays simple because the floating switcher
+          only offers Overview ↔ Payments. */}
       <div className="animate-in fade-in duration-200 min-h-[400px] pt-2">
         {activeTab === "overview" && <OverviewTab />}
         {activeTab === "payments" && <PaymentsTab />}
-        {activeTab === "invoices" && (
-          <div className="hidden md:block">
-            <InvoicesTab />
-          </div>
-        )}
-        {activeTab === "contracts" && (
-          <div className="hidden md:block">
-            <ContractsTab />
-          </div>
-        )}
+        {activeTab === "invoices" && <InvoicesTab />}
+        {activeTab === "contracts" && <ContractsTab />}
       </div>
 
-      {/* ✅ FLOATING SEGMENT TOGGLE — mobile only, Overview ↔ Payments */}
+      {/* ─── Floating segment — mobile only ─────────────────────── */}
+      {/* If the user is on a deep-linked desktop tab, the switcher
+          shows Overview highlighted so tapping it returns them to
+          the mobile browse flow. */}
       <MobileFloatingSegment
         segments={MOBILE_TABS.map((t) => ({ id: t.id, label: t.label, icon: t.icon }))}
-        active={activeTab}
+        active={floatingActive}
         onChange={(id) => handleTabChange(id)}
-        toggleTarget={activeTab === "payments" ? "overview" : "payments"}
-        triggerIcon={activeTab === "payments" ? LayoutDashboard : Banknote}
+        toggleTarget={floatingToggleTarget}
+        triggerIcon={FloatingTriggerIcon}
       />
     </div>
   );
