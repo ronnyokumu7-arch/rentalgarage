@@ -11,6 +11,7 @@ import {
   Calendar, FileText, HelpCircle, BarChart3
 } from "lucide-react";
 import { useAuth } from "@/context/auth-context";
+import SecureImage from "@/components/ui/SecureImage";
 import type { NavItem } from "@/lib/nav-config";
 
 interface SidebarProps {
@@ -19,7 +20,7 @@ interface SidebarProps {
   onClose?: () => void;
 }
 
-// ── Icon mapping for consistent icons ──────────────────────────
+// ── Icon mapping ──────────────────────────
 const iconMap: Record<string, LucideIcon> = {
   dashboard: LayoutDashboard,
   users: Users,
@@ -100,7 +101,7 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
 
   const openGroupItem = navItems.find((i) => i.label === openGroup);
   const settingsItem = navItems.find((item) => item.label === "Settings");
-  // ✅ Mobile-only filter: hide items flagged as desktop-only (Settings handled separately)
+  
   const regularNavItems = navItems.filter((item) => {
     if (item.label === "Settings") return false;
     if (isMobile && item.hiddenOnMobile) return false;
@@ -110,6 +111,30 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
   const fullName = user?.full_name || user?.email || "User";
   const userInitial = fullName.charAt(0).toUpperCase();
   const companyName = tenant?.name || "Agency";
+
+  // Helper to render the avatar for both mobile/desktop contexts
+  const renderAvatar = (size: "sm" | "md") => {
+    const dims = { sm: "w-9 h-9", md: "w-10 h-10" };
+    const initialText = { sm: "text-sm", md: "text-base" };
+
+    const fallback = (
+      <div className={`${dims[size]} rounded-xl flex items-center justify-center font-bold text-white bg-gradient-to-br from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20 flex-shrink-0 transition-transform duration-200 group-hover:scale-105`}>
+        {userInitial}
+      </div>
+    );
+
+    if (user?.avatar_url) {
+      return (
+        <SecureImage
+          src={user.avatar_url}
+          alt={fullName}
+          className={`${dims[size]} rounded-xl object-cover border border-[var(--color-surface-border)] flex-shrink-0 group-hover:scale-105 transition-transform duration-200`}
+          fallback={fallback}
+        />
+      );
+    }
+    return fallback;
+  };
 
   return (
     <>
@@ -124,15 +149,12 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
         {/* ── Top Section: Profile (mobile) / Logo (desktop) + Close ────── */}
         <div className="flex items-center justify-between gap-3 px-4 py-3.5 flex-shrink-0 border-b border-[var(--color-surface-border)]">
           {isMobile ? (
-            /* Mobile: user profile in top section */
             <Link
               href={user?.role === "super_admin" ? `/super-admin/users/${user?.id}` : `/dashboard/users/${user?.id}`}
               onClick={() => onClose?.()}
               className="flex items-center gap-3 min-w-0 flex-1 group"
             >
-              <div className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm text-white bg-gradient-to-br from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20 flex-shrink-0 transition-transform duration-200 group-hover:scale-105">
-                {userInitial}
-              </div>
+              {renderAvatar("md")}
               <div className="min-w-0 flex-1">
                 <p className="text-[13px] font-bold text-[var(--color-ink)] truncate leading-tight">
                   {fullName}
@@ -143,7 +165,6 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
               </div>
             </Link>
           ) : (
-            /* Desktop: logo */
             <Link href="/dashboard" className="group">
               <div className="w-9 h-9 rounded-xl flex items-center justify-center font-black text-[11px] text-white tracking-tight select-none bg-gradient-brand shadow-lg shadow-primary/30 transition-all duration-300 group-hover:scale-105 group-hover:shadow-primary/40">
                 RG
@@ -175,6 +196,11 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
               Icon = item.icon as LucideIcon;
             }
 
+            // ✅ Removed the active background. Only text/icon color changes.
+            const activeStateClass = active
+              ? "text-[var(--color-primary)]"
+              : "text-[var(--color-ink-subtle)] hover:text-[var(--color-ink-primary)]";
+
             return (
               <div key={item.label} className="relative group/nav">
                 {item.href && !item.children ? (
@@ -190,11 +216,7 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
                     onClick={() => isMobile && onClose?.()}
                     className={`relative flex items-center justify-center ${
                       isMobile ? 'justify-start gap-3 px-4 h-12' : 'w-full h-12'
-                    } rounded-xl transition-all duration-200 outline-none group/btn ${
-                      active
-                        ? "text-[var(--color-primary)] bg-[var(--color-primary-muted)]"
-                        : "text-[var(--color-ink-subtle)] hover:text-[var(--color-ink-primary)] hover:bg-[var(--color-surface-hover)]"
-                    }`}
+                    } rounded-xl transition-all duration-200 outline-none group/btn ${activeStateClass}`}
                   >
                     {!isMobile && active && (
                       <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full bg-[var(--color-primary)] shadow-lg shadow-primary/30" />
@@ -215,9 +237,6 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
                         {item.label}
                       </span>
                     )}
-                    {!isMobile && active && (
-                      <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[var(--color-primary)] ring-2 ring-[var(--color-bg)]" />
-                    )}
                   </Link>
                 ) : (
                   <button
@@ -236,8 +255,8 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
                       isMobile ? 'justify-start gap-3 px-4 h-12' : 'w-full h-12'
                     } rounded-xl transition-all duration-200 outline-none group/btn ${
                       isGroupOpen || active
-                        ? "text-[var(--color-primary)] bg-[var(--color-primary-muted)]"
-                        : "text-[var(--color-ink-subtle)] hover:text-[var(--color-ink-primary)] hover:bg-[var(--color-surface-hover)]"
+                        ? "text-[var(--color-primary)]"
+                        : "text-[var(--color-ink-subtle)] hover:text-[var(--color-ink-primary)]"
                     }`}
                   >
                     {!isMobile && (isGroupOpen || active) && (
@@ -297,7 +316,7 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
                 isMobile ? 'justify-start gap-3 px-4' : 'w-full'
               } h-11 rounded-xl transition-all duration-200 outline-none group/btn ${
                 isActive(settingsItem.href)
-                  ? "text-[var(--color-primary)] bg-[var(--color-primary-muted)]"
+                  ? "text-[var(--color-primary)]" // No bg
                   : "text-[var(--color-ink-subtle)] hover:text-[var(--color-ink-primary)] hover:bg-[var(--color-surface-hover)]"
               }`}
             >
@@ -372,7 +391,6 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
             }}
           >
             <div className="p-4 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-[var(--shadow-dropdown)] backdrop-blur-xl">
-              {/* Flyout Header */}
               <div className="flex items-center gap-3 mb-4 pb-3 border-b border-[var(--color-surface-border)]">
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-[var(--color-primary-muted)] border border-[var(--color-primary)]/20">
                   {openGroupItem.icon && (() => {
@@ -391,7 +409,6 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
                 <Sparkles size={12} className="text-[var(--color-primary)] ml-auto opacity-40" />
               </div>
 
-              {/* Flyout Items */}
               <div className="space-y-1">
                 {openGroupItem.children.map((child) => {
                   const childActive = pathname === child.href || pathname.startsWith(child.href + "/");
