@@ -67,18 +67,18 @@ export default function DataTable<T>({
 
   useEffect(() => {
     if (!openActionId) return;
-    
+
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       const isInsideTrigger = target.closest(`[data-row-actions="${openActionId}"]`);
       const isInsideMenu = target.closest(`[data-dropdown-menu="${openActionId}"]`);
-      
+
       if (!isInsideTrigger && !isInsideMenu) {
         setOpenActionId(null);
         setDropdownPos(null);
       }
     };
-    
+
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, [openActionId]);
@@ -97,12 +97,23 @@ export default function DataTable<T>({
     };
   }, [openActionId]);
 
+  // ✅ Auto-close the menu when its target disappears from the current data
+  //    (e.g. filter changes, pagination, refetch — row no longer present).
+  useEffect(() => {
+    if (openActionId === null) return;
+    const stillPresent = data.some((d) => getRowId(d) === openActionId);
+    if (!stillPresent) {
+      setOpenActionId(null);
+      setDropdownPos(null);
+    }
+  }, [data, openActionId, getRowId]);
+
   const handleToggleActions = (e: React.MouseEvent, item: T) => {
     e.stopPropagation();
     e.preventDefault();
-    
+
     const id = getRowId(item);
-    
+
     if (openActionId === id) {
       setOpenActionId(null);
       setDropdownPos(null);
@@ -129,7 +140,7 @@ export default function DataTable<T>({
 
   const table = useReactTable({
     data,
-    columns: rowActions 
+    columns: rowActions
       ? [
           ...columns,
           {
@@ -192,7 +203,6 @@ export default function DataTable<T>({
 
   return (
     <>
-      {/* ✅ REMOVED rounded-xl and overflow-hidden to make top edges sharp */}
       <div className="border border-[var(--color-surface-border)] bg-[var(--color-surface)] flex flex-col shadow-[var(--shadow-card)]">
         <div className="overflow-x-auto -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8">
           <table className="w-full min-w-max text-sm text-left">
@@ -227,7 +237,7 @@ export default function DataTable<T>({
             <tbody className="divide-y divide-[var(--color-surface-border)]">
               {table.getRowModel().rows.map((row) => {
                 const item = row.original;
-                
+
                 return (
                   <tr
                     key={row.id}
@@ -260,11 +270,10 @@ export default function DataTable<T>({
         )}
       </div>
 
-      {/* ✅ Portal-rendered Row Actions Dropdown */}
       {mounted && openActionId !== null && dropdownPos && createPortal(
         <>
           <div className="fixed inset-0 z-[9998]" onClick={() => setOpenActionId(null)} />
-          
+
           <div
             data-dropdown-menu={openActionId}
             className="fixed z-[9999] w-56 bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-xl shadow-[var(--shadow-dropdown)] overflow-hidden animate-in fade-in zoom-in-95 duration-100"
@@ -274,9 +283,9 @@ export default function DataTable<T>({
             {(() => {
               const item = data.find((d) => getRowId(d) === openActionId);
               if (!item) return null;
-              
+
               const actions = typeof rowActions === "function" ? rowActions(item) : rowActions || [];
-              
+
               return actions.map((action, index) => (
                 <Fragment key={`${action.label}-${index}`}>
                   {action.separator && index > 0 && (
@@ -287,10 +296,10 @@ export default function DataTable<T>({
                     onClick={(e) => {
                       e.stopPropagation();
                       e.preventDefault();
-                      
+
                       setOpenActionId(null);
                       setDropdownPos(null);
-                      
+
                       if (typeof action.onClick === "function") {
                         action.onClick(item);
                       }

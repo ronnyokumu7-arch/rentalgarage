@@ -83,7 +83,7 @@ export function useBookingsList() {
   useEffect(() => {
     const handleBookingCreated = () => fetchBookings();
     window.addEventListener('booking:created', handleBookingCreated);
-    
+
     return () => {
       window.removeEventListener('booking:created', handleBookingCreated);
     };
@@ -93,7 +93,7 @@ export function useBookingsList() {
   useEffect(() => {
     const handleBookingUpdated = () => fetchBookings();
     window.addEventListener('booking:updated', handleBookingUpdated);
-    
+
     return () => {
       window.removeEventListener('booking:updated', handleBookingUpdated);
     };
@@ -135,6 +135,9 @@ export function useBookingsList() {
     [bookings],
   );
 
+  // ✅ SORT: newest-first by created_at (id desc fallback).
+  // ✅ SEARCH: expands to client (name/phone/email/id/dl) + vehicle (make/model/plate)
+  //    + booking identifiers (number, id, destination, locations).
   const filteredBookings = useMemo(() => {
     let result = bookings;
 
@@ -149,16 +152,43 @@ export function useBookingsList() {
     }
 
     if (search) {
-      const lowerSearch = search.toLowerCase();
-      result = result.filter((b) =>
-        b.booking_number?.toLowerCase().includes(lowerSearch) ||
-        b.id.toString().includes(lowerSearch) ||
-        b.destination?.toLowerCase().includes(lowerSearch) ||
-        b.pickup_location?.toLowerCase().includes(lowerSearch)
-      );
+      const q = search.toLowerCase();
+
+      result = result.filter((b) => {
+        const client = b.client as any;
+        const vehicle = b.vehicle as any;
+
+        return (
+          // Booking identifiers
+          b.booking_number?.toLowerCase().includes(q) ||
+          b.id.toString().includes(q) ||
+          b.destination?.toLowerCase().includes(q) ||
+          b.pickup_location?.toLowerCase().includes(q) ||
+          b.return_location?.toLowerCase().includes(q) ||
+          // Client — denormalized OR nested
+          b.client_name?.toLowerCase().includes(q) ||
+          b.client_phone?.toLowerCase().includes(q) ||
+          client?.full_name?.toLowerCase().includes(q) ||
+          client?.phone?.toLowerCase().includes(q) ||
+          client?.email?.toLowerCase().includes(q) ||
+          client?.id_number?.toLowerCase().includes(q) ||
+          client?.dl_number?.toLowerCase().includes(q) ||
+          // Vehicle — denormalized OR nested
+          b.vehicle_name?.toLowerCase().includes(q) ||
+          b.vehicle_plate?.toLowerCase().includes(q) ||
+          vehicle?.make?.toLowerCase().includes(q) ||
+          vehicle?.model?.toLowerCase().includes(q) ||
+          vehicle?.plate_number?.toLowerCase().includes(q)
+        );
+      });
     }
 
-    return result;
+    // ✅ Newest first — copy before sort to avoid mutating state arrays
+    return [...result].sort((a, b) => {
+      const aT = new Date(a.created_at).getTime() || 0;
+      const bT = new Date(b.created_at).getTime() || 0;
+      return bT - aT || b.id - a.id;
+    });
   }, [bookings, view, statusFilter, search]);
 
   const paginatedBookings = useMemo(() => {
