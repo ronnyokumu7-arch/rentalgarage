@@ -207,7 +207,7 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
             Rental<span className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary-hover)]">Garage</span>
           </span>
           <span className="text-[10px] text-ink-muted leading-tight mt-0.5 truncate">
-            Car rental business manager
+            Manage your rental business
           </span>
         </Link>
 

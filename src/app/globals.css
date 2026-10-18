@@ -43,6 +43,22 @@
     transition: background-color 0.4s ease, color 0.4s ease;
   }
 
+  /* ✅ GLOBAL THEME TRANSITION (Safe & Scoped) */
+  /* Makes background/border/shadow changes smooth when toggling dark mode,
+     without breaking transforms (like hover scales) or gradients. */
+  *, ::before, ::after {
+    transition-property: background-color, border-color, text-decoration-color, fill, stroke, box-shadow;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+  }
+
+  /* ✅ Disable transitions during initial page load to prevent flashes */
+  [data-theme-transitioning="false"] *,
+  [data-theme-transitioning="false"] *::before,
+  [data-theme-transitioning="false"] *::after {
+    transition-duration: 0ms !important;
+  }
+
   * {
     border-color: var(--color-surface-border);
   }
@@ -513,17 +529,8 @@
   scrollbar-width: none;  /* Firefox */
 }
 
-
-
-
-
-
 /* ════════════════════════════════════════════════════════════
    🌞 PUBLIC PAGES — ALWAYS LIGHT (token-immune)
-   Add class `force-light` to any client-facing page root.
-   Re-declares the light palette INSIDE the subtree, so the
-   !important heading/body rules resolve to dark ink here,
-   no matter what theme the dashboard is in.
    ════════════════════════════════════════════════════════════ */
 .force-light {
   --color-ink-primary:   #1C1917 !important;

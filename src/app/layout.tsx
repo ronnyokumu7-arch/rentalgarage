@@ -11,6 +11,7 @@ import Providers from "@/components/Providers";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import ThemeColorSync from "@/components/ThemeColorSync";
 
 // ── Premium Font Configuration ──────────────────────────────
 
@@ -131,7 +132,11 @@ export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
-  themeColor: '#4338CA',
+  // ✅ Light/Dark mode aware theme color
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#F7F4F0' },
+    { media: '(prefers-color-scheme: dark)',  color: '#0E0C0A' },
+  ],
   colorScheme: 'light dark',
 };
 
@@ -182,6 +187,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          {/* ✅ Syncs the address bar color with manual theme toggles */}
+          <ThemeColorSync />
+
           {/* Vercel Analytics — page views, visitors, devices, referrers */}
           <Analytics />
           
