@@ -18,16 +18,9 @@ const FILTERS: { id: TimeFilter; label: string; icon: React.ElementType }[] = [
 export default function RecentActivityWidget() {
   const { activities, loading, timeFilter, setTimeFilter } = useActivityTab();
 
-  const [itemLimit, setItemLimit] = useState(6);
-
-  useEffect(() => {
-    const checkMobile = () => setItemLimit(window.innerWidth < 768 ? 5 : 6);
-    checkMobile();
-    window.addEventListener("resize", checkMobile);
-    return () => window.removeEventListener("resize", checkMobile);
-  }, []);
-
-  const visibleActivities = activities.slice(0, itemLimit);
+  // Defensive cap — the scroll container's height controls the visible
+  // window (~2.7 cards on mobile), but we still slice to a sane max.
+  const visibleActivities = activities.slice(0, 6);
 
   return (
     <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden flex flex-col">
@@ -60,8 +53,10 @@ export default function RecentActivityWidget() {
         </div>
       </div>
 
-      {/* CONTENT */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-3 space-y-2.5 max-h-[420px]">
+      {/* CONTENT
+          Mobile: height clamps to ~2.7 cards so the 3rd card peeks under
+          the fold (scroll affordance). Desktop: fixed 420px cap. */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-3 space-y-2.5 max-h-[min(50vh,330px)] md:max-h-[420px]">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-12 text-[var(--color-ink-muted)]">
             <Loader2 size={24} className="animate-spin mb-3 text-purple-500" />

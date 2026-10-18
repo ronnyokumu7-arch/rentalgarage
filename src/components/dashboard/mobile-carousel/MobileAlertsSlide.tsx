@@ -14,15 +14,7 @@ import type {
   ExpiringDocAlert,
 } from "@/hooks/dashboard/useNeedsAttention";
 
-/* ──────────────────────────────────────────────────────────────────────
-   Constants
-────────────────────────────────────────────────────────────────────── */
-
 const INNER_CAROUSEL_CAP = 8;
-
-/* ──────────────────────────────────────────────────────────────────────
-   Types
-────────────────────────────────────────────────────────────────────── */
 
 type AlertTab = "overdue" | "service" | "dls" | "insurance";
 
@@ -36,10 +28,6 @@ interface TabDef {
 interface MobileAlertsSlideProps {
   alerts: NeedsAttentionData;
 }
-
-/* ──────────────────────────────────────────────────────────────────────
-   Slide
-────────────────────────────────────────────────────────────────────── */
 
 export default function MobileAlertsSlide({ alerts }: MobileAlertsSlideProps) {
   const allTabs: TabDef[] = [
@@ -61,19 +49,16 @@ export default function MobileAlertsSlide({ alerts }: MobileAlertsSlideProps) {
 
   return (
     <div className="p-4 space-y-3">
-      {/* Header */}
+      {/* Header - pr-16 avoids collision with absolute dots */}
       <div className="flex items-center justify-between pr-16">
         <div>
           <p className="text-[10px] font-bold uppercase tracking-wider text-ink-muted">
             Needs Attention
           </p>
           <p className="text-xs text-ink-subtle mt-0.5">
-            {alerts.totalCount} {alerts.totalCount === 1 ? "item" : "items"} require action
+            {alerts.totalCount} {alerts.totalCount === 1 ? "item" : "items"} need your attention
           </p>
         </div>
-        <span className="px-2.5 py-1 rounded-full bg-amber-500/15 text-[10px] font-extrabold text-amber-700 dark:text-amber-400 border border-amber-500/25 tabular-nums">
-          {alerts.totalCount}
-        </span>
       </div>
 
       {/* Standardized sliding-indicator tabs */}
@@ -111,11 +96,6 @@ export default function MobileAlertsSlide({ alerts }: MobileAlertsSlideProps) {
     </div>
   );
 }
-
-/* ──────────────────────────────────────────────────────────────────────
-   Alert tab switcher — matching the Recent Activity pattern
-   (outer rounded-lg, inner rounded-md, p-0.5 → geometrically perfect)
-────────────────────────────────────────────────────────────────────── */
 
 function AlertTabSwitcher({
   tabs,
@@ -159,7 +139,6 @@ function AlertTabSwitcher({
     <div className="relative w-full">
       {indicatorStyle && (
         <div
-          // ✅ Active indicator matches the inner button radius
           className="absolute z-0 rounded-md bg-gradient-to-br from-amber-500/20 to-amber-500/5 border border-amber-500/30 shadow-lg shadow-amber-500/10 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
           style={{
             left: indicatorStyle.left,
@@ -170,7 +149,6 @@ function AlertTabSwitcher({
         />
       )}
 
-      {/* ✅ Outer container: rounded-lg, p-0.5, overflow-hidden */}
       <div className="relative z-10 flex items-center gap-1 p-0.5 bg-[var(--color-surface-hover)]/50 rounded-lg border border-[var(--color-surface-border)]/50 w-full overflow-hidden">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -183,7 +161,6 @@ function AlertTabSwitcher({
               }}
               type="button"
               onClick={() => onChange(tab.id)}
-              // ✅ Inner button: rounded-md (6px = 8px outer - 2px padding)
               className={`relative flex-1 flex items-center justify-center gap-1 px-1.5 py-1.5 rounded-md text-[10px] font-bold transition-colors whitespace-nowrap touch-manipulation cursor-pointer ${
                 isActive
                   ? "text-amber-700 dark:text-amber-400"
@@ -200,10 +177,6 @@ function AlertTabSwitcher({
     </div>
   );
 }
-
-/* ──────────────────────────────────────────────────────────────────────
-   Lists
-────────────────────────────────────────────────────────────────────── */
 
 function OverdueList({ items }: { items: OverdueReturnAlert[] }) {
   const visible = items.slice(0, INNER_CAROUSEL_CAP);
@@ -407,10 +380,6 @@ function DocsList({
     </>
   );
 }
-
-/* ──────────────────────────────────────────────────────────────────────
-   Shared bits
-────────────────────────────────────────────────────────────────────── */
 
 function InnerCarousel({ children }: { children: React.ReactNode }) {
   return (

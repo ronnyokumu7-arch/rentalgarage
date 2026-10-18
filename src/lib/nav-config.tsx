@@ -1,3 +1,4 @@
+// src/lib/nav-config.tsx
 "use client";
 
 import {
@@ -20,8 +21,6 @@ export interface NavItem {
 }
 
 // ── OPTIMIZED PREMIUM ICON COMPONENTS ────────────────────────────────────────
-// NOTE: No hardcoded colors. This allows the Sidebar to control them via CSS.
-// Using `currentColor` for seamless Light/Dark mode switching.
 
 const PremiumDashboardIcon = ({ size = 20, strokeWidth = 1.8, className = "" }: any) => (
   <LayoutDashboard size={size} strokeWidth={strokeWidth} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
@@ -97,7 +96,8 @@ export const tenantAdminNav: NavItem[] = [
   { label: "Users", href: "/dashboard/users", icon: PremiumUsersIcon },
   { label: "Financials", href: "/dashboard/financials", icon: PremiumWalletIcon },
   { label: "Reports", href: "/dashboard/reports", icon: PremiumBarChartIcon },
-  { label: "Tasks", href: "/dashboard/tasks", icon: PremiumTasksIcon, hiddenOnMobile: true },
+  // ✅ Removed hiddenOnMobile so Tasks appears on mobile too
+  { label: "Tasks", href: "/dashboard/tasks", icon: PremiumTasksIcon },
   { label: "Settings", href: "/dashboard/settings", icon: PremiumSettingsIcon },
 ];
 

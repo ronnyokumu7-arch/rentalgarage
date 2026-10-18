@@ -1,7 +1,7 @@
 // src/components/dashboard/mobile-carousel/MobileCarouselCard.tsx
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Pin } from "lucide-react";
 
@@ -16,26 +16,15 @@ import MobilePromoSlide, {
 } from "./MobilePromoSlide";
 import type { NeedsAttentionData } from "@/hooks/dashboard/useNeedsAttention";
 
-/* ──────────────────────────────────────────────────────────────────────
-   Constants
-────────────────────────────────────────────────────────────────────── */
-
-const ROTATION_INTERVAL_MS = 4000;
+// ✅ Increased to 6s for better readability
+const ROTATION_INTERVAL_MS = 6000;
 
 type SlideKey = "alerts" | "fleet" | "promo";
-
-/* ──────────────────────────────────────────────────────────────────────
-   Types
-────────────────────────────────────────────────────────────────────── */
 
 interface MobileCarouselCardProps {
   vehicles: CarouselVehicle[];
   alerts: NeedsAttentionData;
 }
-
-/* ──────────────────────────────────────────────────────────────────────
-   Orchestrator
-────────────────────────────────────────────────────────────────────── */
 
 export default function MobileCarouselCard({
   vehicles,
@@ -65,7 +54,16 @@ export default function MobileCarouselCard({
   const [hovered, setHovered] = useState(false);
   const [touched, setTouched] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
-  const [pinned, setPinned] = useState(hasAlerts);
+  
+  // ✅ Removed auto-pinning default. Starts unpinned.
+  const [pinned, setPinned] = useState(false);
+
+  // One-shot hint pulse
+  const [hintPulse, setHintPulse] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setHintPulse(false), 1200);
+    return () => clearTimeout(t);
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -76,21 +74,13 @@ export default function MobileCarouselCard({
     return () => mq.removeEventListener("change", handler);
   }, []);
 
-  const alertsWerePresent = useRef(hasAlerts);
-  useEffect(() => {
-    if (hasAlerts && !alertsWerePresent.current) {
-      setIndex(0);
-      setPinned(true);
-    }
-    alertsWerePresent.current = hasAlerts;
-  }, [hasAlerts]);
-
   useEffect(() => {
     if (slides.length <= 1) return;
     if (pinned) return;
     if (hovered) return;
     if (touched) return;
     if (reducedMotion) return;
+    
     const t = setInterval(() => {
       setIndex((i) => (i + 1) % slides.length);
     }, ROTATION_INTERVAL_MS);
@@ -117,7 +107,6 @@ export default function MobileCarouselCard({
 
   const togglePin = () => setPinned((p) => !p);
 
-  // ✅ Static card — single slide, no chrome
   if (slides.length === 1 && activeSlide === "fleet") {
     return (
       <div className="bg-surface rounded-2xl border border-surface-border shadow-card overflow-hidden">
@@ -136,21 +125,43 @@ export default function MobileCarouselCard({
       onTouchStart={() => setTouched(true)}
       onTouchEnd={() => window.setTimeout(() => setTouched(false), 3000)}
     >
-      {/* Control cluster — pin + optional promo dismiss */}
-      <div className="absolute top-3 right-3 z-20 flex items-center gap-1">
+      {/* ── Control cluster: dots + dismiss + pin (Absolute Top Right) ── */}
+      <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
+        {/* Dots */}
+        {slides.length > 1 && (
+          <div className="flex items-center gap-1 mr-1">
+            {slides.map((key, i) => (
+              <button
+                key={key}
+                type="button"
+                aria-label={`Go to slide ${i + 1}`}
+                onClick={() => goTo(i)}
+                className={`
+                  transition-all duration-300 rounded-full
+                  ${i === index
+                    ? "w-4 h-1.5 bg-primary"
+                    : "w-1.5 h-1.5 bg-ink-faint/40 hover:bg-ink-muted"}
+                  ${hintPulse && i !== index ? "animate-pulse" : ""}
+                `}
+              />
+            ))}
+          </div>
+        )}
+
         {showPromoX && (
           <button
             onClick={() => handleDismissPromo(activePromos[0].id)}
             aria-label="Dismiss promo"
-            className="p-1.5 rounded-lg text-ink-muted hover:bg-surface-hover hover:text-ink transition-colors"
+            className="p-1.5 rounded-lg text-ink-muted hover:bg-surface-hover hover:text-ink transition-colors bg-surface/50 backdrop-blur-sm"
           >
             <X size={14} />
           </button>
         )}
+
         <button
           onClick={togglePin}
           aria-label={pinned ? "Unpin slide" : "Pin this slide"}
-          className={`p-1.5 rounded-lg transition-all ${
+          className={`p-1.5 rounded-lg transition-all bg-surface/50 backdrop-blur-sm ${
             pinned
               ? "text-primary bg-primary/10 hover:bg-primary/15"
               : "text-ink-muted hover:bg-surface-hover hover:text-ink"
@@ -164,7 +175,7 @@ export default function MobileCarouselCard({
         </button>
       </div>
 
-      {/* Slide viewport */}
+      {/* Slide viewport — No extra top padding needed, content handles it */}
       <div className="relative">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
@@ -191,25 +202,6 @@ export default function MobileCarouselCard({
           </motion.div>
         </AnimatePresence>
       </div>
-
-      {/* Dots */}
-      {slides.length > 1 && (
-        <div className="flex items-center justify-center gap-1.5 pb-3 pt-1">
-          {slides.map((key, i) => (
-            <button
-              key={key}
-              type="button"
-              aria-label={`Go to slide ${i + 1}`}
-              onClick={() => goTo(i)}
-              className={`transition-all duration-300 rounded-full ${
-                i === index
-                  ? "w-5 h-1.5 bg-primary"
-                  : "w-1.5 h-1.5 bg-ink-faint/40 hover:bg-ink-muted"
-              }`}
-            />
-          ))}
-        </div>
-      )}
     </div>
   );
 }

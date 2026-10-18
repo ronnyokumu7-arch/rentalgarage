@@ -1,12 +1,10 @@
 // src/components/dashboard/mobile-carousel/MobileFleetStatusSlide.tsx
 "use client";
 
+import { useState, useRef } from "react";
+import Link from "next/link";
 import { Car, Wrench, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
-
-/* ──────────────────────────────────────────────────────────────────────
-   Types
-────────────────────────────────────────────────────────────────────── */
 
 export interface CarouselVehicle {
   id: number;
@@ -23,10 +21,6 @@ interface MobileFleetStatusSlideProps {
   vehicles: CarouselVehicle[];
 }
 
-/* ──────────────────────────────────────────────────────────────────────
-   Fleet Status slide — premium tiles in a snap-scroll carousel
-────────────────────────────────────────────────────────────────────── */
-
 export default function MobileFleetStatusSlide({
   vehicles,
 }: MobileFleetStatusSlideProps) {
@@ -42,33 +36,66 @@ export default function MobileFleetStatusSlide({
       id: "available",
       label: "Available",
       count: available,
+      href: "/dashboard/fleet?status=available",
       gradient: "from-emerald-500 to-teal-600",
-      tint: "bg-emerald-500/10",
-      border: "border-emerald-500/20",
+      tint: "bg-emerald-500/5",
+      border: "border-emerald-500/15",
       icon: Car,
+      textColor: "text-emerald-500",
     },
     {
       id: "rented",
       label: "Rented",
       count: rented,
+      href: "/dashboard/fleet?status=rented",
       gradient: "from-blue-500 to-indigo-600",
-      tint: "bg-blue-500/10",
-      border: "border-blue-500/20",
+      tint: "bg-blue-500/5",
+      border: "border-blue-500/15",
       icon: TrendingUp,
+      textColor: "text-blue-500",
     },
     {
       id: "service",
-      label: "Service",
+      label: "Needs Service",
       count: maintenance,
+      href: "/dashboard/fleet?status=maintenance",
       gradient: "from-amber-500 to-orange-600",
-      tint: "bg-amber-500/10",
-      border: "border-amber-500/20",
+      tint: "bg-amber-500/5",
+      border: "border-amber-500/15",
       icon: Wrench,
+      textColor: "text-amber-500",
     },
   ];
 
+  // ✅ Tap-vs-Scroll detection state
+  const [isDragging, setIsDragging] = useState(false);
+  const pointerStart = useRef({ x: 0, y: 0 });
+
+  const handlePointerDown = (e: React.PointerEvent) => {
+    pointerStart.current = { x: e.clientX, y: e.clientY };
+    setIsDragging(false);
+  };
+
+  const handlePointerMove = (e: React.PointerEvent) => {
+    if (isDragging) return;
+    const distX = Math.abs(e.clientX - pointerStart.current.x);
+    const distY = Math.abs(e.clientY - pointerStart.current.y);
+    
+    // If moved more than 10px, assume the user is scrolling
+    if (distX > 10 || distY > 10) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleClick = (e: React.MouseEvent) => {
+    if (isDragging) {
+      e.preventDefault();
+    }
+    // Otherwise let Next.js Link handle the actual navigation
+  };
+
   return (
-    <div className="p-4 space-y-3">
+    <div className="p-4 space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between pr-16">
         <div className="min-w-0">
@@ -76,65 +103,63 @@ export default function MobileFleetStatusSlide({
             Fleet Status
           </p>
           <p className="text-xs text-ink-subtle mt-0.5 truncate">
-            {operational}/{total} operational
+            {operational}/{total} vehicles operational
           </p>
-        </div>
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-success/10 border border-success/20 flex-shrink-0">
-          <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-success" />
-          </span>
-          <span className="text-[9px] font-bold text-success-text uppercase tracking-wider">
-            Live
-          </span>
         </div>
       </div>
 
       {/* Utilization bar */}
       <div>
-        <div className="flex items-center justify-between text-[10px] font-semibold text-ink-muted mb-1">
+        <div className="flex items-center justify-between text-[10px] font-bold text-ink-muted mb-1.5 uppercase tracking-wider">
           <span>Utilization</span>
-          <span className="tabular-nums">{utilizationPct}%</span>
+          <span className="tabular-nums text-[11px] text-ink">{utilizationPct}%</span>
         </div>
-        <div className="h-1.5 w-full rounded-full bg-surface-hover overflow-hidden">
+        <div className="h-2 w-full rounded-full bg-surface-hover overflow-hidden shadow-inner">
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${utilizationPct}%` }}
             transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-            className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600"
+            className="h-full rounded-full bg-gradient-to-r from-blue-500 to-indigo-600 shadow-[0_0_8px_rgba(59,130,246,0.4)]"
           />
         </div>
       </div>
 
-      {/* ✅ Snap-scroll tiles — one card dominant + strong peek of the next.
-          Left edge aligns flush with the header/tab switcher; right bleeds
-          past the container so the next tile peeks under the card border. */}
+      {/* Snap-scroll tiles */}
       <div className="-mr-4">
         <div
-          className="flex gap-2 overflow-x-auto snap-x snap-mandatory scroll-smooth pr-4 pb-1"
+          className="flex gap-2.5 overflow-x-auto snap-x snap-mandatory scroll-smooth pr-4 pb-2"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {tiles.map((tile) => {
             const Icon = tile.icon;
+            const unit = tile.count === 1 ? "car" : "cars";
+
             return (
-              <div
+              <Link
                 key={tile.id}
-                className={`snap-start flex-shrink-0 w-[62%] flex items-center gap-3 rounded-xl ${tile.tint} border ${tile.border} p-3 overflow-hidden`}
+                href={tile.href}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onClick={handleClick}
+                className={`snap-start flex-shrink-0 w-[62%] flex items-center gap-3 rounded-xl ${tile.tint} border ${tile.border} p-3 transition-all active:scale-[0.98] cursor-pointer hover:border-[var(--color-primary)]/30 group`}
               >
+                {/* Icon Tile */}
                 <div
-                  className={`w-10 h-10 rounded-lg bg-gradient-to-br ${tile.gradient} flex items-center justify-center flex-shrink-0 shadow-sm`}
+                  className={`w-10 h-10 rounded-lg bg-gradient-to-br ${tile.gradient} flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform`}
                 >
                   <Icon size={18} className="text-white" strokeWidth={2.5} />
                 </div>
-                <div className="min-w-0">
-                  <p className="text-2xl font-bold text-ink tracking-tight font-display tabular-nums leading-none">
-                    {tile.count}
+                
+                {/* Text Block */}
+                <div className="min-w-0 flex flex-col justify-center">
+                  <p className={`text-lg font-black tracking-tight font-display tabular-nums leading-none mb-0.5 ${tile.textColor}`}>
+                    {tile.count} {unit}
                   </p>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-ink-muted mt-1 truncate">
+                  <p className="text-[9px] font-bold uppercase tracking-wider text-ink-muted truncate group-hover:text-[var(--color-ink)] transition-colors">
                     {tile.label}
                   </p>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>
