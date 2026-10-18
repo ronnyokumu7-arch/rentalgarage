@@ -1,3 +1,4 @@
+// src/components/fleet/VehicleCurrentTripBanner.tsx
 "use client";
 
 import Link from "next/link";
@@ -158,9 +159,9 @@ export default function VehicleCurrentTripBanner({
         </div>
         <button
           onClick={onCreateBooking}
-          className="inline-flex items-center gap-1.5 h-8 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold transition-colors flex-shrink-0"
+          className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity flex-shrink-0"
         >
-          <Plus size={12} /> Create Booking
+          <Plus size={11} /> Create Booking
         </button>
       </div>
     </div>

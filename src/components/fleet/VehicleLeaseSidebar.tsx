@@ -1,3 +1,4 @@
+// src/components/fleet/VehicleLeaseSidebar.tsx
 "use client";
 
 import { User, Banknote, Activity, TrendingUp } from "lucide-react";
@@ -12,63 +13,56 @@ interface VehicleLeaseSidebarProps {
 }
 
 export default function VehicleLeaseSidebar({ vehicle, stats, onEditLease }: VehicleLeaseSidebarProps) {
+  const isInvestorOwned = !!vehicle.owner_id;
+
   return (
     <div className="space-y-4">
-      {/* Ownership / Lease */}
-      <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] p-4 sm:p-5">
-        <div className="flex items-center gap-2 mb-3">
-          <User size={16} className={vehicle.owner_id ? "text-purple-500" : "text-[var(--color-primary)]"} />
-          <h2 className="text-sm font-bold text-[var(--color-ink)] tracking-tight">
-            {vehicle.owner_id ? "Lease Agreement" : "Ownership"}
-          </h2>
-        </div>
+      {/* ✅ Ownership / Lease block — only renders for investor-owned vehicles.
+          Agency vehicles skip this entirely (ownership is implied). */}
+      {isInvestorOwned && (
+        <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] p-4 sm:p-5">
+          <div className="flex items-center gap-2 mb-3">
+            <User size={16} className="text-purple-500" />
+            <h2 className="text-sm font-bold text-[var(--color-ink)] tracking-tight">
+              Lease Agreement
+            </h2>
+          </div>
 
-        {vehicle.owner_id ? (
-          <>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
-                <User size={9} /> Investor
+          <div className="flex items-center gap-2 mb-3">
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
+              <User size={9} /> Investor
+            </span>
+            {vehicle.lease_rate_locked && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] border border-[var(--color-surface-border)]">
+                Locked
               </span>
-              {vehicle.lease_rate_locked && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] border border-[var(--color-surface-border)]">
-                  Locked
-                </span>
-              )}
-            </div>
-            <dl className="space-y-2 mb-3">
-              <div className="flex items-center justify-between">
-                <dt className="text-[11px] text-[var(--color-ink-muted)]">Lease Rate</dt>
-                <dd className="text-xs font-bold text-[var(--color-ink)] tabular-nums">
-                  {vehicle.investor_lease_rate ? formatMoney(vehicle.investor_lease_rate) : "—"}
-                  {vehicle.lease_rate_type && (
-                    <span className="text-[10px] font-medium text-[var(--color-ink-muted)] ml-1">
-                      /{vehicle.lease_rate_type}
-                    </span>
-                  )}
-                </dd>
-              </div>
-            </dl>
-            <button
-              onClick={onEditLease}
-              className="w-full h-8 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] text-[11px] font-bold text-[var(--color-ink)] transition-colors flex items-center justify-center gap-1.5"
-            >
-              <Banknote size={11} /> Edit Lease Agreement
-            </button>
-          </>
-        ) : (
-          <>
-            <p className="text-xs text-[var(--color-ink-muted)] mb-3">
-              This vehicle is owned by the agency. No lease agreement.
-            </p>
-            <div className="flex items-center gap-2 text-[10px] font-semibold text-[var(--color-ink-subtle)]">
-              <Banknote size={11} />
-              Full revenue retained
-            </div>
-          </>
-        )}
-      </div>
+            )}
+          </div>
 
-      {/* Recent Activity */}
+          <dl className="space-y-2 mb-3">
+            <div className="flex items-center justify-between">
+              <dt className="text-[11px] text-[var(--color-ink-muted)]">Lease Rate</dt>
+              <dd className="text-xs font-bold text-[var(--color-ink)] tabular-nums">
+                {vehicle.investor_lease_rate ? formatMoney(vehicle.investor_lease_rate) : "—"}
+                {vehicle.lease_rate_type && (
+                  <span className="text-[10px] font-medium text-[var(--color-ink-muted)] ml-1">
+                    /{vehicle.lease_rate_type}
+                  </span>
+                )}
+              </dd>
+            </div>
+          </dl>
+
+          <button
+            onClick={onEditLease}
+            className="w-full h-8 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] text-[11px] font-bold text-[var(--color-ink)] transition-colors flex items-center justify-center gap-1.5"
+          >
+            <Banknote size={11} /> Edit Lease Agreement
+          </button>
+        </div>
+      )}
+
+      {/* Activity — always shown for all vehicles */}
       <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] p-4 sm:p-5">
         <div className="flex items-center gap-2 mb-3">
           <Activity size={16} className="text-[var(--color-primary)]" />

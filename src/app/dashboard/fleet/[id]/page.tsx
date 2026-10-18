@@ -23,9 +23,9 @@ import type { Vehicle } from "@/lib/types";
 type Tab = "overview" | "bookings" | "documents";
 
 const TABS = [
-  { id: "overview", label: "Overview" },
-  { id: "bookings", label: "Bookings" },
-  { id: "documents", label: "Documents" },
+  { id: "overview" as const, label: "Overview" },
+  { id: "bookings" as const, label: "Bookings" },
+  { id: "documents" as const, label: "Documents" },
 ];
 
 export default function VehicleDetailPage({
@@ -39,7 +39,6 @@ export default function VehicleDetailPage({
   const { vehicle, bookings, loading, error, stats, refetch } = useVehicleDetail(vehicleId);
   const fleetList = useFleetList();
 
-  // ✅ Edit modal state — page-owned, same pattern as garage / pricing
   const [editVehicle, setEditVehicle] = useState<Vehicle | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -94,6 +93,11 @@ export default function VehicleDetailPage({
     setIsEditModalOpen(true);
   };
 
+  const openPricing = () => {
+    fleetList.setPricingVehicle(vehicle);
+    fleetList.setIsPricingModalOpen(true);
+  };
+
   return (
     <div className="space-y-4 sm:space-y-6">
       <VehicleHero
@@ -122,24 +126,30 @@ export default function VehicleDetailPage({
         onReactivate={() => fleetList.handleStatusAction(vehicle.id, "reactivate")}
       />
 
-      <div className="flex items-center justify-between gap-3">
-        <div className="hidden sm:block">
-          <PremiumTabSwitcher tabs={TABS} activeTab={tab} onTabChange={(t) => setTab(t as Tab)} />
-        </div>
-        <div className="sm:hidden flex items-center gap-2 flex-1 overflow-x-auto scrollbar-none">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id as Tab)}
-              className={`flex-shrink-0 h-8 px-3 rounded-lg text-[11px] font-bold transition-colors ${
-                tab === t.id
-                  ? "bg-[var(--color-primary)] text-white"
-                  : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)]"
-              }`}
-            >
-              {t.label}
-            </button>
-          ))}
+      {/* ✅ DESKTOP: PremiumTabSwitcher (unchanged) */}
+      <div className="hidden sm:block">
+        <PremiumTabSwitcher tabs={TABS} activeTab={tab} onTabChange={(t) => setTab(t as Tab)} />
+      </div>
+
+      {/* ✅ MOBILE: Compact segmented tab bar — 3 pills, one tap each */}
+      <div className="sm:hidden">
+        <div className="flex items-center gap-1 p-1 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)]">
+          {TABS.map((t) => {
+            const isActive = tab === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className={`flex-1 h-8 rounded-lg text-[11px] font-bold transition-all ${
+                  isActive
+                    ? "bg-[var(--color-primary)] text-white shadow-sm"
+                    : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
+                }`}
+              >
+                {t.label}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -148,17 +158,19 @@ export default function VehicleDetailPage({
           <div className="lg:col-span-2">
             <VehicleSpecsPanel
               vehicle={vehicle}
+              stats={stats}
               onOpenDocument={() => setTab("documents")}
+              onEditLease={openPricing}
             />
           </div>
-          <div className="lg:col-span-1">
+          {/* ✅ Desktop-only sidebar — the Lease and Activity content lives
+              inside the specs panel tabs on mobile, so we hide the sidebar
+              below lg to avoid duplication */}
+          <div className="hidden lg:block lg:col-span-1">
             <VehicleLeaseSidebar
               vehicle={vehicle}
               stats={stats}
-              onEditLease={() => {
-                fleetList.setPricingVehicle(vehicle);
-                fleetList.setIsPricingModalOpen(true);
-              }}
+              onEditLease={openPricing}
             />
           </div>
         </div>
@@ -222,7 +234,7 @@ export default function VehicleDetailPage({
         </div>
       )}
 
-      {/* Desktop actions dropdown — anchored to the "..." button */}
+      {/* Desktop actions dropdown */}
       {actionsOpen && (
         <div
           className="hidden md:block fixed inset-0 z-[9990]"
@@ -258,7 +270,6 @@ export default function VehicleDetailPage({
         </div>
       )}
 
-      {/* Modals */}
       <VehicleDetailsModal
         vehicle={editVehicle}
         isOpen={isEditModalOpen}
