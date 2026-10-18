@@ -5,7 +5,6 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowRight,
-  Sparkles,
   Calendar,
   Undo2,
   Loader2,
@@ -24,14 +23,13 @@ const HEADER_COPY: Record<
   { title: string; description: string; icon: LucideIcon }
 > = {
   upcoming: {
-    title: "Upcoming Rentals",
-    description: "Track pending and Confirmed bookings",
+    title: "Upcoming",
+    description: "Pending and confirmed bookings",
     icon: Calendar,
   },
   returning: {
-    title: "Returning Today",
-    // ✅ Shortened description to prevent truncation
-    description: "Trips due within 24 hours",
+    title: "Returning",
+    description: "Cars returning within 24h",
     icon: Undo2,
   },
 };
@@ -81,27 +79,22 @@ export default function ActionCenterWidget() {
               <HeaderIcon size={20} />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="text-sm font-bold text-[var(--color-ink)] tracking-tight flex items-center gap-1.5">
+              <h3 className="text-sm font-bold text-[var(--color-ink)] tracking-tight">
                 {headerCopy.title}
-                <Sparkles
-                  size={13}
-                  className="text-[var(--color-primary)] opacity-70 flex-shrink-0"
-                />
               </h3>
-              {/* ✅ Removed truncate, shortened text fits comfortably */}
               <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">
                 {headerCopy.description}
               </p>
             </div>
           </div>
 
-          {/* ✅ Compact toggle button — shows the OTHER tab */}
+          {/* ✅ Text-only toggle button — no outer pill/container */}
           <button
             type="button"
             onClick={toggleSubTab}
             title={`Switch to ${otherCopy.title}`}
             aria-label={`Switch to ${otherCopy.title}`}
-            className="flex-shrink-0 flex items-center gap-1.5 h-8 px-2.5 rounded-lg bg-[var(--color-surface-hover)]/50 border border-[var(--color-surface-border)]/50 hover:bg-[var(--color-surface-hover)] hover:border-[var(--color-primary)]/30 transition-all active:scale-95 cursor-pointer group"
+            className="flex-shrink-0 flex items-center gap-1.5 transition-opacity active:opacity-70 cursor-pointer group"
           >
             <OtherIcon
               size={13}
@@ -109,7 +102,7 @@ export default function ActionCenterWidget() {
               className="text-[var(--color-ink-muted)] group-hover:text-[var(--color-primary)] transition-colors flex-shrink-0"
             />
             <span className="text-[11px] font-bold text-[var(--color-ink-muted)] group-hover:text-[var(--color-ink)] transition-colors whitespace-nowrap">
-              {otherCopy.title.split(" ")[0]}
+              {otherCopy.title}
             </span>
             {otherLoading ? (
               <Loader2

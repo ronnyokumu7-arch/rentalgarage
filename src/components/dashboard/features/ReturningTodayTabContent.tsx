@@ -5,8 +5,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import {
-  Calendar, Clock, Car, MapPin, ChevronRight, Loader2, MoreVertical,
-  CheckCircle2, XCircle, Eye
+  Car, Clock, Loader2, MoreVertical,
+  CheckCircle2, XCircle, Eye, User, ArrowRight
 } from "lucide-react";
 import { useReturningTodayTab } from "@/hooks/dashboard/features/useReturningTodayTab";
 import { bookingsApi } from "@/lib/api/bookings";
@@ -21,32 +21,15 @@ const resolveField = (value: unknown, ...objectKeys: string[]): string => {
       const v = obj[key];
       if (v !== undefined && v !== null) return String(v);
     }
-    const make = obj["make"];
-    const model = obj["model"];
-    const plate = obj["plate_number"];
-    if (make && model) return `${make} ${model}${plate ? ` • ${plate}` : ""}`;
     if (obj["full_name"]) return String(obj["full_name"]);
     if (obj["name"]) return String(obj["name"]);
   }
   return String(value);
 };
 
-const getInitials = (name?: string | null): string =>
-  name ? name.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase() : "?";
-
-const rentalDays = (start?: string | null, end?: string | null): number | null => {
-  if (!start || !end) return null;
-  const d = Math.round((new Date(end).getTime() - new Date(start).getTime()) / 86_400_000);
-  return Number.isNaN(d) ? null : Math.max(1, d);
-};
-
-const formatReturnTime = (dateStr: string): string => {
-  if (!dateStr) return "—";
-  const d = new Date(dateStr);
-  if (Number.isNaN(d.getTime())) return "—";
-  return d.toLocaleString("en-US", {
-    month: "short", day: "numeric", hour: "numeric", minute: "2-digit",
-  });
+const formatPlate = (plate: string | null) => {
+  if (!plate) return "—";
+  return plate.replace(/([A-Za-z])(\d)/, "$1 $2").toUpperCase();
 };
 
 const returnRelative = (dateStr: string, isOverdue: boolean): string => {
@@ -57,10 +40,12 @@ const returnRelative = (dateStr: string, isOverdue: boolean): string => {
   const abs = Math.abs(diff);
   const hours = Math.floor(abs / 3_600_000);
   const minutes = Math.floor((abs % 3_600_000) / 60_000);
+  
   let core: string;
   if (hours === 0) core = `${minutes}m`;
   else if (hours < 24) core = minutes === 0 ? `${hours}h` : `${hours}h ${minutes}m`;
   else core = `${Math.floor(hours / 24)}d`;
+  
   return isOverdue ? `${core} overdue` : `in ${core}`;
 };
 
@@ -83,9 +68,9 @@ export default function ReturningTodayTabContent() {
         <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3">
           <CheckCircle2 size={24} />
         </div>
-        <p className="text-sm font-bold text-[var(--color-ink)]">No returns due today</p>
+        <p className="text-sm font-bold text-[var(--color-ink)]">No vehicles returning</p>
         <p className="text-xs text-[var(--color-ink-muted)] mt-1">
-          Active trips returning within 24 hours will appear here.
+          Active trips ending within 24 hours will appear here.
         </p>
       </div>
     );
@@ -95,13 +80,14 @@ export default function ReturningTodayTabContent() {
     <div className="space-y-2.5 animate-in fade-in duration-200">
       {returns.map((booking) => {
         const overdue = isOverdue(booking);
-        const clientName = resolveField(booking.client, "full_name", "name") || "Customer";
         const vehicle = booking.vehicle;
         const plate = vehicle?.plate_number ?? null;
         const vehicleLabel = vehicle ? `${vehicle.make} ${vehicle.model}` : "Vehicle";
-        const days = rentalDays(booking.start_date, booking.end_date);
-        const destination = resolveField(booking.destination, "name", "destination");
+        const clientName = resolveField(booking.client, "full_name", "name") || "Customer";
         const returnAt = booking.scheduled_return_at ?? booking.end_date;
+        
+        // Extract initials for the client sub-badge
+        const clientInitials = clientName.split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase() || "?";
 
         return (
           <div
@@ -111,31 +97,32 @@ export default function ReturningTodayTabContent() {
             }`}
           >
             <div className="p-3.5">
-              {/* Row 1: Avatar + Client + Menu */}
+              {/* Row 1: Vehicle Identity + Menu */}
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
+                  {/* Car Icon */}
                   <div className="relative flex-shrink-0">
-                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm ring-2 ring-[var(--color-surface)] ${
-                      overdue ? "bg-gradient-to-br from-rose-500 to-rose-600" : "bg-gradient-to-br from-emerald-500 to-emerald-600"
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-sm ring-2 ring-[var(--color-surface)] ${
+                      overdue ? "bg-rose-500/10 text-rose-500" : "bg-[var(--color-primary)]/10 text-[var(--color-primary)]"
                     }`}>
-                      {getInitials(clientName)}
-                    </div>
-                    <div className="absolute -bottom-0.5 -right-0.5">
-                      <div className={`w-2.5 h-2.5 rounded-full ring-2 ring-[var(--color-surface)] ${overdue ? "bg-rose-500" : "bg-emerald-500 animate-pulse"}`} />
+                      <Car size={18} />
                     </div>
                   </div>
 
+                  {/* Vehicle Info */}
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-[var(--color-ink)] truncate">{clientName}</p>
-                    <div className="flex items-center gap-1.5 mt-0.5">
-                      <Car size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                      <span className="text-xs font-medium text-[var(--color-ink-muted)] truncate">{vehicleLabel}</span>
-                      {plate && (
-                        <>
-                          <span className="text-xs text-[var(--color-ink-subtle)]">•</span>
-                          <span className="text-xs font-mono font-semibold text-[var(--color-ink)]">{plate}</span>
-                        </>
-                      )}
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <p className="text-sm font-bold text-[var(--color-ink)] truncate">{vehicleLabel}</p>
+                    </div>
+                    <div className="flex items-center gap-2 mt-0.5">
+                      <span className="text-xs font-mono font-semibold text-[var(--color-ink-muted)]">
+                        {formatPlate(plate)}
+                      </span>
+                      <span className="text-[8px] text-[var(--color-ink-subtle)]">•</span>
+                      <span className="text-[10px] font-medium text-[var(--color-ink-muted)] truncate flex items-center gap-1">
+                        <User size={10} className="text-[var(--color-ink-subtle)]" />
+                        {clientName} ({clientInitials})
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -150,46 +137,22 @@ export default function ReturningTodayTabContent() {
                 </div>
               </div>
 
-              {/* Row 2: Stats Grid */}
-              <div className="grid grid-cols-3 gap-2 mt-3">
-                <div className="flex items-center gap-1.5">
-                  <Calendar size={13} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+              {/* Row 2: Return Time & Status (The focus of this view) */}
+              <div className={`mt-3 pt-3 border-t border-[var(--color-surface-border)]/40 flex items-center justify-between gap-3`}>
+                <div className="flex items-center gap-2">
+                  <Clock size={14} className={overdue ? "text-rose-500" : "text-emerald-500"} />
                   <div>
-                    <p className="text-sm font-semibold text-[var(--color-ink)] leading-tight">{days || 0}d</p>
-                    <p className="text-[10px] text-[var(--color-ink-muted)] leading-tight">Duration</p>
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-1.5 col-span-2 justify-end">
-                  <Clock size={13} className={overdue ? "text-rose-500 flex-shrink-0" : "text-[var(--color-ink-subtle)] flex-shrink-0"} />
-                  <div className="text-right">
-                    <p className={`text-sm font-semibold leading-tight truncate ${overdue ? "text-rose-600 dark:text-rose-400" : "text-[var(--color-ink)]"}`}>
-                      {formatReturnTime(returnAt)}
-                    </p>
-                    <p className={`text-[10px] leading-tight font-semibold ${overdue ? "text-rose-600 dark:text-rose-400" : "text-[var(--color-ink-muted)]"}`}>
+                    <p className={`text-xs font-bold ${overdue ? "text-rose-600 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400"}`}>
                       {returnRelative(returnAt, overdue)}
                     </p>
                   </div>
                 </div>
-              </div>
-
-              {/* Row 3: Destination + Details */}
-              <div className="mt-3 pt-2.5 border-t border-[var(--color-surface-border)]/40 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-1 min-w-0 flex-1">
-                  {destination ? (
-                    <>
-                      <MapPin size={11} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                      <span className="text-[11px] font-medium text-[var(--color-ink-muted)] truncate">{destination}</span>
-                    </>
-                  ) : (
-                    <span className="text-[11px] text-[var(--color-ink-faint)] italic">No destination</span>
-                  )}
-                </div>
+                
                 <button
                   onClick={() => router.push(`/dashboard/bookings/${booking.id}`)}
-                  className="inline-flex items-center gap-0.5 text-[10px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity flex-shrink-0"
+                  className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity flex-shrink-0"
                 >
-                  Details <ChevronRight size={12} />
+                  View Trip <ArrowRight size={12} />
                 </button>
               </div>
             </div>
@@ -213,7 +176,7 @@ function ReturningRentalMenu({ bookingId, isOverdue, onAction, onView }: Returni
   const handleComplete = async () => {
     try {
       await bookingsApi.complete(bookingId);
-      toast.success("Trip completed");
+      toast.success("Vehicle returned — trip completed");
       await onAction();
     } catch (e: unknown) {
       const message = (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail ?? "Action failed. Try again.";
@@ -237,13 +200,13 @@ function ReturningRentalMenu({ bookingId, isOverdue, onAction, onView }: Returni
   const actions: SheetAction[] = [
     {
       kind: "view",
-      label: "View Booking",
+      label: "View Booking Details",
       icon: Eye,
       onClick: onView,
     },
     {
       kind: "action",
-      label: "End Trip",
+      label: "Mark as Returned",
       icon: CheckCircle2,
       tone: "success",
       onClick: handleComplete,

@@ -3,7 +3,7 @@
 
 import { useRouter } from "next/navigation";
 import {
-  Calendar, CalendarDays, Clock, Car, MapPin, ChevronRight,
+  Calendar, Car, MapPin,
   Loader2, MoreVertical, Play, XCircle, Eye,
 } from "lucide-react";
 import { useUpcomingRentalsTab } from "@/hooks/dashboard/features/useUpcomingRentalsTab";
@@ -12,9 +12,9 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import { bookingsApi } from "@/lib/api/bookings";
 
-const BOOKING_STATUS_META: Record<string, { label: string; dot: string }> = {
-  pending:   { label: "Pending",   dot: "bg-amber-500" },
-  confirmed: { label: "Confirmed", dot: "bg-blue-500" },
+const BOOKING_STATUS_META: Record<string, { label: string; dot: string; bg: string; text: string }> = {
+  pending:   { label: "Pending",   dot: "bg-amber-500", bg: "bg-amber-500/10", text: "text-amber-600 dark:text-amber-400" },
+  confirmed: { label: "Confirmed", dot: "bg-blue-500",  bg: "bg-blue-500/10",  text: "text-blue-600 dark:text-blue-400" },
 };
 
 const resolveField = (value: unknown, ...objectKeys: string[]): string => {
@@ -26,18 +26,16 @@ const resolveField = (value: unknown, ...objectKeys: string[]): string => {
       const v = obj[key];
       if (v !== undefined && v !== null) return String(v);
     }
-    const make = obj["make"];
-    const model = obj["model"];
-    const plate = obj["plate_number"];
-    if (make && model) return `${make} ${model}${plate ? ` • ${plate}` : ""}`;
     if (obj["full_name"]) return String(obj["full_name"]);
     if (obj["name"]) return String(obj["name"]);
   }
   return String(value);
 };
 
-const getInitials = (name?: string | null): string =>
-  name ? name.split(" ").map((p) => p[0]).join("").slice(0, 2).toUpperCase() : "?";
+const formatPlate = (plate: string | null) => {
+  if (!plate) return "—";
+  return plate.replace(/([A-Za-z])(\d)/, "$1 $2").toUpperCase();
+};
 
 const rentalDays = (start?: string | null, end?: string | null): number | null => {
   if (!start || !end) return null;
@@ -102,27 +100,25 @@ export default function UpcomingRentalsTabContent() {
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   <div className="relative flex-shrink-0">
-                    <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-sm ring-2 ring-[var(--color-surface)] ${
-                      isConfirmed ? "bg-gradient-to-br from-blue-500 to-blue-600" : "bg-gradient-to-br from-amber-500 to-amber-600"
+                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-sm ring-2 ring-[var(--color-surface)] ${
+                      isConfirmed ? "bg-blue-500/10 text-blue-500" : "bg-amber-500/10 text-amber-500"
                     }`}>
-                      {getInitials(clientName)}
-                    </div>
-                    <div className="absolute -bottom-0.5 -right-0.5">
-                      <div className={`w-2.5 h-2.5 rounded-full ${meta.dot} ring-2 ring-[var(--color-surface)]`} />
+                      <Car size={18} />
                     </div>
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-[var(--color-ink)] truncate">{clientName}</p>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <p className="text-sm font-bold text-[var(--color-ink)] truncate">{clientName}</p>
+                      <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider ${meta.bg} ${meta.text}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${meta.dot}`} />
+                        {meta.label}
+                      </span>
+                    </div>
                     <div className="flex items-center gap-1.5 mt-0.5">
-                      <Car size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
                       <span className="text-xs font-medium text-[var(--color-ink-muted)] truncate">{vehicleLabel}</span>
-                      {plate && (
-                        <>
-                          <span className="text-xs text-[var(--color-ink-subtle)]">•</span>
-                          <span className="text-xs font-mono font-semibold text-[var(--color-ink)]">{plate}</span>
-                        </>
-                      )}
+                      <span className="text-[8px] text-[var(--color-ink-subtle)]">•</span>
+                      <span className="text-xs font-mono font-semibold text-[var(--color-ink)]">{formatPlate(plate)}</span>
                     </div>
                   </div>
                 </div>
@@ -138,35 +134,42 @@ export default function UpcomingRentalsTabContent() {
                 </div>
               </div>
 
-              {/* Row 2: Stats Grid */}
-              <div className="grid grid-cols-3 gap-2 mt-3">
-                <div className="flex items-center gap-1.5">
-                  <CalendarDays size={13} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+              {/* Row 2: Prominent Date & Duration Bar */}
+              <div className="mt-3 flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-[var(--color-surface-hover)]/50 border border-[var(--color-surface-border)]/50">
+                <div className="flex items-center gap-2">
+                  <Calendar size={14} className="text-[var(--color-primary)]" />
                   <div>
-                    <p className="text-sm font-semibold text-[var(--color-ink)] leading-tight">{days || 0}d</p>
-                    <p className="text-[10px] text-[var(--color-ink-muted)] leading-tight">Duration</p>
+                    <p className="text-xs font-bold text-[var(--color-ink)] leading-tight">
+                      {formatDateShort(booking.start_date)}
+                    </p>
+                    <p className="text-[9px] font-medium text-[var(--color-ink-muted)] leading-tight">Pickup</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5">
-                  <Clock size={13} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                  <div>
-                    <p className="text-sm font-semibold text-[var(--color-ink)] leading-tight truncate">{formatDateShort(booking.start_date)}</p>
-                    <p className="text-[10px] text-[var(--color-ink-muted)] leading-tight">Start Date</p>
-                  </div>
+                <div className="flex flex-col items-center px-2">
+                  <span className="text-[10px] font-bold text-[var(--color-ink-muted)] tabular-nums">
+                    {days || 0}d
+                  </span>
+                  <div className="w-8 h-px bg-[var(--color-surface-border)] my-0.5" />
+                  <span className="text-[8px] font-medium text-[var(--color-ink-subtle)] uppercase tracking-wider">
+                    Duration
+                  </span>
                 </div>
 
-                <div className="flex items-center gap-1.5 justify-end">
-                  <span className="text-[10px] font-semibold text-[var(--color-ink-muted)]">{booking.currency_code || "KES"}</span>
+                <div className="flex items-center gap-2 text-right">
                   <div>
-                    <p className="text-sm font-semibold text-[var(--color-primary-text)] leading-tight tabular-nums truncate">{Number(booking.total_amount).toLocaleString()}</p>
-                    <p className="text-[10px] text-[var(--color-ink-muted)] text-right leading-tight">Total</p>
+                    <p className="text-xs font-bold text-[var(--color-ink)] leading-tight">
+                      {Number(booking.total_amount).toLocaleString()}
+                    </p>
+                    <p className="text-[9px] font-medium text-[var(--color-ink-muted)] leading-tight">
+                      {booking.currency_code || "KES"} Total
+                    </p>
                   </div>
                 </div>
               </div>
 
               {/* Row 3: Destination + Details */}
-              <div className="mt-3 pt-2.5 border-t border-[var(--color-surface-border)]/40 flex items-center justify-between gap-2">
+              <div className="mt-2.5 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1 min-w-0 flex-1">
                   {destination ? (
                     <>
@@ -179,9 +182,9 @@ export default function UpcomingRentalsTabContent() {
                 </div>
                 <button
                   onClick={() => router.push(`/dashboard/bookings/${booking.id}`)}
-                  className="inline-flex items-center gap-0.5 text-[10px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity flex-shrink-0"
+                  className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity flex-shrink-0"
                 >
-                  Details <ChevronRight size={12} />
+                  Details
                 </button>
               </div>
             </div>

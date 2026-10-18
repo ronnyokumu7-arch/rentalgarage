@@ -39,7 +39,7 @@ export default function RecentActivityWidget() {
                 <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
               </h3>
               <p className="text-xs text-[var(--color-ink-muted)] truncate">
-                Live feed of your business
+                Track what's happening
               </p>
             </div>
           </div>

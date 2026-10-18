@@ -39,6 +39,8 @@ interface CardGridProps<T> {
   maxHeight?: string | number;
   containerClassName?: string;
   showGlassEffect?: boolean;
+  // ✅ NEW: Allows the consumer to provide a custom badge for the action menu
+  renderActionSheetBadge?: (item: T) => React.ReactNode;
 }
 
 export default function CardGrid<T>({
@@ -61,6 +63,7 @@ export default function CardGrid<T>({
   maxHeight = "calc(100vh - 200px)",
   containerClassName = "",
   showGlassEffect = false,
+  renderActionSheetBadge,
 }: CardGridProps<T>) {
   const [openActionId, setOpenActionId] = useState<string | number | null>(null);
   const [dropdownPos, setDropdownPos] = useState<{ top: number; right: number } | null>(null);
@@ -500,6 +503,13 @@ export default function CardGrid<T>({
                     <X size={18} className="text-[var(--color-ink-muted)]" />
                   </button>
                 </div>
+
+                {/* ✅ Custom Badge Rendering */}
+                {renderActionSheetBadge && (
+                  <div className="px-5 pt-3 pb-1">
+                    {renderActionSheetBadge(item)}
+                  </div>
+                )}
 
                 <div className="p-3 max-h-[55vh] overflow-y-auto overscroll-contain">
                   {renderActionItems(item, true)}
