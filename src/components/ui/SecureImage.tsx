@@ -18,7 +18,7 @@ import apiClient from "@/lib/api-client";
  */
 
 const MARKER = "/api/v1/files/";
-const CACHE_TTL_MS = 8 * 60 * 1000; // refresh 2 min before the 10-min expiry
+const CACHE_TTL_MS = 5 * 60 * 1000; // refresh 2 min before the 10-min expiry
 
 const signedCache = new Map<string, { url: string; expiresAt: number }>();
 
@@ -102,6 +102,7 @@ export default function SecureImage({
       className={className}
       onError={() => setFailed(true)}
       draggable={false}
+      referrerPolicy="no-referrer"  // ✅ ADD THIS LINE
     />
   );
 }

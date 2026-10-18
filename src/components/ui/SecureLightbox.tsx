@@ -149,6 +149,7 @@ export default function SecureLightbox({ url, title = "Document", onClose }: Sec
               alt={title}
               className="max-w-full max-h-[70vh] object-contain"
               onError={() => setFailed(true)}   // ✅ dead/expired image → retry UI
+              referrerPolicy="no-referrer"  // ✅ ADD THIS LINE
             />
           )}
         </div>
