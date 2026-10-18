@@ -115,10 +115,10 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
   // Helper to render the avatar for both mobile/desktop contexts
   const renderAvatar = (size: "sm" | "md") => {
     const dims = { sm: "w-9 h-9", md: "w-10 h-10" };
-    const initialText = { sm: "text-sm", md: "text-base" };
+    const textSize = size === "sm" ? "text-sm" : "text-base";
 
     const fallback = (
-      <div className={`${dims[size]} rounded-xl flex items-center justify-center font-bold text-white bg-gradient-to-br from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20 flex-shrink-0 transition-transform duration-200 group-hover:scale-105`}>
+      <div className={`${dims[size]} rounded-xl flex items-center justify-center font-bold text-white bg-gradient-to-br from-blue-600 to-indigo-600 shadow-lg shadow-blue-500/20 flex-shrink-0 transition-transform duration-200 group-hover:scale-105 ${textSize}`}>
         {userInitial}
       </div>
     );
@@ -196,7 +196,7 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
               Icon = item.icon as LucideIcon;
             }
 
-            // ✅ Removed the active background. Only text/icon color changes.
+            // Removed the active background. Only text/icon color changes.
             const activeStateClass = active
               ? "text-[var(--color-primary)]"
               : "text-[var(--color-ink-subtle)] hover:text-[var(--color-ink-primary)]";
