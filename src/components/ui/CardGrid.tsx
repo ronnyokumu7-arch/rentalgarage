@@ -39,7 +39,6 @@ interface CardGridProps<T> {
   maxHeight?: string | number;
   containerClassName?: string;
   showGlassEffect?: boolean;
-  // ✅ NEW: Allows the consumer to provide a custom badge for the action menu
   renderActionSheetBadge?: (item: T) => React.ReactNode;
 }
 
@@ -73,64 +72,46 @@ export default function CardGrid<T>({
   const actionButtonRef = useRef<HTMLButtonElement | null>(null);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-  // ✅ Track touch position to distinguish taps from scrolls
   const touchStartPos = useRef<{ x: number; y: number } | null>(null);
 
   useEffect(() => {
     setMounted(true);
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
     checkMobile();
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Close dropdown on outside click
   useEffect(() => {
     if (!openActionId) return;
-
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       const isInsideTrigger = target.closest(`[data-card-actions="${openActionId}"]`);
       const isInsideMenu = target.closest(`[data-dropdown-menu="${openActionId}"]`);
-
       if (!isInsideTrigger && !isInsideMenu) {
         setOpenActionId(null);
         setDropdownPos(null);
       }
     };
-
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, [openActionId]);
 
-  // Close dropdown on scroll (always) + resize (desktop only).
-  // ✅ Mobile bottom sheet is viewport-anchored — keyboard resize must NOT close it.
   useEffect(() => {
     if (openActionId === null) return;
-
     const close = () => {
       setOpenActionId(null);
       setDropdownPos(null);
       setTouchAnchor(null);
     };
-
     window.addEventListener("scroll", close, true);
-    if (!isMobile) {
-      window.addEventListener("resize", close);
-    }
-
+    if (!isMobile) window.addEventListener("resize", close);
     return () => {
       window.removeEventListener("scroll", close, true);
-      if (!isMobile) {
-        window.removeEventListener("resize", close);
-      }
+      if (!isMobile) window.removeEventListener("resize", close);
     };
   }, [openActionId, isMobile]);
 
-  // ✅ Auto-close the menu when its target disappears from the filtered list
-  //    (e.g. user opens menu, then search filters the row away).
   useEffect(() => {
     if (openActionId === null) return;
     const stillPresent = data.some((d) => getCardId(d) === openActionId);
@@ -141,96 +122,93 @@ export default function CardGrid<T>({
     }
   }, [data, openActionId, getCardId]);
 
-  // Close dropdown on touch outside (mobile)
   useEffect(() => {
     if (!openActionId) return;
-
     const handleTouchOutside = (event: TouchEvent) => {
       const target = event.target as HTMLElement;
       const isInsideTrigger = target.closest(`[data-card-actions="${openActionId}"]`);
       const isInsideMenu = target.closest(`[data-dropdown-menu="${openActionId}"]`);
-
       if (!isInsideTrigger && !isInsideMenu) {
         setOpenActionId(null);
         setDropdownPos(null);
       }
     };
-
     document.addEventListener("touchstart", handleTouchOutside, { passive: true });
     return () => document.removeEventListener("touchstart", handleTouchOutside);
   }, [openActionId]);
 
-  const calculateDropdownPosition = useCallback((buttonRect: DOMRect): { top: number; right: number } => {
-    const actions = data.find((d) => getCardId(d) === openActionId);
-    if (!actions) return { top: 0, right: 0 };
+  // ✅ FIX: Accept the action list as a parameter so we never read stale `openActionId`.
+  const calculateDropdownPosition = useCallback(
+    (buttonRect: DOMRect, actions: RowAction<T>[]): { top: number; right: number } => {
+      if (!actions.length) return { top: 0, right: 0 };
 
-    const actList = typeof rowActions === "function" ? rowActions(actions) : rowActions || [];
-    const separators = actList.filter((a) => a.separator).length;
-    const estHeight = actList.length * 41 + separators * 9 + 8;
+      const separators = actions.filter((a) => a.separator).length;
+      const estHeight = actions.length * 41 + separators * 9 + 8;
 
-    const spaceBelow = window.innerHeight - buttonRect.bottom;
-    const spaceAbove = buttonRect.top;
+      const spaceBelow = window.innerHeight - buttonRect.bottom;
+      const spaceAbove = buttonRect.top;
 
-    let top: number;
-    let right: number;
+      let top: number;
+      let right: number;
 
-    if (spaceBelow >= estHeight + 12) {
-      top = buttonRect.bottom + 8;
-    } else if (spaceAbove >= estHeight + 12) {
-      top = buttonRect.top - estHeight - 8;
-    } else {
-      top = Math.max(8, (window.innerHeight - estHeight) / 2);
-    }
+      if (spaceBelow >= estHeight + 12) {
+        top = buttonRect.bottom + 8;
+      } else if (spaceAbove >= estHeight + 12) {
+        top = buttonRect.top - estHeight - 8;
+      } else {
+        top = Math.max(8, (window.innerHeight - estHeight) / 2);
+      }
 
-    const dropdownWidth = 224;
-    right = Math.max(8, window.innerWidth - buttonRect.right);
+      const dropdownWidth = 224;
+      right = Math.max(8, window.innerWidth - buttonRect.right);
 
-    const leftPosition = window.innerWidth - right - dropdownWidth;
-    if (leftPosition < 8) {
-      right = window.innerWidth - 8 - dropdownWidth;
-    }
+      const leftPosition = window.innerWidth - right - dropdownWidth;
+      if (leftPosition < 8) {
+        right = window.innerWidth - 8 - dropdownWidth;
+      }
 
-    return { top, right };
-  }, [data, getCardId, openActionId, rowActions]);
+      return { top, right };
+    },
+    []
+  );
 
-  const handleToggleActions = useCallback((
-    e: React.MouseEvent | React.TouchEvent,
-    item: T,
-    touchPoint?: { x: number; y: number }
-  ) => {
-    e.stopPropagation();
-    e.preventDefault();
+  const handleToggleActions = useCallback(
+    (e: React.MouseEvent | React.TouchEvent, item: T, touchPoint?: { x: number; y: number }) => {
+      e.stopPropagation();
+      e.preventDefault();
 
-    const id = getCardId(item);
+      const id = getCardId(item);
 
-    if (openActionId === id) {
-      setOpenActionId(null);
-      setDropdownPos(null);
-      setTouchAnchor(null);
-      return;
-    }
+      if (openActionId === id) {
+        setOpenActionId(null);
+        setDropdownPos(null);
+        setTouchAnchor(null);
+        return;
+      }
 
-    const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+      const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
 
-    if (isMobile) {
-      const clientX = touchPoint?.x ?? rect.left + rect.width / 2;
-      const clientY = touchPoint?.y ?? rect.top + rect.height / 2;
+      if (isMobile) {
+        const clientX = touchPoint?.x ?? rect.left + rect.width / 2;
+        const clientY = touchPoint?.y ?? rect.top + rect.height / 2;
+        setTouchAnchor({ x: clientX, y: clientY });
+        setOpenActionId(id);
+        setDropdownPos(null);
+        return;
+      }
 
-      setTouchAnchor({ x: clientX, y: clientY });
+      // ✅ Compute actions NOW from the current item — no stale state.
+      const actionList = typeof rowActions === "function" ? rowActions(item) : rowActions || [];
+      const position = calculateDropdownPosition(rect, actionList);
+
       setOpenActionId(id);
-      setDropdownPos(null);
-      return;
-    }
-
-    const position = calculateDropdownPosition(rect);
-    setOpenActionId(id);
-    setDropdownPos(position);
-  }, [getCardId, openActionId, calculateDropdownPosition, isMobile]);
+      setDropdownPos(position);
+    },
+    [getCardId, openActionId, calculateDropdownPosition, isMobile, rowActions]
+  );
 
   const handleCardClick = useCallback((item: T) => {
-    if (onCardClick) {
-      onCardClick(item);
-    }
+    if (onCardClick) onCardClick(item);
   }, [onCardClick]);
 
   const renderSkeletons = () => {
@@ -267,9 +245,7 @@ export default function CardGrid<T>({
           <MoreVertical size={24} className="text-[var(--color-ink-subtle)]" />
         </div>
         <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">{emptyMessage}</h3>
-        {emptySubMessage && (
-          <p className="text-sm text-[var(--color-ink-muted)]">{emptySubMessage}</p>
-        )}
+        {emptySubMessage && <p className="text-sm text-[var(--color-ink-muted)]">{emptySubMessage}</p>}
       </div>
     </div>
   );
@@ -288,10 +264,7 @@ export default function CardGrid<T>({
             setOpenActionId(null);
             setDropdownPos(null);
             setTouchAnchor(null);
-
-            if (typeof action.onClick === "function") {
-              action.onClick(item);
-            }
+            if (typeof action.onClick === "function") action.onClick(item);
           }}
           disabled={action.disabled}
           className={`
@@ -316,134 +289,112 @@ export default function CardGrid<T>({
     ));
   };
 
-  if (loading) {
-    return renderSkeletons();
-  }
+  if (loading) return renderSkeletons();
 
   return (
     <>
       <div
-        className={`
-          overflow-y-auto overflow-x-hidden
-          scroll-smooth
-          ${containerClassName}
-        `}
+        className={`overflow-y-auto overflow-x-hidden scroll-smooth ${containerClassName}`}
         style={{
           maxHeight: typeof maxHeight === 'number' ? `${maxHeight}px` : maxHeight,
           WebkitOverflowScrolling: 'touch',
         }}
       >
         <div className={`space-y-3 ${compact ? 'p-2' : 'p-4'} ${data.length === 0 ? 'h-full' : ''}`}>
-          {data.length === 0 ? (
-            renderEmptyState()
-          ) : (
-            data.map((item) => {
-              const id = getCardId(item);
-              const actions = rowActions && (typeof rowActions === "function" ? rowActions(item) : rowActions);
-              const hasActions = actions && actions.length > 0;
+          {data.length === 0 ? renderEmptyState() : data.map((item) => {
+            const id = getCardId(item);
+            const actions = rowActions && (typeof rowActions === "function" ? rowActions(item) : rowActions);
+            const hasActions = actions && actions.length > 0;
 
-              return (
-                <div
-                  key={id}
-                  className={`
-                    rounded-xl
-                    ${showGlassEffect
-                      ? 'bg-[var(--color-surface)]/80 backdrop-blur-xl border border-[var(--color-surface-border)]/70 shadow-[0_8px_32px_rgba(0,0,0,0.08)]'
-                      : 'bg-[var(--color-surface-hover)]/40 border border-[var(--color-surface-border)]'
-                    }
-                    hover:border-[var(--color-primary)]/30
-                    transition-all shadow-sm
-                    ${onCardClick ? 'cursor-pointer hover:shadow-md' : ''}
-                    ${compact ? 'p-3' : 'p-4'}
-                    ${cardClassName}
-                  `}
-                  onClick={() => handleCardClick(item)}
-                  role={onCardClick ? 'button' : undefined}
-                  tabIndex={onCardClick ? 0 : undefined}
-                  onKeyDown={onCardClick ? (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      handleCardClick(item);
-                    }
-                  } : undefined}
-                >
-                  <div className={`flex items-start justify-between gap-3 ${headerClassName}`}>
-                    <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <div className="min-w-0 flex-1">
-                        {renderCardHeader({
-                          item,
-                          onTitleClick: () => {},
-                        })}
-                      </div>
+            return (
+              <div
+                key={id}
+                className={`
+                  rounded-xl
+                  ${showGlassEffect
+                    ? 'bg-[var(--color-surface)]/80 backdrop-blur-xl border border-[var(--color-surface-border)]/70 shadow-[0_8px_32px_rgba(0,0,0,0.08)]'
+                    : 'bg-[var(--color-surface-hover)]/40 border border-[var(--color-surface-border)]'
+                  }
+                  hover:border-[var(--color-primary)]/30
+                  transition-all shadow-sm
+                  ${onCardClick ? 'cursor-pointer hover:shadow-md' : ''}
+                  ${compact ? 'p-3' : 'p-4'}
+                  ${cardClassName}
+                `}
+                onClick={() => handleCardClick(item)}
+                role={onCardClick ? 'button' : undefined}
+                tabIndex={onCardClick ? 0 : undefined}
+                onKeyDown={onCardClick ? (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleCardClick(item);
+                  }
+                } : undefined}
+              >
+                <div className={`flex items-start justify-between gap-3 ${headerClassName}`}>
+                  <div className="flex items-center gap-3 min-w-0 flex-1">
+                    <div className="min-w-0 flex-1">
+                      {renderCardHeader({ item, onTitleClick: () => {} })}
                     </div>
-
-                    {hasActions && (
-                      <div className="relative flex-shrink-0" data-card-actions={id}>
-                        <button
-                          ref={actionButtonRef}
-                          type="button"
-                          onClick={(e) => handleToggleActions(e, item)}
-                          onTouchStart={(e) => {
-                            if (e.touches.length === 1) {
-                              touchStartPos.current = {
-                                x: e.touches[0].clientX,
-                                y: e.touches[0].clientY,
-                              };
-                            }
-                          }}
-                          onTouchEnd={(e) => {
-                            if (touchStartPos.current && e.changedTouches.length === 1) {
-                              const dx = Math.abs(e.changedTouches[0].clientX - touchStartPos.current.x);
-                              const dy = Math.abs(e.changedTouches[0].clientY - touchStartPos.current.y);
-
-                              if (dx < 10 && dy < 10) {
-                                if (e.cancelable) {
-                                  e.preventDefault();
-                                }
-                                handleToggleActions(e, item, {
-                                  x: touchStartPos.current.x,
-                                  y: touchStartPos.current.y,
-                                });
-                              }
-                            }
-                            touchStartPos.current = null;
-                          }}
-                          className={`
-                            w-8 h-8 flex items-center justify-center rounded-lg
-                            text-[var(--color-ink-muted)] hover:bg-[var(--color-surface)]
-                            transition-all hover:text-[var(--color-ink)]
-                            active:scale-95 touch-manipulation
-                          `}
-                          title="More actions"
-                          aria-label="More actions"
-                          aria-expanded={openActionId === id}
-                          aria-haspopup="true"
-                        >
-                          <MoreVertical size={compact ? 16 : 18} />
-                        </button>
-                      </div>
-                    )}
                   </div>
 
-                  <div className={`mt-3 ${bodyClassName}`}>
-                    {renderCardBody({
-                      item,
-                      onTitleClick: () => {},
-                    })}
-                  </div>
-
-                  {renderCardFooter && (
-                    <div className={`mt-3 pt-3 border-t border-[var(--color-surface-border)] ${footerClassName}`}>
-                      {renderCardFooter({
-                        item,
-                        onTitleClick: () => {},
-                      })}
+                  {hasActions && (
+                    <div className="relative flex-shrink-0" data-card-actions={id}>
+                      <button
+                        ref={actionButtonRef}
+                        type="button"
+                        onClick={(e) => handleToggleActions(e, item)}
+                        onTouchStart={(e) => {
+                          if (e.touches.length === 1) {
+                            touchStartPos.current = {
+                              x: e.touches[0].clientX,
+                              y: e.touches[0].clientY,
+                            };
+                          }
+                        }}
+                        onTouchEnd={(e) => {
+                          if (touchStartPos.current && e.changedTouches.length === 1) {
+                            const dx = Math.abs(e.changedTouches[0].clientX - touchStartPos.current.x);
+                            const dy = Math.abs(e.changedTouches[0].clientY - touchStartPos.current.y);
+                            if (dx < 10 && dy < 10) {
+                              if (e.cancelable) e.preventDefault();
+                              handleToggleActions(e, item, {
+                                x: touchStartPos.current.x,
+                                y: touchStartPos.current.y,
+                              });
+                            }
+                          }
+                          touchStartPos.current = null;
+                        }}
+                        className={`
+                          w-8 h-8 flex items-center justify-center rounded-lg
+                          text-[var(--color-ink-muted)] hover:bg-[var(--color-surface)]
+                          transition-all hover:text-[var(--color-ink)]
+                          active:scale-95 touch-manipulation
+                        `}
+                        title="More actions"
+                        aria-label="More actions"
+                        aria-expanded={openActionId === id}
+                        aria-haspopup="true"
+                      >
+                        <MoreVertical size={compact ? 16 : 18} />
+                      </button>
                     </div>
                   )}
                 </div>
-              );
-            })
-          )}
+
+                <div className={`mt-3 ${bodyClassName}`}>
+                  {renderCardBody({ item, onTitleClick: () => {} })}
+                </div>
+
+                {renderCardFooter && (
+                  <div className={`mt-3 pt-3 border-t border-[var(--color-surface-border)] ${footerClassName}`}>
+                    {renderCardFooter({ item, onTitleClick: () => {} })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -459,16 +410,8 @@ export default function CardGrid<T>({
             <>
               <div
                 className="fixed inset-0 z-[9990] bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
-                onClick={() => {
-                  setOpenActionId(null);
-                  setDropdownPos(null);
-                  setTouchAnchor(null);
-                }}
-                onTouchStart={() => {
-                  setOpenActionId(null);
-                  setDropdownPos(null);
-                  setTouchAnchor(null);
-                }}
+                onClick={() => { setOpenActionId(null); setDropdownPos(null); setTouchAnchor(null); }}
+                onTouchStart={() => { setOpenActionId(null); setDropdownPos(null); setTouchAnchor(null); }}
               />
 
               <div
@@ -492,11 +435,7 @@ export default function CardGrid<T>({
                 <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--color-surface-border)]">
                   <span className="text-base font-bold text-[var(--color-ink)]">Quick Actions</span>
                   <button
-                    onClick={() => {
-                      setOpenActionId(null);
-                      setDropdownPos(null);
-                      setTouchAnchor(null);
-                    }}
+                    onClick={() => { setOpenActionId(null); setDropdownPos(null); setTouchAnchor(null); }}
                     className="p-2 rounded-full bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-border)] transition-all active:scale-95"
                     aria-label="Close"
                   >
@@ -504,11 +443,8 @@ export default function CardGrid<T>({
                   </button>
                 </div>
 
-                {/* ✅ Custom Badge Rendering */}
                 {renderActionSheetBadge && (
-                  <div className="px-5 pt-3 pb-1">
-                    {renderActionSheetBadge(item)}
-                  </div>
+                  <div className="px-5 pt-3 pb-1">{renderActionSheetBadge(item)}</div>
                 )}
 
                 <div className="p-3 max-h-[55vh] overflow-y-auto overscroll-contain">
@@ -518,17 +454,9 @@ export default function CardGrid<T>({
 
               <style>{`
                 @keyframes sheetUp {
-                  0% {
-                    transform: translateY(100%) scale(0.9);
-                    opacity: 0.5;
-                  }
-                  60% {
-                    transform: translateY(-5px) scale(1.01);
-                  }
-                  100% {
-                    transform: translateY(0) scale(1);
-                    opacity: 1;
-                  }
+                  0% { transform: translateY(100%) scale(0.9); opacity: 0.5; }
+                  60% { transform: translateY(-5px) scale(1.01); }
+                  100% { transform: translateY(0) scale(1); opacity: 1; }
                 }
               `}</style>
             </>,
@@ -541,14 +469,8 @@ export default function CardGrid<T>({
             <>
               <div
                 className="fixed inset-0 z-[9990]"
-                onClick={() => {
-                  setOpenActionId(null);
-                  setDropdownPos(null);
-                }}
-                onTouchStart={() => {
-                  setOpenActionId(null);
-                  setDropdownPos(null);
-                }}
+                onClick={() => { setOpenActionId(null); setDropdownPos(null); }}
+                onTouchStart={() => { setOpenActionId(null); setDropdownPos(null); }}
               />
 
               <div
@@ -559,7 +481,7 @@ export default function CardGrid<T>({
                   top: dropdownPos.top,
                   right: dropdownPos.right,
                   maxHeight: '60vh',
-                  overflowY: 'auto'
+                  overflowY: 'auto',
                 }}
                 onClick={(e) => e.stopPropagation()}
                 onTouchStart={(e) => e.stopPropagation()}

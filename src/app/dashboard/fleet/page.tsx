@@ -4,28 +4,25 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Car,
-  Plus,
   BarChart3,
   Wrench,
   CarFront,
   LineChart,
   Wrench as WrenchIcon,
-  Filter,
 } from "lucide-react";
-import { useState, useMemo, useEffect } from "react";
-import { useFleetList } from "@/hooks/fleet/useFleetList";
-import FleetList from "@/components/fleet/FleetList";
+import { useState, useMemo, useEffect, useCallback } from "react";
+import { useMobileFleet } from "@/hooks/fleet/useMobileFleet";
+import { useDesktopFleet } from "@/hooks/fleet/useDesktopFleet";
 import QuickGarageModal from "@/components/ui/QuickGarageModal";
 import InvestorVehiclePricingModal from "@/components/fleet/InvestorVehiclePricingModal";
 import { bookingsApi } from "@/lib/api/bookings";
-import type { Booking } from "@/lib/types";
+import { vehiclesApi } from "@/lib/api/vehicles";
+import type { Booking, Vehicle } from "@/lib/types";
 import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
-import MobilePageToolbar from "@/components/ui/MobilePageToolbar";
 import MobileFloatingSegment from "@/components/ui/MobileFloatingSegment";
-
-/* ──────────────────────────────────────────────────────────────────────
-   Tabs config
-────────────────────────────────────────────────────────────────────── */
+import MobileFleetList from "@/components/fleet/MobileFleetList";
+import DesktopFleetList from "@/components/fleet/DesktopFleetList";
+import toast from "react-hot-toast";
 
 type TabMode = "fleet" | "performance" | "garage";
 
@@ -45,24 +42,25 @@ const TABS: TabItem[] = [
 const MOBILE_TABS: TabItem[] = TABS.filter((t) => !t.hiddenOnMobile);
 const VALID_TABS = new Set<TabMode>(["fleet", "performance", "garage"]);
 
-/* ──────────────────────────────────────────────────────────────────────
-   Component
-────────────────────────────────────────────────────────────────────── */
-
 export default function FleetPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  /* ✅ URL-driven tab — deep links land on the right tab on any viewport */
   const tabFromUrl = searchParams.get("tab") as TabMode | null;
   const initialTab: TabMode =
     tabFromUrl && VALID_TABS.has(tabFromUrl) ? tabFromUrl : "fleet";
   const [activeTab, setActiveTab] = useState<TabMode>(initialTab);
 
   const [activeRentals, setActiveRentals] = useState<Record<number, Booking>>({});
-  const fleetData = useFleetList();
 
-  /* Sync FROM URL */
+  const [garageVehicle, setGarageVehicle] = useState<Vehicle | null>(null);
+  const [garageModalOpen, setGarageModalOpen] = useState(false);
+  const [pricingVehicle, setPricingVehicle] = useState<Vehicle | null>(null);
+  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+
+  const mobile = useMobileFleet();
+  const desktop = useDesktopFleet();
+
   useEffect(() => {
     const t = searchParams.get("tab") as TabMode | null;
     if (t && VALID_TABS.has(t) && t !== activeTab) {
@@ -78,34 +76,67 @@ export default function FleetPage() {
     router.push(`/dashboard/fleet?tab=${next}`, { scroll: false });
   };
 
-  /* Fetch active rentals map */
   useEffect(() => {
     async function fetchActiveRentals() {
       try {
-        const allBookings = await bookingsApi.list({
-          page: 1,
-          page_size: 100,
-        });
-
+        const allBookings = await bookingsApi.list({ page: 1, page_size: 100 });
         const active = allBookings.filter(
-          (b) => b.status === "active" || b.status === "confirmed",
+          (b) => b.status === "active" || b.status === "confirmed"
         );
-
         const rentalMap: Record<number, Booking> = {};
         active.forEach((booking) => {
           if (booking.vehicle_id) {
             rentalMap[booking.vehicle_id] = booking;
           }
         });
-
         setActiveRentals(rentalMap);
       } catch (error) {
         console.error("Failed to fetch active rentals:", error);
       }
     }
-
     fetchActiveRentals();
   }, []);
+
+  const handleGarageSave = useCallback(
+    async (payload: { current_mileage: number; next_service_km?: number | null }) => {
+      if (!garageVehicle) return;
+      try {
+        if (garageVehicle.mileage_due) {
+          await vehiclesApi.updateMileage(garageVehicle.id, payload);
+          toast.success("Mileage updated and vehicle is now available!");
+        } else {
+          await vehiclesApi.update(garageVehicle.id, payload);
+          toast.success("Vehicle mileage updated!");
+        }
+        setGarageModalOpen(false);
+        setGarageVehicle(null);
+        await Promise.all([mobile.refetch(), desktop.refetch()]);
+      } catch (error: unknown) {
+        const err = error as { response?: { data?: { detail?: string; message?: string } } };
+        toast.error(
+          err.response?.data?.message ||
+            err.response?.data?.detail ||
+            "Failed to update mileage"
+        );
+        throw error;
+      }
+    },
+    [garageVehicle, mobile, desktop]
+  );
+
+  const handleStatusAction = useCallback(
+    async (id: number, action: string) => {
+      const vehicle = mobile.filteredVehicles.find((v) => v.id === id);
+      if (action === "activate" && vehicle?.owner_id) {
+        setPricingVehicle(vehicle);
+        setIsPricingModalOpen(true);
+        return;
+      }
+      await mobile.handleStatusAction(id, action);
+      await desktop.refetch();
+    },
+    [mobile, desktop]
+  );
 
   const currentTabInfo = useMemo(() => {
     if (activeTab === "fleet") {
@@ -132,26 +163,7 @@ export default function FleetPage() {
     };
   }, [activeTab]);
 
-  const statusOptions = useMemo(() => {
-    const opts = [
-      { value: "pending_activation", label: "Pending Activation" },
-      { value: "available",          label: "Available" },
-      { value: "rented",             label: "Rented" },
-      { value: "maintenance",        label: "Maintenance" },
-      { value: "retired",            label: "Retired" },
-    ];
-    return opts.map((o) => ({
-      ...o,
-      count: fleetData.filteredVehicles.filter((v) => v.status === o.value).length,
-    }));
-  }, [fleetData.filteredVehicles]);
-
-  /* ✅ Floating escape target:
-     - On mobile-browse tabs (fleet / garage): toggle back to "fleet" when on garage.
-     - On desktop-only tab (performance): toggle back to "fleet" (escape hatch).
-     - On "fleet": don't render (nothing to escape to). */
-  const showFloating =
-    activeTab === "garage" || activeTab === "performance";
+  const showFloating = activeTab === "garage" || activeTab === "performance";
   const floatingToggleTarget: TabMode = "fleet";
   const floatingTriggerIcon = activeTab === "performance" ? BarChart3 : CarFront;
 
@@ -180,66 +192,61 @@ export default function FleetPage() {
         </div>
       </div>
 
-      {/* ─── TAB CONTENT ──────────────────────────────────────────── */}
-      {activeTab === "fleet" ? (
+      {/* TAB CONTENT */}
+      {activeTab === "fleet" && (
         <>
-          {/* MOBILE */}
-          <div className="md:hidden bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
-            <div className="p-3 border-b border-[var(--color-surface-border)]">
-              <MobilePageToolbar
-                search={fleetData.search}
-                onSearchChange={fleetData.setSearch}
-                searchPlaceholder="Search make, model, plate..."
-                segment={activeTab}
-                onSegmentChange={(value) => handleTabChange(value)}
-                segments={MOBILE_TABS.map((t) => ({ id: t.id, label: t.label, icon: t.icon }))}
-                segmentMenuMode="toggle"
-                segmentTriggerIcon={Wrench}
-                filters={[
-                  {
-                    id: "fleet-status",
-                    label: "Status",
-                    options: statusOptions,
-                    value: fleetData.statusFilter || null,
-                    onChange: (value) =>
-                      fleetData.setStatusFilter(
-                        (value || "") as typeof fleetData.statusFilter,
-                      ),
-                    icon: Filter,
-                  },
-                ]}
-                primaryAction={
-                  <button
-                    onClick={() => router.push("/dashboard/fleet/new")}
-                    className="w-full h-10 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.99]"
-                  >
-                    <Plus size={16} strokeWidth={2.5} />
-                    Add Vehicle
-                  </button>
-                }
-              />
-            </div>
+          <MobileFleetList
+            loading={mobile.loading}
+            search={mobile.search}
+            setSearch={mobile.setSearch}
+            statusFilter={mobile.statusFilter}
+            setStatusFilter={mobile.setStatusFilter}
+            statusOptions={mobile.statusOptions}
+            activeTab={activeTab}
+            handleTabChange={handleTabChange}
+            mobileTabs={MOBILE_TABS.map((t) => ({ id: t.id, label: t.label, icon: t.icon }))}
+            filteredVehicles={mobile.filteredVehicles}
+            activeRentals={activeRentals}
+            setGarageVehicle={setGarageVehicle}
+            setGarageModalOpen={setGarageModalOpen}
+            setPricingVehicle={setPricingVehicle}
+            setIsPricingModalOpen={setIsPricingModalOpen}
+            handleStatusAction={handleStatusAction}
+            handleArchive={mobile.handleArchive}
+            handleRetire={mobile.handleRetire}
+            onAddVehicle={() => router.push("/dashboard/fleet/new")}
+          />
 
-            <FleetList
-              {...fleetData}
-              activeRentals={activeRentals}
-              setPricingVehicle={fleetData.setPricingVehicle}
-              setIsPricingModalOpen={fleetData.setIsPricingModalOpen}
-            />
-          </div>
-
-          {/* DESKTOP */}
-          <div className="hidden md:block bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
-            <FleetList
-              {...fleetData}
-              activeRentals={activeRentals}
-              setPricingVehicle={fleetData.setPricingVehicle}
-              setIsPricingModalOpen={fleetData.setIsPricingModalOpen}
-            />
-          </div>
+          <DesktopFleetList
+            loading={desktop.loading}
+            search={desktop.search}
+            setSearch={desktop.setSearch}
+            statusFilter={desktop.statusFilter}
+            setStatusFilter={desktop.setStatusFilter}
+            currentPage={desktop.currentPage}
+            setCurrentPage={desktop.setCurrentPage}
+            pageSize={desktop.pageSize}
+            totalPages={desktop.totalPages}
+            filteredVehicles={desktop.filteredVehicles}
+            paginatedVehicles={desktop.paginatedVehicles}
+            totalVehicles={desktop.totalVehicles}
+            availableVehicles={desktop.availableVehicles}
+            rentedVehicles={desktop.rentedVehicles}
+            mileageDueCount={desktop.mileageDueCount}
+            activeRentals={activeRentals}
+            setGarageVehicle={setGarageVehicle}
+            setGarageModalOpen={setGarageModalOpen}
+            setPricingVehicle={setPricingVehicle}
+            setIsPricingModalOpen={setIsPricingModalOpen}
+            handleStatusAction={handleStatusAction}
+            handleArchive={desktop.handleArchive}
+            handleRetire={desktop.handleRetire}
+            onAddVehicle={() => router.push("/dashboard/fleet/new")}
+          />
         </>
-      ) : activeTab === "performance" ? (
-        /* ✅ Renders at every viewport when deep-linked */
+      )}
+
+      {activeTab === "performance" && (
         <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-12 text-center animate-in fade-in duration-300">
           <BarChart3 size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" />
           <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">
@@ -250,20 +257,20 @@ export default function FleetPage() {
             analysis, and customized profitability timelines coming soon.
           </p>
         </div>
-      ) : (
-        /* Garage tab — renders at every viewport */
+      )}
+
+      {activeTab === "garage" && (
         <div className="space-y-6 animate-in fade-in duration-300">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-6">
-            {/* Quick Garage Card */}
             <div
               className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-4 sm:p-6 group cursor-pointer hover:border-[var(--color-primary)]/30 transition-all flex flex-row sm:flex-col items-start gap-3.5 sm:gap-0"
               onClick={() => {
-                const awaitingVehicle = fleetData.filteredVehicles.find(
-                  (v) => v.mileage_due === true,
+                const awaitingVehicle = mobile.filteredVehicles.find(
+                  (v) => v.mileage_due === true
                 );
                 if (awaitingVehicle) {
-                  fleetData.setGarageVehicle(awaitingVehicle);
-                  fleetData.setGarageModalOpen(true);
+                  setGarageVehicle(awaitingVehicle);
+                  setGarageModalOpen(true);
                 }
               }}
             >
@@ -279,20 +286,13 @@ export default function FleetPage() {
                 </p>
                 <div className="flex items-center gap-2 text-xs font-semibold text-[var(--color-primary)]">
                   <span>
-                    {
-                      fleetData.filteredVehicles.filter((v) => v.mileage_due)
-                        .length
-                    }{" "}
-                    vehicles pending mileage
+                    {mobile.filteredVehicles.filter((v) => v.mileage_due).length} vehicles pending mileage
                   </span>
-                  <span className="group-hover:translate-x-1 transition-transform">
-                    →
-                  </span>
+                  <span className="group-hover:translate-x-1 transition-transform">→</span>
                 </div>
               </div>
             </div>
 
-            {/* Maintenance Queue Card */}
             <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-4 sm:p-6 group cursor-pointer hover:border-[var(--color-primary)]/30 transition-all flex flex-row sm:flex-col items-start gap-3.5 sm:gap-0">
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[var(--color-danger-bg)] flex items-center justify-center text-[var(--color-danger-text)] sm:mb-4 group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
                 <Car size={20} className="sm:w-6 sm:h-6" />
@@ -306,21 +306,13 @@ export default function FleetPage() {
                 </p>
                 <div className="flex items-center gap-2 text-xs font-semibold text-[var(--color-primary)]">
                   <span>
-                    {
-                      fleetData.filteredVehicles.filter(
-                        (v) => v.status === "maintenance",
-                      ).length
-                    }{" "}
-                    in maintenance
+                    {mobile.filteredVehicles.filter((v) => v.status === "maintenance").length} in maintenance
                   </span>
-                  <span className="group-hover:translate-x-1 transition-transform">
-                    →
-                  </span>
+                  <span className="group-hover:translate-x-1 transition-transform">→</span>
                 </div>
               </div>
             </div>
 
-            {/* Service Due Card */}
             <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-4 sm:p-6 group cursor-pointer hover:border-[var(--color-primary)]/30 transition-all flex flex-row sm:flex-col items-start gap-3.5 sm:gap-0">
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[var(--color-primary-muted)] flex items-center justify-center text-[var(--color-primary-text)] sm:mb-4 group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
                 <BarChart3 size={20} className="sm:w-6 sm:h-6" />
@@ -334,9 +326,7 @@ export default function FleetPage() {
                 </p>
                 <div className="flex items-center gap-2 text-xs font-semibold text-[var(--color-primary)]">
                   <span>View schedule</span>
-                  <span className="group-hover:translate-x-1 transition-transform">
-                    →
-                  </span>
+                  <span className="group-hover:translate-x-1 transition-transform">→</span>
                 </div>
               </div>
             </div>
@@ -359,28 +349,27 @@ export default function FleetPage() {
 
       {/* Modals */}
       <QuickGarageModal
-        vehicle={fleetData.garageVehicle}
-        open={fleetData.garageModalOpen}
+        vehicle={garageVehicle}
+        open={garageModalOpen}
         onClose={() => {
-          fleetData.setGarageModalOpen(false);
-          fleetData.setGarageVehicle(null);
+          setGarageModalOpen(false);
+          setGarageVehicle(null);
         }}
-        onSave={fleetData.handleGarageSave}
+        onSave={handleGarageSave}
       />
 
       <InvestorVehiclePricingModal
-        vehicle={fleetData.pricingVehicle}
-        isOpen={fleetData.isPricingModalOpen}
+        vehicle={pricingVehicle}
+        isOpen={isPricingModalOpen}
         onClose={() => {
-          fleetData.setIsPricingModalOpen(false);
-          fleetData.setPricingVehicle(null);
+          setIsPricingModalOpen(false);
+          setPricingVehicle(null);
         }}
-        onSuccess={fleetData.refetch}
+        onSuccess={async () => {
+          await Promise.all([mobile.refetch(), desktop.refetch()]);
+        }}
       />
 
-      {/* ✅ Floating toggle — appears on garage (mobile browse) and
-             performance (desktop-only, deep-linked on mobile). Tapping
-             it returns the user to the mobile-friendly "Vehicles" tab. */}
       {showFloating && (
         <MobileFloatingSegment
           segments={MOBILE_TABS.map((t) => ({

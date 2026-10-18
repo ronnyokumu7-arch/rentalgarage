@@ -6,7 +6,7 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import {
   Car, Clock, Loader2, MoreVertical,
-  CheckCircle2, XCircle, Eye, User, ArrowRight
+  CheckCircle2, XCircle, Eye, User
 } from "lucide-react";
 import { useReturningTodayTab } from "@/hooks/dashboard/features/useReturningTodayTab";
 import { bookingsApi } from "@/lib/api/bookings";
@@ -53,6 +53,28 @@ export default function ReturningTodayTabContent() {
   const router = useRouter();
   const { returns, loading, isOverdue, refetch } = useReturningTodayTab();
 
+  const handleComplete = async (bookingId: number) => {
+    try {
+      await bookingsApi.complete(bookingId);
+      toast.success("Vehicle returned — trip completed");
+      await refetch();
+    } catch (e: unknown) {
+      const message = (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail ?? "Action failed. Try again.";
+      toast.error(message);
+    }
+  };
+
+  const handleCancel = async (bookingId: number) => {
+    try {
+      await bookingsApi.cancel(bookingId, { reason: "agency_cancelled" });
+      toast.success("Booking cancelled");
+      await refetch();
+    } catch (e: unknown) {
+      const message = (e as { response?: { data?: { detail?: string } } })?.response?.data?.detail ?? "Action failed. Try again.";
+      toast.error(message);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-[var(--color-ink-muted)]">
@@ -77,7 +99,7 @@ export default function ReturningTodayTabContent() {
   }
 
   return (
-    <div className="space-y-2.5 animate-in fade-in duration-200">
+    <div className="space-y-2.5 animate-in fade-in duration-200 max-h-[min(55vh,340px)] overflow-y-auto overflow-x-hidden custom-scrollbar pr-1 md:max-h-none md:overflow-visible">
       {returns.map((booking) => {
         const overdue = isOverdue(booking);
         const vehicle = booking.vehicle;
@@ -85,8 +107,6 @@ export default function ReturningTodayTabContent() {
         const vehicleLabel = vehicle ? `${vehicle.make} ${vehicle.model}` : "Vehicle";
         const clientName = resolveField(booking.client, "full_name", "name") || "Customer";
         const returnAt = booking.scheduled_return_at ?? booking.end_date;
-        
-        // Extract initials for the client sub-badge
         const clientInitials = clientName.split(" ").map(p => p[0]).join("").slice(0, 2).toUpperCase() || "?";
 
         return (
@@ -100,16 +120,12 @@ export default function ReturningTodayTabContent() {
               {/* Row 1: Vehicle Identity + Menu */}
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
-                  {/* Car Icon */}
-                  <div className="relative flex-shrink-0">
-                    <div className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-sm ring-2 ring-[var(--color-surface)] ${
-                      overdue ? "bg-rose-500/10 text-rose-500" : "bg-[var(--color-primary)]/10 text-[var(--color-primary)]"
-                    }`}>
-                      <Car size={18} />
-                    </div>
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-sm flex-shrink-0 ${
+                    overdue ? "bg-rose-500/10 text-rose-500" : "bg-[var(--color-primary)]/10 text-[var(--color-primary)]"
+                  }`}>
+                    <Car size={18} />
                   </div>
 
-                  {/* Vehicle Info */}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <p className="text-sm font-bold text-[var(--color-ink)] truncate">{vehicleLabel}</p>
@@ -127,7 +143,8 @@ export default function ReturningTodayTabContent() {
                   </div>
                 </div>
 
-                <div className="relative flex-shrink-0">
+                {/* ✅ MOBILE ONLY: 3-dots menu */}
+                <div className="md:hidden relative flex-shrink-0">
                   <ReturningRentalMenu
                     bookingId={booking.id}
                     isOverdue={overdue}
@@ -137,7 +154,7 @@ export default function ReturningTodayTabContent() {
                 </div>
               </div>
 
-              {/* Row 2: Return Time & Status (The focus of this view) */}
+              {/* Row 2: Return Time & Status */}
               <div className={`mt-3 pt-3 border-t border-[var(--color-surface-border)]/40 flex items-center justify-between gap-3`}>
                 <div className="flex items-center gap-2">
                   <Clock size={14} className={overdue ? "text-rose-500" : "text-emerald-500"} />
@@ -147,13 +164,36 @@ export default function ReturningTodayTabContent() {
                     </p>
                   </div>
                 </div>
-                
+
+                {/* ✅ MOBILE ONLY: Details link */}
                 <button
                   onClick={() => router.push(`/dashboard/bookings/${booking.id}`)}
-                  className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity flex-shrink-0"
+                  className="md:hidden inline-flex items-center gap-1 text-[10px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity flex-shrink-0"
                 >
-                  View Trip <ArrowRight size={12} />
+                  Details
                 </button>
+
+                {/* ✅ DESKTOP ONLY: Inline action buttons */}
+                <div className="hidden md:flex items-center gap-1.5 flex-shrink-0">
+                  <button
+                    onClick={() => router.push(`/dashboard/bookings/${booking.id}`)}
+                    className="px-2.5 py-1 rounded-md text-[10px] font-bold text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors"
+                  >
+                    View Trip
+                  </button>
+                  <button
+                    onClick={() => handleComplete(booking.id)}
+                    className="px-2.5 py-1 rounded-md text-[10px] font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors"
+                  >
+                    Mark Returned
+                  </button>
+                  <button
+                    onClick={() => handleCancel(booking.id)}
+                    className="px-2.5 py-1 rounded-md text-[10px] font-bold text-rose-500 hover:bg-rose-500/10 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             </div>
           </div>

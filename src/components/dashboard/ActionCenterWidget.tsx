@@ -24,7 +24,7 @@ const HEADER_COPY: Record<
 > = {
   upcoming: {
     title: "Upcoming",
-    description: "Pending and confirmed bookings",
+    description: "Track pending and confirmed bookings",
     icon: Calendar,
   },
   returning: {
@@ -119,7 +119,14 @@ export default function ActionCenterWidget() {
       </div>
 
       {/* ── CONTENT ────────────────────────────────────────────────── */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-3 sm:p-4 max-h-[560px] space-y-2.5">
+      {/* 
+        ✅ Removed `space-y-2.5` from this wrapper. The children now manage 
+        their own spacing (via CardGrid or their own internal map). 
+        This ensures the desktop view has full width and doesn't get constrained 
+        by the flex layout, allowing the `md:` breakpoints in the child components 
+        to trigger correctly.
+      */}
+      <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-3 sm:p-4 max-h-[560px]">
         {activeSubTab === "upcoming" && <UpcomingRentalsTabContent />}
         {activeSubTab === "returning" && <ReturningTodayTabContent />}
       </div>
