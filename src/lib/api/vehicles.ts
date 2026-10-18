@@ -6,20 +6,34 @@ export interface MileageUpdatePayload {
   next_service_km?: number | null;
 }
 
-// ✅ NEW: Payload interface for investor vehicle onboarding
 export interface InvestorVehicleCreatePayload {
   make: string;
   model: string;
-  plate_number: string;
   year: number;
+  plate_number: string;
   vin?: string | null;
-  expected_lease_rate?: number | null; // Investor's suggested rate
+  expected_lease_rate?: number | null;
   current_mileage?: number;
   next_service_km?: number | null;
   insurance_number?: string | null;
   insurance_expiry?: string | null;
   inspection_doc?: string | null;
   notes?: string | null;
+}
+
+// ✅ MATCHES BACKEND: InvestorVehicleAgencyUpdate (app/schemas/vehicle.py)
+export interface InvestorVehicleAgencyUpdatePayload {
+  daily_rate?: number;
+  current_mileage?: number;
+  next_service_km?: number | null;
+  notes?: string | null;
+  supports_airport_transfer?: boolean;
+  airport_transfer_base_rate?: number | null;
+  supports_wedding_service?: boolean;
+  wedding_base_rate?: number | null;
+  investor_lease_rate?: number | null;
+  lease_rate_type?: string | null;
+  lease_rate_locked?: boolean;
 }
 
 export const vehiclesApi = {
@@ -35,11 +49,15 @@ export const vehiclesApi = {
   create: (data: VehicleCreate) =>
     apiClient.post<Vehicle>("/vehicles", data).then((r) => r.data),
 
-  // ✅ ADDED: Dedicated investor vehicle onboarding endpoint
   createInvestorVehicle: (data: InvestorVehicleCreatePayload) =>
     apiClient.post<Vehicle>("/investors/vehicles", data).then((r) => r.data),
 
   update: (id: number, data: VehicleUpdate) =>
+    apiClient.patch<Vehicle>(`/vehicles/${id}`, data).then((r) => r.data),
+
+  // ✅ NEW: Investor-scoped update (uses same PATCH /vehicles/{id} route,
+  // but only sends investor-allowed fields; backend dispatches on owner_id)
+  updateInvestorVehicle: (id: number, data: InvestorVehicleAgencyUpdatePayload) =>
     apiClient.patch<Vehicle>(`/vehicles/${id}`, data).then((r) => r.data),
 
   delete: (id: number) =>
@@ -69,7 +87,6 @@ export const vehiclesApi = {
   updateMileage: (id: number, data: MileageUpdatePayload) =>
     apiClient.patch<Vehicle>(`/vehicles/${id}/update-mileage`, data).then((r) => r.data),
 
-  // --- Standard Agency Uploads ---
   uploadInsuranceDoc: (id: number, file: File) => {
     const formData = new FormData();
     formData.append("file", file);
@@ -94,7 +111,6 @@ export const vehiclesApi = {
     });
   },
 
-  // ✅ NEW: Investor-Specific Uploads (Matches backend /investors/vehicles/{id}/upload-{type})
   uploadInvestorInsuranceDoc: (vehicleId: number, file: File) => {
     const formData = new FormData();
     formData.append("file", file);

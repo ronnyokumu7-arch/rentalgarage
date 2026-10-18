@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   Car, Archive, Shield, Loader2,
   Ban, Wrench, Gauge, User,
-  Filter, Clock, Banknote,
+  Filter, Clock, Banknote, Pencil,
 } from "lucide-react";
 import CardGrid, { RowAction } from "@/components/ui/CardGrid";
 import MobilePageToolbar from "@/components/ui/MobilePageToolbar";
@@ -33,9 +33,6 @@ const dotSpec: Record<VehicleStatus, { color: string; pulse: boolean }> = {
 
 const formatPlate = (plate: string) => plate.replace(/([A-Za-z])(\d)/, "$1 $2").toUpperCase();
 
-/**
- * Format the remaining time to return.
- */
 const formatTimeRemaining = (endStr?: string | null): { text: string; overdue: boolean } | null => {
   if (!endStr) return null;
   const end = new Date(endStr).getTime();
@@ -81,6 +78,9 @@ interface MobileFleetListProps {
   setGarageModalOpen: (open: boolean) => void;
   setPricingVehicle: (v: Vehicle | null) => void;
   setIsPricingModalOpen: (open: boolean) => void;
+  // ✅ NEW: Edit details plumbing
+  setEditVehicle: (v: Vehicle | null) => void;
+  setIsEditModalOpen: (open: boolean) => void;
   handleStatusAction: (id: number, action: string) => void;
   handleArchive: (id: number) => void;
   handleRetire: (id: number) => void;
@@ -103,6 +103,8 @@ export default function MobileFleetList({
   setGarageModalOpen,
   setPricingVehicle,
   setIsPricingModalOpen,
+  setEditVehicle,
+  setIsEditModalOpen,
   handleStatusAction,
   handleArchive,
   handleRetire,
@@ -126,82 +128,94 @@ export default function MobileFleetList({
         variant: "primary",
         onClick: () => handleStatusAction(vehicle.id, "restore"),
       });
-    } else {
-      if (vehicle.status === "pending_activation") {
-        const isInvestorAsset = !!vehicle.owner_id;
-        actions.push({
-          label: isInvestorAsset ? "Review & Set Pricing" : "Activate Vehicle",
-          icon: Shield,
-          variant: "primary",
-          onClick: () => handleStatusAction(vehicle.id, "activate"),
-        });
-      } else if (vehicle.owner_id) {
-        actions.push({
-          label: "Edit Lease Agreement",
-          icon: Banknote,
-          variant: "default",
-          onClick: () => {
-            setPricingVehicle(vehicle);
-            setIsPricingModalOpen(true);
-          },
-        });
-      }
-
-      if (vehicle.mileage_due || vehicle.status === "maintenance") {
-        actions.push({
-          label: "Update Mileage",
-          icon: Wrench,
-          variant: "default",
-          onClick: () => {
-            setGarageVehicle(vehicle);
-            setGarageModalOpen(true);
-          },
-        });
-      }
-
-      if (vehicle.status === "maintenance") {
-        actions.push({
-          label: "Reactivate Vehicle",
-          icon: Shield,
-          variant: "primary",
-          onClick: () => handleStatusAction(vehicle.id, "reactivate"),
-        });
-      }
-
-      if (vehicle.status === "available") {
-        actions.push({
-          label: "Send to Maintenance",
-          icon: Shield,
-          variant: "default",
-          onClick: () => handleStatusAction(vehicle.id, "maintenance"),
-        });
-      }
-
-      actions.push(
-        {
-          label: "Quick Garage",
-          icon: Wrench,
-          variant: "default",
-          separator: true,
-          onClick: () => {
-            setGarageVehicle(vehicle);
-            setGarageModalOpen(true);
-          },
-        },
-        {
-          label: "Archive",
-          icon: Archive,
-          variant: "default",
-          onClick: () => handleArchive(vehicle.id),
-        },
-        {
-          label: "Retire",
-          icon: Ban,
-          variant: "danger",
-          onClick: () => handleRetire(vehicle.id),
-        }
-      );
+      return actions;
     }
+
+    // ✅ Edit Details — always available for non-archived vehicles
+    actions.push({
+      label: "Edit Details",
+      icon: Pencil,
+      variant: "default",
+      onClick: () => {
+        setEditVehicle(vehicle);
+        setIsEditModalOpen(true);
+      },
+    });
+
+    if (vehicle.status === "pending_activation") {
+      const isInvestorAsset = !!vehicle.owner_id;
+      actions.push({
+        label: isInvestorAsset ? "Review & Set Pricing" : "Activate Vehicle",
+        icon: Shield,
+        variant: "primary",
+        onClick: () => handleStatusAction(vehicle.id, "activate"),
+      });
+    } else if (vehicle.owner_id) {
+      actions.push({
+        label: "Edit Lease Agreement",
+        icon: Banknote,
+        variant: "default",
+        onClick: () => {
+          setPricingVehicle(vehicle);
+          setIsPricingModalOpen(true);
+        },
+      });
+    }
+
+    if (vehicle.mileage_due || vehicle.status === "maintenance") {
+      actions.push({
+        label: "Update Mileage",
+        icon: Wrench,
+        variant: "default",
+        onClick: () => {
+          setGarageVehicle(vehicle);
+          setGarageModalOpen(true);
+        },
+      });
+    }
+
+    if (vehicle.status === "maintenance") {
+      actions.push({
+        label: "Reactivate Vehicle",
+        icon: Shield,
+        variant: "primary",
+        onClick: () => handleStatusAction(vehicle.id, "reactivate"),
+      });
+    }
+
+    if (vehicle.status === "available") {
+      actions.push({
+        label: "Send to Maintenance",
+        icon: Shield,
+        variant: "default",
+        onClick: () => handleStatusAction(vehicle.id, "maintenance"),
+      });
+    }
+
+    actions.push(
+      {
+        label: "Quick Garage",
+        icon: Wrench,
+        variant: "default",
+        separator: true,
+        onClick: () => {
+          setGarageVehicle(vehicle);
+          setGarageModalOpen(true);
+        },
+      },
+      {
+        label: "Archive",
+        icon: Archive,
+        variant: "default",
+        onClick: () => handleArchive(vehicle.id),
+      },
+      {
+        label: "Retire",
+        icon: Ban,
+        variant: "danger",
+        onClick: () => handleRetire(vehicle.id),
+      }
+    );
 
     return actions;
   };
@@ -276,7 +290,7 @@ export default function MobileFleetList({
 
             return (
               <div className="flex items-start gap-3 w-full py-3 px-4 pr-10">
-                {/* Icon + status dot (smaller, refined) */}
+                {/* Icon + status dot */}
                 <div className="relative flex-shrink-0">
                   <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 flex items-center justify-center">
                     <Car size={18} className="text-[var(--color-primary)]" />
@@ -345,14 +359,12 @@ export default function MobileFleetList({
                     ) : null;
                   })() : (
                     <div className="flex items-center gap-2 mt-1 min-w-0 flex-wrap">
-                      {/* Plate — no icon */}
                       <span className="text-[10px] text-[var(--color-ink-muted)] font-mono font-semibold truncate">
                         {formatPlate(item.plate_number)}
                       </span>
 
                       <span className="text-[10px] text-[var(--color-ink-subtle)]">|</span>
 
-                      {/* Mileage — no comma, with Gauge icon */}
                       <div className="flex items-center gap-1">
                         <Gauge size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
                         <span className="text-[10px] text-[var(--color-ink-muted)] font-mono font-semibold">
@@ -360,7 +372,6 @@ export default function MobileFleetList({
                         </span>
                       </div>
 
-                      {/* Next-service (only if present) — icon retained */}
                       {item.next_service_km && (
                         <>
                           <span className="text-[10px] text-[var(--color-ink-subtle)]">|</span>
@@ -432,7 +443,7 @@ export default function MobileFleetList({
                       ? "text-amber-500 bg-amber-500/10 border-amber-500/20"
                       : tone === "info"
                         ? "text-blue-500 bg-blue-500/10 border-blue-500/20"
-                          : "text-[var(--color-ink-muted)] bg-[var(--color-surface-hover)] border-[var(--color-surface-border)]"
+                        : "text-[var(--color-ink-muted)] bg-[var(--color-surface-hover)] border-[var(--color-surface-border)]"
                 }`}
               >
                 <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />

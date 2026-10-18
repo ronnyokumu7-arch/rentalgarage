@@ -15,6 +15,7 @@ import { useMobileFleet } from "@/hooks/fleet/useMobileFleet";
 import { useDesktopFleet } from "@/hooks/fleet/useDesktopFleet";
 import QuickGarageModal from "@/components/ui/QuickGarageModal";
 import InvestorVehiclePricingModal from "@/components/fleet/InvestorVehiclePricingModal";
+import VehicleDetailsModal from "@/components/fleet/VehicleDetailsModal";
 import { bookingsApi } from "@/lib/api/bookings";
 import { vehiclesApi } from "@/lib/api/vehicles";
 import type { Booking, Vehicle } from "@/lib/types";
@@ -57,6 +58,9 @@ export default function FleetPage() {
   const [garageModalOpen, setGarageModalOpen] = useState(false);
   const [pricingVehicle, setPricingVehicle] = useState<Vehicle | null>(null);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
+  // ✅ NEW: Edit Details modal state
+  const [editVehicle, setEditVehicle] = useState<Vehicle | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const mobile = useMobileFleet();
   const desktop = useDesktopFleet();
@@ -211,6 +215,8 @@ export default function FleetPage() {
             setGarageModalOpen={setGarageModalOpen}
             setPricingVehicle={setPricingVehicle}
             setIsPricingModalOpen={setIsPricingModalOpen}
+            setEditVehicle={setEditVehicle}
+            setIsEditModalOpen={setIsEditModalOpen}
             handleStatusAction={handleStatusAction}
             handleArchive={mobile.handleArchive}
             handleRetire={mobile.handleRetire}
@@ -348,6 +354,18 @@ export default function FleetPage() {
       )}
 
       {/* Modals */}
+      <VehicleDetailsModal
+        vehicle={editVehicle}
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditVehicle(null);
+        }}
+        onSuccess={async () => {
+          await Promise.all([mobile.refetch(), desktop.refetch()]);
+        }}
+      />
+
       <QuickGarageModal
         vehicle={garageVehicle}
         open={garageModalOpen}
