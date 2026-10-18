@@ -5,17 +5,26 @@ import { motion } from "framer-motion";
 import { ArrowUpRight, Landmark } from "lucide-react";
 
 /* ──────────────────────────────────────────────────────────────────────
-   Mobile Hero Earnings — lifetime revenue, hero number, MoM trend.
-   The Fleet Status + Alerts panels moved into MobileCarouselCard.tsx.
+   Mobile Hero Earnings — hero number, label, subtitle, trend.
+   Props override the defaults so it can display "This Year (YTD)" or
+   "Total Revenue" depending on context.
 ────────────────────────────────────────────────────────────────────── */
+
+interface MobileHeroEarningsProps {
+  value: string;
+  label?: string;
+  subtitle?: string;
+  change?: { value: string; positive: boolean };
+  changeLabel?: string;
+}
 
 export function MobileHeroEarnings({
   value,
+  label = "Total Revenue",
+  subtitle = "Lifetime earnings",
   change,
-}: {
-  value: string;
-  change?: { value: string; positive: boolean };
-}) {
+  changeLabel = "vs last month",
+}: MobileHeroEarningsProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -28,17 +37,17 @@ export function MobileHeroEarnings({
           <Landmark size={13} className="text-white" />
         </div>
         <p className="text-[10px] font-medium text-ink-muted uppercase tracking-wider">
-          Total Revenue
+          {label}
         </p>
       </div>
 
-      {/* ✅ PREMIUM GRADIENT TEXT */}
+      {/* ✅ PREMIUM GRADIENT TEXT (unchanged) */}
       <p className="text-3xl font-bold tracking-tight font-display mt-0.5 bg-gradient-to-r from-emerald-500 via-teal-500 to-blue-500 bg-clip-text text-transparent">
         {value}
       </p>
 
       <div className="flex items-center gap-3 mt-0.5">
-        <p className="text-[11px] text-ink-subtle">Lifetime earnings</p>
+        <p className="text-[11px] text-ink-subtle">{subtitle}</p>
         {change && (
           <div
             className={`flex items-center gap-0.5 text-[10px] font-semibold ${
@@ -47,7 +56,7 @@ export function MobileHeroEarnings({
           >
             <ArrowUpRight size={12} />
             {change.value}
-            <span className="text-ink-muted font-normal">vs last month</span>
+            <span className="text-ink-muted font-normal">{changeLabel}</span>
           </div>
         )}
       </div>

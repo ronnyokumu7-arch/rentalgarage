@@ -113,7 +113,8 @@ export default function MobileAlertsSlide({ alerts }: MobileAlertsSlideProps) {
 }
 
 /* ──────────────────────────────────────────────────────────────────────
-   Alert tab switcher — matches Recent Activity / Action Center pattern
+   Alert tab switcher — matching the Recent Activity pattern
+   (outer rounded-lg, inner rounded-md, p-0.5 → geometrically perfect)
 ────────────────────────────────────────────────────────────────────── */
 
 function AlertTabSwitcher({
@@ -158,6 +159,7 @@ function AlertTabSwitcher({
     <div className="relative w-full">
       {indicatorStyle && (
         <div
+          // ✅ Active indicator matches the inner button radius
           className="absolute z-0 rounded-md bg-gradient-to-br from-amber-500/20 to-amber-500/5 border border-amber-500/30 shadow-lg shadow-amber-500/10 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
           style={{
             left: indicatorStyle.left,
@@ -168,6 +170,7 @@ function AlertTabSwitcher({
         />
       )}
 
+      {/* ✅ Outer container: rounded-lg, p-0.5, overflow-hidden */}
       <div className="relative z-10 flex items-center gap-1 p-0.5 bg-[var(--color-surface-hover)]/50 rounded-lg border border-[var(--color-surface-border)]/50 w-full overflow-hidden">
         {tabs.map((tab) => {
           const Icon = tab.icon;
@@ -180,6 +183,7 @@ function AlertTabSwitcher({
               }}
               type="button"
               onClick={() => onChange(tab.id)}
+              // ✅ Inner button: rounded-md (6px = 8px outer - 2px padding)
               className={`relative flex-1 flex items-center justify-center gap-1 px-1.5 py-1.5 rounded-md text-[10px] font-bold transition-colors whitespace-nowrap touch-manipulation cursor-pointer ${
                 isActive
                   ? "text-amber-700 dark:text-amber-400"
@@ -204,6 +208,7 @@ function AlertTabSwitcher({
 function OverdueList({ items }: { items: OverdueReturnAlert[] }) {
   const visible = items.slice(0, INNER_CAROUSEL_CAP);
   const hasMore = items.length > INNER_CAROUSEL_CAP;
+  const cardWidthClass = visible.length === 1 ? "w-full" : "w-[80%]";
 
   return (
     <>
@@ -222,10 +227,9 @@ function OverdueList({ items }: { items: OverdueReturnAlert[] }) {
             <Link
               key={b.id}
               href={`/dashboard/bookings/${b.id}`}
-              className="snap-start flex-shrink-0 w-[80%] rounded-xl border border-amber-500/25 hover:border-amber-500/50 bg-surface transition-all relative overflow-hidden p-3 space-y-2"
+              className={`snap-start flex-shrink-0 ${cardWidthClass} rounded-xl border border-amber-500/25 hover:border-amber-500/50 bg-surface transition-all relative overflow-hidden p-3 space-y-2`}
             >
               <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-amber-500 rounded-r" />
-
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-bold text-ink truncate">
                   {b.client_name ?? "Unknown client"}
@@ -234,7 +238,6 @@ function OverdueList({ items }: { items: OverdueReturnAlert[] }) {
                   Late
                 </span>
               </div>
-
               <div className="flex items-center gap-1.5 text-[11px] text-ink-muted">
                 <Car size={11} className="flex-shrink-0 text-ink-subtle" />
                 <span className="font-mono font-semibold text-ink truncate">
@@ -244,7 +247,6 @@ function OverdueList({ items }: { items: OverdueReturnAlert[] }) {
                   <span className="truncate">· {b.vehicle_name}</span>
                 )}
               </div>
-
               <div className="pt-1 border-t border-surface-border/50 flex items-center gap-1.5">
                 <Clock size={11} className="text-rose-500 flex-shrink-0" />
                 <span className="text-[10px] font-bold text-rose-700 dark:text-rose-400 tabular-nums">
@@ -265,6 +267,7 @@ function OverdueList({ items }: { items: OverdueReturnAlert[] }) {
 function ServiceList({ items }: { items: ServiceDueAlert[] }) {
   const visible = items.slice(0, INNER_CAROUSEL_CAP);
   const hasMore = items.length > INNER_CAROUSEL_CAP;
+  const cardWidthClass = visible.length === 1 ? "w-full" : "w-[80%]";
 
   return (
     <>
@@ -275,10 +278,9 @@ function ServiceList({ items }: { items: ServiceDueAlert[] }) {
             <Link
               key={v.id}
               href={`/dashboard/fleet/${v.id}`}
-              className="snap-start flex-shrink-0 w-[80%] rounded-xl border border-amber-500/25 hover:border-amber-500/50 bg-surface transition-all relative overflow-hidden p-3 space-y-2"
+              className={`snap-start flex-shrink-0 ${cardWidthClass} rounded-xl border border-amber-500/25 hover:border-amber-500/50 bg-surface transition-all relative overflow-hidden p-3 space-y-2`}
             >
               <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-amber-500 rounded-r" />
-
               <div className="flex items-center justify-between gap-2">
                 <span className="font-mono text-xs font-bold text-ink tracking-tight">
                   {v.plate_number}
@@ -294,11 +296,9 @@ function ServiceList({ items }: { items: ServiceDueAlert[] }) {
                   </span>
                 )}
               </div>
-
               <p className="text-sm font-bold text-ink leading-tight truncate">
                 {v.make} {v.model}
               </p>
-
               <div className="pt-1 border-t border-surface-border/50 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-1.5 min-w-0">
                   <Gauge size={11} className="text-ink-subtle flex-shrink-0" />
@@ -342,6 +342,7 @@ function DocsList({
 }) {
   const visible = items.slice(0, INNER_CAROUSEL_CAP);
   const hasMore = items.length > INNER_CAROUSEL_CAP;
+  const cardWidthClass = visible.length === 1 ? "w-full" : "w-[80%]";
 
   return (
     <>
@@ -359,10 +360,9 @@ function DocsList({
             <Link
               key={item.id}
               href={itemHref(item.id)}
-              className="snap-start flex-shrink-0 w-[80%] rounded-xl border border-amber-500/25 hover:border-amber-500/50 bg-surface transition-all relative overflow-hidden p-3 space-y-2"
+              className={`snap-start flex-shrink-0 ${cardWidthClass} rounded-xl border border-amber-500/25 hover:border-amber-500/50 bg-surface transition-all relative overflow-hidden p-3 space-y-2`}
             >
               <span className="absolute left-0 top-0 bottom-0 w-[3px] bg-amber-500 rounded-r" />
-
               <div className="flex items-center justify-between gap-2">
                 <p className="text-sm font-bold text-ink truncate">
                   {item.title}
@@ -377,13 +377,11 @@ function DocsList({
                   {isExpired ? "Expired" : "Expiring"}
                 </span>
               </div>
-
               {item.subtitle && (
                 <p className="text-[11px] font-medium text-ink-muted truncate font-mono">
                   {item.subtitle}
                 </p>
               )}
-
               <div className="pt-1 border-t border-surface-border/50 flex items-center gap-1.5">
                 <Clock
                   size={11}
@@ -411,14 +409,9 @@ function DocsList({
 }
 
 /* ──────────────────────────────────────────────────────────────────────
-   Shared bits (used only by this slide)
+   Shared bits
 ────────────────────────────────────────────────────────────────────── */
 
-/**
- * One-sided bleed: the track extends past the container's right edge so the
- * next card peeks under the card border, while the first card's left edge
- * aligns flush with the section header, tab switcher, and slide title.
- */
 function InnerCarousel({ children }: { children: React.ReactNode }) {
   return (
     <div className="-mr-4">

@@ -115,8 +115,7 @@ export function useDashboard() {
       .slice(0, 5);
   }, [bookings]);
 
-  // ❌ REMOVED: Fake recentActivity (use useActivityTab instead)
-
+  // ✅ EXPOSE RAW DATA for useDashboardStats to compute Today/Year metrics
   return {
     loading,
     stats,
@@ -124,5 +123,9 @@ export function useDashboard() {
     upcomingBookings,
     tasks,
     vehicles,
+    bookings,
+    clients,
+    invoices,
+    payments,
   };
 }

@@ -2,16 +2,17 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Loader2, Activity, Calendar, CalendarDays, CalendarRange } from "lucide-react";
+import { Loader2, Activity, Clock, CalendarDays, CalendarRange } from "lucide-react";
 import { useActivityTab } from "@/hooks/dashboard/features/useActivityTab";
 import UnifiedActivityCard from "@/components/dashboard/UnifiedActivityCard";
 
 type TimeFilter = "today" | "week" | "month";
 
+// ✅ Replaced generic calendars with the clock-focused set
 const FILTERS: { id: TimeFilter; label: string; icon: React.ElementType }[] = [
-  { id: "today", label: "Today", icon: Calendar },
-  { id: "week", label: "Week", icon: CalendarDays },
-  { id: "month", label: "Month", icon: CalendarRange },
+  { id: "today", label: "Today", icon: Clock },
+  { id: "week", label: "This Week", icon: CalendarDays },
+  { id: "month", label: "This Month", icon: CalendarRange },
 ];
 
 export default function RecentActivityWidget() {
@@ -32,7 +33,9 @@ export default function RecentActivityWidget() {
     <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden flex flex-col">
       {/* HEADER */}
       <div className="px-5 py-3.5 border-b border-[var(--color-surface-border)] bg-gradient-to-r from-[var(--color-surface-hover)]/50 to-transparent">
-        <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between gap-4">
+          
+          {/* Left: Title */}
           <div className="flex items-center gap-3.5 min-w-0">
             <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white shadow-sm shadow-purple-500/20 flex-shrink-0">
               <Activity size={20} />
@@ -43,12 +46,12 @@ export default function RecentActivityWidget() {
                 <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
               </h3>
               <p className="text-xs text-[var(--color-ink-muted)] truncate">
-                The live pulse of your fleet's latest moves.
+                Live feed of your business
               </p>
             </div>
           </div>
 
-          {/* ✅ Premium Sliding Time Filter (matches Action Center pattern) */}
+          {/* Right: Compact Icon-Only Time Filter */}
           <TimeFilterSwitcher
             activeTab={timeFilter}
             setActiveTab={setTimeFilter}
@@ -83,9 +86,9 @@ export default function RecentActivityWidget() {
 }
 
 /* ──────────────────────────────────────────────────────────────────────
-   Time filter switcher — sliding indicator + gradient pill.
-   Mirrors the Action Center sub-tab switcher for visual consistency,
-   scaled down for the compact widget context.
+   Compact icon-only time filter switcher.
+   Matches the geometry of the alert switcher (outer rounded-lg, inner
+   rounded-md, p-0.5) but without the text labels to save space.
 ────────────────────────────────────────────────────────────────────── */
 
 interface TimeFilterSwitcherProps {
@@ -125,10 +128,11 @@ function TimeFilterSwitcher({ activeTab, setActiveTab, filters }: TimeFilterSwit
   }, [activeTab]);
 
   return (
-    <div className="relative w-full">
+    <div className="relative flex-shrink-0">
       {indicatorStyle && (
         <div
-          className="absolute z-0 rounded-md bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 shadow-lg shadow-[var(--color-primary)]/10 transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
+          // ✅ Active indicator: 6px radius (rounded-md)
+          className="absolute z-0 rounded-md bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)]"
           style={{
             left: indicatorStyle.left,
             width: indicatorStyle.width,
@@ -138,7 +142,8 @@ function TimeFilterSwitcher({ activeTab, setActiveTab, filters }: TimeFilterSwit
         />
       )}
 
-      <div className="relative z-10 flex items-center gap-1 p-0.5 bg-[var(--color-surface-hover)]/50 rounded-lg border border-[var(--color-surface-border)]/50 w-full overflow-hidden">
+      {/* ✅ Outer container: 8px radius (rounded-lg) + 2px padding (p-0.5) */}
+      <div className="relative z-10 flex items-center gap-0.5 p-0.5 bg-[var(--color-surface-hover)]/50 rounded-lg border border-[var(--color-surface-border)]/50">
         {filters.map((filter) => {
           const Icon = filter.icon;
           const isActive = activeTab === filter.id;
@@ -150,14 +155,16 @@ function TimeFilterSwitcher({ activeTab, setActiveTab, filters }: TimeFilterSwit
               }}
               type="button"
               onClick={() => setActiveTab(filter.id)}
-              className={`relative flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 rounded-md text-[10px] font-bold transition-colors duration-200 whitespace-nowrap touch-manipulation cursor-pointer ${
+              title={filter.label}
+              aria-label={filter.label}
+              // ✅ Inner button: 6px radius (rounded-md), 32x32 hit area
+              className={`relative flex items-center justify-center w-8 h-8 rounded-md transition-colors duration-200 cursor-pointer ${
                 isActive
                   ? "text-[var(--color-ink)]"
                   : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
               }`}
             >
-              <Icon size={12} />
-              {filter.label}
+              <Icon size={14} strokeWidth={isActive ? 2.5 : 2} />
             </button>
           );
         })}

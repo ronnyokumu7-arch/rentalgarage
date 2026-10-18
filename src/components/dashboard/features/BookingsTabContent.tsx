@@ -2,11 +2,15 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import toast from "react-hot-toast";
 import {
-  Calendar, CalendarDays, Clock, Car, MapPin, ChevronRight, ArrowUpRight,
+  Calendar, CalendarDays, Clock, Car, MapPin, ChevronRight,
   Loader2, MoreVertical, Play, XCircle, Eye, CheckCircle2
 } from "lucide-react";
 import { useBookingsTab } from "@/hooks/dashboard/features/useBookingsTab";
+import { bookingsApi } from "@/lib/api/bookings";
+import BookingActionsSheet, { SheetAction } from "./BookingActionsSheet";
 
 const BOOKING_STATUS_META: Record<string, { label: string; dot: string }> = {
   pending:   { label: "Pending",   dot: "bg-amber-500" },
@@ -48,10 +52,7 @@ const isOverdue = (dateStr: string) => !!dateStr && new Date(dateStr) < new Date
 
 export default function BookingsTabContent() {
   const router = useRouter();
-  const {
-    bookings, loading, actingBookingId, openMenuId,
-    setOpenMenuId, handleAction, closeMenu
-  } = useBookingsTab();
+  const { bookings, loading, refetch } = useBookingsTab();
 
   if (loading) {
     return (
@@ -88,13 +89,6 @@ export default function BookingsTabContent() {
         const isActive = booking.status === "active";
         const isPending = booking.status === "pending";
         const isConfirmed = booking.status === "confirmed";
-
-        const getPrimaryAction = () => {
-          if (isConfirmed) return { label: "Start Trip", icon: Play, onClick: () => handleAction(booking.id, "activate") };
-          if (isActive) return { label: "End Trip", icon: CheckCircle2, onClick: () => handleAction(booking.id, "complete") };
-          return null;
-        };
-        const primaryAction = getPrimaryAction();
 
         return (
           <div
@@ -142,42 +136,25 @@ export default function BookingsTabContent() {
                   </div>
                 </div>
 
-                <div className="relative flex-shrink-0" data-booking-menu>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === booking.id ? null : booking.id); }}
-                    className="p-1.5 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all active:scale-95"
-                  >
-                    {actingBookingId === booking.id ? <Loader2 size={15} className="animate-spin" /> : <MoreVertical size={15} />}
-                  </button>
-
-                  {openMenuId === booking.id && (
-                    <div className="absolute right-0 top-full mt-2 w-52 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-lg shadow-black/5 z-20 overflow-hidden animate-in fade-in slide-up duration-150">
-                      <button
-                        onClick={(e) => { e.stopPropagation(); closeMenu(); router.push(`/dashboard/bookings/${booking.id}`); }}
-                        className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors"
-                      >
-                        <Eye size={15} /> View Booking
-                      </button>
-                      {isConfirmed && (
-                        <button onClick={(e) => { e.stopPropagation(); handleAction(booking.id, "activate"); }}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors border-t border-[var(--color-surface-border)]">
-                          <Play size={15} /> Start Trip
-                        </button>
-                      )}
-                      {isActive && (
-                        <button onClick={(e) => { e.stopPropagation(); handleAction(booking.id, "complete"); }}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors border-t border-[var(--color-surface-border)]">
-                          <CheckCircle2 size={15} /> End Trip
-                        </button>
-                      )}
-                      {(isPending || isConfirmed) && (
-                        <button onClick={(e) => { e.stopPropagation(); handleAction(booking.id, "cancel"); }}
-                          className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors border-t border-[var(--color-surface-border)]">
-                          <XCircle size={15} /> Cancel Booking
-                        </button>
-                      )}
-                    </div>
-                  )}
+                <div className="relative flex-shrink-0">
+                  <BookingMenu
+                    bookingId={booking.id}
+                    isActive={isActive}
+                    isConfirmed={isConfirmed}
+                    isPending={isPending}
+                    statusLabel={
+                      tripOverdue ? "Overdue Return" : 
+                      isActive ? "Trip Active" :
+                      isConfirmed ? "Booking Confirmed" : "Booking Pending"
+                    }
+                    statusTone={
+                      tripOverdue ? "danger" :
+                      isActive ? "success" :
+                      isConfirmed ? "info" : "warning"
+                    }
+                    onAction={refetch}
+                    onView={() => router.push(`/dashboard/bookings/${booking.id}`)}
+                  />
                 </div>
               </div>
 
@@ -212,58 +189,126 @@ export default function BookingsTabContent() {
                 </div>
               </div>
 
-              {/* Row 3: Unified Status + Details Box */}
-              <div className={`mt-3 rounded-xl px-3 py-2.5 border ${
-                tripOverdue ? 'bg-rose-500/10 border-rose-500/20' :
-                isActive ? 'bg-emerald-500/10 border-emerald-500/20' :
-                isConfirmed ? 'bg-blue-500/10 border-blue-500/20' :
-                'bg-[var(--color-surface-hover)]/50 border-[var(--color-surface-border)]/50'
-              }`}>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <span className={`w-2 h-2 rounded-full ${meta.dot} ${isActive ? 'animate-pulse' : ''}`} />
-                    <span className={`text-[9px] font-bold uppercase tracking-wide ${
-                      tripOverdue ? 'text-rose-600 dark:text-rose-400' :
-                      isActive ? 'text-emerald-600 dark:text-emerald-400' :
-                      isConfirmed ? 'text-blue-600 dark:text-blue-400' :
-                      'text-amber-600 dark:text-amber-400'
-                    }`}>
-                      {tripOverdue ? 'Overdue' : meta.label}
-                    </span>
-                  </div>
-
-                  {destination && (
-                    <div className="flex items-center gap-1 min-w-0 flex-1 justify-end px-2">
+              {/* Row 3: Destination + Details */}
+              <div className="mt-3 pt-2.5 border-t border-[var(--color-surface-border)]/40 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-1 min-w-0 flex-1">
+                  {destination ? (
+                    <>
                       <MapPin size={11} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                      <span className="text-[10px] font-medium text-[var(--color-ink-muted)] truncate">{destination}</span>
-                    </div>
+                      <span className="text-[11px] font-medium text-[var(--color-ink-muted)] truncate">{destination}</span>
+                    </>
+                  ) : (
+                    <span className="text-[11px] text-[var(--color-ink-faint)] italic">No destination</span>
                   )}
-
-                  <button
-                    onClick={() => router.push(`/dashboard/bookings/${booking.id}`)}
-                    className="inline-flex items-center gap-0.5 text-[10px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity flex-shrink-0"
-                  >
-                    Details
-                    <ChevronRight size={12} />
-                  </button>
                 </div>
-              </div>
-
-              {/* PRIMARY ACTION BUTTON */}
-              {primaryAction && (
                 <button
-                  onClick={(e) => { e.stopPropagation(); primaryAction.onClick(); }}
-                  className="w-full mt-2.5 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 border border-[var(--color-primary)]/20 text-[var(--color-primary-text)] transition-all active:scale-[0.98] text-[11px] font-bold"
+                  onClick={() => router.push(`/dashboard/bookings/${booking.id}`)}
+                  className="inline-flex items-center gap-0.5 text-[10px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity flex-shrink-0"
                 >
-                  {primaryAction.icon && <primaryAction.icon size={13} />}
-                  {primaryAction.label}
-                  <ArrowUpRight size={13} className="opacity-70" />
+                  Details <ChevronRight size={12} />
                 </button>
-              )}
+              </div>
             </div>
           </div>
         );
       })}
     </div>
+  );
+}
+
+interface BookingMenuProps {
+  bookingId: number;
+  isActive: boolean;
+  isConfirmed: boolean;
+  isPending: boolean;
+  statusLabel: string;
+  statusTone: "success" | "warning" | "danger" | "info";
+  onAction: () => void | Promise<void>;
+  onView: () => void;
+}
+
+function BookingMenu({ bookingId, isActive, isConfirmed, isPending, statusLabel, statusTone, onAction, onView }: BookingMenuProps) {
+  const [open, setOpen] = useState(false);
+
+  const handleActivate = async () => {
+    try {
+      await bookingsApi.activate(bookingId);
+      toast.success("Trip started");
+      await onAction();
+    } catch (e: any) {
+      toast.error(e.response?.data?.detail ?? "Action failed.");
+      throw e;
+    }
+  };
+
+  const handleComplete = async () => {
+    try {
+      await bookingsApi.complete(bookingId);
+      toast.success("Trip completed");
+      await onAction();
+    } catch (e: any) {
+      toast.error(e.response?.data?.detail ?? "Action failed.");
+      throw e;
+    }
+  };
+
+  const handleCancel = async () => {
+    try {
+      await bookingsApi.cancel(bookingId, { reason: "agency_cancelled" });
+      toast.success("Booking cancelled");
+      await onAction();
+    } catch (e: any) {
+      toast.error(e.response?.data?.detail ?? "Action failed.");
+      throw e;
+    }
+  };
+
+  const actions: SheetAction[] = [
+    {
+      kind: "view",
+      label: "View Booking",
+      icon: Eye,
+      onClick: onView,
+    },
+    ...(isConfirmed ? [{
+      kind: "action" as const,
+      label: "Start Trip",
+      icon: Play,
+      tone: "success" as const,
+      onClick: handleActivate,
+    }] : []),
+    ...(isActive ? [{
+      kind: "action" as const,
+      label: "End Trip",
+      icon: CheckCircle2,
+      tone: "success" as const,
+      onClick: handleComplete,
+    }] : []),
+    ...(isPending || isConfirmed ? [{
+      kind: "action" as const,
+      label: "Cancel Booking",
+      icon: XCircle,
+      tone: "danger" as const,
+      onClick: handleCancel,
+    }] : []),
+  ];
+
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="p-1.5 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all active:scale-95"
+      >
+        <MoreVertical size={15} />
+      </button>
+
+      <BookingActionsSheet
+        open={open}
+        onClose={() => setOpen(false)}
+        statusLabel={statusLabel}
+        statusTone={statusTone}
+        actions={actions}
+      />
+    </>
   );
 }
