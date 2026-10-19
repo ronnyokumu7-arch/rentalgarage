@@ -30,7 +30,6 @@ const TABS = [
   { id: "invites"    as const, label: "Invites",    icon: Link2, hiddenOnMobile: true },
 ];
 
-const MOBILE_TABS = TABS.filter((t) => !t.hiddenOnMobile);
 const VALID_TABS = new Set<ClientSegment>(["individual", "corporate", "invites"]);
 
 export default function ClientsPage() {
@@ -82,8 +81,6 @@ export default function ClientsPage() {
       icon: <UserPlus size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
     };
   }, [activeTab]);
-
-  const toolbarTriggerIcon = activeTab === "corporate" ? Building2 : Building2;
 
   return (
     <div className="space-y-6">
@@ -143,14 +140,18 @@ export default function ClientsPage() {
             statusOptions={mobile.statusOptions}
             activeTab={activeTab}
             handleTabChange={handleTabChange}
-            mobileTabs={MOBILE_TABS.map((t) => ({ id: t.id, label: t.label, icon: t.icon }))}
-            toolbarTriggerIcon={toolbarTriggerIcon}
             loading={mobile.loading}
             filteredClients={mobile.filteredClients}
             paginatedClients={mobile.paginatedClients}
             pendingClients={mobile.pendingClients}
+            handleVerify={mobile.handleVerify}
+            handleSuspend={mobile.handleSuspend}
             handleArchive={mobile.handleArchive}
             refetch={mobile.refetch}
+            onAddClient={() => {
+              // TODO: wire this once AddClientButton is refactored to accept a FAB variant.
+              // For now this is a no-op that compiles.
+            }}
           />
 
           {/* ✅ Desktop — self-contained */}

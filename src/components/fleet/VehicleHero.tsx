@@ -28,7 +28,6 @@ export default function VehicleHero({
 
   return (
     <div className="space-y-3">
-      {/* Back button */}
       <button
         onClick={() => router.push("/dashboard/fleet")}
         className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-[11px] font-bold text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors group"
@@ -56,7 +55,7 @@ export default function VehicleHero({
               </span>
             </div>
             <p className="text-xs sm:text-sm text-[var(--color-ink-muted)] mt-1 font-mono">
-              {formatPlate(vehicle.plate_number)} · {vehicle.year} · YOM-{vehicle.year}
+              {formatPlate(vehicle.plate_number)} · {vehicle.year}
             </p>
             <div className="flex items-center gap-3 mt-2 flex-wrap">
               <span className="text-xs sm:text-sm font-bold text-[var(--color-ink)] tabular-nums">
@@ -77,8 +76,6 @@ export default function VehicleHero({
             </div>
           </div>
 
-          {/* ✅ Single menu trigger — mobile and desktop both use this now.
-              All CTAs (Edit, Mileage, Maintenance, etc.) live inside the sheet. */}
           <button
             onClick={onOpenActions}
             className="w-9 h-9 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] flex items-center justify-center transition-colors flex-shrink-0"

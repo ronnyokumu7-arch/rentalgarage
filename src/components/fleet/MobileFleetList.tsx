@@ -2,13 +2,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState, useRef, useEffect } from "react";
 import {
   Car, Archive, Shield, Loader2,
-  Ban, Wrench, Gauge, User,
-  Filter, Clock, Banknote, Pencil,
+  Ban, Wrench, Gauge, User, CarFront,
+  Clock, Banknote, Pencil, Plus, Search, CheckCircle2, Circle, X,
 } from "lucide-react";
 import CardGrid, { RowAction } from "@/components/ui/CardGrid";
-import MobilePageToolbar from "@/components/ui/MobilePageToolbar";
 import type { Vehicle, VehicleStatus, Booking } from "@/lib/types";
 
 /* ──────────────────────────────────────────────────────────────────────
@@ -23,15 +23,8 @@ const statusLabels: Record<VehicleStatus, string> = {
   retired: "Retired",
 };
 
-const dotSpec: Record<VehicleStatus, { color: string; pulse: boolean }> = {
-  available: { color: "bg-emerald-500", pulse: false },
-  pending_activation: { color: "bg-amber-500", pulse: false },
-  rented: { color: "bg-emerald-500", pulse: false },
-  maintenance: { color: "bg-amber-500", pulse: true },
-  retired: { color: "bg-gray-400", pulse: false },
-};
-
-const formatPlate = (plate: string) => plate.replace(/([A-Za-z])(\d)/, "$1 $2").toUpperCase();
+const formatPlate = (plate: string) =>
+  plate.replace(/([A-Za-z])(\d)/, "$1 $2").toUpperCase();
 
 const formatTimeRemaining = (endStr?: string | null): { text: string; overdue: boolean } | null => {
   if (!endStr) return null;
@@ -78,7 +71,6 @@ interface MobileFleetListProps {
   setGarageModalOpen: (open: boolean) => void;
   setPricingVehicle: (v: Vehicle | null) => void;
   setIsPricingModalOpen: (open: boolean) => void;
-  // ✅ NEW: Edit details plumbing
   setEditVehicle: (v: Vehicle | null) => void;
   setIsEditModalOpen: (open: boolean) => void;
   handleStatusAction: (id: number, action: string) => void;
@@ -96,7 +88,6 @@ export default function MobileFleetList({
   statusOptions,
   activeTab,
   handleTabChange,
-  mobileTabs,
   filteredVehicles,
   activeRentals,
   setGarageVehicle,
@@ -111,6 +102,102 @@ export default function MobileFleetList({
   onAddVehicle,
 }: MobileFleetListProps) {
   const router = useRouter();
+
+  const [selected, setSelected] = useState<Vehicle[]>([]);
+  const isSelecting = selected.length > 0;
+
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressFired = useRef(false);
+  const longPressStartPos = useRef<{ x: number; y: number } | null>(null);
+
+  const clearSelection = () => {
+    setSelected([]);
+    longPressFired.current = false;
+  };
+
+  const toggleSelection = (vehicle: Vehicle) => {
+    setSelected((prev) => {
+      const exists = prev.some((v) => v.id === vehicle.id);
+      if (exists) {
+        return prev.filter((v) => v.id !== vehicle.id);
+      }
+      return [...prev, vehicle];
+    });
+  };
+
+  const handleTouchStart = (vehicle: Vehicle) => (e: React.TouchEvent) => {
+    longPressFired.current = false;
+    const touch = e.touches[0];
+    if (!touch) return;
+    longPressStartPos.current = { x: touch.clientX, y: touch.clientY };
+
+    longPressTimer.current = setTimeout(() => {
+      longPressFired.current = true;
+      if (!isSelecting) {
+        setSelected([vehicle]);
+      } else {
+        toggleSelection(vehicle);
+      }
+      if (typeof navigator !== "undefined" && "vibrate" in navigator) {
+        navigator.vibrate(15);
+      }
+    }, 450);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (!longPressTimer.current || !longPressStartPos.current) return;
+    const touch = e.touches[0];
+    if (!touch) return;
+    const dx = Math.abs(touch.clientX - longPressStartPos.current.x);
+    const dy = Math.abs(touch.clientY - longPressStartPos.current.y);
+    if (dx > 8 || dy > 8) {
+      if (longPressTimer.current) {
+        clearTimeout(longPressTimer.current);
+        longPressTimer.current = null;
+      }
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (longPressTimer.current) {
+      clearTimeout(longPressTimer.current);
+      longPressTimer.current = null;
+    }
+  };
+
+  useEffect(() => {
+    if (!isSelecting) return;
+    const handleOutsideClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement;
+      if (target.closest("[data-selection-zone]")) return;
+      clearSelection();
+    };
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => document.removeEventListener("mousedown", handleOutsideClick);
+  }, [isSelecting]);
+
+  const handleBatchArchive = () => {
+    if (selected.length === 0) return;
+    selected.forEach((v) => handleArchive(v.id));
+    clearSelection();
+  };
+
+  const handleBatchMaintenance = () => {
+    if (selected.length === 0) return;
+    selected.forEach((v) => {
+      if (v.status === "available") {
+        handleStatusAction(v.id, "maintenance");
+      }
+    });
+    clearSelection();
+  };
+
+  const handleBatchMileage = () => {
+    if (selected.length === 0) return;
+    setGarageVehicle(selected[0]);
+    setGarageModalOpen(true);
+    clearSelection();
+  };
 
   const getVehicleActions = (vehicle: Vehicle): RowAction<Vehicle>[] => {
     const actions: RowAction<Vehicle>[] = [
@@ -131,7 +218,6 @@ export default function MobileFleetList({
       return actions;
     }
 
-    // ✅ Edit Details — always available for non-archived vehicles
     actions.push({
       label: "Edit Details",
       icon: Pencil,
@@ -221,37 +307,109 @@ export default function MobileFleetList({
   };
 
   return (
-    <div className="md:hidden bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
-      <div className="p-3 border-b border-[var(--color-surface-border)]">
-        <MobilePageToolbar
-          search={search}
-          onSearchChange={setSearch}
-          searchPlaceholder="Search make, model, plate..."
-          segment={activeTab}
-          onSegmentChange={(value) => handleTabChange(value)}
-          segments={mobileTabs}
-          segmentMenuMode="toggle"
-          segmentTriggerIcon={Wrench}
-          filters={[
-            {
-              id: "fleet-status",
-              label: "Status",
-              options: statusOptions,
-              value: statusFilter || null,
-              onChange: (value) =>
-                setStatusFilter((value || "") as VehicleStatus | ""),
-              icon: Filter,
-            },
-          ]}
-          primaryAction={
-            <button
-              onClick={onAddVehicle}
-              className="w-full h-10 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.99]"
-            >
-              Add Vehicle
-            </button>
-          }
-        />
+    <div className="md:hidden -mx-4 animate-in fade-in duration-300 relative">
+      {/* Toolbar — swaps between search/filters and selection actions */}
+      <div className="px-4 py-3" data-selection-zone>
+        {isSelecting ? (
+          <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <button
+                onClick={clearSelection}
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] transition-colors"
+                aria-label="Clear selection"
+              >
+                <X size={16} />
+              </button>
+              <span className="text-sm font-bold text-[var(--color-ink)] tabular-nums">
+                {selected.length} selected
+              </span>
+            </div>
+
+            {/* ✅ 3 action icons — no more 3-dots, no more bin */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handleBatchMileage}
+                className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
+                aria-label="Update mileage"
+                title="Update Mileage"
+              >
+                <Clock size={16} />
+              </button>
+              <button
+                onClick={handleBatchMaintenance}
+                className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
+                aria-label="Send to maintenance"
+                title="Send to Maintenance"
+              >
+                <Wrench size={16} />
+              </button>
+              <button
+                onClick={handleBatchArchive}
+                className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
+                aria-label="Archive"
+                title="Archive"
+              >
+                <Archive size={16} />
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-2.5">
+            <div className="relative">
+              <Search
+                size={16}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+              />
+              <input
+                type="text"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search make, model, plate..."
+                className="w-full h-10 pl-9 pr-4 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all"
+              />
+            </div>
+
+            <div className="-mx-4 px-4 overflow-x-auto scrollbar-none">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setStatusFilter("")}
+                  className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-bold transition-colors border ${
+                    statusFilter === ""
+                      ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
+                      : "bg-[var(--color-surface)] text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                  }`}
+                >
+                  All
+                </button>
+                {statusOptions.map((opt) => {
+                  const isActive = statusFilter === opt.value;
+                  return (
+                    <button
+                      key={opt.value}
+                      onClick={() =>
+                        setStatusFilter((opt.value || "") as VehicleStatus | "")
+                      }
+                      className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
+                        isActive
+                          ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
+                          : "bg-[var(--color-surface)] text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                      }`}
+                    >
+                      {opt.label}
+                      <span
+                        className={`text-[9px] font-extrabold tabular-nums ${
+                          isActive ? "text-white/80" : "text-[var(--color-ink-subtle)]"
+                        }`}
+                      >
+                        {opt.count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {loading ? (
@@ -275,103 +433,96 @@ export default function MobileFleetList({
           data={filteredVehicles}
           getCardId={(v: Vehicle) => v.id}
           compact={true}
-          onCardClick={(v: Vehicle) => router.push(`/dashboard/fleet/${v.id}`)}
-          cardClassName="!p-0 !rounded-none !border-0 !bg-transparent !shadow-none hover:!bg-[var(--color-surface-hover)]/40 transition-colors"
+          onCardClick={(v: Vehicle) => {
+            if (longPressFired.current) {
+              longPressFired.current = false;
+              return;
+            }
+            if (isSelecting) {
+              toggleSelection(v);
+              return;
+            }
+            const trigger = document.querySelector(
+              `[data-card-actions="${v.id}"] button`,
+            ) as HTMLButtonElement | null;
+            trigger?.click();
+          }}
+          cardClassName={`!p-0 !rounded-none !border-0 !bg-transparent !shadow-none transition-colors [&_[data-card-actions]]:absolute [&_[data-card-actions]]:top-0 [&_[data-card-actions]]:right-0 [&_[data-card-actions]>button]:w-0 [&_[data-card-actions]>button]:h-0 [&_[data-card-actions]>button]:overflow-hidden [&_[data-card-actions]>button]:opacity-0`}
           containerClassName="!p-0"
-          maxHeight="calc(100vh - 180px)"
+          maxHeight="calc(100vh - 220px)"
           renderCardHeader={({ item }: { item: Vehicle }) => {
             const kmToService = item.next_service_km
               ? item.next_service_km - item.current_mileage
               : null;
             const isDueForService = kmToService !== null && kmToService <= 500;
-            const showWrench = item.status === "maintenance" || isDueForService || item.mileage_due;
             const activeRental = activeRentals[item.id] || null;
-            const dot = dotSpec[item.status] || { color: "bg-gray-400", pulse: false };
+            const isSelected = selected.some((v) => v.id === item.id);
+
+            const needsAttention =
+              item.status === "pending_activation" ||
+              item.status === "maintenance" ||
+              isDueForService ||
+              item.mileage_due;
+            const dot = needsAttention
+              ? {
+                  color: "bg-amber-500",
+                  pulse: item.status === "maintenance",
+                }
+              : null;
+            const showWrench =
+              item.status === "maintenance" || isDueForService || item.mileage_due;
 
             return (
-              <div className="flex items-start gap-3 w-full py-3 px-4 pr-10">
-                {/* Icon + status dot */}
+              <div
+                data-selection-zone
+                onTouchStart={handleTouchStart(item)}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                className={`flex items-start gap-3 w-full py-3 px-4 border-b border-[var(--color-surface-border)]/50 last:border-b-0 transition-colors ${
+                  isSelected
+                    ? "bg-[var(--color-primary)]/10"
+                    : "hover:bg-[var(--color-surface-hover)]/40"
+                }`}
+              >
+                {/* ✅ Avatar always visible — checkmark now sits on the right */}
                 <div className="relative flex-shrink-0">
-                  <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 flex items-center justify-center">
-                    <Car size={18} className="text-[var(--color-primary)]" />
+                  <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/15 flex items-center justify-center overflow-hidden">
+                    <Car size={26} className="text-[var(--color-primary)]" />
                   </div>
-                  <span
-                    className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full flex items-center justify-center ring-2 ring-[var(--color-surface)] shadow-sm ${dot.color} ${dot.pulse ? "animate-pulse" : ""}`}
-                  >
-                    {showWrench && (
-                      <Wrench size={6} className="text-white" strokeWidth={3} />
-                    )}
-                  </span>
+                  {dot && (
+                    <span
+                      className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full flex items-center justify-center ring-2 ring-[var(--color-surface)] shadow-sm ${dot.color} ${dot.pulse ? "animate-pulse" : ""}`}
+                    >
+                      {showWrench && (
+                        <Wrench size={7} className="text-white" strokeWidth={3} />
+                      )}
+                    </span>
+                  )}
                 </div>
 
-                {/* Content */}
                 <div className="min-w-0 flex-1">
-                  {/* Row 1: Name + investor icon */}
-                  <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
-                      {item.make} {item.model}
-                    </span>
-                    {item.owner_id && (
-                      <div className="w-4 h-4 flex items-center justify-center flex-shrink-0" title="Investor Owned">
-                        <User size={11} className="text-[var(--color-ink-subtle)]" />
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Row 2: Price (with KES prefix) */}
-                  <div className="flex items-baseline gap-1 mt-1">
-                    <span className="text-[9px] font-semibold text-[var(--color-ink-muted)] uppercase tracking-wider">
-                      KES
-                    </span>
-                    <span className="text-[11px] font-bold text-[var(--color-ink)] tabular-nums">
-                      {Number(item.daily_rate).toLocaleString()}
-                    </span>
-                    <span className="text-[9px] font-medium text-[var(--color-ink-muted)]">/day</span>
-                  </div>
-
-                  {/* Row 3: Countdown if on trip, else plate | mileage | service */}
-                  {activeRental ? (() => {
-                    const remaining = formatTimeRemaining(activeRental.end_date);
-                    return remaining ? (
-                      <div className="flex items-center gap-1.5 mt-1 min-w-0">
-                        <Clock
-                          size={10}
-                          className={remaining.overdue ? "text-rose-500" : "text-emerald-500"}
-                        />
-                        <span
-                          className={`text-[10px] font-bold ${
-                            remaining.overdue
-                              ? "text-rose-600 dark:text-rose-400"
-                              : "text-emerald-600 dark:text-emerald-400"
-                          }`}
-                        >
-                          {remaining.text}
-                        </span>
-                        {activeRental.booking_number && (
-                          <>
-                            <span className="text-[10px] text-[var(--color-ink-subtle)]">|</span>
-                            <span className="text-[9px] text-[var(--color-ink-muted)] font-mono truncate">
-                              {activeRental.booking_number}
-                            </span>
-                          </>
-                        )}
-                      </div>
-                    ) : null;
-                  })() : (
-                    <div className="flex items-center gap-2 mt-1 min-w-0 flex-wrap">
-                      <span className="text-[10px] text-[var(--color-ink-muted)] font-mono font-semibold truncate">
+                  <div className="flex flex-col h-16 justify-between">
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
+                        {item.make} {item.model}
+                      </span>
+                      <span className="text-[10px] font-mono font-semibold text-[var(--color-ink-subtle)] tracking-wide flex-shrink-0">
                         {formatPlate(item.plate_number)}
                       </span>
+                      {item.owner_id && (
+                        <div className="w-4 h-4 flex items-center justify-center flex-shrink-0" title="Investor Owned">
+                          <User size={11} className="text-[var(--color-ink-subtle)]" />
+                        </div>
+                      )}
+                    </div>
 
-                      <span className="text-[10px] text-[var(--color-ink-subtle)]">|</span>
-
+                    <div className="flex items-center gap-2 min-w-0 flex-wrap">
                       <div className="flex items-center gap-1">
                         <Gauge size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
                         <span className="text-[10px] text-[var(--color-ink-muted)] font-mono font-semibold">
                           {item.current_mileage} KM
                         </span>
                       </div>
-
                       {item.next_service_km && (
                         <>
                           <span className="text-[10px] text-[var(--color-ink-subtle)]">|</span>
@@ -397,8 +548,67 @@ export default function MobileFleetList({
                         </>
                       )}
                     </div>
-                  )}
+
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-[9px] font-semibold text-[var(--color-ink-muted)] uppercase tracking-wider">
+                        KES
+                      </span>
+                      <span className="text-[11px] font-bold text-[var(--color-ink)] tabular-nums">
+                        {Number(item.daily_rate).toLocaleString()}
+                      </span>
+                      <span className="text-[9px] font-medium text-[var(--color-ink-muted)]">/day</span>
+                    </div>
+                  </div>
+
+                  {activeRental && (() => {
+                    const remaining = formatTimeRemaining(activeRental.end_date);
+                    if (!remaining) return null;
+                    return (
+                      <div className="flex items-center gap-1.5 mt-1.5 min-w-0">
+                        <Clock
+                          size={10}
+                          className={remaining.overdue ? "text-rose-500" : "text-emerald-500"}
+                        />
+                        <span
+                          className={`text-[10px] font-bold ${
+                            remaining.overdue
+                              ? "text-rose-600 dark:text-rose-400"
+                              : "text-emerald-600 dark:text-emerald-400"
+                          }`}
+                        >
+                          {remaining.text}
+                        </span>
+                        {activeRental.booking_number && (
+                          <>
+                            <span className="text-[10px] text-[var(--color-ink-subtle)]">|</span>
+                            <span className="text-[9px] text-[var(--color-ink-muted)] font-mono truncate">
+                              {activeRental.booking_number}
+                            </span>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </div>
+
+                {/* ✅ Checkmark on the right side (only shown in selection mode) */}
+                {isSelecting && (
+                  <div className="flex-shrink-0 self-center pl-1">
+                    {isSelected ? (
+                      <CheckCircle2
+                        size={22}
+                        className="text-[var(--color-primary)]"
+                        strokeWidth={2.25}
+                      />
+                    ) : (
+                      <Circle
+                        size={22}
+                        className="text-[var(--color-ink-subtle)]"
+                        strokeWidth={1.5}
+                      />
+                    )}
+                  </div>
+                )}
               </div>
             );
           }}
@@ -452,6 +662,37 @@ export default function MobileFleetList({
             );
           }}
         />
+      )}
+
+      {!isSelecting && (
+        <div className="fixed right-4 bottom-20 z-40 flex flex-col items-end gap-3">
+          <button
+            type="button"
+            onClick={() => handleTabChange(activeTab === "fleet" ? "garage" : "fleet")}
+            aria-label={`Switch to ${activeTab === "fleet" ? "Garage" : "Vehicles"}`}
+            className="w-12 h-12 rounded-xl bg-[var(--color-surface)]/80 backdrop-blur-xl border border-[var(--color-surface-border)] shadow-[0_8px_32px_rgba(0,0,0,0.25)] flex items-center justify-center active:scale-95 hover:bg-[var(--color-surface-hover)]/90 transition-all"
+          >
+            {activeTab === "fleet" ? (
+              <Wrench size={18} className="text-[var(--color-ink-muted)]" />
+            ) : (
+              <CarFront size={18} className="text-[var(--color-ink-muted)]" />
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={onAddVehicle}
+            aria-label="Add Vehicle"
+            className="w-14 h-14 rounded-xl bg-[var(--color-primary)]/20 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.25)] flex items-center justify-center active:scale-95 hover:bg-[var(--color-primary)]/30 transition-all"
+          >
+            <div className="relative flex items-center justify-center">
+              <CarFront size={22} strokeWidth={2} className="text-[var(--color-primary)]" />
+              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center shadow-sm">
+                <Plus size={10} strokeWidth={3.5} />
+              </span>
+            </div>
+          </button>
+        </div>
       )}
     </div>
   );
