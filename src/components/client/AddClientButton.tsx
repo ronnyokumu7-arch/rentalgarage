@@ -1,19 +1,23 @@
 // src/components/client/AddClientButton.tsx
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
 import { UserPlus } from "lucide-react";
-import AddClientModal from "./AddClientModal";
 
-export default function AddClientButton() {
-  const [modalOpen, setModalOpen] = useState(false);
+interface AddClientButtonProps {
+  onClick: () => void;
+}
 
+/**
+ * ✅ Pure trigger. Owns no state — the caller provides the modal opener.
+ * Both viewports use the same button (styled differently) so behavior is
+ * identical: tap → open the AddClientModal from the page.
+ */
+export default function AddClientButton({ onClick }: AddClientButtonProps) {
   return (
     <>
-      {/* 📱 MOBILE: Full-width primary action (row 2 of MobilePageToolbar) */}
+      {/* 📱 MOBILE: full-width primary action */}
       <button
-        onClick={() => setModalOpen(true)}
+        onClick={onClick}
         className="md:hidden w-full h-10 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.99]"
         aria-label="Add new client"
       >
@@ -21,16 +25,15 @@ export default function AddClientButton() {
         Add Client
       </button>
 
-      {/* 💻 DESKTOP: unchanged */}
-      <Link
-        href="/dashboard/clients/new"
+      {/* 💻 DESKTOP: inline pill */}
+      <button
+        onClick={onClick}
         className="hidden md:flex h-10 px-4 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-bold items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.98] shrink-0"
+        aria-label="Add new client"
       >
         <UserPlus size={16} strokeWidth={2.5} />
         Add Client
-      </Link>
-
-      <AddClientModal isOpen={modalOpen} onClose={() => setModalOpen(false)} />
+      </button>
     </>
   );
 }

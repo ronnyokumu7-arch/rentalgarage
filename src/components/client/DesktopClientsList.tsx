@@ -76,6 +76,8 @@ interface DesktopClientsListProps {
   handleReactivate: (id: number) => void;
   handleArchive: (id: number) => void;
   refetch: () => void;
+  // ✅ NEW: caller provides the modal opener
+  onAddClient: () => void;
 }
 
 export default function DesktopClientsList({
@@ -97,6 +99,7 @@ export default function DesktopClientsList({
   handleReactivate,
   handleArchive,
   refetch,
+  onAddClient,
 }: DesktopClientsListProps) {
   const router = useRouter();
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
@@ -215,7 +218,8 @@ export default function DesktopClientsList({
                 icon={Filter}
               />
             </div>
-            <AddClientButton />
+            {/* ✅ Pass onClick through to the button */}
+            <AddClientButton onClick={onAddClient} />
           </div>
         </div>
 

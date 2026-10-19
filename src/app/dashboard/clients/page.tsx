@@ -15,6 +15,7 @@ import ClientInvitesPanel from "@/components/client/ClientInvitesPanel";
 import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
 import MobileClientsList from "@/components/client/MobileClientsList";
 import DesktopClientsList from "@/components/client/DesktopClientsList";
+import AddClientModal from "@/components/client/AddClientModal";
 import { useMobileClients } from "@/hooks/clients/useMobileClients";
 import { useDesktopClients } from "@/hooks/clients/useDesktopClients";
 
@@ -41,6 +42,9 @@ export default function ClientsPage() {
     tabFromUrl && VALID_TABS.has(tabFromUrl) ? tabFromUrl : "individual";
   const [activeTab, setActiveTab] = useState<ClientSegment>(initialTab);
 
+  // ✅ Shared Add Client modal state — one instance, two triggers
+  const [addClientOpen, setAddClientOpen] = useState(false);
+
   useEffect(() => {
     const t = searchParams.get("tab") as ClientSegment | null;
     if (t && VALID_TABS.has(t) && t !== activeTab) {
@@ -56,7 +60,6 @@ export default function ClientsPage() {
     router.push(`/dashboard/clients?tab=${next}`, { scroll: false });
   };
 
-  // ✅ Both hooks provide the exact props their respective components need.
   const mobile = useMobileClients();
   const desktop = useDesktopClients();
 
@@ -131,7 +134,6 @@ export default function ClientsPage() {
 
       {activeTab === "individual" && (
         <>
-          {/* ✅ Mobile — self-contained */}
           <MobileClientsList
             search={mobile.search}
             setSearch={mobile.setSearch}
@@ -148,13 +150,9 @@ export default function ClientsPage() {
             handleSuspend={mobile.handleSuspend}
             handleArchive={mobile.handleArchive}
             refetch={mobile.refetch}
-            onAddClient={() => {
-              // TODO: wire this once AddClientButton is refactored to accept a FAB variant.
-              // For now this is a no-op that compiles.
-            }}
+            onAddClient={() => setAddClientOpen(true)}
           />
 
-          {/* ✅ Desktop — self-contained */}
           <DesktopClientsList
             loading={desktop.loading}
             search={desktop.search}
@@ -174,9 +172,21 @@ export default function ClientsPage() {
             handleReactivate={desktop.handleReactivate}
             handleArchive={desktop.handleArchive}
             refetch={desktop.refetch}
+            onAddClient={() => setAddClientOpen(true)}  // ✅ NEW — desktop toolbar trigger
           />
         </>
       )}
+
+      {/* ✅ SINGLE Add Client modal at page level — used by both mobile FAB and desktop toolbar */}
+      <AddClientModal
+        isOpen={addClientOpen}
+        onClose={() => {
+          setAddClientOpen(false);
+          // Refresh both hooks so a newly created client appears immediately
+          mobile.refetch();
+          desktop.refetch();
+        }}
+      />
     </div>
   );
 }
