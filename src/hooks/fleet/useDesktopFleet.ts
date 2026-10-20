@@ -2,12 +2,14 @@
 import { useFleetList } from "@/hooks/fleet/useFleetList";
 import type { VehicleStatus } from "@/lib/types";
 
+type FleetFilter = VehicleStatus | "" | "mileage_due";
+
 export interface UseDesktopFleetResult {
   loading: boolean;
   search: string;
   setSearch: (v: string) => void;
-  statusFilter: VehicleStatus | "";
-  setStatusFilter: (v: VehicleStatus | "") => void;
+  statusFilter: FleetFilter;
+  setStatusFilter: (v: FleetFilter) => void;
   currentPage: number;
   setCurrentPage: (p: number) => void;
   pageSize: number;

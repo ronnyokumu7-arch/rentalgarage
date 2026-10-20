@@ -13,7 +13,6 @@ import {
   MessageCircle,
   CreditCard,
   Car,
-  BadgeCheck,
   Shield,
   Ban,
   Archive,
@@ -23,7 +22,7 @@ import {
   X,
   Plus,
   Building2,
-  ChevronDown,
+  Calendar,
 } from "lucide-react";
 import CardGrid, { RowAction } from "@/components/ui/CardGrid";
 import SecureImage from "@/components/ui/SecureImage";
@@ -52,30 +51,18 @@ const getWhatsAppNumber = (rawPhone?: string | null): string | null => {
   return digits;
 };
 
-/**
- * ✅ Derive a friendly DL status from an ISO expiry date.
- * Returns one of: 'none' | 'expired' | 'expiring' | 'valid'
- * and a friendly label like "DL expired", "DL expires in 12 days", "DL valid".
- */
 function getDLStatus(dlExpiry?: string | null): {
   kind: "none" | "expired" | "expiring" | "valid";
   label: string;
   tone: "emerald" | "amber" | "rose" | "muted";
 } {
   if (!dlExpiry) return { kind: "none", label: "DL not provided", tone: "muted" };
-
   const expiry = new Date(dlExpiry);
   if (Number.isNaN(expiry.getTime())) {
     return { kind: "none", label: "DL not provided", tone: "muted" };
   }
-
-  const diffDays = Math.ceil(
-    (expiry.getTime() - Date.now()) / 86_400_000,
-  );
-
-  if (diffDays < 0) {
-    return { kind: "expired", label: "DL expired", tone: "rose" };
-  }
+  const diffDays = Math.ceil((expiry.getTime() - Date.now()) / 86_400_000);
+  if (diffDays < 0) return { kind: "expired", label: "DL expired", tone: "rose" };
   if (diffDays <= 30) {
     return {
       kind: "expiring",
@@ -134,26 +121,12 @@ export default function MobileClientsList({
   const [selected, setSelected] = useState<any[]>([]);
   const isSelecting = selected.length > 0;
 
+  const [searchFocused, setSearchFocused] = useState(false);
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressFired = useRef(false);
   const longPressStartPos = useRef<{ x: number; y: number } | null>(null);
-
-  const [segmentMenuOpen, setSegmentMenuOpen] = useState(false);
-  const segmentMenuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!segmentMenuOpen) return;
-    const handleOutside = (e: MouseEvent) => {
-      if (
-        segmentMenuRef.current &&
-        !segmentMenuRef.current.contains(e.target as Node)
-      ) {
-        setSegmentMenuOpen(false);
-      }
-    };
-    document.addEventListener("mousedown", handleOutside);
-    return () => document.removeEventListener("mousedown", handleOutside);
-  }, [segmentMenuOpen]);
 
   const clearSelection = () => {
     setSelected([]);
@@ -163,9 +136,7 @@ export default function MobileClientsList({
   const toggleSelection = (client: any) => {
     setSelected((prev) => {
       const exists = prev.some((c) => c.id === client.id);
-      if (exists) {
-        return prev.filter((c) => c.id !== client.id);
-      }
+      if (exists) return prev.filter((c) => c.id !== client.id);
       return [...prev, client];
     });
   };
@@ -178,11 +149,8 @@ export default function MobileClientsList({
 
     longPressTimer.current = setTimeout(() => {
       longPressFired.current = true;
-      if (!isSelecting) {
-        setSelected([client]);
-      } else {
-        toggleSelection(client);
-      }
+      if (!isSelecting) setSelected([client]);
+      else toggleSelection(client);
       if (typeof navigator !== "undefined" && "vibrate" in navigator) {
         navigator.vibrate(15);
       }
@@ -230,9 +198,7 @@ export default function MobileClientsList({
   const handleBatchSuspend = () => {
     if (selected.length === 0) return;
     selected.forEach((c) => {
-      if (c.status === "active") {
-        handleSuspend(c.id);
-      }
+      if (c.status === "active") handleSuspend(c.id);
     });
     clearSelection();
   };
@@ -243,18 +209,11 @@ export default function MobileClientsList({
     clearSelection();
   };
 
-  const segmentOptions: {
-    id: ClientSegment;
-    label: string;
-    icon: React.ElementType;
-  }[] = [
-    { id: "individual", label: "Individual", icon: UserIcon },
-    { id: "corporate", label: "Corporate", icon: Building2 },
-  ];
-
-  const activeSegment =
-    segmentOptions.find((s) => s.id === activeTab) || segmentOptions[0];
-  const SegmentIcon = activeSegment.icon;
+  const handleClearSearch = () => {
+    setSearch("");
+    setSearchFocused(false);
+    searchInputRef.current?.blur();
+  };
 
   const getClientActions = (client: any): RowAction<any>[] =>
     [
@@ -292,9 +251,9 @@ export default function MobileClientsList({
 
   return (
     <>
-      <div className="md:hidden -mx-4 animate-in fade-in duration-300 relative">
+      <div className="md:hidden animate-in fade-in duration-300 relative">
         {/* Toolbar */}
-        <div className="px-4 py-3" data-selection-zone>
+        <div className="py-3" data-selection-zone>
           {isSelecting ? (
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
@@ -339,130 +298,129 @@ export default function MobileClientsList({
             </div>
           ) : (
             <div className="space-y-2.5">
-              <div className="flex items-center gap-2">
-                <div className="relative flex-1">
-                  <Search
-                    size={16}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
-                  />
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Search clients..."
-                    className="w-full h-10 pl-9 pr-4 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all"
-                  />
-                </div>
-
-                <div ref={segmentMenuRef} className="relative flex-shrink-0">
+              {/* ✅ Search takes full width — segment dropdown removed */}
+              <div className="relative">
+                <Search
+                  size={16}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => {
+                    setTimeout(() => setSearchFocused(false), 150);
+                  }}
+                  placeholder={activeTab === "corporate" ? "Search corporate clients..." : "Search clients..."}
+                  className="w-full h-10 pl-9 pr-10 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all"
+                />
+                {search && (
                   <button
-                    onClick={() => setSegmentMenuOpen((v) => !v)}
-                    className={`h-10 px-3 rounded-xl border flex items-center gap-1.5 transition-colors ${
-                      segmentMenuOpen
-                        ? "border-[var(--color-primary)]/40 bg-[var(--color-primary)]/10"
-                        : "border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)]"
-                    }`}
-                    aria-label="Switch client type"
-                    aria-haspopup="true"
-                    aria-expanded={segmentMenuOpen}
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={handleClearSearch}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[var(--color-surface-hover)] flex items-center justify-center hover:bg-[var(--color-surface-border)] transition-colors"
+                    aria-label="Clear search"
                   >
-                    <SegmentIcon
-                      size={14}
-                      className="text-[var(--color-ink-muted)]"
-                      strokeWidth={2}
-                    />
-                    <span className="text-[11px] font-bold text-[var(--color-ink)]">
-                      {activeSegment.label}
-                    </span>
-                    <ChevronDown
-                      size={12}
-                      className={`text-[var(--color-ink-subtle)] transition-transform ${segmentMenuOpen ? "rotate-180" : ""}`}
-                    />
+                    <X size={12} className="text-[var(--color-ink-muted)]" />
                   </button>
-
-                  {segmentMenuOpen && (
-                    <div className="absolute right-0 top-full mt-1.5 w-44 bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-xl shadow-[var(--shadow-dropdown)] z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-                      {segmentOptions.map((opt) => {
-                        const Icon = opt.icon;
-                        const isActive = activeTab === opt.id;
-                        return (
-                          <button
-                            key={opt.id}
-                            onClick={() => {
-                              handleTabChange(opt.id);
-                              setSegmentMenuOpen(false);
-                            }}
-                            className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-semibold transition-colors ${
-                              isActive
-                                ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)]"
-                                : "text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"
-                            }`}
-                          >
-                            <Icon size={14} strokeWidth={2} className="flex-shrink-0" />
-                            <span className="flex-1 text-left">{opt.label}</span>
-                            {isActive && (
-                              <CheckCircle2 size={14} className="flex-shrink-0" />
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
+                )}
               </div>
 
-              <div className="-mx-4 px-4 overflow-x-auto scrollbar-none">
-                <div className="flex items-center gap-2">
+              <div className={`overflow-x-auto scrollbar-none transition-all duration-200 ${searchFocused ? "max-h-0 opacity-0 overflow-hidden" : "max-h-20 opacity-100"}`}>
+                <div className="flex items-center gap-2 py-1">
                   <button
                     onClick={() => setStatusFilter(null)}
                     className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-bold transition-colors border ${
                       statusFilter === null || statusFilter === ""
-                        ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
-                        : "bg-[var(--color-surface)] text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                        ? "text-[var(--color-primary)] border-[var(--color-primary)]"
+                        : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
                     }`}
                   >
                     All
                   </button>
-                  {statusOptions.map((opt) => {
-                    const isActive = statusFilter === opt.value;
-                    return (
-                      <button
-                        key={opt.value}
-                        onClick={() => setStatusFilter(opt.value)}
-                        className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
-                          isActive
-                            ? "bg-[var(--color-primary)] text-white border-[var(--color-primary)]"
-                            : "bg-[var(--color-surface)] text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                        }`}
-                      >
-                        {opt.label}
-                        <span
-                          className={`text-[9px] font-extrabold tabular-nums ${
-                            isActive ? "text-white/80" : "text-[var(--color-ink-subtle)]"
+                  {statusOptions
+                    .filter((opt) => opt.value !== "pending" && opt.value !== "inactive")
+                    .map((opt) => {
+                      const isActive = statusFilter === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          onClick={() => setStatusFilter(opt.value)}
+                          className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
+                            isActive
+                              ? "text-[var(--color-primary)] border-[var(--color-primary)]"
+                              : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
                           }`}
                         >
-                          {opt.count}
-                        </span>
-                      </button>
-                    );
-                  })}
+                          {opt.label}
+                          {isActive && (
+                            <span className="text-[9px] font-extrabold tabular-nums text-[var(--color-primary)]">
+                              {opt.count}
+                            </span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  <button
+                    onClick={() => setStatusFilter("with_booking")}
+                    className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
+                      statusFilter === "with_booking"
+                        ? "text-[var(--color-primary)] border-[var(--color-primary)]"
+                        : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                    }`}
+                  >
+                    <Calendar size={11} className="flex-shrink-0" />
+                    With Booking
+                  </button>
+                  <button
+                    onClick={() => setStatusFilter("inactive")}
+                    className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
+                      statusFilter === "inactive"
+                        ? "text-[var(--color-primary)] border-[var(--color-primary)]"
+                        : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                    }`}
+                  >
+                    <Archive size={11} className="flex-shrink-0" />
+                    Archived
+                  </button>
                 </div>
               </div>
             </div>
           )}
         </div>
 
-        {!isSelecting && !loading && pendingClients > 0 && statusFilter !== "pending" && (
-          <button
-            type="button"
-            onClick={() => setStatusFilter("pending")}
-            className="w-full flex items-center justify-center gap-2 px-4 py-3 text-amber-600 dark:text-amber-400 hover:opacity-80 transition-opacity text-xs font-semibold"
-          >
-            <ShieldAlert size={14} />
-            {pendingClients} {pendingClients === 1 ? "client" : "clients"} awaiting your review
-            <ArrowRight size={12} className="opacity-70" />
-          </button>
-        )}
+        <div className={searchFocused || isSelecting ? "hidden" : ""}>
+          {!loading && pendingClients > 0 && statusFilter !== "pending" && (
+            <button
+              type="button"
+              onClick={() => setStatusFilter("pending")}
+              className="w-full flex items-center justify-start gap-2 py-3 px-1 text-amber-600 dark:text-amber-400 hover:opacity-80 transition-opacity text-xs font-semibold"
+            >
+              <ShieldAlert size={14} />
+              {pendingClients} {pendingClients === 1 ? "client" : "clients"} awaiting your review
+              <ArrowRight size={12} className="opacity-70" />
+            </button>
+          )}
+
+          {!loading && statusFilter === "pending" && (
+            <div className="w-full flex items-center justify-between py-3 px-1 text-blue-600 dark:text-blue-400 text-xs font-semibold">
+              <span className="flex items-center gap-2">
+                <ShieldAlert size={14} />
+                Viewing {filteredClients.length} pending {filteredClients.length === 1 ? "client" : "clients"}
+              </span>
+              <button
+                type="button"
+                onClick={() => setStatusFilter(null)}
+                className="text-[11px] font-bold px-2 py-1 rounded-md bg-blue-500/15 hover:bg-blue-500/25 transition-colors"
+              >
+                Clear Filter
+              </button>
+            </div>
+          )}
+        </div>
 
         {loading ? (
           <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2">
@@ -473,9 +431,7 @@ export default function MobileClientsList({
             <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
               <Users size={24} className="text-[var(--color-ink-subtle)]" />
             </div>
-            <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">
-              No clients found
-            </h3>
+            <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No clients found</h3>
             <p className="text-sm text-[var(--color-ink-muted)] mb-4">
               Try adjusting your search query or filters.
             </p>
@@ -501,16 +457,15 @@ export default function MobileClientsList({
             }}
             cardClassName={`!p-0 !rounded-none !border-0 !bg-transparent !shadow-none transition-colors [&_[data-card-actions]]:absolute [&_[data-card-actions]]:top-0 [&_[data-card-actions]]:right-0 [&_[data-card-actions]>button]:w-0 [&_[data-card-actions]>button]:h-0 [&_[data-card-actions]>button]:overflow-hidden [&_[data-card-actions]>button]:opacity-0`}
             containerClassName="!p-0"
-            maxHeight="calc(100vh - 220px)"
+            maxHeight={searchFocused ? "calc(100vh - 120px)" : "calc(100vh - 220px)"}
             renderCardHeader={({ item }: { item: any }) => {
-              const style =
-                CLIENT_STATUS_STYLES[item.status] || CLIENT_STATUS_STYLES.inactive;
               const phone = item.phone || "";
               const isVerified = item.verification_status === "verified";
+              const isPending = item.status === "pending" || item.verification_status === "under_review" || item.verification_status === "sent";
+              const isSuspended = item.status === "suspended";
               const isSelected = selected.some((c) => c.id === item.id);
               const dl = getDLStatus(item.dl_expiry);
 
-              // Tone → color classes for the DL chip and ID verified pill
               const dlToneClasses: Record<typeof dl.tone, string> = {
                 emerald: "text-emerald-600 dark:text-emerald-400",
                 amber: "text-amber-600 dark:text-amber-400",
@@ -518,92 +473,70 @@ export default function MobileClientsList({
                 muted: "text-[var(--color-ink-subtle)]",
               };
 
+              const idStatus = isVerified
+                ? { label: "ID verified", tone: "text-emerald-600 dark:text-emerald-400" }
+                : isPending
+                  ? { label: "ID pending", tone: "text-amber-600 dark:text-amber-400" }
+                  : { label: "ID missing", tone: "text-[var(--color-ink-subtle)]" };
+
+              // ✅ Suspended records muted via opacity
               return (
                 <div
                   data-selection-zone
                   onTouchStart={handleTouchStart(item)}
                   onTouchMove={handleTouchMove}
                   onTouchEnd={handleTouchEnd}
-                  className={`flex items-start gap-3 w-full py-3 px-4 border-b border-[var(--color-surface-border)]/50 last:border-b-0 transition-colors ${
+                  className={`flex items-start gap-3 w-full py-3 border-b border-[var(--color-surface-border)]/50 last:border-b-0 transition-colors ${
                     isSelected
                       ? "bg-[var(--color-primary)]/10"
-                      : "hover:bg-[var(--color-surface-hover)]/40"
+                      : isSuspended
+                        ? "opacity-50"
+                        : "hover:bg-[var(--color-surface-hover)]/40"
                   }`}
                 >
-                  {/* ✅ Avatar: 48px square, covers ~2 rows (name + compliance) */}
+                  {/* ✅ Avatar — no status dot */}
                   <div className="relative flex-shrink-0">
                     <div className="w-12 h-12 rounded-xl overflow-hidden bg-[var(--color-surface-hover)] flex items-center justify-center">
                       <SecureImage
                         src={item.avatar_image}
                         alt={item.full_name}
                         className="w-full h-full object-cover"
-                        fallback={
-                          <UserIcon size={22} className="text-[var(--color-ink-subtle)]" />
-                        }
+                        fallback={<UserIcon size={22} className="text-[var(--color-ink-subtle)]" />}
                       />
                     </div>
-                    <span
-                      className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full ${style.dot} ring-2 ring-[var(--color-surface)] shadow-sm`}
-                    />
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    {/* Row 1: Name + verified check */}
                     <div className="flex items-center gap-1.5 flex-wrap">
                       <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
                         {item.full_name}
                       </span>
-                      {isVerified && (
-                        <BadgeCheck
-                          size={14}
-                          className="text-blue-500 flex-shrink-0"
-                          fill="currentColor"
-                          stroke="var(--color-surface)"
-                          strokeWidth={1.5}
-                        />
-                      )}
                     </div>
 
-                    {/* ✅ Row 2: Compliance summary (ID verified · DL valid/expired/expires in x days) */}
-                    <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                      {/* ID status */}
-                      <span
-                        className={`inline-flex items-center gap-1 text-[10px] font-semibold ${
-                          item.id_number
-                            ? "text-emerald-600 dark:text-emerald-400"
-                            : "text-[var(--color-ink-subtle)]"
-                        }`}
-                      >
-                        <CreditCard size={10} className="flex-shrink-0" />
-                        {item.id_number ? "ID verified" : "ID missing"}
+                    <div className="flex items-center gap-3 mt-1 flex-wrap">
+                      <span className={`inline-flex items-center gap-1 text-[11px] font-semibold ${idStatus.tone}`}>
+                        <CreditCard size={11} className="flex-shrink-0" />
+                        {idStatus.label}
                       </span>
 
-                      <span className="text-[10px] text-[var(--color-ink-subtle)]">·</span>
-
-                      {/* DL status */}
-                      <span
-                        className={`inline-flex items-center gap-1 text-[10px] font-semibold ${dlToneClasses[dl.tone]}`}
-                      >
-                        <Car size={10} className="flex-shrink-0" />
+                      <span className={`inline-flex items-center gap-1 text-[11px] font-semibold ${dlToneClasses[dl.tone]}`}>
+                        <Car size={11} className="flex-shrink-0" />
                         {dl.label}
                       </span>
                     </div>
 
-                    {/* ✅ Row 3: Phone */}
                     <div className="flex items-center gap-1.5 mt-1 min-w-0">
                       {phone ? (
                         <a
                           href={`tel:${phone.replace(/\s/g, "")}`}
                           onClick={(e) => e.stopPropagation()}
-                          className="flex items-center gap-1 text-[11px] font-medium text-[var(--color-ink-muted)] hover:text-[var(--color-primary)] transition-colors min-w-0"
+                          className="flex items-center gap-1 text-xs font-medium text-[var(--color-ink-muted)] hover:text-[var(--color-primary)] transition-colors min-w-0"
                         >
-                          <Phone size={10} className="flex-shrink-0" />
+                          <Phone size={11} className="flex-shrink-0" />
                           <span className="truncate">{phone}</span>
                         </a>
                       ) : (
-                        <span className="text-[11px] text-[var(--color-ink-subtle)] italic">
-                          No phone
-                        </span>
+                        <span className="text-xs text-[var(--color-ink-subtle)] italic">No phone</span>
                       )}
                     </div>
                   </div>
@@ -611,17 +544,9 @@ export default function MobileClientsList({
                   {isSelecting && (
                     <div className="flex-shrink-0 self-center pl-1">
                       {isSelected ? (
-                        <CheckCircle2
-                          size={22}
-                          className="text-[var(--color-primary)]"
-                          strokeWidth={2.25}
-                        />
+                        <CheckCircle2 size={22} className="text-[var(--color-primary)]" strokeWidth={2.25} />
                       ) : (
-                        <Circle
-                          size={22}
-                          className="text-[var(--color-ink-subtle)]"
-                          strokeWidth={1.5}
-                        />
+                        <Circle size={22} className="text-[var(--color-ink-subtle)]" strokeWidth={1.5} />
                       )}
                     </div>
                   )}
@@ -631,8 +556,7 @@ export default function MobileClientsList({
             renderCardBody={() => null}
             rowActions={getClientActions}
             renderActionSheetBadge={(client: any) => {
-              const style =
-                CLIENT_STATUS_STYLES[client.status] || CLIENT_STATUS_STYLES.inactive;
+              const style = CLIENT_STATUS_STYLES[client.status] || CLIENT_STATUS_STYLES.inactive;
               return (
                 <span
                   className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-extrabold uppercase tracking-wider border ${
@@ -653,20 +577,45 @@ export default function MobileClientsList({
           />
         )}
 
-        {!isSelecting && (
-          <button
-            type="button"
-            onClick={onAddClient}
-            aria-label="Add Client"
-            className="fixed right-4 bottom-20 z-40 w-14 h-14 rounded-xl bg-[var(--color-primary)]/20 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.25)] flex items-center justify-center active:scale-95 hover:bg-[var(--color-primary)]/30 transition-all"
-          >
-            <div className="relative flex items-center justify-center">
-              <UserIcon size={22} strokeWidth={2} className="text-[var(--color-primary)]" />
-              <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center shadow-sm">
-                <Plus size={10} strokeWidth={3.5} />
-              </span>
-            </div>
-          </button>
+        {/* ✅ FAB stack — segment toggle (top) + Add Client (bottom) */}
+        {!isSelecting && !searchFocused && (
+          <div className="fixed right-4 bottom-20 z-40 flex flex-col items-end gap-3">
+            {/* ✅ Segment toggle — visible on BOTH individual and corporate tabs.
+                Icon shows the DESTINATION (opposite of current). */}
+            <button
+              type="button"
+              onClick={() =>
+                handleTabChange(activeTab === "individual" ? "corporate" : "individual")
+              }
+              aria-label={
+                activeTab === "individual"
+                  ? "Switch to Corporate"
+                  : "Switch to Individual"
+              }
+              className="w-12 h-12 rounded-xl bg-[var(--color-surface)]/80 backdrop-blur-xl border border-[var(--color-surface-border)] shadow-[0_8px_32px_rgba(0,0,0,0.25)] flex items-center justify-center active:scale-95 hover:bg-[var(--color-surface-hover)]/90 transition-all"
+            >
+              {activeTab === "individual" ? (
+                <Building2 size={18} className="text-[var(--color-ink-muted)]" />
+              ) : (
+                <UserIcon size={18} className="text-[var(--color-ink-muted)]" />
+              )}
+            </button>
+
+            {/* Add Client */}
+            <button
+              type="button"
+              onClick={onAddClient}
+              aria-label="Add Client"
+              className="w-14 h-14 rounded-xl bg-[var(--color-primary)]/20 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.25)] flex items-center justify-center active:scale-95 hover:bg-[var(--color-primary)]/30 transition-all"
+            >
+              <div className="relative flex items-center justify-center">
+                <UserIcon size={22} strokeWidth={2} className="text-[var(--color-primary)]" />
+                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center shadow-sm">
+                  <Plus size={10} strokeWidth={3.5} />
+                </span>
+              </div>
+            </button>
+          </div>
         )}
       </div>
 

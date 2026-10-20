@@ -51,8 +51,8 @@ interface DesktopFleetListProps {
   loading: boolean;
   search: string;
   setSearch: (v: string) => void;
-  statusFilter: VehicleStatus | "";
-  setStatusFilter: (v: VehicleStatus | "") => void;
+  statusFilter: VehicleStatus | "" | "mileage_due";
+  setStatusFilter: (v: VehicleStatus | "" | "mileage_due") => void;
   currentPage: number;
   setCurrentPage: (p: number) => void;
   pageSize: number;

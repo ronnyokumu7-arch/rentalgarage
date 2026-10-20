@@ -1,3 +1,4 @@
+// src/hooks/fleet/useFleetList.ts
 import { confirmAction } from "@/lib/utils/confirmAction";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import toast from "react-hot-toast";
@@ -5,12 +6,19 @@ import { vehiclesApi } from "@/lib/api/vehicles";
 import type { Vehicle, VehicleStatus } from "@/lib/types";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 
+/**
+ * ✅ Extend the filter type to include the pseudo-status `mileage_due`.
+ * Backend never sends this — it's a client-side derived filter for
+ * "vehicles that need a mileage log after a trip ended".
+ */
+type FleetFilter = VehicleStatus | "" | "mileage_due";
+
 export function useFleetList() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<VehicleStatus | "">("");
+  const [statusFilter, setStatusFilter] = useState<FleetFilter>("");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 7;
 
@@ -19,7 +27,6 @@ export function useFleetList() {
   const [actionLoadingId, setActionLoadingId] = useState<number | null>(null);
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
 
-  // ✅ NEW: States for Investor Vehicle Pricing Modal
   const [pricingVehicle, setPricingVehicle] = useState<Vehicle | null>(null);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
 
@@ -43,12 +50,12 @@ export function useFleetList() {
 
   useEffect(() => {
     const handleVehicleEvent = () => fetchVehicles();
-    window.addEventListener('vehicle:created', handleVehicleEvent);
-    window.addEventListener('vehicle:updated', handleVehicleEvent);
-    
+    window.addEventListener("vehicle:created", handleVehicleEvent);
+    window.addEventListener("vehicle:updated", handleVehicleEvent);
+
     return () => {
-      window.removeEventListener('vehicle:created', handleVehicleEvent);
-      window.removeEventListener('vehicle:updated', handleVehicleEvent);
+      window.removeEventListener("vehicle:created", handleVehicleEvent);
+      window.removeEventListener("vehicle:updated", handleVehicleEvent);
     };
   }, [fetchVehicles]);
 
@@ -64,7 +71,13 @@ export function useFleetList() {
         v.model.toLowerCase().includes(searchLower) ||
         v.plate_number.toLowerCase().includes(searchLower);
 
-      const matchesStatus = statusFilter === "" || v.status === statusFilter;
+      // ✅ Handle mileage_due pseudo-filter + normal status filter
+      let matchesStatus = true;
+      if (statusFilter === "mileage_due") {
+        matchesStatus = v.mileage_due;
+      } else if (statusFilter !== "") {
+        matchesStatus = v.status === statusFilter;
+      }
 
       return matchesSearch && matchesStatus;
     });
@@ -82,15 +95,13 @@ export function useFleetList() {
   const mileageDueCount = vehicles.filter((v) => v.mileage_due).length;
 
   const handleStatusAction = async (id: number, action: string) => {
-    // ✅ INTERCEPT: If activating an investor-owned vehicle, open pricing modal
     const vehicle = filteredVehicles.find((v) => v.id === id);
     if (action === "activate" && vehicle?.owner_id) {
       setPricingVehicle(vehicle);
       setIsPricingModalOpen(true);
-      return; // Stop here. The modal will handle the API call.
+      return;
     }
 
-    // Standard flow for agency-owned vehicles
     setActionLoadingId(id);
     try {
       if (action === "activate") {
@@ -201,7 +212,6 @@ export function useFleetList() {
     rentedVehicles,
     mileageDueCount,
     refetch: fetchVehicles,
-    // ✅ NEW: Expose pricing modal states to parent component
     pricingVehicle,
     setPricingVehicle,
     isPricingModalOpen,

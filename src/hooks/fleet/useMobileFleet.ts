@@ -3,12 +3,14 @@ import { useMemo } from "react";
 import { useFleetList } from "@/hooks/fleet/useFleetList";
 import type { VehicleStatus } from "@/lib/types";
 
+type FleetFilter = VehicleStatus | "" | "mileage_due";
+
 export interface UseMobileFleetResult {
   loading: boolean;
   search: string;
   setSearch: (v: string) => void;
-  statusFilter: VehicleStatus | "";
-  setStatusFilter: (v: VehicleStatus | "") => void;
+  statusFilter: FleetFilter;                         // ✅ was VehicleStatus | ""
+  setStatusFilter: (v: FleetFilter) => void;         // ✅ was VehicleStatus | ""
   filteredVehicles: any[];
   statusOptions: { label: string; value: string; count: number }[];
   handleStatusAction: (id: number, action: string) => void;

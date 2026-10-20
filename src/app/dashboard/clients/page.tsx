@@ -42,7 +42,6 @@ export default function ClientsPage() {
     tabFromUrl && VALID_TABS.has(tabFromUrl) ? tabFromUrl : "individual";
   const [activeTab, setActiveTab] = useState<ClientSegment>(initialTab);
 
-  // ✅ Shared Add Client modal state — one instance, two triggers
   const [addClientOpen, setAddClientOpen] = useState(false);
 
   useEffect(() => {
@@ -113,15 +112,29 @@ export default function ClientsPage() {
 
       {activeTab === "corporate" && (
         <>
-          <div className="md:hidden bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
-            <div className="p-12 text-center">
-              <Building2 size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" />
-              <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">Corporate Client Hub</h3>
-              <p className="text-sm text-[var(--color-ink-muted)] max-w-md mx-auto">
-                Commercial profiles, group company multi-driver billing, agency agreements coming soon.
-              </p>
-            </div>
-          </div>
+          {/* ✅ Mobile: reuse MobileClientsList so it inherits the segment-toggle FAB.
+              No client data yet for corporate, so we pass empty arrays — the list
+              renders its empty state, and the FAB toggle stays visible. */}
+          <MobileClientsList
+            search={mobile.search}
+            setSearch={mobile.setSearch}
+            statusFilter={mobile.statusFilter}
+            setStatusFilter={mobile.setStatusFilter}
+            statusOptions={mobile.statusOptions}
+            activeTab={activeTab}
+            handleTabChange={handleTabChange}
+            loading={false}
+            filteredClients={[]}
+            paginatedClients={[]}
+            pendingClients={0}
+            handleVerify={mobile.handleVerify}
+            handleSuspend={mobile.handleSuspend}
+            handleArchive={mobile.handleArchive}
+            refetch={mobile.refetch}
+            onAddClient={() => setAddClientOpen(true)}
+          />
+
+          {/* Desktop: unchanged placeholder */}
           <div className="hidden md:block p-12 text-center bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)]">
             <Building2 size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" />
             <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">Corporate Client Hub</h3>
@@ -172,17 +185,15 @@ export default function ClientsPage() {
             handleReactivate={desktop.handleReactivate}
             handleArchive={desktop.handleArchive}
             refetch={desktop.refetch}
-            onAddClient={() => setAddClientOpen(true)}  // ✅ NEW — desktop toolbar trigger
+            onAddClient={() => setAddClientOpen(true)}
           />
         </>
       )}
 
-      {/* ✅ SINGLE Add Client modal at page level — used by both mobile FAB and desktop toolbar */}
       <AddClientModal
         isOpen={addClientOpen}
         onClose={() => {
           setAddClientOpen(false);
-          // Refresh both hooks so a newly created client appears immediately
           mobile.refetch();
           desktop.refetch();
         }}
