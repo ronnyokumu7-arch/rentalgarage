@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Sidebar from "./Sidebar";
 import Topbar from "./TopBar";
 import BottomNav from "./BottomNav";
+import PullUpNav from "./PullUpNav";
 import type { NavItem } from "@/lib/nav-config";
 
 interface DashboardShellProps {
@@ -18,58 +19,42 @@ export default function DashboardShell({ children, navItems }: DashboardShellPro
   const pathname = usePathname();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
-  // ── Close mobile nav on route change ──────────────────────
   useEffect(() => {
     setIsMobileNavOpen(false);
   }, [pathname]);
 
-  // ── Page transition variants ──────────────────────────────
   const pageVariants = {
-    initial: {
-      opacity: 0,
-      y: 12,
-    },
+    initial: { opacity: 0, y: 12 },
     animate: {
       opacity: 1,
       y: 0,
-      transition: {
-        duration: 0.4,
-        ease: [0.16, 1, 0.3, 1] as const, // ✅ Fixed: Added `as const`
-      },
+      transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] as const },
     },
     exit: {
       opacity: 0,
       y: -12,
-      transition: {
-        duration: 0.3,
-        ease: [0.16, 1, 0.3, 1] as const, // ✅ Fixed: Added `as const`
-      },
+      transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] as const },
     },
   };
 
-  // ── Child variants for staggered animations ──────────────
   const containerVariants = {
     animate: {
-      transition: {
-        staggerChildren: 0.06,
-        delayChildren: 0.1,
-      },
+      transition: { staggerChildren: 0.06, delayChildren: 0.1 },
     },
   };
 
   return (
     <div className="min-h-screen text-ink flex transition-colors duration-300 bg-bg">
-      
-      {/* ── Desktop Sidebar ────────────────────────────────── */}
+
+      {/* Desktop Sidebar */}
       <div className="hidden lg:block fixed inset-y-0 left-0 z-40 w-[72px]">
         <Sidebar navItems={navItems} />
       </div>
 
-      {/* ── Main Content ────────────────────────────────────── */}
+      {/* Main Content */}
       <div className="flex-1 flex flex-col min-w-0 lg:pl-[72px]">
-        <Topbar onMenuToggle={() => setIsMobileNavOpen(true)} />
-        
-        {/* ── Page Content with Animations ──────────────────── */}
+        <Topbar />
+
         <AnimatePresence mode="wait">
           <motion.main
             key={pathname}
@@ -77,7 +62,7 @@ export default function DashboardShell({ children, navItems }: DashboardShellPro
             initial="initial"
             animate="animate"
             exit="exit"
-            className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-4 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] lg:pb-8"
+            className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-4 pb-[calc(7rem+env(safe-area-inset-bottom,0px))] lg:pb-8"
           >
             <motion.div
               variants={containerVariants}
@@ -91,16 +76,18 @@ export default function DashboardShell({ children, navItems }: DashboardShellPro
         </AnimatePresence>
       </div>
 
-      {/* ── Mobile Bottom Nav ────────────────────────────────── */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40">
+      {/* Permanent bottom bar */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[62]">
         <BottomNav navItems={navItems} />
       </div>
 
-      {/* ── Mobile Sidebar Overlay ───────────────────────────── */}
+      {/* Pull-up drawer (behind the bar, peeks above it) */}
+      <PullUpNav navItems={navItems} />
+
+      {/* Legacy mobile sidebar overlay (dormant) */}
       <AnimatePresence>
         {isMobileNavOpen && (
           <>
-            {/* Backdrop */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -109,23 +96,17 @@ export default function DashboardShell({ children, navItems }: DashboardShellPro
               className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm lg:hidden"
               onClick={() => setIsMobileNavOpen(false)}
             />
-            
-            {/* Mobile Sidebar */}
             <motion.div
               initial={{ x: -280 }}
               animate={{ x: 0 }}
               exit={{ x: -280 }}
-              transition={{ 
-                type: "spring", 
-                stiffness: 300, 
-                damping: 30 
-              }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
               className="fixed top-0 left-0 z-50 w-72 h-full bg-surface border-r border-surface-border shadow-2xl lg:hidden"
             >
-              <Sidebar 
-                navItems={navItems} 
-                isMobile 
-                onClose={() => setIsMobileNavOpen(false)} 
+              <Sidebar
+                navItems={navItems}
+                isMobile
+                onClose={() => setIsMobileNavOpen(false)}
               />
             </motion.div>
           </>

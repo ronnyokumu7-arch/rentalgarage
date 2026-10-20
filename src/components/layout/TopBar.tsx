@@ -7,7 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   Search, User, Bell,
   LogOut, ChevronRight, Command,
-  MoreVertical, Sparkles, X, HelpCircle,
+  Sparkles, HelpCircle,
   CreditCard, Users, CalendarDays, Car, ChevronDown,
   Building2
 } from "lucide-react";
@@ -16,11 +16,6 @@ import MobileSearchModal from "@/components/search/MobileSearchModal";
 import DesktopSearchDropdown from "@/components/search/DesktopSearchDropdown";
 import SecureImage from "@/components/ui/SecureImage";
 import ThemeToggle from "@/components/layout/ThemeToggle";
-
-interface TopbarProps {
-  onMenuToggle?: () => void;
-  isMobileMenuOpen?: boolean;
-}
 
 interface SearchScope {
   id: string;
@@ -37,7 +32,7 @@ const SEARCH_SCOPES: SearchScope[] = [
   { id: "fleet", label: "Fleet", placeholder: "Search fleet...", icon: Car },
 ];
 
-export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: TopbarProps) {
+export default function Topbar() {
   const { user, tenant, logout } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
@@ -435,16 +430,6 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
           >
             <Search size={17} strokeWidth={1.8} />
           </button>
-
-          {onMenuToggle && (
-            <button
-              onClick={onMenuToggle}
-              className="lg:hidden flex items-center justify-center w-9 h-9 rounded-xl text-ink-muted hover:bg-surface-hover hover:text-ink transition-all duration-200 active:scale-95"
-              aria-label="Toggle menu"
-            >
-              {isMobileMenuOpen ? <X size={18} strokeWidth={2} /> : <MoreVertical size={18} strokeWidth={2} />}
-            </button>
-          )}
         </div>
       </header>
 
