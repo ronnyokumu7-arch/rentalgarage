@@ -44,21 +44,6 @@
   }
 
   /* ✅ GLOBAL THEME TRANSITION (Safe & Scoped) */
-  /* 
-    Previously this was a universal `*` transition on background/border/shadow.
-    That meant every element on the page animated concurrently when the
-    dark/light class flipped — hundreds of transitions running in lockstep,
-    dropping frames and making the toggle feel like it took seconds.
-    
-    The fix: only animate on `body` and `html`, plus interactive elements
-    (buttons, inputs, links). That cuts the concurrent transition count from
-    hundreds to ~20, so the toggle settles in 250ms and feels instant.
-    
-    Non-interactive elements (cards, rows, badges, dividers) now switch
-    instantly on theme change. This is the right tradeoff: the address
-    bar / status bar / nav chrome update with a soft fade, but the bulk of
-    the page snaps to the new theme in a single frame.
-  */
   body, html {
     transition-property: background-color, color;
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
@@ -72,21 +57,12 @@
     transition-duration: 200ms;
   }
 
-  /* ✅ Disable ALL transitions during the theme swap, driven by the
-     `data-theme-transitioning` attribute. When `next-themes` flips the
-     `dark` class, TopBar's toggle sets this to "true" for one frame,
-     which stops every residual transition (including the body fade) so
-     the swap is truly single-frame. Set back to "false" on the next
-     animation frame. */
   [data-theme-transitioning="true"] *,
   [data-theme-transitioning="true"] *::before,
   [data-theme-transitioning="true"] *::after {
     transition: none !important;
   }
 
-  /* ✅ Also honor the old "false" convention — used to lock down transitions
-     during initial page load, preventing the flash of interpolated colors
-     that happens between server-rendered CSS and client-side hydration. */
   [data-theme-transitioning="false"] *,
   [data-theme-transitioning="false"] *::before,
   [data-theme-transitioning="false"] *::after {
@@ -321,8 +297,15 @@
    ═══════════════════════════════════════════════════════════ */
 
 @layer utilities {
+  /* ✅ Global scrollbar hiding utilities */
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* ✅ Replaces the previous custom-scrollbar. Applied to any 
+     overflow container (main, nav, modal) to hide the native bar 
+     while keeping the element fully scrollable. */
+  .custom-scrollbar::-webkit-scrollbar { display: none; }
+  .custom-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
   /* ── TEXT COLORS ────────────────────────────────────────── */
   .text-ink { color: var(--color-ink-primary) !important; }
@@ -552,17 +535,6 @@
   transition: all 0.3s ease;
 }
 
-/* Hide scrollbar for Chrome, Safari and Opera */
-.scrollbar-hide::-webkit-scrollbar {
-  display: none;
-}
-
-/* Hide scrollbar for IE, Edge and Firefox */
-.scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
-}
-
 /* ════════════════════════════════════════════════════════════
    🌞 PUBLIC PAGES — ALWAYS LIGHT (token-immune)
    ════════════════════════════════════════════════════════════ */
@@ -581,4 +553,20 @@
 /* Micro-labels (CLIENT DETAILS, TOTAL AMOUNT, ...) keep their subtle tone */
 .force-light h3.uppercase {
   color: #78716C !important;
+}
+
+/* ════════════════════════════════════════════════════════════
+   🛟 HIDE FAB STACK WHEN PULLUP MENU IS OPEN
+   ════════════════════════════════════════════════════════════ */
+
+/* 1. Ensure the FAB stack always has a smooth transition */
+[data-fab-stack] {
+  transition: opacity 200ms ease-out, transform 200ms ease-out !important;
+}
+
+/* 2. Hide it when the pull-up menu is open (using the reliable data attribute) */
+body[data-pullup-open="true"] [data-fab-stack] {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transform: translateY(20px) !important;
 }

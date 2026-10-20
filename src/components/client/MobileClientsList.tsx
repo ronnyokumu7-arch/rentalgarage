@@ -1,4 +1,3 @@
-// src/components/client/MobileClientsList.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -298,7 +297,7 @@ export default function MobileClientsList({
             </div>
           ) : (
             <div className="space-y-2.5">
-              {/* ✅ Search takes full width — segment dropdown removed */}
+              {/* Search takes full width — segment dropdown removed */}
               <div className="relative">
                 <Search
                   size={16}
@@ -479,22 +478,20 @@ export default function MobileClientsList({
                   ? { label: "ID pending", tone: "text-amber-600 dark:text-amber-400" }
                   : { label: "ID missing", tone: "text-[var(--color-ink-subtle)]" };
 
-              // ✅ Suspended records muted via opacity
               return (
                 <div
                   data-selection-zone
                   onTouchStart={handleTouchStart(item)}
                   onTouchMove={handleTouchMove}
                   onTouchEnd={handleTouchEnd}
-                  className={`flex items-start gap-3 w-full py-3 border-b border-[var(--color-surface-border)]/50 last:border-b-0 transition-colors ${
-                    isSelected
-                      ? "bg-[var(--color-primary)]/10"
-                      : isSuspended
-                        ? "opacity-50"
-                        : "hover:bg-[var(--color-surface-hover)]/40"
+                  // ✅ Removed background highlight & added select-none
+                  className={`flex items-start gap-3 w-full py-3 border-b border-[var(--color-surface-border)]/50 last:border-b-0 transition-colors select-none ${
+                    isSuspended
+                      ? "opacity-50"
+                      : "hover:bg-[var(--color-surface-hover)]/40"
                   }`}
                 >
-                  {/* ✅ Avatar — no status dot */}
+                  {/* Avatar */}
                   <div className="relative flex-shrink-0">
                     <div className="w-12 h-12 rounded-xl overflow-hidden bg-[var(--color-surface-hover)] flex items-center justify-center">
                       <SecureImage
@@ -577,11 +574,14 @@ export default function MobileClientsList({
           />
         )}
 
-        {/* ✅ FAB stack — segment toggle (top) + Add Client (bottom) */}
+        {/* ✅ FAB stack — z-65 sits above the PullUpNav drawer and grab area. 
+            bottom-[108px] clears the nav bar (68px) + peek (24px) + breathing room. */}
         {!isSelecting && !searchFocused && (
-          <div className="fixed right-4 bottom-20 z-40 flex flex-col items-end gap-3">
-            {/* ✅ Segment toggle — visible on BOTH individual and corporate tabs.
-                Icon shows the DESTINATION (opposite of current). */}
+          <div 
+            data-fab-stack 
+            className="fixed right-4 bottom-[108px] z-[65] flex flex-col items-end gap-3"
+          >
+            {/* Segment toggle */}
             <button
               type="button"
               onClick={() =>

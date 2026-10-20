@@ -1,4 +1,3 @@
-// src/components/fleet/MobileFleetList.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -605,11 +604,8 @@ export default function MobileFleetList({
                 onTouchStart={handleTouchStart(item)}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
-                className={`flex items-start gap-3 w-full py-3 border-b border-[var(--color-surface-border)]/50 last:border-b-0 transition-colors ${
-                  isSelected
-                    ? "bg-[var(--color-primary)]/10"
-                    : "hover:bg-[var(--color-surface-hover)]/40"
-                }`}
+                // ✅ Removed background highlight & added select-none
+                className="flex items-start gap-3 w-full py-3 border-b border-[var(--color-surface-border)]/50 last:border-b-0 transition-colors hover:bg-[var(--color-surface-hover)]/40 select-none"
               >
                 <div className="relative flex-shrink-0">
                   <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/15 flex items-center justify-center overflow-hidden">
@@ -781,7 +777,11 @@ export default function MobileFleetList({
       )}
 
       {!isSelecting && !searchFocused && (
-        <div className="fixed right-4 bottom-20 z-40 flex flex-col items-end gap-3">
+        // ✅ FAB stack bottom offset adjusted to clear the 24px peek strip
+        <div 
+          data-fab-stack 
+          className="fixed right-4 bottom-[108px] z-[65] flex flex-col items-end gap-3"
+        >
           <button
             type="button"
             onClick={() => handleTabChange(activeTab === "fleet" ? "garage" : "fleet")}

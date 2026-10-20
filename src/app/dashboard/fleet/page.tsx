@@ -58,7 +58,6 @@ export default function FleetPage() {
   const [garageModalOpen, setGarageModalOpen] = useState(false);
   const [pricingVehicle, setPricingVehicle] = useState<Vehicle | null>(null);
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
-  // ✅ NEW: Edit Details modal state
   const [editVehicle, setEditVehicle] = useState<Vehicle | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -388,18 +387,26 @@ export default function FleetPage() {
         }}
       />
 
+      {/* ✅ Wrapped floating segment with data-fab-stack and positioning */}
       {showFloating && (
-        <MobileFloatingSegment
-          segments={MOBILE_TABS.map((t) => ({
-            id: t.id,
-            label: t.label,
-            icon: t.icon,
-          }))}
-          active={activeTab}
-          onChange={(id) => handleTabChange(id)}
-          toggleTarget={floatingToggleTarget}
-          triggerIcon={floatingTriggerIcon}
-        />
+        <div 
+          data-fab-stack 
+          className="lg:hidden fixed inset-x-0 bottom-[108px] z-[65] flex justify-end px-4 pointer-events-none transition-all duration-200"
+        >
+          <div className="pointer-events-auto">
+            <MobileFloatingSegment
+              segments={MOBILE_TABS.map((t) => ({
+                id: t.id,
+                label: t.label,
+                icon: t.icon,
+              }))}
+              active={activeTab}
+              onChange={(id) => handleTabChange(id)}
+              toggleTarget={floatingToggleTarget}
+              triggerIcon={floatingTriggerIcon}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

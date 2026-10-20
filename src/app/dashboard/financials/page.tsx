@@ -34,9 +34,6 @@ const TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
   { id: "payments", label: "Payments", icon: DollarSign },
 ];
 
-// ✅ Mobile *browse* path offers only these two.
-// Invoices + Contracts still render on mobile when reached via deep link
-// (search results, bookmarks, browser back/forward).
 const MOBILE_TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
   { id: "overview", label: "Overview", icon: LayoutDashboard },
   { id: "payments", label: "Payments", icon: DollarSign },
@@ -75,7 +72,6 @@ export default function FinancialsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // Derive the initial tab from the URL — safe fallback if tab is unknown.
   const initialTab: TabId = (() => {
     const t = searchParams.get("tab") as TabId | null;
     return t && VALID_TABS.has(t) ? t : "overview";
@@ -83,8 +79,6 @@ export default function FinancialsPage() {
 
   const [activeTab, setActiveTab] = useState<TabId>(initialTab);
 
-  // ✅ Sync FROM URL — handles deep links, browser back/forward, and manual edits.
-  // Never bounces on mobile; the tab simply renders.
   useEffect(() => {
     const t = searchParams.get("tab") as TabId | null;
     if (t && VALID_TABS.has(t) && t !== activeTab) {
@@ -92,7 +86,6 @@ export default function FinancialsPage() {
     }
   }, [searchParams, activeTab]);
 
-  // Single source of tab-change plumbing — always keeps URL in sync.
   const handleTabChange = (tabId: string) => {
     if (!VALID_TABS.has(tabId as TabId)) return;
     const next = tabId as TabId;
@@ -133,9 +126,6 @@ export default function FinancialsPage() {
     [activeTab],
   );
 
-  // ✅ The floating segment treats any deep-linked tab (invoices/contracts)
-  // as "not a mobile tab" — highlight Overview as the escape target so
-  // users have an obvious way back into the mobile browse flow.
   const isOnMobileTab = MOBILE_TABS.some((t) => t.id === activeTab);
   const floatingActive = isOnMobileTab ? activeTab : "overview";
   const floatingToggleTarget: TabId =
@@ -192,10 +182,7 @@ export default function FinancialsPage() {
         />
       </div>
 
-      {/* ─── Tab content — renders at every viewport ─────────────── */}
-      {/* Deep-linked Invoices / Contracts now render on mobile too.
-          Mobile browse stays simple because the floating switcher
-          only offers Overview ↔ Payments. */}
+      {/* ─── Tab content ─────────────────────────────────────────── */}
       <div className="animate-in fade-in duration-200 min-h-[400px] pt-2">
         {activeTab === "overview" && <OverviewTab />}
         {activeTab === "payments" && <PaymentsTab />}
@@ -204,16 +191,21 @@ export default function FinancialsPage() {
       </div>
 
       {/* ─── Floating segment — mobile only ─────────────────────── */}
-      {/* If the user is on a deep-linked desktop tab, the switcher
-          shows Overview highlighted so tapping it returns them to
-          the mobile browse flow. */}
-      <MobileFloatingSegment
-        segments={MOBILE_TABS.map((t) => ({ id: t.id, label: t.label, icon: t.icon }))}
-        active={floatingActive}
-        onChange={(id) => handleTabChange(id)}
-        toggleTarget={floatingToggleTarget}
-        triggerIcon={FloatingTriggerIcon}
-      />
+      {/* ✅ Wrapper forces the inner fixed component up above the nav + peek area. */}
+      <div
+        data-fab-stack
+        className="lg:hidden fixed right-4 bottom-[108px] z-[65] pointer-events-none transition-all duration-200"
+      >
+        <div className="pointer-events-auto">
+          <MobileFloatingSegment
+            segments={MOBILE_TABS.map((t) => ({ id: t.id, label: t.label, icon: t.icon }))}
+            active={floatingActive}
+            onChange={(id) => handleTabChange(id)}
+            toggleTarget={floatingToggleTarget}
+            triggerIcon={FloatingTriggerIcon}
+          />
+        </div>
+      </div>
     </div>
   );
 }

@@ -192,7 +192,7 @@ export default function UpcomingRentalsTabContent() {
                   )}
                 </div>
 
-                {/* ✅ MOBILE: Details link only */}
+                {/* MOBILE: Details link only */}
                 <button
                   onClick={() => router.push(`/dashboard/bookings/${booking.id}`)}
                   className="md:hidden inline-flex items-center gap-1 text-[10px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity flex-shrink-0"
@@ -200,7 +200,7 @@ export default function UpcomingRentalsTabContent() {
                   Details
                 </button>
 
-                {/* ✅ DESKTOP: Inline action buttons */}
+                {/* DESKTOP: Inline action buttons */}
                 <div className="hidden md:flex items-center gap-1.5 flex-shrink-0">
                   <button
                     onClick={() => router.push(`/dashboard/bookings/${booking.id}`)}

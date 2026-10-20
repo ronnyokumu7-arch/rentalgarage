@@ -4,10 +4,6 @@
 import Link from "next/link";
 import { Sparkles, ArrowUpRight } from "lucide-react";
 
-/* ──────────────────────────────────────────────────────────────────────
-   Types
-────────────────────────────────────────────────────────────────────── */
-
 export interface Promo {
   id: string;
   eyebrow: string;
@@ -20,11 +16,6 @@ export interface Promo {
 interface MobilePromoSlideProps {
   promo: Promo;
 }
-
-/* ──────────────────────────────────────────────────────────────────────
-   v1 promo config — hardcoded. Swap for endpoint later.
-   Dismissal state is owned by the orchestrator, not this slide.
-────────────────────────────────────────────────────────────────────── */
 
 export const PROMOS: Promo[] = [
   {
@@ -47,14 +38,10 @@ export const PROMOS: Promo[] = [
 
 export const PROMO_DISMISS_KEY_PREFIX = "carousel_promo_dismissed_";
 
-/* ──────────────────────────────────────────────────────────────────────
-   Slide
-────────────────────────────────────────────────────────────────────── */
-
 export default function MobilePromoSlide({ promo }: MobilePromoSlideProps) {
   return (
-    <div className="p-4">
-      <div className="space-y-2 pr-16">
+    <div className="p-4 flex flex-col flex-1">
+      <div className="space-y-2 pr-16 flex-1">
         <div className="flex items-center gap-1.5">
           <div className="w-5 h-5 rounded-md bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-sm">
             <Sparkles size={11} className="text-white" />
@@ -74,7 +61,7 @@ export default function MobilePromoSlide({ promo }: MobilePromoSlideProps) {
 
       <Link
         href={promo.ctaHref}
-        className="mt-3 inline-flex items-center gap-1 px-3.5 py-2 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 text-white text-xs font-bold hover:opacity-90 transition-opacity"
+        className="mt-3 inline-flex items-center gap-1 px-3.5 py-2 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 text-white text-xs font-bold hover:opacity-90 transition-opacity self-start"
       >
         {promo.ctaLabel}
         <ArrowUpRight size={12} />

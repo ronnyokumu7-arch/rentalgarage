@@ -2,12 +2,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/navigation";
 import {
-  ArrowRight,
   Calendar,
   Undo2,
-  Loader2,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -35,7 +32,6 @@ const HEADER_COPY: Record<
 };
 
 export default function ActionCenterWidget() {
-  const router = useRouter();
   const [activeSubTab, setActiveSubTab] = useState<SubTab>("upcoming");
 
   // ✅ Both hooks mount together — counts drive the toggle badge + smart default
@@ -43,8 +39,6 @@ export default function ActionCenterWidget() {
   const { returns, loading: returningLoading } = useReturningTodayTab();
 
   // ✅ SMART DEFAULT — one-shot. Runs after both hooks resolve their first load.
-  // If anything needs returning (or is overdue) → default to Returning.
-  // Otherwise → default to Upcoming. User's manual switch is never overridden.
   const hasInitializedDefault = useRef(false);
   useEffect(() => {
     if (hasInitializedDefault.current) return;
@@ -58,88 +52,83 @@ export default function ActionCenterWidget() {
   const headerCopy = HEADER_COPY[activeSubTab];
   const HeaderIcon = headerCopy.icon;
 
-  // ✅ Compute the "other" tab for the toggle button
-  const otherTab: SubTab = activeSubTab === "upcoming" ? "returning" : "upcoming";
-  const otherCopy = HEADER_COPY[otherTab];
-  const otherCount = otherTab === "upcoming" ? rentals.length : returns.length;
-  const otherLoading = otherTab === "upcoming" ? upcomingLoading : returningLoading;
-  const OtherIcon = otherCopy.icon;
-
-  const toggleSubTab = () => setActiveSubTab(otherTab);
-
   return (
     <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden flex flex-col">
       {/* ── HEADER ─────────────────────────────────────────────────── */}
       <div className="px-5 py-3.5 border-b border-[var(--color-surface-border)] bg-gradient-to-r from-[var(--color-surface-hover)]/50 to-transparent">
-        <div className="flex items-center justify-between gap-3">
-          
-          {/* Left: Title + description */}
-          <div className="flex items-center gap-3.5 min-w-0 flex-1">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary)]/80 flex items-center justify-center text-white shadow-sm shadow-[var(--color-primary)]/20 flex-shrink-0">
-              <HeaderIcon size={20} />
-            </div>
-            <div className="min-w-0 flex-1">
-              <h3 className="text-sm font-bold text-[var(--color-ink)] tracking-tight">
-                {headerCopy.title}
-              </h3>
-              <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">
-                {headerCopy.description}
-              </p>
-            </div>
+        <div className="flex items-center gap-3.5 min-w-0 flex-1">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary)]/80 flex items-center justify-center text-white shadow-sm shadow-[var(--color-primary)]/20 flex-shrink-0">
+            <HeaderIcon size={20} />
           </div>
-
-          {/* ✅ Text-only toggle button — no outer pill/container */}
-          <button
-            type="button"
-            onClick={toggleSubTab}
-            title={`Switch to ${otherCopy.title}`}
-            aria-label={`Switch to ${otherCopy.title}`}
-            className="flex-shrink-0 flex items-center gap-1.5 transition-opacity active:opacity-70 cursor-pointer group"
-          >
-            <OtherIcon
-              size={13}
-              strokeWidth={2.25}
-              className="text-[var(--color-ink-muted)] group-hover:text-[var(--color-primary)] transition-colors flex-shrink-0"
-            />
-            <span className="text-[11px] font-bold text-[var(--color-ink-muted)] group-hover:text-[var(--color-ink)] transition-colors whitespace-nowrap">
-              {otherCopy.title}
-            </span>
-            {otherLoading ? (
-              <Loader2
-                size={10}
-                className="animate-spin text-[var(--color-ink-subtle)] flex-shrink-0"
-              />
-            ) : otherCount > 0 ? (
-              <span className="px-1.5 py-0.5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-[9px] font-extrabold tabular-nums flex-shrink-0 leading-none">
-                {otherCount}
-              </span>
-            ) : null}
-          </button>
+          <div className="min-w-0 flex-1">
+            <h3 className="text-sm font-bold text-[var(--color-ink)] tracking-tight">
+              {headerCopy.title}
+            </h3>
+            <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">
+              {headerCopy.description}
+            </p>
+          </div>
         </div>
       </div>
 
       {/* ── CONTENT ────────────────────────────────────────────────── */}
-      {/* 
-        ✅ Removed `space-y-2.5` from this wrapper. The children now manage 
-        their own spacing (via CardGrid or their own internal map). 
-        This ensures the desktop view has full width and doesn't get constrained 
-        by the flex layout, allowing the `md:` breakpoints in the child components 
-        to trigger correctly.
-      */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-3 sm:p-4 max-h-[560px]">
+      <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-4 sm:p-5 max-h-[560px]">
         {activeSubTab === "upcoming" && <UpcomingRentalsTabContent />}
         {activeSubTab === "returning" && <ReturningTodayTabContent />}
       </div>
 
-      {/* ── FOOTER ─────────────────────────────────────────────────── */}
-      <div className="px-5 py-2.5 border-t border-[var(--color-surface-border)] bg-[var(--color-surface-hover)] text-center">
-        <button
-          onClick={() => router.push("/dashboard/bookings")}
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-primary)] hover:opacity-80 transition-opacity"
-        >
-          View all Rentals
-          <ArrowRight size={14} />
-        </button>
+      {/* ── FOOTER — Tab Switcher ───────────────────────────────────── */}
+      {/* ✅ Added the surface-hover background to match Recent Activity */}
+      <div className="px-3 py-2 border-t border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50">
+        <div className="flex items-center gap-1">
+          <button
+            onClick={() => setActiveSubTab("upcoming")}
+            aria-label="Show upcoming rentals"
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg transition-all text-[11px] font-bold ${
+              activeSubTab === "upcoming"
+                ? "bg-[var(--color-surface)] text-[var(--color-ink)] shadow-sm"
+                : "text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)]"
+            }`}
+          >
+            <Calendar size={12} />
+            <span>Upcoming</span>
+            {!upcomingLoading && rentals.length > 0 && (
+              <span
+                className={`px-1.5 py-0.5 rounded-full text-[9px] font-extrabold tabular-nums leading-none ${
+                  activeSubTab === "upcoming"
+                    ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)]"
+                    : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)]"
+                }`}
+              >
+                {rentals.length}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => setActiveSubTab("returning")}
+            aria-label="Show returning rentals"
+            className={`flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg transition-all text-[11px] font-bold ${
+              activeSubTab === "returning"
+                ? "bg-[var(--color-surface)] text-[var(--color-ink)] shadow-sm"
+                : "text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)]"
+            }`}
+          >
+            <Undo2 size={12} />
+            <span>Returning</span>
+            {!returningLoading && returns.length > 0 && (
+              <span
+                className={`px-1.5 py-0.5 rounded-full text-[9px] font-extrabold tabular-nums leading-none ${
+                  activeSubTab === "returning"
+                    ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)]"
+                    : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)]"
+                }`}
+              >
+                {returns.length}
+              </span>
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

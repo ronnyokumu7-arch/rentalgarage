@@ -55,18 +55,8 @@ export default function MobileStatsCarousel(props: MobileStatsCarouselProps) {
     commission = null,
   } = props;
 
+  // ✅ REORDERED: Week → Month → Pending → Year → Commission
   const statsData = [
-    ...(pendingPayments > 0
-      ? [{
-          id: 'pending',
-          label: 'Pending Payments',
-          value: `KES ${pendingPayments.toLocaleString()}`,
-          subtext: 'Follow up with clients',
-          icon: AlertCircle,
-          gradient: 'from-rose-500 to-red-600',
-          href: '/dashboard/financials?tab=invoices',
-        }]
-      : []),
     {
       id: 'week',
       label: 'This Week',
@@ -95,6 +85,17 @@ export default function MobileStatsCarousel(props: MobileStatsCarouselProps) {
       icon: TrendingUp,
       gradient: 'from-amber-500 to-orange-600',
     },
+    ...(pendingPayments > 0
+      ? [{
+          id: 'pending',
+          label: 'Pending',
+          value: `KES ${pendingPayments.toLocaleString()}`,
+          subtext: 'Collect pending payments',
+          icon: AlertCircle,
+          gradient: 'from-rose-500 to-red-600',
+          href: '/dashboard/financials?tab=invoices',
+        }]
+      : []),
     ...(thisYearRevenue != null && lastYearSamePeriodRevenue != null && yearOverYearPercent != null
       ? [{
           id: 'year',
@@ -201,7 +202,7 @@ export default function MobileStatsCarousel(props: MobileStatsCarouselProps) {
                 </div>
                 {isLinked && (
                   <span className="text-[9px] font-bold text-[var(--color-primary)] flex items-center gap-0.5 opacity-80 group-hover/card:opacity-100 group-hover/card:translate-x-0.5 transition-all leading-none">
-                    View <ChevronRight size={10} />
+                    Get paid <ChevronRight size={10} />
                   </span>
                 )}
               </div>

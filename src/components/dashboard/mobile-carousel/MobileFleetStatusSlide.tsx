@@ -67,7 +67,6 @@ export default function MobileFleetStatusSlide({
     },
   ];
 
-  // ✅ Tap-vs-Scroll detection state
   const [isDragging, setIsDragging] = useState(false);
   const pointerStart = useRef({ x: 0, y: 0 });
 
@@ -80,8 +79,6 @@ export default function MobileFleetStatusSlide({
     if (isDragging) return;
     const distX = Math.abs(e.clientX - pointerStart.current.x);
     const distY = Math.abs(e.clientY - pointerStart.current.y);
-    
-    // If moved more than 10px, assume the user is scrolling
     if (distX > 10 || distY > 10) {
       setIsDragging(true);
     }
@@ -91,11 +88,10 @@ export default function MobileFleetStatusSlide({
     if (isDragging) {
       e.preventDefault();
     }
-    // Otherwise let Next.js Link handle the actual navigation
   };
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-4 flex flex-col flex-1 space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between pr-16">
         <div className="min-w-0">
@@ -125,7 +121,7 @@ export default function MobileFleetStatusSlide({
       </div>
 
       {/* Snap-scroll tiles */}
-      <div className="-mr-4">
+      <div className="-mr-4 flex-1">
         <div
           className="flex gap-2.5 overflow-x-auto snap-x snap-mandatory scroll-smooth pr-4 pb-2"
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
@@ -143,14 +139,11 @@ export default function MobileFleetStatusSlide({
                 onClick={handleClick}
                 className={`snap-start flex-shrink-0 w-[62%] flex items-center gap-3 rounded-xl ${tile.tint} border ${tile.border} p-3 transition-all active:scale-[0.98] cursor-pointer hover:border-[var(--color-primary)]/30 group`}
               >
-                {/* Icon Tile */}
                 <div
                   className={`w-10 h-10 rounded-lg bg-gradient-to-br ${tile.gradient} flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform`}
                 >
                   <Icon size={18} className="text-white" strokeWidth={2.5} />
                 </div>
-                
-                {/* Text Block */}
                 <div className="min-w-0 flex flex-col justify-center">
                   <p className={`text-lg font-black tracking-tight font-display tabular-nums leading-none mb-0.5 ${tile.textColor}`}>
                     {tile.count} {unit}

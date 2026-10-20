@@ -16,7 +16,6 @@ import MobilePromoSlide, {
 } from "./MobilePromoSlide";
 import type { NeedsAttentionData } from "@/hooks/dashboard/useNeedsAttention";
 
-// ✅ Increased to 6s for better readability
 const ROTATION_INTERVAL_MS = 6000;
 
 type SlideKey = "alerts" | "fleet" | "promo";
@@ -54,11 +53,8 @@ export default function MobileCarouselCard({
   const [hovered, setHovered] = useState(false);
   const [touched, setTouched] = useState(false);
   const [reducedMotion, setReducedMotion] = useState(false);
-  
-  // ✅ Removed auto-pinning default. Starts unpinned.
   const [pinned, setPinned] = useState(false);
 
-  // One-shot hint pulse
   const [hintPulse, setHintPulse] = useState(true);
   useEffect(() => {
     const t = setTimeout(() => setHintPulse(false), 1200);
@@ -127,7 +123,6 @@ export default function MobileCarouselCard({
     >
       {/* ── Control cluster: dots + dismiss + pin (Absolute Top Right) ── */}
       <div className="absolute top-3 right-3 z-20 flex items-center gap-2">
-        {/* Dots */}
         {slides.length > 1 && (
           <div className="flex items-center gap-1 mr-1">
             {slides.map((key, i) => (
@@ -175,8 +170,8 @@ export default function MobileCarouselCard({
         </button>
       </div>
 
-      {/* Slide viewport — No extra top padding needed, content handles it */}
-      <div className="relative">
+      {/* ✅ Slide viewport — natural height, no more forced min-height */}
+      <div className="relative flex flex-col">
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
             key={activeSlide}
@@ -191,6 +186,7 @@ export default function MobileCarouselCard({
               if (info.offset.x < -60) goTo(index + 1);
               else if (info.offset.x > 60) goTo(index - 1);
             }}
+            className="flex flex-col"
           >
             {activeSlide === "fleet" && (
               <MobileFleetStatusSlide vehicles={vehicles} />

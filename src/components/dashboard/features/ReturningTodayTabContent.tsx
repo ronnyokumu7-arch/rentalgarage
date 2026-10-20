@@ -143,7 +143,7 @@ export default function ReturningTodayTabContent() {
                   </div>
                 </div>
 
-                {/* ✅ MOBILE ONLY: 3-dots menu */}
+                {/* MOBILE ONLY: 3-dots menu */}
                 <div className="md:hidden relative flex-shrink-0">
                   <ReturningRentalMenu
                     bookingId={booking.id}
@@ -165,7 +165,7 @@ export default function ReturningTodayTabContent() {
                   </div>
                 </div>
 
-                {/* ✅ MOBILE ONLY: Details link */}
+                {/* MOBILE ONLY: Details link */}
                 <button
                   onClick={() => router.push(`/dashboard/bookings/${booking.id}`)}
                   className="md:hidden inline-flex items-center gap-1 text-[10px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity flex-shrink-0"
@@ -173,7 +173,7 @@ export default function ReturningTodayTabContent() {
                   Details
                 </button>
 
-                {/* ✅ DESKTOP ONLY: Inline action buttons */}
+                {/* DESKTOP ONLY: Inline action buttons */}
                 <div className="hidden md:flex items-center gap-1.5 flex-shrink-0">
                   <button
                     onClick={() => router.push(`/dashboard/bookings/${booking.id}`)}
