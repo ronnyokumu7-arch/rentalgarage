@@ -128,15 +128,14 @@ export const metadata: Metadata = {
 };
 
 // ── Viewport Configuration ────────────────────────────────────
+// ✅ REMOVED `themeColor` — ThemeColorSync owns the <meta name="theme-color">
+// tag now, and drives it from the app's resolved theme (not the OS preference).
+// If we leave the media-scoped tags here, they fight ThemeColorSync and the
+// address bar ends up stuck on the OS-matched color until a scroll or focus.
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
   maximumScale: 5,
-  // ✅ Light/Dark mode aware theme color
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#F7F4F0' },
-    { media: '(prefers-color-scheme: dark)',  color: '#0E0C0A' },
-  ],
   colorScheme: 'light dark',
 };
 

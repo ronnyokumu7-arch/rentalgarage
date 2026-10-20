@@ -103,23 +103,41 @@ function tokenize(q: string): string[] {
     .filter(Boolean);
 }
 
-/** Does any token match any haystack string (substring, both directions)? */
-function anyTokenMatches(
+/**
+ * ✅ AND-token matcher — every token must match at least one haystack.
+ * This is the "Nissan" vs "Nissan Sylphy" fix:
+ *   - tokens = ["nissan"] → matches any vehicle whose haystack contains "nissan"
+ *   - tokens = ["nissan", "sylphy"] → only matches rows where BOTH appear
+ *     (either in the same field, or across different fields on the same row)
+ *
+ * Substring matching is bidirectional so partial words work
+ * ("syl" matches "Sylphy", "niss" matches "Nissan"). Empty haystacks
+ * are skipped. Empty token list → true (no constraint).
+ */
+function allTokensMatch(
   tokens: string[],
-  haystacks: Array<string | null | undefined>,
+  haystacks: Array<string | number | null | undefined>,
 ): boolean {
-  const clean = haystacks.filter(
-    (h): h is string => typeof h === "string" && h.length > 0,
-  );
-  if (clean.length === 0 || tokens.length === 0) return false;
+  if (tokens.length === 0) return true;
+
+  const clean = haystacks
+    .map((h) => (h == null ? "" : String(h)))
+    .filter((h) => h.length > 0)
+    .map((h) => h.toLowerCase());
+
+  if (clean.length === 0) return false;
 
   for (const tok of tokens) {
+    let hit = false;
     for (const hay of clean) {
-      const h = hay.toLowerCase();
-      if (h.includes(tok) || tok.includes(h)) return true;
+      if (hay.includes(tok) || tok.includes(hay)) {
+        hit = true;
+        break;
+      }
     }
+    if (!hit) return false;
   }
-  return false;
+  return true;
 }
 
 /* ──────────────────────────────────────────────────────────────────────
@@ -127,7 +145,7 @@ function anyTokenMatches(
 ────────────────────────────────────────────────────────────────────── */
 
 function matchesClientText(c: Client, tokens: string[]): boolean {
-  return anyTokenMatches(tokens, [
+  return allTokensMatch(tokens, [
     c.full_name,
     c.first_name,
     c.last_name,
@@ -135,14 +153,16 @@ function matchesClientText(c: Client, tokens: string[]): boolean {
     c.email,
     c.id_number,
     c.dl_number,
+    c.id_type,
+    c.residential_address,
+    c.work_address,
+    c.next_of_kin_name,
+    c.next_of_kin_phone,
   ]);
 }
 
 function clientHasStatus(c: Client, statuses: Set<string>): boolean {
   if (statuses.size === 0) return true;
-  // Client rows carry `status` (ClientStatus). Verification statuses live
-  // in `verification_status` — match against either when the query lists
-  // a verification term.
   const verificationStatuses = new Set(
     statusesForEntity("client_verification").map((s) => s.value),
   );
@@ -156,7 +176,7 @@ function clientHasStatus(c: Client, statuses: Set<string>): boolean {
 function matchesBookingText(b: Booking, tokens: string[]): boolean {
   const client = b.client as Client | undefined;
   const vehicle = b.vehicle as Vehicle | undefined;
-  return anyTokenMatches(tokens, [
+  return allTokensMatch(tokens, [
     b.booking_number,
     String(b.id),
     b.destination,
@@ -168,11 +188,14 @@ function matchesBookingText(b: Booking, tokens: string[]): boolean {
     client?.first_name,
     client?.last_name,
     client?.phone,
+    client?.email,
+    client?.id_number,
     b.vehicle_name,
     b.vehicle_plate,
     vehicle?.make,
     vehicle?.model,
     vehicle?.plate_number,
+    vehicle?.vin,
   ]);
 }
 
@@ -182,20 +205,20 @@ function bookingHasStatus(b: Booking, statuses: Set<string>): boolean {
     statusesForEntity("cancellation_reason").map((s) => s.value),
   );
   for (const s of statuses) {
-    // Booking statuses
     if (b.status === s) return true;
-    // Cancellation reasons — matched against `cancellation_reason`, not status
     if (cancellationReasons.has(s) && b.cancellation_reason === s) return true;
   }
   return false;
 }
 
 function matchesVehicleText(v: Vehicle, tokens: string[]): boolean {
-  return anyTokenMatches(tokens, [
+  return allTokensMatch(tokens, [
     v.make,
     v.model,
     v.plate_number,
     v.vin,
+    `${v.make} ${v.model}`,
+    `${v.plate_number}`.replace(/\s+/g, ""),
   ]);
 }
 
@@ -226,7 +249,7 @@ function pageMatches(
     ...(entry.statusKeywords ?? []),
   ];
 
-  if (anyTokenMatches(tokens, haystacks)) return true;
+  if (allTokensMatch(tokens, haystacks)) return true;
   if (haystacks.some((h) => h.toLowerCase().includes(rawLower))) return true;
 
   // 2. Status keyword cross-match
@@ -253,10 +276,8 @@ export function useGlobalSearch(query: string): UseGlobalSearchReturn {
 
   const inFlight = useRef(false);
 
-  /* Role-scoped pages — the only gate. Viewport never matters here. */
   const pagesForRole = useMemo(() => getPagesForRole(user?.role), [user?.role]);
 
-  /* Data fetch — unchanged. */
   const fetchAll = useCallback(async () => {
     if (inFlight.current) return;
     inFlight.current = true;
@@ -284,7 +305,6 @@ export function useGlobalSearch(query: string): UseGlobalSearchReturn {
     fetchAll();
   }, [fetchAll]);
 
-  /* Result computation — the interesting part. */
   const results = useMemo<GroupedResults>(() => {
     const raw = query.trim();
     if (!raw) {
@@ -307,9 +327,10 @@ export function useGlobalSearch(query: string): UseGlobalSearchReturn {
 
     /* 2. Filter to statuses that make sense for each entity. */
     const clientStatuses = new Set(
-      Array.from(detectedStatuses).filter((s) =>
-        statusesForEntity("client").some((d) => d.value === s) ||
-        statusesForEntity("client_verification").some((d) => d.value === s),
+      Array.from(detectedStatuses).filter(
+        (s) =>
+          statusesForEntity("client").some((d) => d.value === s) ||
+          statusesForEntity("client_verification").some((d) => d.value === s),
       ),
     );
     const bookingStatuses = new Set(
@@ -333,7 +354,6 @@ export function useGlobalSearch(query: string): UseGlobalSearchReturn {
       if (!pageMatches(entry, tokens, rawLower, detectedStatuses)) continue;
 
       let weight = entry.weight ?? 0;
-      // Pure-status query → boost pages whose statusKeywords matched
       if (
         isPureStatus &&
         (entry.statusKeywords ?? []).some((k) => detectedStatuses.has(k))
