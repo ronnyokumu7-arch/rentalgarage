@@ -128,10 +128,10 @@ export const metadata: Metadata = {
 };
 
 // ── Viewport Configuration ────────────────────────────────────
-// ✅ REMOVED `themeColor` — ThemeColorSync owns the <meta name="theme-color">
-// tag now, and drives it from the app's resolved theme (not the OS preference).
-// If we leave the media-scoped tags here, they fight ThemeColorSync and the
-// address bar ends up stuck on the OS-matched color until a scroll or focus.
+// ✅ ThemeColorSync owns the <meta name="theme-color"> tag and drives
+// it from the app's resolved theme. Do NOT declare `themeColor` here —
+// media-scoped tags will fight the JS-managed tag and the address bar
+// will get stuck on the OS-matched color.
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
@@ -145,8 +145,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html 
-      lang="en" 
+    <html
+      lang="en"
       suppressHydrationWarning
       className={`${sansFont.variable} ${displayFont.variable} ${monoFont.variable}`}
     >
@@ -154,17 +154,17 @@ export default function RootLayout({
         {/* Preconnect to Google Fonts for faster loading */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        
+
         {/* DNS Prefetch for external resources */}
         <link rel="dns-prefetch" href="https://api.rentalgarage.co.ke" />
         <link rel="dns-prefetch" href="https://images.rentalgarage.co.ke" />
       </head>
       <body className={`
-        font-sans 
-        antialiased 
-        bg-[var(--color-bg)] 
-        text-[var(--color-ink-primary)] 
-        selection:bg-[var(--color-primary-muted)] 
+        font-sans
+        antialiased
+        bg-[var(--color-bg)]
+        text-[var(--color-ink-primary)]
+        selection:bg-[var(--color-primary-muted)]
         selection:text-[var(--color-primary-text)]
         scroll-smooth
         min-h-screen
@@ -172,26 +172,26 @@ export default function RootLayout({
         duration-300
       `}>
         {/* Skip to main content - Accessibility */}
-        <a 
-          href="#main-content" 
+        <a
+          href="#main-content"
           className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-surface focus:text-ink focus:rounded-lg focus:shadow-lg focus:border focus:border-primary"
         >
           Skip to main content
         </a>
 
-        {/* Theme Provider for dark/light mode */}
+        {/* Theme Provider for dark/light/system mode */}
         <ThemeProvider
           attribute="class"
-          defaultTheme="light"
+          defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          {/* ✅ Syncs the address bar color with manual theme toggles */}
+          {/* ✅ Syncs the address bar color with the app's resolved theme */}
           <ThemeColorSync />
 
           {/* Vercel Analytics — page views, visitors, devices, referrers */}
           <Analytics />
-          
+
           {/* Speed Insights — real-user performance metrics */}
           <SpeedInsights />
 
@@ -199,7 +199,7 @@ export default function RootLayout({
           <Providers>
             <AuthProvider>
               {/* Toast Notifications - Premium Styling */}
-              <Toaster 
+              <Toaster
                 position="top-right"
                 toastOptions={{
                   duration: 4000,
@@ -239,7 +239,7 @@ export default function RootLayout({
                   },
                 }}
               />
-              
+
               {/* Main Content - No wrapper <main> here to allow layouts to control their own structure */}
               {children}
             </AuthProvider>

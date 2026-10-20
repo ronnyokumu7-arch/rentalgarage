@@ -5,7 +5,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  Search, Sun, Moon, User, Bell,
+  Search, User, Bell,
   LogOut, ChevronRight, Command,
   MoreVertical, Sparkles, X, HelpCircle,
   CreditCard, Users, CalendarDays, Car, ChevronDown,
@@ -15,6 +15,7 @@ import { useAuth } from "@/context/auth-context";
 import MobileSearchModal from "@/components/search/MobileSearchModal";
 import DesktopSearchDropdown from "@/components/search/DesktopSearchDropdown";
 import SecureImage from "@/components/ui/SecureImage";
+import ThemeToggle from "@/components/layout/ThemeToggle";
 
 interface TopbarProps {
   onMenuToggle?: () => void;
@@ -41,7 +42,6 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
   const pathname = usePathname();
   const router = useRouter();
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [isDark, setIsDark] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const [showScopeMenu, setShowScopeMenu] = useState(false);
   const [activeScope, setActiveScope] = useState<SearchScope>(SEARCH_SCOPES[0]);
@@ -52,15 +52,6 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
   const scopeRef = useRef<HTMLDivElement>(null);
   const desktopSearchRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    const isCurrentlyDark = savedTheme === "dark" || (!savedTheme && prefersDark);
-    setIsDark(isCurrentlyDark);
-    if (isCurrentlyDark) document.documentElement.classList.add("dark");
-    else document.documentElement.classList.remove("dark");
-  }, []);
 
   const handleClickOutside = useCallback((e: MouseEvent) => {
     if (menuRef.current && !menuRef.current.contains(e.target as Node)) setShowUserMenu(false);
@@ -110,18 +101,6 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [searchQuery]);
 
-  const toggleTheme = () => {
-    const newIsDark = !isDark;
-    setIsDark(newIsDark);
-    if (newIsDark) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
-    }
-  };
-
   const handleSearchSubmit = () => {
     const q = searchQuery.trim();
     if (!q) return;
@@ -140,7 +119,7 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
   const companyName = user?.role === "super_admin" ? "Rental Garage" : tenant?.name || "Agency";
   const isSuperAdmin = user?.role === "super_admin";
   const fullName = user?.full_name || user?.email || "User";
-  
+
   const jobTitle = user?.job_title || (isSuperAdmin ? "System Admin" : user?.role?.replace("_", " ") || "Team Member");
 
   const renderAvatar = (size: "md" | "lg") => {
@@ -343,13 +322,8 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
         {/* ── RIGHT: Controls ─────────────────────────────────────────────── */}
         <div className="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0 ml-auto">
 
-          <button
-            onClick={toggleTheme}
-            className="flex w-9 h-9 rounded-xl items-center justify-center text-ink-muted hover:bg-surface-hover hover:text-ink transition-all duration-200 active:scale-95"
-            aria-label="Toggle theme"
-          >
-            {isDark ? <Sun size={17} strokeWidth={1.8} /> : <Moon size={17} strokeWidth={1.8} />}
-          </button>
+          {/* ✅ Theme toggle: cycle light → dark → system via next-themes */}
+          <ThemeToggle />
 
           <div className="w-px h-6 bg-surface-border mx-0.5 sm:mx-1" />
 
@@ -378,7 +352,7 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
 
             {showUserMenu && (
               <div className="absolute right-0 top-[calc(100%+8px)] w-[calc(100vw-2rem)] sm:w-[300px] max-w-[300px] rounded-2xl bg-surface border border-surface-border shadow-[var(--shadow-dropdown)] z-[9999] overflow-hidden animate-in slide-up fade-in duration-200">
-                
+
                 {/* Header */}
                 <div className="px-4 pt-4 pb-3 border-b border-surface-border">
                   <div className="flex items-center gap-3">
@@ -408,7 +382,6 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
                     <ChevronRight size={14} className="text-ink-subtle opacity-0 group-hover:opacity-100 transition-opacity" />
                   </Link>
 
-                  {/* ✅ Deep link to Business Profile module inside Settings */}
                   <Link
                     href={isSuperAdmin ? "/super-admin/settings" : "/dashboard/settings?tab=general&module=business"}
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-ink hover:bg-surface-hover transition-all duration-150 group"
@@ -418,7 +391,6 @@ export default function Topbar({ onMenuToggle, isMobileMenuOpen = false }: Topba
                     <ChevronRight size={14} className="text-ink-subtle opacity-0 group-hover:opacity-100 transition-opacity" />
                   </Link>
 
-                  {/* ✅ Deep link to Invoices tab inside Financials */}
                   <Link
                     href="/dashboard/financials?tab=invoices"
                     className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-ink hover:bg-surface-hover transition-all duration-150 group"
