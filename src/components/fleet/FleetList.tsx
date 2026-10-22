@@ -6,7 +6,7 @@ import { useMemo } from "react";
 import {
   Car, Archive, Shield, Loader2,
   Search, Filter, Ban, Wrench, Plus, Gauge, RectangleHorizontal,
-  User, Banknote
+  User, Banknote,
 } from "lucide-react";
 import FilterDropdown from "@/components/ui/FilterDropdown";
 import DataTable, { RowAction } from "@/components/ui/DataTable";
@@ -68,13 +68,67 @@ const statusLabels: Record<VehicleStatus, string> = {
   retired: "Retired",
 };
 
-const dotSpec: Record<VehicleStatus, { color: string; pulse: boolean }> = {
-  available: { color: "bg-emerald-500", pulse: false },
-  pending_activation: { color: "bg-amber-500", pulse: false },
-  rented: { color: "bg-emerald-500", pulse: false },
-  maintenance: { color: "bg-amber-500", pulse: true },
-  retired: { color: "bg-gray-400", pulse: false },
-};
+/** Compact, colored status pill used in the mobile card row. */
+function MobileStatusPill({ vehicle }: { vehicle: Vehicle }) {
+  const kmToService = vehicle.next_service_km
+    ? vehicle.next_service_km - vehicle.current_mileage
+    : null;
+  const isDueForService = kmToService !== null && kmToService <= 500;
+
+  let label = statusLabels[vehicle.status] || "Ready";
+  let tone: { bg: string; text: string; dot: string } = {
+    bg: "bg-[var(--color-surface-hover)]",
+    text: "text-[var(--color-ink-muted)]",
+    dot: "bg-gray-400",
+  };
+
+  if (vehicle.is_archived) {
+    label = "Archived";
+  } else if (vehicle.status === "maintenance" || isDueForService || vehicle.mileage_due) {
+    label = vehicle.status === "maintenance"
+      ? "In Garage"
+      : isDueForService
+      ? "Service Due"
+      : "Mileage Due";
+    tone = {
+      bg: "bg-amber-500/10",
+      text: "text-amber-600 dark:text-amber-400",
+      dot: "bg-amber-500",
+    };
+  } else if (vehicle.status === "rented") {
+    label = "Rented";
+    tone = {
+      bg: "bg-emerald-500/10",
+      text: "text-emerald-600 dark:text-emerald-400",
+      dot: "bg-emerald-500",
+    };
+  } else if (vehicle.status === "available") {
+    label = "Available";
+    tone = {
+      bg: "bg-blue-500/10",
+      text: "text-blue-600 dark:text-blue-400",
+      dot: "bg-blue-500",
+    };
+  } else if (vehicle.status === "pending_activation") {
+    label = "Pending";
+    tone = {
+      bg: "bg-violet-500/10",
+      text: "text-violet-600 dark:text-violet-400",
+      dot: "bg-violet-500",
+    };
+  } else if (vehicle.status === "retired") {
+    label = "Retired";
+  }
+
+  return (
+    <span
+      className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wide ${tone.bg} ${tone.text}`}
+    >
+      <span className={`w-1.5 h-1.5 rounded-full ${tone.dot}`} />
+      {label}
+    </span>
+  );
+}
 
 const formatPlate = (plate: string) => plate.replace(/([A-Za-z])(\d)/, "$1 $2").toUpperCase();
 
@@ -233,7 +287,7 @@ export default function FleetList({
 
   return (
     <>
-      {/* ✅ DESKTOP TOOLBAR — hidden on mobile; mobile uses MobilePageToolbar */}
+      {/* DESKTOP TOOLBAR — unchanged */}
       <div className="hidden md:flex p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
         <div className="hidden sm:flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
           <div className="flex items-center gap-2 whitespace-nowrap">
@@ -312,7 +366,7 @@ export default function FleetList({
         </div>
       ) : (
         <>
-          {/* ✅ MOBILE: Premium Fleet CardGrid — full unpaginated list, scroll for all */}
+          {/* MOBILE: Premium Fleet CardGrid */}
           <div className="block md:hidden">
             <CardGrid
               data={filteredVehicles}
@@ -323,11 +377,12 @@ export default function FleetList({
               containerClassName="px-2 pb-4"
               maxHeight="calc(100vh - 160px)"
               renderCardHeader={({ item }) => {
-                const kmToService = item.next_service_km ? item.next_service_km - item.current_mileage : null;
+                const kmToService = item.next_service_km
+                  ? item.next_service_km - item.current_mileage
+                  : null;
                 const isDueForService = kmToService !== null && kmToService <= 500;
-                const showWrench = item.status === 'maintenance' || isDueForService || item.mileage_due;
-                const showOnTrip = item.status === 'rented';
-                const dot = dotSpec[item.status] || { color: "bg-gray-400", pulse: false };
+                const showWrench = item.status === "maintenance" || isDueForService || item.mileage_due;
+                const showOnTrip = item.status === "rented";
 
                 return (
                   <div
@@ -339,8 +394,8 @@ export default function FleetList({
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center shadow-md">
                           <Car size={16} className="text-[var(--color-primary)]" />
                         </div>
-                        
-                        {/* ✅ Status Badges — handles all status states */}
+
+                        {/* Status dot — top-right corner of the icon tile */}
                         <div className="absolute -top-1 -right-1">
                           {showWrench ? (
                             <div className="w-4 h-4 rounded-full bg-amber-500 flex items-center justify-center shadow-md">
@@ -351,13 +406,17 @@ export default function FleetList({
                               <span className="text-[6px] font-extrabold text-white">OT</span>
                             </div>
                           ) : (
-                            <div className={`w-4 h-4 rounded-full ${dot.color} shadow-md ${dot.pulse ? "animate-pulse" : ""}`} />
+                            <div className={`w-4 h-4 rounded-full ${
+                              item.status === "available" ? "bg-blue-500" :
+                              item.status === "pending_activation" ? "bg-violet-500" :
+                              "bg-gray-400"
+                            } shadow-md`} />
                           )}
                         </div>
                       </div>
 
                       <div className="min-w-0 flex-1 flex flex-col">
-                        {/* Line 1: Name + Badge */}
+                        {/* Line 1: Name + Investor tag */}
                         <div className="flex items-center gap-1.5 flex-wrap">
                           <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
                             {item.make} {item.model}
@@ -368,17 +427,8 @@ export default function FleetList({
                             </div>
                           )}
                         </div>
-                        
-                        {/* Line 2: Price */}
-                        <div className="flex items-center gap-1 mt-1">
-                          <Banknote size={12} className="text-[var(--color-primary)]" />
-                          <span className="text-[11px] font-bold text-[var(--color-ink)] tabular-nums">
-                            {Number(item.daily_rate).toLocaleString()}
-                            <span className="text-[9px] font-medium text-[var(--color-ink-muted)]">/day</span>
-                          </span>
-                        </div>
 
-                        {/* Line 3: Other Details (Plate • Mileage) */}
+                        {/* Line 2: Plate + Mileage */}
                         <div className="flex items-center gap-2 mt-1">
                           <div className="flex items-center gap-1">
                             <RectangleHorizontal size={10} className="text-[var(--color-ink-subtle)]" />
@@ -394,6 +444,56 @@ export default function FleetList({
                             </span>
                           </div>
                         </div>
+
+                        {/* ✅ Line 3: Price left, mileage/next-service right */}
+                        <div className="flex items-center justify-between gap-2 mt-1">
+                          <div className="flex items-center gap-1">
+                            <Banknote size={11} className="text-[var(--color-primary)] shrink-0" />
+                            <span className="text-[11px] font-bold text-[var(--color-ink)] tabular-nums">
+                              {Number(item.daily_rate).toLocaleString()}
+                              <span className="text-[9px] font-medium text-[var(--color-ink-muted)]">/day</span>
+                            </span>
+                          </div>
+
+                          {/* Next-service indicator on the right, replacing the old "overdue" line */}
+                          <div className="flex items-center gap-1 shrink-0">
+                            <Wrench
+                              size={10}
+                              className={
+                                isDueForService
+                                  ? "text-amber-500"
+                                  : "text-[var(--color-ink-subtle)]"
+                              }
+                            />
+                            <span
+                              className={`text-[10px] font-mono font-semibold ${
+                                isDueForService
+                                  ? "text-amber-600 dark:text-amber-400"
+                                  : item.next_service_km
+                                  ? "text-[var(--color-ink-muted)]"
+                                  : "text-[var(--color-ink-subtle)] italic font-sans"
+                              }`}
+                            >
+                              {item.next_service_km
+                                ? `${item.next_service_km.toLocaleString()} KM`
+                                : "No service"}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* ✅ Line 4: Colored status pill (replaces old grey line) */}
+                        <div className="flex items-center justify-between gap-2 mt-1.5">
+                          <MobileStatusPill vehicle={item} />
+                          {showOnTrip && (() => {
+                            const { progress, rental } = calculateTripProgress(item.id);
+                            if (!rental) return null;
+                            return (
+                              <span className="text-[9px] font-bold text-emerald-600 dark:text-emerald-400 tabular-nums">
+                                {Math.min(Math.round(progress * 100), 100)}%
+                              </span>
+                            );
+                          })()}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -401,71 +501,68 @@ export default function FleetList({
               }}
               renderCardBody={({ item }) => {
                 const { progress: tripProgress, rental: activeRental } = calculateTripProgress(item.id);
-                const isOnTrip = item.status === 'rented' && activeRental;
+                const isOnTrip = item.status === "rented" && activeRental;
 
-                // If not on a trip, we don't render any bottom text anymore.
-                // The status dot handles it, and the detailed status is in the menu.
-                if (!isOnTrip) {
-                  return null;
-                }
+                if (!isOnTrip) return null;
 
-                // Only render the body if the vehicle is on a trip (showing the progress bar).
                 return (
-                  <div className="mt-2.5 space-y-1.5">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-500">On Trip</span>
-                        {activeRental.booking_number && (
-                          <span className="text-[8px] text-[var(--color-ink-muted)] font-medium font-mono">• {activeRental.booking_number}</span>
-                        )}
-                      </div>
-                      <span className="text-[9px] font-bold text-[var(--color-ink-muted)] tabular-nums">
-                        {Math.min(Math.round(tripProgress * 100), 100)}%
-                      </span>
-                    </div>
+                  <div className="mt-2 space-y-1.5">
                     <div className="relative h-1.5 w-full rounded-full bg-[var(--color-surface-border)]/50 overflow-hidden">
-                      <div className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600 transition-all duration-1000 ease-out" style={{ width: `${Math.min(tripProgress * 100, 100)}%` }} />
+                      <div
+                        className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-emerald-400 to-emerald-600 transition-all duration-1000 ease-out"
+                        style={{ width: `${Math.min(tripProgress * 100, 100)}%` }}
+                      />
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-[8px] font-medium text-[var(--color-ink-muted)]">{formatDateShort(activeRental.start_date)}</span>
-                      <span className="text-[8px] font-medium text-[var(--color-ink-muted)]">{formatDateShort(activeRental.end_date)}</span>
+                      <span className="text-[8px] font-medium text-[var(--color-ink-muted)]">
+                        {formatDateShort(activeRental.start_date)}
+                      </span>
+                      <span className="text-[8px] font-medium text-[var(--color-ink-muted)]">
+                        {formatDateShort(activeRental.end_date)}
+                      </span>
                     </div>
                   </div>
                 );
               }}
               rowActions={getVehicleActions}
               renderActionSheetBadge={(item) => {
-                // ✅ Move the status text into the menu badge
-                const kmToService = item.next_service_km ? item.next_service_km - item.current_mileage : null;
+                const kmToService = item.next_service_km
+                  ? item.next_service_km - item.current_mileage
+                  : null;
                 const isDueForService = kmToService !== null && kmToService <= 500;
-                
+
                 let label = statusLabels[item.status] || "Ready";
                 let tone: "success" | "warning" | "info" | "default" = "default";
                 let dotColor = "bg-gray-400";
 
                 if (item.is_archived) {
                   label = "Archived";
-                } else if (item.status === 'maintenance' || isDueForService || item.mileage_due) {
-                  label = item.status === 'maintenance' ? 'In Maintenance' : isDueForService ? 'Service Due Soon' : 'Mileage Due';
+                } else if (item.status === "maintenance" || isDueForService || item.mileage_due) {
+                  label = item.status === "maintenance" ? "In Maintenance" : isDueForService ? "Service Due Soon" : "Mileage Due";
                   tone = "warning";
                   dotColor = "bg-amber-500";
-                } else if (item.status === 'rented') {
+                } else if (item.status === "rented") {
                   label = "On Trip";
                   tone = "success";
                   dotColor = "bg-emerald-500";
-                } else if (item.status === 'available') {
+                } else if (item.status === "available") {
                   label = "Ready for Booking";
                   tone = "info";
                   dotColor = "bg-blue-500";
                 }
 
                 return (
-                  <span className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-extrabold uppercase tracking-wider border ${
-                    tone === "success" ? "text-emerald-500 bg-emerald-500/10 border-emerald-500/20" :
-                    tone === "warning" ? "text-amber-500 bg-amber-500/10 border-amber-500/20" :
-                    tone === "info" ? "text-blue-500 bg-blue-500/10 border-blue-500/20" :
-                    "text-[var(--color-ink-muted)] bg-[var(--color-surface-hover)] border-[var(--color-surface-border)]"
-                  }`}>
+                  <span
+                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-extrabold uppercase tracking-wider border ${
+                      tone === "success"
+                        ? "text-emerald-500 bg-emerald-500/10 border-emerald-500/20"
+                        : tone === "warning"
+                        ? "text-amber-500 bg-amber-500/10 border-amber-500/20"
+                        : tone === "info"
+                        ? "text-blue-500 bg-blue-500/10 border-blue-500/20"
+                        : "text-[var(--color-ink-muted)] bg-[var(--color-surface-hover)] border-[var(--color-surface-border)]"
+                    }`}
+                  >
                     <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
                     {label}
                   </span>
@@ -474,7 +571,7 @@ export default function FleetList({
             />
           </div>
 
-          {/* ✅ DESKTOP: DataTable — paginated */}
+          {/* DESKTOP: DataTable — unchanged */}
           <div className="hidden md:block">
             <DataTable
               data={paginatedVehicles}
@@ -507,7 +604,9 @@ export default function FleetList({
                               </span>
                             )}
                           </div>
-                          <p className="text-xs text-[var(--color-ink-muted)] font-mono truncate">YOM-{v.year}</p>
+                          <p className="text-xs text-[var(--color-ink-muted)] font-mono truncate">
+                            YOM-{v.year}
+                          </p>
                         </div>
                       </div>
                     );
@@ -543,11 +642,10 @@ export default function FleetList({
                       : statusStyles[v.status] || statusStyles.retired;
 
                     return (
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${style.bg} ${style.text}`}>
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${style.bg} ${style.text}`}
+                      >
                         {displayStatus}
-                        {v.mileage_due && v.status === "available" && (
-                          <span className="ml-1 text-orange-500"></span>
-                        )}
                       </span>
                     );
                   },
@@ -566,7 +664,9 @@ export default function FleetList({
                   accessorKey: "next_service_km",
                   cell: ({ row }) => (
                     <span className="font-mono text-sm text-[var(--color-ink-muted)]">
-                      {row.original.next_service_km ? `${row.original.next_service_km.toLocaleString()} KM` : "—"}
+                      {row.original.next_service_km
+                        ? `${row.original.next_service_km.toLocaleString()} KM`
+                        : "—"}
                     </span>
                   ),
                 },

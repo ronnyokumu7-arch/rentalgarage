@@ -15,8 +15,9 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
-    font-size: 15px;
-    line-height: 1.55;
+    font-size: var(--density-font-size, 15px);
+    line-height: var(--density-line-height, 1.55);
+    transition: font-size 200ms ease, line-height 200ms ease;
   }
 
   h1, h2, h3, h4, h5, h6,
@@ -293,6 +294,43 @@
 }
 
 /* ══════════════════════════════════════════════════════════
+   🎛️ DENSITY MODES
+   ═══════════════════════════════════════════════════════════ */
+
+:root {
+  --density-spacing-unit: 1rem;
+  --density-row-height: 3.5rem;
+  --density-card-padding: 1.25rem;
+  --density-stack-gap: 1.5rem;
+  --density-section-gap: 1.5rem;
+  --density-line-height: 1.55;
+  --density-font-size: 15px;
+  --density-touch-target: 44px;
+}
+
+html[data-density="compact"] {
+  --density-spacing-unit: 0.75rem;
+  --density-row-height: 2.75rem;
+  --density-card-padding: 0.875rem;
+  --density-stack-gap: 1rem;
+  --density-section-gap: 1rem;
+  --density-line-height: 1.4;
+  --density-font-size: 14px;
+  --density-touch-target: 40px;
+}
+
+html[data-density="comfortable"] {
+  --density-spacing-unit: 1rem;
+  --density-row-height: 3.5rem;
+  --density-card-padding: 1.25rem;
+  --density-stack-gap: 1.5rem;
+  --density-section-gap: 1.5rem;
+  --density-line-height: 1.55;
+  --density-font-size: 15px;
+  --density-touch-target: 44px;
+}
+
+/* ══════════════════════════════════════════════════════════
    🎯 PREMIUM UTILITY CLASSES
    ═══════════════════════════════════════════════════════════ */
 
@@ -301,11 +339,27 @@
   .no-scrollbar::-webkit-scrollbar { display: none; }
   .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-  /* ✅ Replaces the previous custom-scrollbar. Applied to any 
-     overflow container (main, nav, modal) to hide the native bar 
-     while keeping the element fully scrollable. */
   .custom-scrollbar::-webkit-scrollbar { display: none; }
   .custom-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+  /* ── DENSITY-AWARE SPACING ──────────────────────────────── */
+  .density-stack {
+    gap: var(--density-stack-gap);
+  }
+  .density-section {
+    padding-top: var(--density-section-gap);
+    padding-bottom: var(--density-section-gap);
+  }
+  .density-card {
+    padding: var(--density-card-padding);
+  }
+  .density-row {
+    min-height: var(--density-row-height);
+  }
+  .density-touch-target {
+    min-height: var(--density-touch-target);
+    min-width: var(--density-touch-target);
+  }
 
   /* ── TEXT COLORS ────────────────────────────────────────── */
   .text-ink { color: var(--color-ink-primary) !important; }
@@ -550,7 +604,6 @@
   color: #1C1917 !important;
 }
 
-/* Micro-labels (CLIENT DETAILS, TOTAL AMOUNT, ...) keep their subtle tone */
 .force-light h3.uppercase {
   color: #78716C !important;
 }
@@ -559,12 +612,10 @@
    🛟 HIDE FAB STACK WHEN PULLUP MENU IS OPEN
    ════════════════════════════════════════════════════════════ */
 
-/* 1. Ensure the FAB stack always has a smooth transition */
 [data-fab-stack] {
   transition: opacity 200ms ease-out, transform 200ms ease-out !important;
 }
 
-/* 2. Hide it when the pull-up menu is open (using the reliable data attribute) */
 body[data-pullup-open="true"] [data-fab-stack] {
   opacity: 0 !important;
   pointer-events: none !important;

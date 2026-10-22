@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { Block, BlockType, parseBlocks, serializeBlocks } from "@/lib/markdownLite";
 
-// ── Auto-growing single-block textarea (no raw box, wraps naturally) ────────
+// ── Auto-growing single-block textarea ──────────────────────────────
 function AutoGrow({
   value, onChange, placeholder,
 }: {
@@ -30,7 +30,7 @@ function AutoGrow({
       value={value}
       placeholder={placeholder}
       onChange={(e) => onChange(e.target.value)}
-      className="flex-1 bg-transparent border-none outline-none resize-none overflow-hidden text-sm leading-relaxed text-[var(--color-ink)] placeholder:text-[var(--color-ink-subtle)] py-1"
+      className="w-full flex-1 min-w-0 bg-transparent border-none outline-none resize-none overflow-hidden text-sm leading-relaxed text-[var(--color-ink)] placeholder:text-[var(--color-ink-subtle)] py-1 caret-[var(--color-primary)] focus:outline-none"
     />
   );
 }
@@ -76,43 +76,47 @@ export default function ClauseBlockEditor({
   };
 
   return (
-    <div className="space-y-1">
+    <div className="space-y-1.5 w-full">
       {blocks.map((b, i) => (
         <div
           key={i}
-          className="group flex items-start gap-2 rounded-lg border border-transparent px-2 py-1 transition-colors hover:border-[var(--color-surface-border)] hover:bg-[var(--color-surface-hover)]/40"
+          className="group rounded-lg border border-transparent transition-colors hover:border-[var(--color-surface-border)] hover:bg-[var(--color-surface-hover)]/40 focus-within:border-[var(--color-primary)]/40 focus-within:bg-[var(--color-primary)]/[0.03]"
         >
-          <button
-            onClick={() => cycleType(i)}
-            title="Cycle: Paragraph → Bullet → Numbered"
-            className="mt-1 shrink-0 rounded p-1 text-[var(--color-ink-subtle)] transition-colors hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary)]"
-          >
-            {b.type === "bullet" ? (
-              <List className="h-3.5 w-3.5" />
-            ) : b.type === "numbered" ? (
-              <ListOrdered className="h-3.5 w-3.5" />
-            ) : (
-              <Type className="h-3.5 w-3.5" />
-            )}
-          </button>
+          {/* Row: icon + textarea */}
+          <div className="flex items-start gap-2 px-2 pt-1.5">
+            <button
+              onClick={() => cycleType(i)}
+              title="Cycle: Paragraph → Bullet → Numbered"
+              className="mt-1 shrink-0 rounded p-1 text-[var(--color-ink-subtle)] transition-colors hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary)]"
+            >
+              {b.type === "bullet" ? (
+                <List className="h-3.5 w-3.5" />
+              ) : b.type === "numbered" ? (
+                <ListOrdered className="h-3.5 w-3.5" />
+              ) : (
+                <Type className="h-3.5 w-3.5" />
+              )}
+            </button>
 
-          <AutoGrow
-            value={b.text}
-            onChange={(v) => update(i, { text: v })}
-            placeholder={b.type === "paragraph" ? "Write a sentence…" : "List item…"}
-          />
+            <AutoGrow
+              value={b.text}
+              onChange={(v) => update(i, { text: v })}
+              placeholder={b.type === "paragraph" ? "Write a sentence…" : "List item…"}
+            />
+          </div>
 
-          <div className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
-            <button onClick={() => move(i, -1)} className="rounded p-1 text-[var(--color-ink-subtle)] hover:bg-[var(--color-surface-hover)]">
+          {/* Row: action buttons — always visible on mobile, on hover on desktop */}
+          <div className="flex items-center justify-end gap-0.5 px-2 pb-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+            <button onClick={() => move(i, -1)} className="rounded p-1 text-[var(--color-ink-subtle)] hover:bg-[var(--color-surface-hover)]" title="Move up">
               <ChevronUp className="h-3.5 w-3.5" />
             </button>
-            <button onClick={() => move(i, 1)} className="rounded p-1 text-[var(--color-ink-subtle)] hover:bg-[var(--color-surface-hover)]">
+            <button onClick={() => move(i, 1)} className="rounded p-1 text-[var(--color-ink-subtle)] hover:bg-[var(--color-surface-hover)]" title="Move down">
               <ChevronDown className="h-3.5 w-3.5" />
             </button>
-            <button onClick={() => addBelow(i)} className="rounded p-1 text-[var(--color-ink-subtle)] hover:bg-[var(--color-surface-hover)]">
+            <button onClick={() => addBelow(i)} className="rounded p-1 text-[var(--color-ink-subtle)] hover:bg-[var(--color-surface-hover)]" title="Add block below">
               <Plus className="h-3.5 w-3.5" />
             </button>
-            <button onClick={() => remove(i)} className="rounded p-1 text-[var(--color-danger-text)] hover:bg-[var(--color-danger-bg)]">
+            <button onClick={() => remove(i)} className="rounded p-1 text-[var(--color-danger-text)] hover:bg-[var(--color-danger-bg)]" title="Delete block">
               <Trash2 className="h-3.5 w-3.5" />
             </button>
           </div>

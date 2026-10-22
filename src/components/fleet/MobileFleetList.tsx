@@ -5,7 +5,8 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import {
   Car, Archive, Shield, Loader2,
   Ban, Wrench, Gauge, User, CarFront,
-  Clock, Banknote, Pencil, Plus, Search, CheckCircle2, Circle, X
+  Banknote, Pencil, Plus, Search, CheckCircle2, Circle, X,
+  SlidersHorizontal,
 } from "lucide-react";
 import CardGrid, { RowAction } from "@/components/ui/CardGrid";
 import type { Vehicle, VehicleStatus, Booking } from "@/lib/types";
@@ -24,31 +25,6 @@ const statusLabels: Record<VehicleStatus, string> = {
 
 const formatPlate = (plate: string) =>
   plate.replace(/([A-Za-z])(\d)/, "$1 $2").toUpperCase();
-
-const formatTimeRemaining = (endStr?: string | null): { text: string; overdue: boolean } | null => {
-  if (!endStr) return null;
-  const end = new Date(endStr).getTime();
-  if (Number.isNaN(end)) return null;
-  const diff = end - Date.now();
-  const abs = Math.abs(diff);
-  const hours = Math.floor(abs / 3_600_000);
-  const minutes = Math.floor((abs % 3_600_000) / 60_000);
-
-  if (abs < 60_000) return { text: "due now", overdue: diff < 0 };
-
-  let core: string;
-  if (hours === 0) core = `${minutes}m`;
-  else if (hours < 24) core = minutes === 0 ? `${hours}h` : `${hours}h ${minutes}m`;
-  else {
-    const days = Math.floor(hours / 24);
-    const remHours = hours % 24;
-    core = remHours === 0 ? `${days}d` : `${days}d ${remHours}h`;
-  }
-
-  return diff < 0
-    ? { text: `${core} overdue`, overdue: true }
-    : { text: `${core} left`, overdue: false };
-};
 
 /* ──────────────────────────────────────────────────────────────────────
    Props
@@ -88,7 +64,6 @@ export default function MobileFleetList({
   activeTab,
   handleTabChange,
   filteredVehicles,
-  activeRentals,
   setGarageVehicle,
   setGarageModalOpen,
   setPricingVehicle,
@@ -106,13 +81,13 @@ export default function MobileFleetList({
   const isSelecting = selected.length > 0;
 
   const [searchFocused, setSearchFocused] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressFired = useRef(false);
   const longPressStartPos = useRef<{ x: number; y: number } | null>(null);
 
-  // ✅ Ensure alphabetical sorting
   const sortedVehicles = useMemo(() => {
     return [...filteredVehicles].sort((a, b) => {
       const aKey = `${a.make} ${a.model}`.toLowerCase();
@@ -322,20 +297,20 @@ export default function MobileFleetList({
   );
   const garageCount = statusOptions.find((o) => o.value === "maintenance")?.count ?? 0;
 
-  // ✅ Compute exact array for mileage due to bypass parent filtering issues
   const mileageDueVehicles = useMemo(
     () => sortedVehicles.filter((v) => v.mileage_due),
     [sortedVehicles],
   );
 
-  // ✅ Determine which data to show based on the pseudo-filter
-  const displayVehicles = (statusFilter as any) === "mileage_due" 
-    ? mileageDueVehicles 
+  const displayVehicles = (statusFilter as any) === "mileage_due"
+    ? mileageDueVehicles
     : sortedVehicles;
+
+  const hasActiveFilter = statusFilter !== "";
 
   return (
     <div className="md:hidden animate-in fade-in duration-300 relative">
-      {/* Toolbar */}
+      {/* ─── TOOLBAR ─────────────────────────────────────────── */}
       <div className="py-3" data-selection-zone>
         {isSelecting ? (
           <div className="flex items-center justify-between gap-2">
@@ -359,7 +334,7 @@ export default function MobileFleetList({
                 aria-label="Update mileage"
                 title="Update Mileage"
               >
-                <Clock size={16} />
+                <Wrench size={16} />
               </button>
               <button
                 onClick={handleBatchMaintenance}
@@ -381,105 +356,128 @@ export default function MobileFleetList({
           </div>
         ) : (
           <div className="space-y-2.5">
-            <div className="relative">
-              <Search
-                size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
-              />
-              <input
-                ref={searchInputRef}
-                type="text"
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                onFocus={() => setSearchFocused(true)}
-                onBlur={() => {
-                  setTimeout(() => setSearchFocused(false), 150);
-                }}
-                placeholder="Search make, model, plate..."
-                className="w-full h-10 pl-9 pr-10 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all"
-              />
-              {search && (
-                <button
-                  type="button"
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={handleClearSearch}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[var(--color-surface-hover)] flex items-center justify-center hover:bg-[var(--color-surface-border)] transition-colors"
-                  aria-label="Clear search"
-                >
-                  <X size={12} className="text-[var(--color-ink-muted)]" />
-                </button>
-              )}
+            {/* Search + Filter row */}
+            <div className="flex items-center gap-2">
+              <div className="relative flex-1">
+                <Search
+                  size={16}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => {
+                    setTimeout(() => setSearchFocused(false), 150);
+                  }}
+                  placeholder="Search make, model, plate..."
+                  className="w-full h-10 pl-9 pr-10 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all"
+                />
+                {search && (
+                  <button
+                    type="button"
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={handleClearSearch}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[var(--color-surface-hover)] flex items-center justify-center hover:bg-[var(--color-surface-border)] transition-colors"
+                    aria-label="Clear search"
+                  >
+                    <X size={12} className="text-[var(--color-ink-muted)]" />
+                  </button>
+                )}
+              </div>
+
+              {/* Filter toggle button */}
+              <button
+                type="button"
+                onClick={() => setFiltersOpen((v) => !v)}
+                aria-label={filtersOpen ? "Hide filters" : "Show filters"}
+                className={`relative h-10 w-10 rounded-xl border flex items-center justify-center transition-all shrink-0 active:scale-95 ${
+                  filtersOpen
+                    ? "bg-[var(--color-primary)] border-[var(--color-primary)] text-white"
+                    : "bg-[var(--color-surface)] border-[var(--color-surface-border)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
+                }`}
+              >
+                <SlidersHorizontal size={16} />
+                {hasActiveFilter && !filtersOpen && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[var(--color-primary)] ring-2 ring-[var(--color-surface)]" />
+                )}
+              </button>
             </div>
 
-            <div className={`overflow-x-auto scrollbar-none transition-all duration-200 ${searchFocused ? "max-h-0 opacity-0 overflow-hidden" : "max-h-20 opacity-100"}`}>
-              <div className="flex items-center gap-2 py-1">
-                <button
-                  onClick={() => setStatusFilter("")}
-                  className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-bold transition-colors border ${
-                    statusFilter === ""
-                      ? "text-[var(--color-primary)] border-[var(--color-primary)]"
-                      : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                  }`}
-                >
-                  All
-                </button>
-                {pillOptions.map((opt) => {
-                  const isActive = statusFilter === opt.value;
-                  return (
-                    <button
-                      key={opt.value}
-                      onClick={() =>
-                        setStatusFilter((opt.value || "") as VehicleStatus | "")
-                      }
-                      className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
-                        isActive
-                          ? "text-[var(--color-primary)] border-[var(--color-primary)]"
-                          : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                      }`}
-                    >
-                      {opt.label}
-                      {isActive && (
-                        <span className="text-[9px] font-extrabold tabular-nums text-[var(--color-primary)]">
-                          {opt.count}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-                <button
-                  onClick={() => setStatusFilter("maintenance")}
-                  className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
-                    statusFilter === "maintenance"
-                      ? "text-[var(--color-primary)] border-[var(--color-primary)]"
-                      : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                  }`}
-                >
-                  <Wrench size={11} className="flex-shrink-0" />
-                  Garage
-                  {statusFilter === "maintenance" && (
-                    <span className="text-[9px] font-extrabold tabular-nums text-[var(--color-primary)]">
-                      {garageCount}
-                    </span>
-                  )}
-                </button>
-                <button
-                  onClick={() => setStatusFilter("retired")}
-                  className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
-                    statusFilter === "retired"
-                      ? "text-[var(--color-primary)] border-[var(--color-primary)]"
-                      : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                  }`}
-                >
-                  <Archive size={11} className="flex-shrink-0" />
-                  Archived
-                </button>
+            {/* Filter pills — hidden by default, revealed by the filter button */}
+            {filtersOpen && !searchFocused && (
+              <div className="overflow-x-auto scrollbar-none animate-in slide-in-from-top-1 fade-in duration-200">
+                <div className="flex items-center gap-2 py-1">
+                  <button
+                    onClick={() => setStatusFilter("")}
+                    className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-bold transition-colors border ${
+                      statusFilter === ""
+                        ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
+                        : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                    }`}
+                  >
+                    All
+                  </button>
+                  {pillOptions.map((opt) => {
+                    const isActive = statusFilter === opt.value;
+                    return (
+                      <button
+                        key={opt.value}
+                        onClick={() =>
+                          setStatusFilter((opt.value || "") as VehicleStatus | "")
+                        }
+                        className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
+                          isActive
+                            ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
+                            : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                        }`}
+                      >
+                        {opt.label}
+                        {isActive && (
+                          <span className="text-[9px] font-extrabold tabular-nums text-[var(--color-primary)]">
+                            {opt.count}
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                  <button
+                    onClick={() => setStatusFilter("maintenance")}
+                    className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
+                      statusFilter === "maintenance"
+                        ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
+                        : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                    }`}
+                  >
+                    <Wrench size={11} className="flex-shrink-0" />
+                    Garage
+                    {statusFilter === "maintenance" && (
+                      <span className="text-[9px] font-extrabold tabular-nums text-[var(--color-primary)]">
+                        {garageCount}
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setStatusFilter("retired")}
+                    className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
+                      statusFilter === "retired"
+                        ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
+                        : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                    }`}
+                  >
+                    <Archive size={11} className="flex-shrink-0" />
+                    Archived
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
       </div>
 
-      {/* ✅ Banners — hidden during search focus or selection. NO border-t */}
+      {/* Banners */}
       <div className={searchFocused || isSelecting ? "hidden" : ""}>
         {!loading && pendingCount > 0 && statusFilter !== "pending_activation" && (
           <button
@@ -581,7 +579,6 @@ export default function MobileFleetList({
               ? item.next_service_km - item.current_mileage
               : null;
             const isDueForService = kmToService !== null && kmToService <= 500;
-            const activeRental = activeRentals[item.id] || null;
             const isSelected = selected.some((v) => v.id === item.id);
 
             const needsAttention =
@@ -598,18 +595,31 @@ export default function MobileFleetList({
             const showWrench =
               item.status === "maintenance" || isDueForService || item.mileage_due;
 
+            const statusDisplay = (() => {
+              if (item.is_archived) return { label: "Archived", color: "text-[var(--color-ink-muted)]", dot: "bg-gray-400" };
+              if (item.status === "maintenance") return { label: "In garage", color: "text-amber-600 dark:text-amber-400", dot: "bg-amber-500" };
+              if (isDueForService) return { label: "Service due", color: "text-amber-600 dark:text-amber-400", dot: "bg-amber-500" };
+              if (item.mileage_due) return { label: "Mileage due", color: "text-amber-600 dark:text-amber-400", dot: "bg-amber-500" };
+              if (item.status === "rented") return { label: "Rented", color: "text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500" };
+              if (item.status === "available") return { label: "Available", color: "text-blue-600 dark:text-blue-400", dot: "bg-blue-500" };
+              if (item.status === "pending_activation") return { label: "Pending", color: "text-violet-600 dark:text-violet-400", dot: "bg-violet-500" };
+              return { label: "Retired", color: "text-[var(--color-ink-muted)]", dot: "bg-gray-400" };
+            })();
+
             return (
               <div
                 data-selection-zone
                 onTouchStart={handleTouchStart(item)}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
-                // ✅ Removed background highlight & added select-none
-                className="flex items-start gap-3 w-full py-3 border-b border-[var(--color-surface-border)]/50 last:border-b-0 transition-colors hover:bg-[var(--color-surface-hover)]/40 select-none"
+                className={`flex items-start gap-3 w-full px-1 py-3 transition-colors select-none ${
+                  isSelected ? "bg-[var(--color-primary)]/[0.04]" : ""
+                }`}
               >
+                {/* Avatar tile */}
                 <div className="relative flex-shrink-0">
-                  <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/15 flex items-center justify-center overflow-hidden">
-                    <Car size={26} className="text-[var(--color-primary)]" />
+                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/15 flex items-center justify-center overflow-hidden shadow-sm">
+                    <Car size={22} className="text-[var(--color-primary)]" strokeWidth={1.75} />
                   </div>
                   {dot && (
                     <span
@@ -622,13 +632,15 @@ export default function MobileFleetList({
                   )}
                 </div>
 
+                {/* Content */}
                 <div className="min-w-0 flex-1">
-                  <div className="flex flex-col h-16 justify-between">
+                  <div className="flex flex-col h-14 justify-between">
+                    {/* Line 1: Make Model + plate pill + investor */}
                     <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
+                      <span className="text-[13px] font-bold text-[var(--color-ink)] truncate tracking-tight">
                         {item.make} {item.model}
                       </span>
-                      <span className="text-[10px] font-mono font-semibold text-[var(--color-ink-subtle)] tracking-wide flex-shrink-0">
+                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono font-bold tracking-wide bg-[var(--color-ink)] text-[var(--color-ink-inverse)] flex-shrink-0">
                         {formatPlate(item.plate_number)}
                       </span>
                       {item.owner_id && (
@@ -638,11 +650,12 @@ export default function MobileFleetList({
                       )}
                     </div>
 
+                    {/* Line 2: Mileage + next service */}
                     <div className="flex items-center gap-3 min-w-0 flex-wrap">
                       <div className="flex items-center gap-1">
                         <Gauge size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
                         <span className="text-[10px] text-[var(--color-ink-muted)] font-mono font-semibold">
-                          {item.current_mileage} KM
+                          {item.current_mileage.toLocaleString()} km
                         </span>
                       </div>
                       <div className="flex items-center gap-1">
@@ -664,44 +677,30 @@ export default function MobileFleetList({
                           }`}
                         >
                           {item.next_service_km
-                            ? `${item.next_service_km} KM`
-                            : "Not provided"}
+                            ? `${item.next_service_km.toLocaleString()} km`
+                            : "Not set"}
                         </span>
                       </div>
                     </div>
 
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-[9px] font-semibold text-[var(--color-ink-muted)] uppercase tracking-wider">
-                        KES
+                    {/* Line 3: Price + status text with dot */}
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-[9px] font-semibold text-[var(--color-ink-muted)] uppercase tracking-wider">
+                          KES
+                        </span>
+                        <span className="text-[11px] font-bold text-[var(--color-ink)] tabular-nums">
+                          {Number(item.daily_rate).toLocaleString()}
+                        </span>
+                        <span className="text-[9px] font-medium text-[var(--color-ink-muted)]">/day</span>
+                      </div>
+
+                      <span className={`inline-flex items-center gap-1 text-[10px] font-bold tracking-wide shrink-0 ${statusDisplay.color}`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${statusDisplay.dot}`} />
+                        {statusDisplay.label}
                       </span>
-                      <span className="text-[11px] font-bold text-[var(--color-ink)] tabular-nums">
-                        {Number(item.daily_rate).toLocaleString()}
-                      </span>
-                      <span className="text-[9px] font-medium text-[var(--color-ink-muted)]">/day</span>
                     </div>
                   </div>
-
-                  {activeRental && (() => {
-                    const remaining = formatTimeRemaining(activeRental.end_date);
-                    if (!remaining) return null;
-                    return (
-                      <div className="flex items-center gap-1.5 mt-1.5 min-w-0">
-                        <Clock
-                          size={10}
-                          className={remaining.overdue ? "text-rose-500" : "text-emerald-500"}
-                        />
-                        <span
-                          className={`text-[10px] font-bold ${
-                            remaining.overdue
-                              ? "text-rose-600 dark:text-rose-400"
-                              : "text-emerald-600 dark:text-emerald-400"
-                          }`}
-                        >
-                          {remaining.text}
-                        </span>
-                      </div>
-                    );
-                  })()}
                 </div>
 
                 {isSelecting && (
@@ -777,23 +776,21 @@ export default function MobileFleetList({
       )}
 
       {!isSelecting && !searchFocused && (
-        // ✅ FAB stack bottom offset adjusted to clear the 24px peek strip
-        <div 
-          data-fab-stack 
+        <div
+          data-fab-stack
           className="fixed right-4 bottom-[108px] z-[65] flex flex-col items-end gap-3"
         >
-          <button
-            type="button"
-            onClick={() => handleTabChange(activeTab === "fleet" ? "garage" : "fleet")}
-            aria-label={`Switch to ${activeTab === "fleet" ? "Garage" : "Vehicles"}`}
-            className="w-12 h-12 rounded-xl bg-[var(--color-surface)]/80 backdrop-blur-xl border border-[var(--color-surface-border)] shadow-[0_8px_32px_rgba(0,0,0,0.25)] flex items-center justify-center active:scale-95 hover:bg-[var(--color-surface-hover)]/90 transition-all"
-          >
-            {activeTab === "fleet" ? (
-              <Wrench size={18} className="text-[var(--color-ink-muted)]" />
-            ) : (
+          {/* Fleet tab no longer shows the spanner — navigation is via pull-up menu. */}
+          {activeTab !== "fleet" && (
+            <button
+              type="button"
+              onClick={() => handleTabChange("fleet")}
+              aria-label="Back to Vehicles"
+              className="w-12 h-12 rounded-xl bg-[var(--color-surface)]/80 backdrop-blur-xl border border-[var(--color-surface-border)] shadow-[0_8px_32px_rgba(0,0,0,0.25)] flex items-center justify-center active:scale-95 hover:bg-[var(--color-surface-hover)]/90 transition-all"
+            >
               <CarFront size={18} className="text-[var(--color-ink-muted)]" />
-            )}
-          </button>
+            </button>
+          )}
 
           <button
             type="button"
