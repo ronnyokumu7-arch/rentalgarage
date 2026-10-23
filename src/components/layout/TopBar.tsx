@@ -205,13 +205,18 @@ export default function Topbar({
 
   return (
     <>
+      {/* 
+        Added 'transform: translateZ(0)' to force a new stacking context. 
+        This prevents parent overflow hidden/auto from breaking sticky.
+      */}
       <header
         className={`
-          sticky top-0 z-30 bg-bg
+          sticky top-0 z-40 bg-bg
           transition-all duration-300
           sm:h-16
           ${hasPageHeader && mobileHeaderExpanded ? "h-auto" : "h-14"}
         `}
+        style={{ transform: "translateZ(0)" }}
       >
         {hasPageHeader && mobileHeaderExpanded ? (
           /* ── MOBILE EXPANDED SHEET ───────────────────────── */

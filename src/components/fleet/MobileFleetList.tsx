@@ -1,3 +1,4 @@
+// src/components/fleet/MobileFleetList.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -329,173 +330,175 @@ export default function MobileFleetList({
 
   const hasActiveFilter = statusFilter !== "";
 
-  const toolbarSpacerHeight = filtersOpen && !isSelecting ? "h-32" : "h-20";
-
   return (
     <div className="md:hidden animate-in fade-in duration-300 relative">
-      {/* TOOLBAR */}
+      {/* 
+        TOOLBAR 
+        - No px-4 on the sticky container.
+        - Using px-3 (or your app's standard padding) on the inner items so it aligns perfectly with the TopBar.
+      */}
       <div
-        className="fixed top-14 left-0 right-0 z-25 px-4 pt-2 pb-2 bg-[var(--color-bg)]/95 backdrop-blur-md"
+        className="sticky top-0 z-20 bg-[var(--color-bg)] py-2"
         data-selection-zone
       >
-        {isSelecting ? (
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <button
-                onClick={clearSelection}
-                className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] transition-colors"
-                aria-label="Clear selection"
-              >
-                <X size={16} />
-              </button>
-              <span className="text-sm font-bold text-[var(--color-ink)] tabular-nums">
-                {selected.length} selected
-              </span>
-            </div>
-
-            <div className="flex items-center gap-1">
-              <button
-                onClick={handleBatchMileage}
-                className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
-                aria-label="Update mileage"
-              >
-                <Wrench size={16} />
-              </button>
-              <button
-                onClick={handleBatchMaintenance}
-                className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
-                aria-label="Send to maintenance"
-              >
-                <Wrench size={16} />
-              </button>
-              <button
-                onClick={handleBatchArchive}
-                className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
-                aria-label="Archive"
-              >
-                <Archive size={16} />
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="space-y-2">
-            <div className="flex items-center h-11 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] overflow-hidden transition-colors">
-              <div className="relative flex-1 h-full">
-                <Search
-                  size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
-                />
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  onFocus={() => setSearchFocused(true)}
-                  onBlur={() => {
-                    setTimeout(() => setSearchFocused(false), 150);
-                  }}
-                  placeholder="Search vehicle, plate, driver..."
-                  className="w-full h-full pl-10 pr-2 bg-transparent text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] outline-none"
-                />
-                {search && (
-                  <button
-                    type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={handleClearSearch}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[var(--color-surface-hover)] flex items-center justify-center hover:bg-[var(--color-surface-border)] transition-colors"
-                    aria-label="Clear search"
-                  >
-                    <X size={12} className="text-[var(--color-ink-muted)]" />
-                  </button>
-                )}
+        {/* Aligns search bar with TopBar standard padding (usually px-3 or px-4 depending on app config) */}
+        <div className="px-3 sm:px-4">
+          {isSelecting ? (
+            <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={clearSelection}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] transition-colors"
+                  aria-label="Clear selection"
+                >
+                  <X size={16} />
+                </button>
+                <span className="text-sm font-bold text-[var(--color-ink)] tabular-nums">
+                  {selected.length} selected
+                </span>
               </div>
 
-              <div className="pr-1.5">
+              <div className="flex items-center gap-1">
                 <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setFiltersOpen((v) => !v);
-                  }}
-                  aria-label={filtersOpen ? "Hide filters" : "Show filters"}
-                  aria-expanded={filtersOpen}
-                  className={`relative h-8 px-2.5 rounded-lg flex items-center justify-center gap-1 transition-all active:scale-95 ${
-                    filtersOpen
-                      ? "bg-[var(--color-primary)] text-white shadow-sm"
-                      : hasActiveFilter
-                        ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/15"
-                        : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                  }`}
+                  onClick={handleBatchMileage}
+                  className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
+                  aria-label="Update mileage"
                 >
-                  <SlidersHorizontal size={14} />
-                  {hasActiveFilter && !filtersOpen && (
-                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]" />
-                  )}
+                  <Wrench size={16} />
+                </button>
+                <button
+                  onClick={handleBatchMaintenance}
+                  className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
+                  aria-label="Send to maintenance"
+                >
+                  <Wrench size={16} />
+                </button>
+                <button
+                  onClick={handleBatchArchive}
+                  className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
+                  aria-label="Archive"
+                >
+                  <Archive size={16} />
                 </button>
               </div>
             </div>
-
-            {filtersOpen && !searchFocused && (
-              <div className="relative animate-in slide-in-from-top-1 fade-in duration-200">
-                <div className="overflow-x-auto scrollbar-none">
-                  <div className="flex items-center gap-2 py-1 pr-6">
+          ) : (
+            <div className="space-y-2">
+              <div className="flex items-center h-11 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] overflow-hidden transition-colors">
+                <div className="relative flex-1 h-full">
+                  <Search
+                    size={16}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                  />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    onFocus={() => setSearchFocused(true)}
+                    onBlur={() => {
+                      setTimeout(() => setSearchFocused(false), 150);
+                    }}
+                    placeholder="Search vehicle, plate, driver..."
+                    className="w-full h-full pl-10 pr-2 bg-transparent text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] outline-none"
+                  />
+                  {search && (
                     <button
-                      onClick={() => setStatusFilter("")}
-                      className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border ${
-                        statusFilter === ""
-                          ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
-                          : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                      }`}
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={handleClearSearch}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[var(--color-surface-hover)] flex items-center justify-center hover:bg-[var(--color-surface-border)] transition-colors"
+                      aria-label="Clear search"
                     >
-                      All
+                      <X size={12} className="text-[var(--color-ink-muted)]" />
                     </button>
-                    {pillOptions.map((opt) => {
-                      const isActive = statusFilter === opt.value;
-                      return (
-                        <button
-                          key={opt.value}
-                          onClick={() =>
-                            setStatusFilter((opt.value || "") as VehicleStatus | "")
-                          }
-                          className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border ${
-                            isActive
-                              ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
-                              : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                          }`}
-                        >
-                          {opt.label}
-                        </button>
-                      );
-                    })}
-                    <button
-                      onClick={() => setStatusFilter("maintenance")}
-                      className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
-                        statusFilter === "maintenance"
-                          ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
-                          : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                      }`}
-                    >
-                      <Wrench size={11} className="flex-shrink-0" />
-                      Garage
-                    </button>
-                  </div>
+                  )}
                 </div>
 
-                <div
-                  className="pointer-events-none absolute top-0 right-0 bottom-0 w-12 bg-gradient-to-l from-[var(--color-bg)] via-[var(--color-bg)]/80 to-transparent"
-                  aria-hidden="true"
-                />
+                <div className="pr-1.5">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFiltersOpen((v) => !v);
+                    }}
+                    aria-label={filtersOpen ? "Hide filters" : "Show filters"}
+                    aria-expanded={filtersOpen}
+                    className={`relative h-8 px-2.5 rounded-lg flex items-center justify-center gap-1 transition-all active:scale-95 ${
+                      filtersOpen
+                        ? "bg-[var(--color-primary)] text-white shadow-sm"
+                        : hasActiveFilter
+                          ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/15"
+                          : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                    }`}
+                  >
+                    <SlidersHorizontal size={14} />
+                    {hasActiveFilter && !filtersOpen && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]" />
+                    )}
+                  </button>
+                </div>
               </div>
-            )}
-          </div>
-        )}
+
+              {filtersOpen && !searchFocused && (
+                <div className="relative animate-in slide-in-from-top-1 fade-in duration-200">
+                  <div className="overflow-x-auto scrollbar-none">
+                    <div className="flex items-center gap-2 py-1 pr-6">
+                      <button
+                        onClick={() => setStatusFilter("")}
+                        className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border ${
+                          statusFilter === ""
+                            ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
+                            : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                        }`}
+                      >
+                        All
+                      </button>
+                      {pillOptions.map((opt) => {
+                        const isActive = statusFilter === opt.value;
+                        return (
+                          <button
+                            key={opt.value}
+                            onClick={() =>
+                              setStatusFilter((opt.value || "") as VehicleStatus | "")
+                            }
+                            className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border ${
+                              isActive
+                                ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
+                                : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                            }`}
+                          >
+                            {opt.label}
+                          </button>
+                        );
+                      })}
+                      <button
+                        onClick={() => setStatusFilter("maintenance")}
+                        className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
+                          statusFilter === "maintenance"
+                            ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
+                            : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                        }`}
+                      >
+                        <Wrench size={11} className="flex-shrink-0" />
+                        Garage
+                      </button>
+                    </div>
+                  </div>
+
+                  <div
+                    className="pointer-events-none absolute top-0 right-0 bottom-0 w-12 bg-gradient-to-l from-[var(--color-bg)] via-[var(--color-bg)]/80 to-transparent"
+                    aria-hidden="true"
+                  />
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Spacer */}
-      <div className={`${toolbarSpacerHeight} transition-[height] duration-200`} />
-
       {/* Banners */}
-      <div className={searchFocused || isSelecting ? "hidden" : ""}>
+      <div className={`px-3 sm:px-4 ${searchFocused || isSelecting ? "hidden" : ""}`}>
         {!loading && pendingCount > 0 && statusFilter !== "pending_activation" && (
           <button
             type="button"
@@ -570,7 +573,7 @@ export default function MobileFleetList({
           </p>
         </div>
       ) : (
-        <div className="space-y-2.5 pb-4">
+        <div className="space-y-2.5 pb-4 px-3 sm:px-4">
           {displayVehicles.map((item) => {
             const isSelected = selected.some((v) => v.id === item.id);
 
@@ -595,10 +598,7 @@ export default function MobileFleetList({
               ? "text-amber-600 dark:text-amber-400"
               : "text-[var(--color-ink-muted)]";
 
-            // ✅ Status-based avatar colors
             const avatarColors = getVehicleAvatarColors(item, isDueForService);
-
-            // ✅ Body-type-aware icon (truck/bus/van/motorcycle/etc.)
             const BodyIcon = getVehicleBodyIcon(item);
 
             return (
@@ -625,7 +625,6 @@ export default function MobileFleetList({
                     : "border-[var(--color-surface-border)] hover:border-[var(--color-primary)]/30 shadow-sm"
                 }`}
               >
-                {/* ✅ Status-colored avatar tile with body-type icon */}
                 <div
                   className={`w-20 h-14 rounded-xl flex items-center justify-center shrink-0 overflow-hidden ${avatarColors.bg}`}
                 >

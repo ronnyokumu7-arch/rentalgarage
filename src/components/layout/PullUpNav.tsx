@@ -136,26 +136,24 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
     const dy = dragStartY.current - touch.clientY;
     if (Math.abs(dy) > 4) hasMoved.current = true;
     if (!hasMoved.current) return;
-    
+
     const next = Math.max(0, Math.min(travel, dragStartOffset.current + dy));
     setCurrentOffset(next);
-    
+
     if (e.cancelable) e.preventDefault();
   };
 
   const handleTouchEnd = () => {
     setIsDragging(false);
-    
+
+    // ✅ Tap: toggle based on current state
     if (!hasMoved.current) {
-      // Tap → toggle
-      const next = currentOffset >= travel / 2 ? 0 : travel;
-      setCurrentOffset(next);
+      setCurrentOffset((prev) => (prev >= travel / 2 ? 0 : travel));
       return;
     }
-    
-    // Drag → snap
-    const next = currentOffset >= travel / 2 ? travel : 0;
-    setCurrentOffset(next);
+
+    // ✅ Drag: snap to nearest edge
+    setCurrentOffset((prev) => (prev >= travel / 2 ? travel : 0));
   };
 
   const handleLogout = async () => {
@@ -206,7 +204,7 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
       <>
         <div className="px-5 pt-4 pb-4 flex items-center justify-between flex-shrink-0">
           <h2 className="text-lg font-bold text-[var(--color-ink)] tracking-tight">
-            Quick Access
+            Business Tools
           </h2>
           <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)]">
             {drawerItems.length + 1} items
@@ -307,16 +305,10 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
-          onClick={() => {
-            if (!hasMoved.current) {
-              const next = currentOffset >= travel / 2 ? 0 : travel;
-              setCurrentOffset(next);
-            }
-          }}
         >
           <div className="absolute left-5 flex items-center gap-1.5 pointer-events-none">
             <span className="text-[11px] font-medium text-[var(--color-ink-muted)]">
-              Explore more
+              More Options
             </span>
           </div>
           <div className="flex items-center justify-center w-14 h-full pointer-events-none">

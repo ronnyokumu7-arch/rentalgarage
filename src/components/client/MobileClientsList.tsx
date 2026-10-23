@@ -1,3 +1,4 @@
+// src/components/clients/MobileClientsList.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -26,7 +27,6 @@ import {
 } from "lucide-react";
 import CardGrid, { RowAction } from "@/components/ui/CardGrid";
 import ReviewVerificationModal from "@/components/client/ReviewVerificationModal";
-import { useMobileHeaderExpanded } from "@/hooks/useMobileHeaderExpanded";
 
 /* ──────────────────────────────────────────────────────────────────────
    Types & helpers
@@ -135,7 +135,6 @@ export default function MobileClientsList({
   onAddClient,
 }: MobileClientsListProps) {
   const router = useRouter();
-  const headerExpanded = useMobileHeaderExpanded();
 
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [reviewClientId, setReviewClientId] = useState<number | null>(null);
@@ -274,202 +273,187 @@ export default function MobileClientsList({
 
   const hasActiveFilter = statusFilter !== null && statusFilter !== "";
 
-  // ✅ Dynamic top offset (matches fleet + bookings)
-  const EXPANDED_OFFSET = 128;
-  const COLLAPSED_OFFSET = 56;
-  const toolbarTop = headerExpanded ? EXPANDED_OFFSET : COLLAPSED_OFFSET;
-
-  // ✅ Dynamic spacer (matches fleet + bookings)
-  const baseSpacer = filtersOpen && !isSelecting ? 144 : 96;
-  const headerDelta = headerExpanded ? (EXPANDED_OFFSET - COLLAPSED_OFFSET) : 0;
-  const spacerHeight = baseSpacer + headerDelta;
-
   return (
     <>
       <div className="md:hidden animate-in fade-in duration-300 relative">
-        {/* ✅ TOOLBAR — slides down when header expands */}
+        {/* 
+          TOOLBAR 
+          - Sticky top-0
+          - Full width background, inner padding
+        */}
         <div
-          className="fixed left-0 right-0 z-25 px-4 pt-2 pb-2 bg-[var(--color-bg)]/95 backdrop-blur-md"
-          style={{
-            top: `${toolbarTop}px`,
-            transition: "top 300ms cubic-bezier(0.16, 1, 0.3, 1)",
-          }}
+          className="sticky top-0 z-20 bg-[var(--color-bg)] py-2"
           data-selection-zone
         >
-          {isSelecting ? (
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={clearSelection}
-                  className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] transition-colors"
-                  aria-label="Clear selection"
-                >
-                  <X size={16} />
-                </button>
-                <span className="text-sm font-bold text-[var(--color-ink)] tabular-nums">
-                  {selected.length} selected
-                </span>
-              </div>
-
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={handleBatchVerify}
-                  className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
-                  aria-label="Verify clients"
-                >
-                  <Shield size={16} />
-                </button>
-                <button
-                  onClick={handleBatchSuspend}
-                  className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
-                  aria-label="Suspend clients"
-                >
-                  <Ban size={16} />
-                </button>
-                <button
-                  onClick={handleBatchArchive}
-                  className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
-                  aria-label="Archive clients"
-                >
-                  <Archive size={16} />
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {/* Unified search + embedded filter pill */}
-              <div className="flex items-center h-11 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] overflow-hidden transition-colors">
-                <div className="relative flex-1 h-full">
-                  <Search
-                    size={16}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
-                  />
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    onFocus={() => setSearchFocused(true)}
-                    onBlur={() => {
-                      setTimeout(() => setSearchFocused(false), 150);
-                    }}
-                    placeholder={activeTab === "corporate" ? "Search corporate clients..." : "Search clients..."}
-                    className="w-full h-full pl-10 pr-2 bg-transparent text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] outline-none"
-                  />
-                  {search && (
-                    <button
-                      type="button"
-                      onMouseDown={(e) => e.preventDefault()}
-                      onClick={handleClearSearch}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[var(--color-surface-hover)] flex items-center justify-center hover:bg-[var(--color-surface-border)] transition-colors"
-                      aria-label="Clear search"
-                    >
-                      <X size={12} className="text-[var(--color-ink-muted)]" />
-                    </button>
-                  )}
+          <div className="px-3 sm:px-4">
+            {isSelecting ? (
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={clearSelection}
+                    className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] transition-colors"
+                    aria-label="Clear selection"
+                  >
+                    <X size={16} />
+                  </button>
+                  <span className="text-sm font-bold text-[var(--color-ink)] tabular-nums">
+                    {selected.length} selected
+                  </span>
                 </div>
 
-                <div className="pr-1.5">
+                <div className="flex items-center gap-1">
                   <button
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setFiltersOpen((v) => !v);
-                    }}
-                    aria-label={filtersOpen ? "Hide filters" : "Show filters"}
-                    aria-expanded={filtersOpen}
-                    className={`relative h-8 px-2.5 rounded-lg flex items-center justify-center gap-1 transition-all active:scale-95 ${
-                      filtersOpen
-                        ? "bg-[var(--color-primary)] text-white shadow-sm"
-                        : hasActiveFilter
-                          ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/15"
-                          : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                    }`}
+                    onClick={handleBatchVerify}
+                    className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
+                    aria-label="Verify clients"
                   >
-                    <SlidersHorizontal size={14} />
-                    {hasActiveFilter && !filtersOpen && (
-                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]" />
-                    )}
+                    <Shield size={16} />
+                  </button>
+                  <button
+                    onClick={handleBatchSuspend}
+                    className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
+                    aria-label="Suspend clients"
+                  >
+                    <Ban size={16} />
+                  </button>
+                  <button
+                    onClick={handleBatchArchive}
+                    className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
+                    aria-label="Archive clients"
+                  >
+                    <Archive size={16} />
                   </button>
                 </div>
               </div>
-
-              {filtersOpen && !searchFocused && (
-                <div className="relative animate-in slide-in-from-top-1 fade-in duration-200">
-                  <div className="overflow-x-auto scrollbar-none">
-                    <div className="flex items-center gap-2 py-1 pr-6">
+            ) : (
+              <div className="space-y-2">
+                {/* Unified search + embedded filter pill */}
+                <div className="flex items-center h-11 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] overflow-hidden transition-colors">
+                  <div className="relative flex-1 h-full">
+                    <Search
+                      size={16}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                    />
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      onFocus={() => setSearchFocused(true)}
+                      onBlur={() => {
+                        setTimeout(() => setSearchFocused(false), 150);
+                      }}
+                      placeholder={activeTab === "corporate" ? "Search corporate clients..." : "Search clients..."}
+                      className="w-full h-full pl-10 pr-2 bg-transparent text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] outline-none"
+                    />
+                    {search && (
                       <button
-                        onClick={() => setStatusFilter(null)}
-                        className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border ${
-                          statusFilter === null || statusFilter === ""
-                            ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
-                            : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                        }`}
+                        type="button"
+                        onMouseDown={(e) => e.preventDefault()}
+                        onClick={handleClearSearch}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[var(--color-surface-hover)] flex items-center justify-center hover:bg-[var(--color-surface-border)] transition-colors"
+                        aria-label="Clear search"
                       >
-                        All
+                        <X size={12} className="text-[var(--color-ink-muted)]" />
                       </button>
-                      {statusOptions
-                        .filter((opt) => opt.value !== "pending" && opt.value !== "inactive")
-                        .map((opt) => {
-                          const isActive = statusFilter === opt.value;
-                          return (
-                            <button
-                              key={opt.value}
-                              onClick={() => setStatusFilter(opt.value)}
-                              className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border ${
-                                isActive
-                                  ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
-                                  : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                              }`}
-                            >
-                              {opt.label}
-                            </button>
-                          );
-                        })}
-                      <button
-                        onClick={() => setStatusFilter("with_booking")}
-                        className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
-                          statusFilter === "with_booking"
-                            ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
-                            : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                        }`}
-                      >
-                        <Calendar size={11} className="flex-shrink-0" />
-                        With Booking
-                      </button>
-                      <button
-                        onClick={() => setStatusFilter("inactive")}
-                        className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
-                          statusFilter === "inactive"
-                            ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
-                            : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                        }`}
-                      >
-                        <Archive size={11} className="flex-shrink-0" />
-                        Archived
-                      </button>
-                    </div>
+                    )}
                   </div>
 
-                  <div
-                    className="pointer-events-none absolute top-0 right-0 bottom-0 w-12 bg-gradient-to-l from-[var(--color-bg)] via-[var(--color-bg)]/80 to-transparent"
-                    aria-hidden="true"
-                  />
+                  <div className="pr-1.5">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setFiltersOpen((v) => !v);
+                      }}
+                      aria-label={filtersOpen ? "Hide filters" : "Show filters"}
+                      aria-expanded={filtersOpen}
+                      className={`relative h-8 px-2.5 rounded-lg flex items-center justify-center gap-1 transition-all active:scale-95 ${
+                        filtersOpen
+                          ? "bg-[var(--color-primary)] text-white shadow-sm"
+                          : hasActiveFilter
+                            ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/15"
+                            : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                      }`}
+                    >
+                      <SlidersHorizontal size={14} />
+                      {hasActiveFilter && !filtersOpen && (
+                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]" />
+                      )}
+                    </button>
+                  </div>
                 </div>
-              )}
-            </div>
-          )}
+
+                {filtersOpen && !searchFocused && (
+                  <div className="relative animate-in slide-in-from-top-1 fade-in duration-200">
+                    <div className="overflow-x-auto scrollbar-none">
+                      <div className="flex items-center gap-2 py-1 pr-6">
+                        <button
+                          onClick={() => setStatusFilter(null)}
+                          className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border ${
+                            statusFilter === null || statusFilter === ""
+                              ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
+                              : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                          }`}
+                        >
+                          All
+                        </button>
+                        {statusOptions
+                          .filter((opt) => opt.value !== "pending" && opt.value !== "inactive")
+                          .map((opt) => {
+                            const isActive = statusFilter === opt.value;
+                            return (
+                              <button
+                                key={opt.value}
+                                onClick={() => setStatusFilter(opt.value)}
+                                className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border ${
+                                  isActive
+                                    ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
+                                    : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                                }`}
+                              >
+                                {opt.label}
+                              </button>
+                            );
+                          })}
+                        <button
+                          onClick={() => setStatusFilter("with_booking")}
+                          className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
+                            statusFilter === "with_booking"
+                              ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
+                              : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                          }`}
+                        >
+                          <Calendar size={11} className="flex-shrink-0" />
+                          With Booking
+                        </button>
+                        <button
+                          onClick={() => setStatusFilter("inactive")}
+                          className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
+                            statusFilter === "inactive"
+                              ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
+                              : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                          }`}
+                        >
+                          <Archive size={11} className="flex-shrink-0" />
+                          Archived
+                        </button>
+                      </div>
+                    </div>
+
+                    <div
+                      className="pointer-events-none absolute top-0 right-0 bottom-0 w-12 bg-gradient-to-l from-[var(--color-bg)] via-[var(--color-bg)]/80 to-transparent"
+                      aria-hidden="true"
+                    />
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* ✅ Dynamic spacer */}
-        <div
-          style={{
-            height: `${spacerHeight}px`,
-            transition: "height 300ms cubic-bezier(0.16, 1, 0.3, 1)",
-          }}
-        />
-
-        <div className={searchFocused || isSelecting ? "hidden" : ""}>
+        {/* Banners — moved into the normal flow so they sit right under the search bar */}
+        <div className={`px-3 sm:px-4 ${searchFocused || isSelecting ? "hidden" : ""}`}>
           {!loading && pendingClients > 0 && statusFilter !== "pending" && (
             <button
               type="button"
@@ -499,155 +483,158 @@ export default function MobileClientsList({
           )}
         </div>
 
-        {loading ? (
-          <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2">
-            <Loader2 className="w-5 h-5 animate-spin" /> Loading clients...
-          </div>
-        ) : filteredClients.length === 0 ? (
-          <div className="p-12 text-center">
-            <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
-              <Users size={24} className="text-[var(--color-ink-subtle)]" />
+        {/* Card List */}
+        <div className="px-3 sm:px-4 pb-4">
+          {loading ? (
+            <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2">
+              <Loader2 className="w-5 h-5 animate-spin" /> Loading clients...
             </div>
-            <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No clients found</h3>
-            <p className="text-sm text-[var(--color-ink-muted)] mb-4">
-              Try adjusting your search query or filters.
-            </p>
-          </div>
-        ) : (
-          <CardGrid
-            data={paginatedClients}
-            getCardId={(client: any) => client.id}
-            compact={true}
-            onCardClick={(client: any) => {
-              if (longPressFired.current) {
-                longPressFired.current = false;
-                return;
-              }
-              if (isSelecting) {
-                toggleSelection(client);
-                return;
-              }
-              const trigger = document.querySelector(
-                `[data-card-actions="${client.id}"] button`,
-              ) as HTMLButtonElement | null;
-              trigger?.click();
-            }}
-            cardClassName={`!p-0 !rounded-none !border-0 !bg-transparent !shadow-none transition-colors [&_[data-card-actions]]:absolute [&_[data-card-actions]]:top-0 [&_[data-card-actions]]:right-0 [&_[data-card-actions]>button]:w-0 [&_[data-card-actions]>button]:h-0 [&_[data-card-actions]>button]:overflow-hidden [&_[data-card-actions]>button]:opacity-0`}
-            containerClassName="!p-0"
-            maxHeight={searchFocused ? "calc(100vh - 120px)" : "calc(100vh - 220px)"}
-            renderCardHeader={({ item }: { item: any }) => {
-              const phone = item.phone || "";
-              const isVerified = item.verification_status === "verified";
-              const isPending = item.status === "pending" || item.verification_status === "under_review" || item.verification_status === "sent";
-              const isSuspended = item.status === "suspended";
-              const isSelected = selected.some((c) => c.id === item.id);
-              const dl = getDLStatus(item.dl_expiry);
+          ) : filteredClients.length === 0 ? (
+            <div className="p-12 text-center">
+              <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
+                <Users size={24} className="text-[var(--color-ink-subtle)]" />
+              </div>
+              <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No clients found</h3>
+              <p className="text-sm text-[var(--color-ink-muted)] mb-4">
+                Try adjusting your search query or filters.
+              </p>
+            </div>
+          ) : (
+            <CardGrid
+              data={paginatedClients}
+              getCardId={(client: any) => client.id}
+              compact={true}
+              onCardClick={(client: any) => {
+                if (longPressFired.current) {
+                  longPressFired.current = false;
+                  return;
+                }
+                if (isSelecting) {
+                  toggleSelection(client);
+                  return;
+                }
+                const trigger = document.querySelector(
+                  `[data-card-actions="${client.id}"] button`,
+                ) as HTMLButtonElement | null;
+                trigger?.click();
+              }}
+              cardClassName={`!p-0 !rounded-none !border-0 !bg-transparent !shadow-none transition-colors [&_[data-card-actions]]:absolute [&_[data-card-actions]]:top-0 [&_[data-card-actions]]:right-0 [&_[data-card-actions]>button]:w-0 [&_[data-card-actions]>button]:h-0 [&_[data-card-actions]>button]:overflow-hidden [&_[data-card-actions]>button]:opacity-0`}
+              containerClassName="!p-0"
+              // ✅ REMOVED maxHeight constraint so the list flows naturally with the page
+              renderCardHeader={({ item }: { item: any }) => {
+                const phone = item.phone || "";
+                const isVerified = item.verification_status === "verified";
+                const isPending = item.status === "pending" || item.verification_status === "under_review" || item.verification_status === "sent";
+                const isSuspended = item.status === "suspended";
+                const isSelected = selected.some((c) => c.id === item.id);
+                const dl = getDLStatus(item.dl_expiry);
 
-              const dlToneClasses: Record<typeof dl.tone, string> = {
-                emerald: "text-emerald-600 dark:text-emerald-400",
-                amber: "text-amber-600 dark:text-amber-400",
-                rose: "text-rose-600 dark:text-rose-400",
-                muted: "text-[var(--color-ink-subtle)]",
-              };
+                const dlToneClasses: Record<typeof dl.tone, string> = {
+                  emerald: "text-emerald-600 dark:text-emerald-400",
+                  amber: "text-amber-600 dark:text-amber-400",
+                  rose: "text-rose-600 dark:text-rose-400",
+                  muted: "text-[var(--color-ink-subtle)]",
+                };
 
-              const idStatus = isVerified
-                ? { label: "ID verified", tone: "text-emerald-600 dark:text-emerald-400" }
-                : isPending
-                  ? { label: "ID pending", tone: "text-amber-600 dark:text-amber-400" }
-                  : { label: "ID missing", tone: "text-[var(--color-ink-subtle)]" };
+                const idStatus = isVerified
+                  ? { label: "ID verified", tone: "text-emerald-600 dark:text-emerald-400" }
+                  : isPending
+                    ? { label: "ID pending", tone: "text-amber-600 dark:text-amber-400" }
+                    : { label: "ID missing", tone: "text-[var(--color-ink-subtle)]" };
 
-              const avatarColors = getAvatarColors(item.status);
+                const avatarColors = getAvatarColors(item.status);
 
-              return (
-                <div
-                  data-selection-zone
-                  onTouchStart={handleTouchStart(item)}
-                  onTouchMove={handleTouchMove}
-                  onTouchEnd={handleTouchEnd}
-                  className={`flex items-start gap-3 w-full py-3 border-b border-[var(--color-surface-border)]/50 last:border-b-0 transition-colors select-none ${
-                    isSuspended
-                      ? "opacity-50"
-                      : "hover:bg-[var(--color-surface-hover)]/40"
-                  }`}
-                >
-                  <div className="relative flex-shrink-0">
-                    <div
-                      className={`w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center font-bold text-sm ${avatarColors}`}
-                    >
-                      {getInitials(item.full_name)}
+                return (
+                  <div
+                    data-selection-zone
+                    onTouchStart={handleTouchStart(item)}
+                    onTouchMove={handleTouchMove}
+                    onTouchEnd={handleTouchEnd}
+                    className={`flex items-start gap-3 w-full py-3 border-b border-[var(--color-surface-border)]/50 last:border-b-0 transition-colors select-none ${
+                      isSuspended
+                        ? "opacity-50"
+                        : "hover:bg-[var(--color-surface-hover)]/40"
+                    }`}
+                  >
+                    <div className="relative flex-shrink-0">
+                      <div
+                        className={`w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center font-bold text-sm ${avatarColors}`}
+                      >
+                        {getInitials(item.full_name)}
+                      </div>
                     </div>
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
+                          {item.full_name}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3 mt-1 flex-wrap">
+                        <span className={`inline-flex items-center gap-1 text-[11px] font-semibold ${idStatus.tone}`}>
+                          <CreditCard size={11} className="flex-shrink-0" />
+                          {idStatus.label}
+                        </span>
+
+                        <span className={`inline-flex items-center gap-1 text-[11px] font-semibold ${dlToneClasses[dl.tone]}`}>
+                          <Car size={11} className="flex-shrink-0" />
+                          {dl.label}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 mt-1 min-w-0">
+                        {phone ? (
+                          <a
+                            href={`tel:${phone.replace(/\s/g, "")}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex items-center gap-1 text-xs font-medium text-[var(--color-ink-muted)] hover:text-[var(--color-primary)] transition-colors min-w-0"
+                          >
+                            <Phone size={11} className="flex-shrink-0" />
+                            <span className="truncate">{phone}</span>
+                          </a>
+                        ) : (
+                          <span className="text-xs text-[var(--color-ink-subtle)] italic">No phone</span>
+                        )}
+                      </div>
+                    </div>
+
+                    {isSelecting && (
+                      <div className="flex-shrink-0 self-center pl-1">
+                        {isSelected ? (
+                          <CheckCircle2 size={22} className="text-[var(--color-primary)]" strokeWidth={2.25} />
+                        ) : (
+                          <Circle size={22} className="text-[var(--color-ink-subtle)]" strokeWidth={1.5} />
+                        )}
+                      </div>
+                    )}
                   </div>
-
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
-                        {item.full_name}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-3 mt-1 flex-wrap">
-                      <span className={`inline-flex items-center gap-1 text-[11px] font-semibold ${idStatus.tone}`}>
-                        <CreditCard size={11} className="flex-shrink-0" />
-                        {idStatus.label}
-                      </span>
-
-                      <span className={`inline-flex items-center gap-1 text-[11px] font-semibold ${dlToneClasses[dl.tone]}`}>
-                        <Car size={11} className="flex-shrink-0" />
-                        {dl.label}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center gap-1.5 mt-1 min-w-0">
-                      {phone ? (
-                        <a
-                          href={`tel:${phone.replace(/\s/g, "")}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="flex items-center gap-1 text-xs font-medium text-[var(--color-ink-muted)] hover:text-[var(--color-primary)] transition-colors min-w-0"
-                        >
-                          <Phone size={11} className="flex-shrink-0" />
-                          <span className="truncate">{phone}</span>
-                        </a>
-                      ) : (
-                        <span className="text-xs text-[var(--color-ink-subtle)] italic">No phone</span>
-                      )}
-                    </div>
-                  </div>
-
-                  {isSelecting && (
-                    <div className="flex-shrink-0 self-center pl-1">
-                      {isSelected ? (
-                        <CheckCircle2 size={22} className="text-[var(--color-primary)]" strokeWidth={2.25} />
-                      ) : (
-                        <Circle size={22} className="text-[var(--color-ink-subtle)]" strokeWidth={1.5} />
-                      )}
-                    </div>
-                  )}
-                </div>
-              );
-            }}
-            renderCardBody={() => null}
-            rowActions={getClientActions}
-            renderActionSheetBadge={(client: any) => {
-              const style = CLIENT_STATUS_STYLES[client.status] || CLIENT_STATUS_STYLES.inactive;
-              return (
-                <span
-                  className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-extrabold uppercase tracking-wider border ${
-                    client.status === "active"
-                      ? "text-emerald-500 bg-emerald-500/10 border-emerald-500/20"
-                      : client.status === "pending"
-                        ? "text-amber-500 bg-amber-500/10 border-amber-500/20"
-                        : client.status === "suspended"
-                          ? "text-rose-500 bg-rose-500/10 border-rose-500/20"
-                          : "text-[var(--color-ink-muted)] bg-[var(--color-surface-hover)] border-[var(--color-surface-border)]"
-                  }`}
-                >
-                  <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
-                  {style.label}
-                </span>
-              );
-            }}
-          />
-        )}
+                );
+              }}
+              renderCardBody={() => null}
+              rowActions={getClientActions}
+              renderActionSheetBadge={(client: any) => {
+                const style = CLIENT_STATUS_STYLES[client.status] || CLIENT_STATUS_STYLES.inactive;
+                return (
+                  <span
+                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-extrabold uppercase tracking-wider border ${
+                      client.status === "active"
+                        ? "text-emerald-500 bg-emerald-500/10 border-emerald-500/20"
+                        : client.status === "pending"
+                          ? "text-amber-500 bg-amber-500/10 border-amber-500/20"
+                          : client.status === "suspended"
+                            ? "text-rose-500 bg-rose-500/10 border-rose-500/20"
+                            : "text-[var(--color-ink-muted)] bg-[var(--color-surface-hover)] border-[var(--color-surface-border)]"
+                    }`}
+                  >
+                    <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
+                    {style.label}
+                  </span>
+                );
+              }}
+            />
+          )}
+        </div>
 
         {/* FAB stack */}
         {!isSelecting && !searchFocused && (
