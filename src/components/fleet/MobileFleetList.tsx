@@ -9,6 +9,7 @@ import {
   SlidersHorizontal, MoreHorizontal,
 } from "lucide-react";
 import CardGrid, { RowAction } from "@/components/ui/CardGrid";
+import { getVehicleBodyIcon } from "@/components/fleet/vehicle-avatar";
 import type { Vehicle, VehicleStatus, Booking } from "@/lib/types";
 
 /* ──────────────────────────────────────────────────────────────────────
@@ -597,6 +598,9 @@ export default function MobileFleetList({
             // ✅ Status-based avatar colors
             const avatarColors = getVehicleAvatarColors(item, isDueForService);
 
+            // ✅ Body-type-aware icon (truck/bus/van/motorcycle/etc.)
+            const BodyIcon = getVehicleBodyIcon(item);
+
             return (
               <div
                 key={item.id}
@@ -621,11 +625,11 @@ export default function MobileFleetList({
                     : "border-[var(--color-surface-border)] hover:border-[var(--color-primary)]/30 shadow-sm"
                 }`}
               >
-                {/* ✅ Status-colored avatar tile */}
+                {/* ✅ Status-colored avatar tile with body-type icon */}
                 <div
                   className={`w-20 h-14 rounded-xl flex items-center justify-center shrink-0 overflow-hidden ${avatarColors.bg}`}
                 >
-                  <Car size={28} className={avatarColors.icon} strokeWidth={1.75} />
+                  <BodyIcon size={28} className={avatarColors.icon} strokeWidth={1.75} />
                 </div>
 
                 <div className="min-w-0 flex-1 pr-6">

@@ -26,6 +26,7 @@ import {
 } from "lucide-react";
 import CardGrid, { RowAction } from "@/components/ui/CardGrid";
 import ReviewVerificationModal from "@/components/client/ReviewVerificationModal";
+import { useMobileHeaderExpanded } from "@/hooks/useMobileHeaderExpanded";
 
 /* ──────────────────────────────────────────────────────────────────────
    Types & helpers
@@ -40,7 +41,6 @@ const CLIENT_STATUS_STYLES: Record<string, { bg: string; text: string; dot: stri
   inactive:  { bg: "bg-gray-500/10",    text: "text-gray-600 dark:text-gray-400",       dot: "bg-gray-500",    label: "Inactive" },
 };
 
-/** Generates initials from a full name (e.g., "John Doe" → "JD"). */
 const getInitials = (name?: string | null) => {
   if (!name) return "?";
   const parts = name.trim().split(/\s+/);
@@ -48,7 +48,6 @@ const getInitials = (name?: string | null) => {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 };
 
-/** Returns a soft background color + text color based on client status. */
 const getAvatarColors = (status: string) => {
   switch (status) {
     case "active":
@@ -136,6 +135,8 @@ export default function MobileClientsList({
   onAddClient,
 }: MobileClientsListProps) {
   const router = useRouter();
+  const headerExpanded = useMobileHeaderExpanded();
+
   const [reviewModalOpen, setReviewModalOpen] = useState(false);
   const [reviewClientId, setReviewClientId] = useState<number | null>(null);
 
@@ -272,14 +273,27 @@ export default function MobileClientsList({
     ].filter((action) => !!action.label) as RowAction<any>[];
 
   const hasActiveFilter = statusFilter !== null && statusFilter !== "";
-  const toolbarSpacerHeight = filtersOpen && !isSelecting ? "h-32" : "h-20";
+
+  // ✅ Dynamic top offset (matches fleet + bookings)
+  const EXPANDED_OFFSET = 128;
+  const COLLAPSED_OFFSET = 56;
+  const toolbarTop = headerExpanded ? EXPANDED_OFFSET : COLLAPSED_OFFSET;
+
+  // ✅ Dynamic spacer (matches fleet + bookings)
+  const baseSpacer = filtersOpen && !isSelecting ? 144 : 96;
+  const headerDelta = headerExpanded ? (EXPANDED_OFFSET - COLLAPSED_OFFSET) : 0;
+  const spacerHeight = baseSpacer + headerDelta;
 
   return (
     <>
       <div className="md:hidden animate-in fade-in duration-300 relative">
-        {/* ✅ TOOLBAR — fixed below topbar, no border */}
+        {/* ✅ TOOLBAR — slides down when header expands */}
         <div
-          className="fixed top-14 left-0 right-0 z-25 px-4 pt-2 pb-2 bg-[var(--color-bg)]/95 backdrop-blur-md"
+          className="fixed left-0 right-0 z-25 px-4 pt-2 pb-2 bg-[var(--color-bg)]/95 backdrop-blur-md"
+          style={{
+            top: `${toolbarTop}px`,
+            transition: "top 300ms cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
           data-selection-zone
         >
           {isSelecting ? (
@@ -323,7 +337,7 @@ export default function MobileClientsList({
             </div>
           ) : (
             <div className="space-y-2">
-              {/* ✅ Unified search + embedded filter pill */}
+              {/* Unified search + embedded filter pill */}
               <div className="flex items-center h-11 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] overflow-hidden transition-colors">
                 <div className="relative flex-1 h-full">
                   <Search
@@ -447,8 +461,13 @@ export default function MobileClientsList({
           )}
         </div>
 
-        {/* Spacer */}
-        <div className={`${toolbarSpacerHeight} transition-[height] duration-200`} />
+        {/* ✅ Dynamic spacer */}
+        <div
+          style={{
+            height: `${spacerHeight}px`,
+            transition: "height 300ms cubic-bezier(0.16, 1, 0.3, 1)",
+          }}
+        />
 
         <div className={searchFocused || isSelecting ? "hidden" : ""}>
           {!loading && pendingClients > 0 && statusFilter !== "pending" && (
@@ -537,7 +556,6 @@ export default function MobileClientsList({
                   ? { label: "ID pending", tone: "text-amber-600 dark:text-amber-400" }
                   : { label: "ID missing", tone: "text-[var(--color-ink-subtle)]" };
 
-              // ✅ Avatar colors based on status
               const avatarColors = getAvatarColors(item.status);
 
               return (
@@ -552,7 +570,6 @@ export default function MobileClientsList({
                       : "hover:bg-[var(--color-surface-hover)]/40"
                   }`}
                 >
-                  {/* ✅ Avatar: Initials + Status-based color */}
                   <div className="relative flex-shrink-0">
                     <div
                       className={`w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center font-bold text-sm ${avatarColors}`}

@@ -18,6 +18,7 @@ import SecureImage from "@/components/ui/SecureImage";
 import ThemeToggle from "@/components/layout/ThemeToggle";
 import TopBarBrand from "@/components/layout/topbar/TopBarBrand";
 import TopBarPageTitle from "@/components/layout/topbar/TopBarPageTitle";
+import { emitMobileHeaderExpanded } from "@/hooks/useMobileHeaderExpanded";
 
 interface SearchScope {
   id: string;
@@ -98,13 +99,17 @@ export default function Topbar({
     setMobileHeaderExpanded(false);
   }, [pathname]);
 
+  // ✅ Notify mobile toolbars when the header expands/collapses
+  useEffect(() => {
+    emitMobileHeaderExpanded(mobileHeaderExpanded);
+  }, [mobileHeaderExpanded]);
+
   // ✅ Auto-collapse expanded topbar on scroll
   useEffect(() => {
     if (!mobileHeaderExpanded) return;
 
     const collapse = () => setMobileHeaderExpanded(false);
 
-    // Capture scroll from any scrollable ancestor (window or inner containers)
     window.addEventListener("scroll", collapse, { passive: true, capture: true });
     document.addEventListener("touchmove", collapse, { passive: true });
 
@@ -202,7 +207,7 @@ export default function Topbar({
     <>
       <header
         className={`
-          sticky top-0 z-30 bg-bg border-b border-surface-border/60
+          sticky top-0 z-30 bg-bg
           transition-all duration-300
           sm:h-16
           ${hasPageHeader && mobileHeaderExpanded ? "h-auto" : "h-14"}

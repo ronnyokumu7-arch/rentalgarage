@@ -5,6 +5,18 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false, // ✅ Hides Next.js fingerprint
   compress: true,
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // ⚡ PACKAGE IMPORT OPTIMIZATION
+  // ─────────────────────────────────────────────────────────────────────────
+  // Automatically transforms barrel imports into direct imports.
+  // This keeps dev server fast and prevents bundling unused icons.
+  experimental: {
+    optimizePackageImports: [
+      '@phosphor-icons/react',
+      'lucide-react', // Add this too if you still use it elsewhere
+    ],
+  },
   
   // ─────────────────────────────────────────────────────────────────────────
   // 🖼️ IMAGE DOMAIN CONTROL

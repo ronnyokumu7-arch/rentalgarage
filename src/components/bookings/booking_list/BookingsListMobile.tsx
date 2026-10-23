@@ -12,6 +12,7 @@ import type { Booking, Client, Vehicle } from "@/lib/types";
 import { getBookingActions, type BookingActionsContext } from "./getBookingActions";
 import { formatDateShort, statusLabels } from "./constants";
 import { NewBookingFab } from "@/components/bookings/NewBookingButton";
+import { useMobileHeaderExpanded } from "@/hooks/useMobileHeaderExpanded";
 
 interface BookingsListMobileProps {
   bookings: Booking[];
@@ -62,6 +63,8 @@ export default function BookingsListMobile({
   statusOptions,
 }: BookingsListMobileProps) {
   const router = useRouter();
+  const headerExpanded = useMobileHeaderExpanded();
+
   const fullCtx: BookingActionsContext = {
     ...actionsCtx,
     routerPush: (h) => router.push(h),
@@ -72,12 +75,27 @@ export default function BookingsListMobile({
   const [searchFocused, setSearchFocused] = useState(false);
 
   const hasActiveFilter = statusFilter !== null && statusFilter !== "";
-  const toolbarSpacerHeight = filtersOpen ? "h-32" : "h-20";
+
+  // ✅ Dynamic top offset based on header expansion (matches fleet)
+  const EXPANDED_OFFSET = 128;
+  const COLLAPSED_OFFSET = 56;
+  const toolbarTop = headerExpanded ? EXPANDED_OFFSET : COLLAPSED_OFFSET;
+
+  // ✅ Dynamic spacer: matches fleet's base values + header expansion delta
+  const baseSpacer = filtersOpen ? 144 : 96;
+  const headerDelta = headerExpanded ? (EXPANDED_OFFSET - COLLAPSED_OFFSET) : 0;
+  const spacerHeight = baseSpacer + headerDelta;
 
   return (
     <div className="block md:hidden relative">
-      {/* TOOLBAR */}
-      <div className="fixed top-14 left-0 right-0 z-25 px-4 pt-2 pb-2 bg-[var(--color-bg)]/95 backdrop-blur-md">
+      {/* TOOLBAR — slides down when header expands */}
+      <div
+        className="fixed left-0 right-0 z-25 px-4 pt-2 pb-2 bg-[var(--color-bg)]/95 backdrop-blur-md"
+        style={{
+          top: `${toolbarTop}px`,
+          transition: "top 300ms cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
+      >
         <div className="space-y-2">
           {/* Search + filter pill */}
           <div className="flex items-center h-11 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] overflow-hidden transition-colors">
@@ -179,8 +197,13 @@ export default function BookingsListMobile({
         </div>
       </div>
 
-      {/* Spacer */}
-      <div className={`${toolbarSpacerHeight} transition-[height] duration-200`} />
+      {/* ✅ Dynamic spacer — matches fleet spacing exactly */}
+      <div
+        style={{
+          height: `${spacerHeight}px`,
+          transition: "height 300ms cubic-bezier(0.16, 1, 0.3, 1)",
+        }}
+      />
 
       {/* Card list */}
       <CardGrid
@@ -290,7 +313,7 @@ export default function BookingsListMobile({
         rowActions={getRowActions}
       />
 
-      {/* ✅ FAB — shares the same actions as NewBookingButton, opens the same modals */}
+      {/* FAB */}
       {!searchFocused && <NewBookingFab />}
     </div>
   );
