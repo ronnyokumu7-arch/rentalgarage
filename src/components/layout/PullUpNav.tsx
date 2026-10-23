@@ -41,11 +41,11 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
   const [currentOffset, setCurrentOffset] = useState(0);
   const [openHeight, setOpenHeight] = useState(0);
   const [travel, setTravel] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
-  const drawerRef = useRef<HTMLDivElement>(null);
-  const dragHandleRef = useRef<HTMLDivElement>(null);
-  const travelRef = useRef(0);
-  const offsetRef = useRef(0);
+  const dragStartY = useRef(0);
+  const dragStartOffset = useRef(0);
+  const hasMoved = useRef(false);
 
   const reorderedItems = [...navItems].sort((a, b) => {
     const priority: Record<string, number> = {
@@ -71,9 +71,6 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
   const parts = currentPanel?.split(":") ?? [];
   const level = parts.length;
   const isSettingsLeaf = parts[0] === "settings" && level === 3;
-
-  useEffect(() => { travelRef.current = travel; }, [travel]);
-  useEffect(() => { offsetRef.current = currentOffset; }, [currentOffset]);
 
   useEffect(() => {
     setMounted(true);
@@ -103,21 +100,13 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
     [pathname],
   );
 
-  // ✅ Stable close function
   const closeDrawer = useCallback(() => {
-    if (drawerRef.current) {
-      drawerRef.current.style.transition = "transform 300ms cubic-bezier(0.16, 1, 0.3, 1)";
-      drawerRef.current.style.transform = `translate3d(0, ${travelRef.current}px, 0)`;
-    }
-    offsetRef.current = 0;
     setCurrentOffset(0);
   }, []);
 
-  // ✅ Reset stack on route OR query change — the critical fix
   useEffect(() => {
     setPanelStack([]);
     setCurrentOffset(0);
-    offsetRef.current = 0;
   }, [pathname, searchParams]);
 
   const getDisplayLabel = (label: string) =>
@@ -132,115 +121,42 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
     return () => document.body.removeAttribute("data-pullup-open");
   }, [currentOffset]);
 
-  // ── GESTURE — attaches once ──
-  useEffect(() => {
-    const drawer = drawerRef.current;
-    const handle = dragHandleRef.current;
-    if (!drawer || !handle) return;
+  const handleTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (!touch) return;
+    dragStartY.current = touch.clientY;
+    dragStartOffset.current = currentOffset;
+    hasMoved.current = false;
+    setIsDragging(true);
+  };
 
-    let startY = 0;
-    let startOffset = 0;
-    let moved = false;
-    let rafId: number | null = null;
-    let dragging = false;
+  const handleTouchMove = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (!touch) return;
+    const dy = dragStartY.current - touch.clientY;
+    if (Math.abs(dy) > 4) hasMoved.current = true;
+    if (!hasMoved.current) return;
+    
+    const next = Math.max(0, Math.min(travel, dragStartOffset.current + dy));
+    setCurrentOffset(next);
+    
+    if (e.cancelable) e.preventDefault();
+  };
 
-    const paint = (offset: number) => {
-      const tr = travelRef.current;
-      const clamped = Math.max(0, Math.min(tr, offset));
-      const ty = tr - clamped;
-      drawer.style.transition = "none";
-      drawer.style.transform = `translate3d(0, ${ty}px, 0)`;
-      const content = drawer.querySelector(".drawer-content") as HTMLElement | null;
-      if (content) {
-        const op = Math.min(1, Math.max(0, (clamped - PEEK_VISIBLE) / 30));
-        content.style.opacity = op.toString();
-        content.style.pointerEvents = op > 0.5 ? "auto" : "none";
-      }
-    };
-
-    const settle = (target: number) => {
-      const tr = travelRef.current;
-      const clamped = Math.max(0, Math.min(tr, target));
-      drawer.style.transition = "transform 300ms cubic-bezier(0.16, 1, 0.3, 1)";
-      drawer.style.transform = `translate3d(0, ${tr - clamped}px, 0)`;
-      offsetRef.current = clamped;
-      setCurrentOffset(clamped);
-    };
-
-    const begin = (y: number) => {
-      startY = y;
-      startOffset = offsetRef.current;
-      moved = false;
-      dragging = true;
-      document.body.style.overflow = "hidden";
-      if (rafId) cancelAnimationFrame(rafId);
-      paint(startOffset);
-    };
-
-    const move = (y: number) => {
-      if (!dragging) return;
-      const dy = startY - y;
-      if (Math.abs(dy) > 5) moved = true;
-      if (!moved) return;
-      if (rafId) cancelAnimationFrame(rafId);
-      rafId = requestAnimationFrame(() => paint(startOffset + dy));
-    };
-
-    const end = () => {
-      if (!dragging) return;
-      dragging = false;
-      document.body.style.overflow = "";
-      if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
-
-      const tr = travelRef.current;
-
-      if (!moved) {
-        const cur = offsetRef.current;
-        settle(cur >= tr / 2 ? 0 : tr);
-        return;
-      }
-
-      const style = window.getComputedStyle(drawer);
-      const matrix = new DOMMatrixReadOnly(style.transform);
-      const painted = tr - matrix.m42;
-      settle(painted >= tr / 2 ? tr : 0);
-    };
-
-    const onTouchStart = (e: TouchEvent) => begin(e.touches[0].clientY);
-    const onTouchMove = (e: TouchEvent) => {
-      if (!dragging) return;
-      if (e.cancelable) e.preventDefault();
-      move(e.touches[0].clientY);
-    };
-    const onTouchEnd = () => end();
-
-    const onMouseDown = (e: MouseEvent) => {
-      e.preventDefault();
-      begin(e.clientY);
-    };
-    const onMouseMove = (e: MouseEvent) => move(e.clientY);
-    const onMouseUp = () => end();
-
-    handle.addEventListener("touchstart", onTouchStart, { passive: true });
-    window.addEventListener("touchmove", onTouchMove, { passive: false });
-    window.addEventListener("touchend", onTouchEnd);
-    window.addEventListener("touchcancel", onTouchEnd);
-
-    handle.addEventListener("mousedown", onMouseDown);
-    window.addEventListener("mousemove", onMouseMove);
-    window.addEventListener("mouseup", onMouseUp);
-
-    return () => {
-      handle.removeEventListener("touchstart", onTouchStart);
-      window.removeEventListener("touchmove", onTouchMove);
-      window.removeEventListener("touchend", onTouchEnd);
-      window.removeEventListener("touchcancel", onTouchEnd);
-
-      handle.removeEventListener("mousedown", onMouseDown);
-      window.removeEventListener("mousemove", onMouseMove);
-      window.removeEventListener("mouseup", onMouseUp);
-    };
-  }, []);
+  const handleTouchEnd = () => {
+    setIsDragging(false);
+    
+    if (!hasMoved.current) {
+      // Tap → toggle
+      const next = currentOffset >= travel / 2 ? 0 : travel;
+      setCurrentOffset(next);
+      return;
+    }
+    
+    // Drag → snap
+    const next = currentOffset >= travel / 2 ? travel : 0;
+    setCurrentOffset(next);
+  };
 
   const handleLogout = async () => {
     await logout();
@@ -375,41 +291,38 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
       />
 
       <div
-        ref={drawerRef}
-        data-pullup-drawer
         className="lg:hidden fixed inset-x-0 z-[60] bg-[var(--color-surface)] border-t border-[var(--color-surface-border)] rounded-t-[20px] shadow-[0_-20px_60px_rgba(0,0,0,0.25)] flex flex-col overflow-hidden"
         style={{
           bottom: BAR_HEIGHT,
           height: openHeight,
           transform: `translate3d(0, ${translateY}px, 0)`,
           willChange: "transform",
-          transition: "height 250ms cubic-bezier(0.16, 1, 0.3, 1)",
+          transition: isDragging ? "none" : "transform 300ms cubic-bezier(0.16, 1, 0.3, 1)",
         }}
         aria-hidden={!isOpen}
       >
         <div
-          ref={dragHandleRef}
           className="relative flex items-center justify-center h-[32px] flex-shrink-0 cursor-grab active:cursor-grabbing select-none bg-[var(--color-bg-elevated)] rounded-t-[20px]"
           style={{ touchAction: "none" }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
           onClick={() => {
-            if (!drawerRef.current) return;
-            const tr = travelRef.current;
-            const next = offsetRef.current >= tr / 2 ? 0 : tr;
-            drawerRef.current.style.transition = "transform 300ms cubic-bezier(0.16, 1, 0.3, 1)";
-            drawerRef.current.style.transform = `translate3d(0, ${tr - next}px, 0)`;
-            offsetRef.current = next;
-            setCurrentOffset(next);
+            if (!hasMoved.current) {
+              const next = currentOffset >= travel / 2 ? 0 : travel;
+              setCurrentOffset(next);
+            }
           }}
         >
-          <div className="absolute left-5 flex items-center gap-1.5">
+          <div className="absolute left-5 flex items-center gap-1.5 pointer-events-none">
             <span className="text-[11px] font-medium text-[var(--color-ink-muted)]">
               Explore more
             </span>
           </div>
-          <div className="flex items-center justify-center w-14 h-full">
+          <div className="flex items-center justify-center w-14 h-full pointer-events-none">
             <span className="block w-10 h-1 rounded-full bg-[var(--color-ink-faint)]" />
           </div>
-          <div className="absolute right-5 flex items-center">
+          <div className="absolute right-5 flex items-center pointer-events-none">
             <ChevronUp
               size={14}
               className="text-[var(--color-ink-subtle)] transition-transform duration-300"

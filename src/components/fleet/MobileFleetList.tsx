@@ -4,9 +4,9 @@ import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useMemo } from "react";
 import {
   Car, Archive, Shield, Loader2,
-  Ban, Wrench, Gauge, User, CarFront,
+  Ban, Wrench, CarFront, Gauge,
   Banknote, Pencil, Plus, Search, CheckCircle2, Circle, X,
-  SlidersHorizontal,
+  SlidersHorizontal, MoreHorizontal,
 } from "lucide-react";
 import CardGrid, { RowAction } from "@/components/ui/CardGrid";
 import type { Vehicle, VehicleStatus, Booking } from "@/lib/types";
@@ -15,16 +15,37 @@ import type { Vehicle, VehicleStatus, Booking } from "@/lib/types";
    Helpers
 ────────────────────────────────────────────────────────────────────── */
 
-const statusLabels: Record<VehicleStatus, string> = {
-  pending_activation: "Pending",
-  available: "Available",
-  rented: "Rented",
-  maintenance: "Maintenance",
-  retired: "Retired",
+const formatPlate = (plate: string) => plate.toUpperCase();
+
+const formatPrice = (amount: number | string) => {
+  const num = Number(amount);
+  return num.toLocaleString("en-KE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
-const formatPlate = (plate: string) =>
-  plate.replace(/([A-Za-z])(\d)/, "$1 $2").toUpperCase();
+const formatMileage = (km: number) => km.toString();
+
+/** Returns avatar tile styling (bg + icon color) based on the vehicle's status. */
+const getVehicleAvatarColors = (
+  vehicle: Vehicle,
+  isDueForService: boolean
+): { bg: string; icon: string } => {
+  if (vehicle.is_archived) {
+    return { bg: "bg-slate-500/10", icon: "text-slate-600 dark:text-slate-400" };
+  }
+  if (vehicle.status === "maintenance" || isDueForService || vehicle.mileage_due) {
+    return { bg: "bg-amber-500/10", icon: "text-amber-600 dark:text-amber-400" };
+  }
+  if (vehicle.status === "rented") {
+    return { bg: "bg-blue-500/10", icon: "text-blue-600 dark:text-blue-400" };
+  }
+  if (vehicle.status === "available") {
+    return { bg: "bg-emerald-500/10", icon: "text-emerald-600 dark:text-emerald-400" };
+  }
+  if (vehicle.status === "pending_activation") {
+    return { bg: "bg-violet-500/10", icon: "text-violet-600 dark:text-violet-400" };
+  }
+  return { bg: "bg-slate-500/10", icon: "text-slate-600 dark:text-slate-400" };
+};
 
 /* ──────────────────────────────────────────────────────────────────────
    Props
@@ -295,7 +316,6 @@ export default function MobileFleetList({
   const pillOptions = statusOptions.filter(
     (opt) => opt.value !== "pending_activation" && opt.value !== "maintenance",
   );
-  const garageCount = statusOptions.find((o) => o.value === "maintenance")?.count ?? 0;
 
   const mileageDueVehicles = useMemo(
     () => sortedVehicles.filter((v) => v.mileage_due),
@@ -308,10 +328,15 @@ export default function MobileFleetList({
 
   const hasActiveFilter = statusFilter !== "";
 
+  const toolbarSpacerHeight = filtersOpen && !isSelecting ? "h-32" : "h-20";
+
   return (
     <div className="md:hidden animate-in fade-in duration-300 relative">
-      {/* ─── TOOLBAR ─────────────────────────────────────────── */}
-      <div className="py-3" data-selection-zone>
+      {/* TOOLBAR */}
+      <div
+        className="fixed top-14 left-0 right-0 z-25 px-4 pt-2 pb-2 bg-[var(--color-bg)]/95 backdrop-blur-md"
+        data-selection-zone
+      >
         {isSelecting ? (
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
@@ -332,7 +357,6 @@ export default function MobileFleetList({
                 onClick={handleBatchMileage}
                 className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
                 aria-label="Update mileage"
-                title="Update Mileage"
               >
                 <Wrench size={16} />
               </button>
@@ -340,7 +364,6 @@ export default function MobileFleetList({
                 onClick={handleBatchMaintenance}
                 className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
                 aria-label="Send to maintenance"
-                title="Send to Maintenance"
               >
                 <Wrench size={16} />
               </button>
@@ -348,17 +371,15 @@ export default function MobileFleetList({
                 onClick={handleBatchArchive}
                 className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
                 aria-label="Archive"
-                title="Archive"
               >
                 <Archive size={16} />
               </button>
             </div>
           </div>
         ) : (
-          <div className="space-y-2.5">
-            {/* Search + Filter row */}
-            <div className="flex items-center gap-2">
-              <div className="relative flex-1">
+          <div className="space-y-2">
+            <div className="flex items-center h-11 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] overflow-hidden transition-colors">
+              <div className="relative flex-1 h-full">
                 <Search
                   size={16}
                   className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
@@ -372,8 +393,8 @@ export default function MobileFleetList({
                   onBlur={() => {
                     setTimeout(() => setSearchFocused(false), 150);
                   }}
-                  placeholder="Search make, model, plate..."
-                  className="w-full h-10 pl-9 pr-10 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all"
+                  placeholder="Search vehicle, plate, driver..."
+                  className="w-full h-full pl-10 pr-2 bg-transparent text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] outline-none"
                 />
                 {search && (
                   <button
@@ -388,94 +409,89 @@ export default function MobileFleetList({
                 )}
               </div>
 
-              {/* Filter toggle button */}
-              <button
-                type="button"
-                onClick={() => setFiltersOpen((v) => !v)}
-                aria-label={filtersOpen ? "Hide filters" : "Show filters"}
-                className={`relative h-10 w-10 rounded-xl border flex items-center justify-center transition-all shrink-0 active:scale-95 ${
-                  filtersOpen
-                    ? "bg-[var(--color-primary)] border-[var(--color-primary)] text-white"
-                    : "bg-[var(--color-surface)] border-[var(--color-surface-border)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
-                }`}
-              >
-                <SlidersHorizontal size={16} />
-                {hasActiveFilter && !filtersOpen && (
-                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[var(--color-primary)] ring-2 ring-[var(--color-surface)]" />
-                )}
-              </button>
+              <div className="pr-1.5">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setFiltersOpen((v) => !v);
+                  }}
+                  aria-label={filtersOpen ? "Hide filters" : "Show filters"}
+                  aria-expanded={filtersOpen}
+                  className={`relative h-8 px-2.5 rounded-lg flex items-center justify-center gap-1 transition-all active:scale-95 ${
+                    filtersOpen
+                      ? "bg-[var(--color-primary)] text-white shadow-sm"
+                      : hasActiveFilter
+                        ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/15"
+                        : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                  }`}
+                >
+                  <SlidersHorizontal size={14} />
+                  {hasActiveFilter && !filtersOpen && (
+                    <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]" />
+                  )}
+                </button>
+              </div>
             </div>
 
-            {/* Filter pills — hidden by default, revealed by the filter button */}
             {filtersOpen && !searchFocused && (
-              <div className="overflow-x-auto scrollbar-none animate-in slide-in-from-top-1 fade-in duration-200">
-                <div className="flex items-center gap-2 py-1">
-                  <button
-                    onClick={() => setStatusFilter("")}
-                    className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-bold transition-colors border ${
-                      statusFilter === ""
-                        ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
-                        : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                    }`}
-                  >
-                    All
-                  </button>
-                  {pillOptions.map((opt) => {
-                    const isActive = statusFilter === opt.value;
-                    return (
-                      <button
-                        key={opt.value}
-                        onClick={() =>
-                          setStatusFilter((opt.value || "") as VehicleStatus | "")
-                        }
-                        className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
-                          isActive
-                            ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
-                            : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                        }`}
-                      >
-                        {opt.label}
-                        {isActive && (
-                          <span className="text-[9px] font-extrabold tabular-nums text-[var(--color-primary)]">
-                            {opt.count}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                  <button
-                    onClick={() => setStatusFilter("maintenance")}
-                    className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
-                      statusFilter === "maintenance"
-                        ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
-                        : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                    }`}
-                  >
-                    <Wrench size={11} className="flex-shrink-0" />
-                    Garage
-                    {statusFilter === "maintenance" && (
-                      <span className="text-[9px] font-extrabold tabular-nums text-[var(--color-primary)]">
-                        {garageCount}
-                      </span>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => setStatusFilter("retired")}
-                    className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
-                      statusFilter === "retired"
-                        ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
-                        : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                    }`}
-                  >
-                    <Archive size={11} className="flex-shrink-0" />
-                    Archived
-                  </button>
+              <div className="relative animate-in slide-in-from-top-1 fade-in duration-200">
+                <div className="overflow-x-auto scrollbar-none">
+                  <div className="flex items-center gap-2 py-1 pr-6">
+                    <button
+                      onClick={() => setStatusFilter("")}
+                      className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border ${
+                        statusFilter === ""
+                          ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
+                          : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                      }`}
+                    >
+                      All
+                    </button>
+                    {pillOptions.map((opt) => {
+                      const isActive = statusFilter === opt.value;
+                      return (
+                        <button
+                          key={opt.value}
+                          onClick={() =>
+                            setStatusFilter((opt.value || "") as VehicleStatus | "")
+                          }
+                          className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border ${
+                            isActive
+                              ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
+                              : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                          }`}
+                        >
+                          {opt.label}
+                        </button>
+                      );
+                    })}
+                    <button
+                      onClick={() => setStatusFilter("maintenance")}
+                      className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
+                        statusFilter === "maintenance"
+                          ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
+                          : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                      }`}
+                    >
+                      <Wrench size={11} className="flex-shrink-0" />
+                      Garage
+                    </button>
+                  </div>
                 </div>
+
+                <div
+                  className="pointer-events-none absolute top-0 right-0 bottom-0 w-12 bg-gradient-to-l from-[var(--color-bg)] via-[var(--color-bg)]/80 to-transparent"
+                  aria-hidden="true"
+                />
               </div>
             )}
           </div>
         )}
       </div>
+
+      {/* Spacer */}
+      <div className={`${toolbarSpacerHeight} transition-[height] duration-200`} />
 
       {/* Banners */}
       <div className={searchFocused || isSelecting ? "hidden" : ""}>
@@ -553,234 +569,143 @@ export default function MobileFleetList({
           </p>
         </div>
       ) : (
-        <CardGrid
-          data={displayVehicles}
-          getCardId={(v: Vehicle) => v.id}
-          compact={true}
-          onCardClick={(v: Vehicle) => {
-            if (longPressFired.current) {
-              longPressFired.current = false;
-              return;
-            }
-            if (isSelecting) {
-              toggleSelection(v);
-              return;
-            }
-            const trigger = document.querySelector(
-              `[data-card-actions="${v.id}"] button`,
-            ) as HTMLButtonElement | null;
-            trigger?.click();
-          }}
-          cardClassName={`!p-0 !rounded-none !border-0 !bg-transparent !shadow-none transition-colors [&_[data-card-actions]]:absolute [&_[data-card-actions]]:top-0 [&_[data-card-actions]]:right-0 [&_[data-card-actions]>button]:w-0 [&_[data-card-actions]>button]:h-0 [&_[data-card-actions]>button]:overflow-hidden [&_[data-card-actions]>button]:opacity-0`}
-          containerClassName="!p-0"
-          maxHeight={searchFocused ? "calc(100vh - 120px)" : "calc(100vh - 220px)"}
-          renderCardHeader={({ item }: { item: Vehicle }) => {
+        <div className="space-y-2.5 pb-4">
+          {displayVehicles.map((item) => {
+            const isSelected = selected.some((v) => v.id === item.id);
+
             const kmToService = item.next_service_km
               ? item.next_service_km - item.current_mileage
               : null;
             const isDueForService = kmToService !== null && kmToService <= 500;
-            const isSelected = selected.some((v) => v.id === item.id);
-
-            const needsAttention =
-              item.status === "pending_activation" ||
-              item.status === "maintenance" ||
-              isDueForService ||
-              item.mileage_due;
-            const dot = needsAttention
-              ? {
-                  color: "bg-amber-500",
-                  pulse: item.status === "maintenance",
-                }
-              : null;
-            const showWrench =
-              item.status === "maintenance" || isDueForService || item.mileage_due;
+            const needsMileageAttention = isDueForService || item.mileage_due || item.status === "maintenance";
 
             const statusDisplay = (() => {
-              if (item.is_archived) return { label: "Archived", color: "text-[var(--color-ink-muted)]", dot: "bg-gray-400" };
-              if (item.status === "maintenance") return { label: "In garage", color: "text-amber-600 dark:text-amber-400", dot: "bg-amber-500" };
-              if (isDueForService) return { label: "Service due", color: "text-amber-600 dark:text-amber-400", dot: "bg-amber-500" };
-              if (item.mileage_due) return { label: "Mileage due", color: "text-amber-600 dark:text-amber-400", dot: "bg-amber-500" };
-              if (item.status === "rented") return { label: "Rented", color: "text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500" };
-              if (item.status === "available") return { label: "Available", color: "text-blue-600 dark:text-blue-400", dot: "bg-blue-500" };
-              if (item.status === "pending_activation") return { label: "Pending", color: "text-violet-600 dark:text-violet-400", dot: "bg-violet-500" };
-              return { label: "Retired", color: "text-[var(--color-ink-muted)]", dot: "bg-gray-400" };
+              if (item.is_archived) return { label: "Archived", color: "text-[var(--color-ink-muted)]" };
+              if (item.status === "maintenance") return { label: "Maintenance", color: "text-amber-600 dark:text-amber-400" };
+              if (isDueForService || item.mileage_due) return { label: "Mileage due", color: "text-amber-600 dark:text-amber-400" };
+              if (item.status === "rented") return { label: "Rented", color: "text-blue-600 dark:text-blue-400" };
+              if (item.status === "available") return { label: "Available", color: "text-emerald-600 dark:text-emerald-400" };
+              if (item.status === "pending_activation") return { label: "Pending", color: "text-violet-600 dark:text-violet-400" };
+              return { label: "Retired", color: "text-[var(--color-ink-muted)]" };
             })();
+
+            const MileageIcon = needsMileageAttention ? Wrench : Gauge;
+            const mileageColorClass = needsMileageAttention
+              ? "text-amber-600 dark:text-amber-400"
+              : "text-[var(--color-ink-muted)]";
+
+            // ✅ Status-based avatar colors
+            const avatarColors = getVehicleAvatarColors(item, isDueForService);
 
             return (
               <div
+                key={item.id}
                 data-selection-zone
                 onTouchStart={handleTouchStart(item)}
                 onTouchMove={handleTouchMove}
                 onTouchEnd={handleTouchEnd}
-                className={`flex items-start gap-3 w-full px-1 py-3 transition-colors select-none ${
-                  isSelected ? "bg-[var(--color-primary)]/[0.04]" : ""
+                onClick={() => {
+                  if (longPressFired.current) {
+                    longPressFired.current = false;
+                    return;
+                  }
+                  if (isSelecting) {
+                    toggleSelection(item);
+                    return;
+                  }
+                  router.push(`/dashboard/fleet/${item.id}`);
+                }}
+                className={`relative flex items-center gap-4 p-3.5 rounded-2xl border transition-all cursor-pointer select-none bg-[var(--color-surface)] ${
+                  isSelected
+                    ? "border-[var(--color-primary)] bg-[var(--color-primary)]/[0.04]"
+                    : "border-[var(--color-surface-border)] hover:border-[var(--color-primary)]/30 shadow-sm"
                 }`}
               >
-                {/* Avatar tile */}
-                <div className="relative flex-shrink-0">
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/15 flex items-center justify-center overflow-hidden shadow-sm">
-                    <Car size={22} className="text-[var(--color-primary)]" strokeWidth={1.75} />
-                  </div>
-                  {dot && (
-                    <span
-                      className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full flex items-center justify-center ring-2 ring-[var(--color-surface)] shadow-sm ${dot.color} ${dot.pulse ? "animate-pulse" : ""}`}
-                    >
-                      {showWrench && (
-                        <Wrench size={7} className="text-white" strokeWidth={3} />
-                      )}
+                {/* ✅ Status-colored avatar tile */}
+                <div
+                  className={`w-20 h-14 rounded-xl flex items-center justify-center shrink-0 overflow-hidden ${avatarColors.bg}`}
+                >
+                  <Car size={28} className={avatarColors.icon} strokeWidth={1.75} />
+                </div>
+
+                <div className="min-w-0 flex-1 pr-6">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <h3 className="text-base font-bold text-[var(--color-ink)] truncate tracking-tight">
+                      {item.make} {item.model}
+                    </h3>
+                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-mono font-bold tracking-tight bg-[var(--color-surface-hover)] text-[var(--color-ink)] border border-[var(--color-surface-border)] flex-shrink-0">
+                      {formatPlate(item.plate_number)}
                     </span>
-                  )}
-                </div>
+                  </div>
 
-                {/* Content */}
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-col h-14 justify-between">
-                    {/* Line 1: Make Model + plate pill + investor */}
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      <span className="text-[13px] font-bold text-[var(--color-ink)] truncate tracking-tight">
-                        {item.make} {item.model}
+                  <div className="flex items-center gap-1 mt-1">
+                    <MileageIcon size={11} className={`flex-shrink-0 ${mileageColorClass}`} strokeWidth={2.25} />
+                    <span className={`text-[11px] font-mono font-semibold ${mileageColorClass}`}>
+                      {formatMileage(item.current_mileage)} km
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 mt-1.5">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-[10px] font-semibold text-[var(--color-ink-muted)]">KES</span>
+                      <span className="text-[12px] font-bold text-[var(--color-ink)] tabular-nums">
+                        {formatPrice(item.daily_rate)}
                       </span>
-                      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono font-bold tracking-wide bg-[var(--color-ink)] text-[var(--color-ink-inverse)] flex-shrink-0">
-                        {formatPlate(item.plate_number)}
-                      </span>
-                      {item.owner_id && (
-                        <div className="w-4 h-4 flex items-center justify-center flex-shrink-0" title="Investor Owned">
-                          <User size={11} className="text-[var(--color-ink-subtle)]" />
-                        </div>
-                      )}
                     </div>
 
-                    {/* Line 2: Mileage + next service */}
-                    <div className="flex items-center gap-3 min-w-0 flex-wrap">
-                      <div className="flex items-center gap-1">
-                        <Gauge size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                        <span className="text-[10px] text-[var(--color-ink-muted)] font-mono font-semibold">
-                          {item.current_mileage.toLocaleString()} km
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Wrench
-                          size={10}
-                          className={
-                            isDueForService
-                              ? "text-amber-500 flex-shrink-0"
-                              : "text-[var(--color-ink-subtle)] flex-shrink-0"
-                          }
-                        />
-                        <span
-                          className={`text-[10px] font-mono font-semibold ${
-                            isDueForService
-                              ? "text-amber-600 dark:text-amber-400"
-                              : item.next_service_km
-                                ? "text-[var(--color-ink-muted)]"
-                                : "text-[var(--color-ink-subtle)] italic font-sans"
-                          }`}
-                        >
-                          {item.next_service_km
-                            ? `${item.next_service_km.toLocaleString()} km`
-                            : "Not set"}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Line 3: Price + status text with dot */}
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-[9px] font-semibold text-[var(--color-ink-muted)] uppercase tracking-wider">
-                          KES
-                        </span>
-                        <span className="text-[11px] font-bold text-[var(--color-ink)] tabular-nums">
-                          {Number(item.daily_rate).toLocaleString()}
-                        </span>
-                        <span className="text-[9px] font-medium text-[var(--color-ink-muted)]">/day</span>
-                      </div>
-
-                      <span className={`inline-flex items-center gap-1 text-[10px] font-bold tracking-wide shrink-0 ${statusDisplay.color}`}>
-                        <span className={`w-1.5 h-1.5 rounded-full ${statusDisplay.dot}`} />
-                        {statusDisplay.label}
-                      </span>
+                    <div className={`text-[11px] font-bold tracking-wide ${statusDisplay.color}`}>
+                      {statusDisplay.label}
                     </div>
                   </div>
                 </div>
+
+                <button
+                  className="absolute top-3.5 right-3.5 p-1.5 rounded-md text-[var(--color-ink-subtle)] hover:bg-[var(--color-surface-hover)] transition-colors"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    const trigger = document.querySelector(`[data-card-actions="${item.id}"] button`) as HTMLButtonElement | null;
+                    trigger?.click();
+                  }}
+                  aria-label="Vehicle actions"
+                >
+                  <MoreHorizontal size={18} />
+                </button>
 
                 {isSelecting && (
-                  <div className="flex-shrink-0 self-center pl-1">
+                  <div className="absolute top-3.5 left-3.5 z-10">
                     {isSelected ? (
-                      <CheckCircle2
-                        size={22}
-                        className="text-[var(--color-primary)]"
-                        strokeWidth={2.25}
-                      />
+                      <CheckCircle2 size={20} className="text-[var(--color-primary)] bg-white rounded-full" />
                     ) : (
-                      <Circle
-                        size={22}
-                        className="text-[var(--color-ink-subtle)]"
-                        strokeWidth={1.5}
-                      />
+                      <Circle size={20} className="text-[var(--color-ink-subtle)] bg-white rounded-full" />
                     )}
                   </div>
                 )}
               </div>
             );
-          }}
+          })}
+        </div>
+      )}
+
+      {/* Hidden CardGrid to render action sheets */}
+      <div className="hidden">
+        <CardGrid
+          data={displayVehicles}
+          getCardId={(v: Vehicle) => v.id}
+          compact={true}
+          onCardClick={() => {}}
+          cardClassName="!p-0"
+          containerClassName="!p-0"
+          renderCardHeader={() => <div className="hidden" />}
           renderCardBody={() => null}
           rowActions={getVehicleActions}
-          renderActionSheetBadge={(item: Vehicle) => {
-            const kmToService = item.next_service_km
-              ? item.next_service_km - item.current_mileage
-              : null;
-            const isDueForService = kmToService !== null && kmToService <= 500;
-
-            let label = statusLabels[item.status] || "Ready";
-            let tone: "success" | "warning" | "info" | "default" = "default";
-            let dotColor = "bg-gray-400";
-
-            if (item.is_archived) {
-              label = "Archived";
-            } else if (item.status === "maintenance" || isDueForService || item.mileage_due) {
-              label = item.status === "maintenance"
-                ? "In Garage"
-                : isDueForService
-                  ? "Service Due Soon"
-                  : "Mileage Due";
-              tone = "warning";
-              dotColor = "bg-amber-500";
-            } else if (item.status === "rented") {
-              label = "On Trip";
-              tone = "success";
-              dotColor = "bg-emerald-500";
-            } else if (item.status === "available") {
-              label = "Ready for Booking";
-              tone = "info";
-              dotColor = "bg-blue-500";
-            }
-
-            return (
-              <span
-                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-extrabold uppercase tracking-wider border ${
-                  tone === "success"
-                    ? "text-emerald-500 bg-emerald-500/10 border-emerald-500/20"
-                    : tone === "warning"
-                      ? "text-amber-500 bg-amber-500/10 border-amber-500/20"
-                      : tone === "info"
-                        ? "text-blue-500 bg-blue-500/10 border-blue-500/20"
-                        : "text-[var(--color-ink-muted)] bg-[var(--color-surface-hover)] border-[var(--color-surface-border)]"
-                }`}
-              >
-                <span className={`w-1.5 h-1.5 rounded-full ${dotColor}`} />
-                {label}
-              </span>
-            );
-          }}
         />
-      )}
+      </div>
 
       {!isSelecting && !searchFocused && (
         <div
           data-fab-stack
           className="fixed right-4 bottom-[108px] z-[65] flex flex-col items-end gap-3"
         >
-          {/* Fleet tab no longer shows the spanner — navigation is via pull-up menu. */}
           {activeTab !== "fleet" && (
             <button
               type="button"

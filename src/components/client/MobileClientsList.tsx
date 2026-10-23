@@ -22,9 +22,9 @@ import {
   Plus,
   Building2,
   Calendar,
+  SlidersHorizontal,
 } from "lucide-react";
 import CardGrid, { RowAction } from "@/components/ui/CardGrid";
-import SecureImage from "@/components/ui/SecureImage";
 import ReviewVerificationModal from "@/components/client/ReviewVerificationModal";
 
 /* ──────────────────────────────────────────────────────────────────────
@@ -38,6 +38,28 @@ const CLIENT_STATUS_STYLES: Record<string, { bg: string; text: string; dot: stri
   pending:   { bg: "bg-amber-500/10",   text: "text-amber-600 dark:text-amber-400",     dot: "bg-amber-500",   label: "Pending" },
   suspended: { bg: "bg-red-500/10",     text: "text-red-600 dark:text-red-400",         dot: "bg-red-500",     label: "Suspended" },
   inactive:  { bg: "bg-gray-500/10",    text: "text-gray-600 dark:text-gray-400",       dot: "bg-gray-500",    label: "Inactive" },
+};
+
+/** Generates initials from a full name (e.g., "John Doe" → "JD"). */
+const getInitials = (name?: string | null) => {
+  if (!name) return "?";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+};
+
+/** Returns a soft background color + text color based on client status. */
+const getAvatarColors = (status: string) => {
+  switch (status) {
+    case "active":
+      return "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400";
+    case "pending":
+      return "bg-amber-500/15 text-amber-700 dark:text-amber-400";
+    case "suspended":
+      return "bg-rose-500/15 text-rose-700 dark:text-rose-400";
+    default:
+      return "bg-slate-500/15 text-slate-700 dark:text-slate-400";
+  }
 };
 
 const getWhatsAppNumber = (rawPhone?: string | null): string | null => {
@@ -121,6 +143,7 @@ export default function MobileClientsList({
   const isSelecting = selected.length > 0;
 
   const [searchFocused, setSearchFocused] = useState(false);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -248,11 +271,17 @@ export default function MobileClientsList({
       },
     ].filter((action) => !!action.label) as RowAction<any>[];
 
+  const hasActiveFilter = statusFilter !== null && statusFilter !== "";
+  const toolbarSpacerHeight = filtersOpen && !isSelecting ? "h-32" : "h-20";
+
   return (
     <>
       <div className="md:hidden animate-in fade-in duration-300 relative">
-        {/* Toolbar */}
-        <div className="py-3" data-selection-zone>
+        {/* ✅ TOOLBAR — fixed below topbar, no border */}
+        <div
+          className="fixed top-14 left-0 right-0 z-25 px-4 pt-2 pb-2 bg-[var(--color-bg)]/95 backdrop-blur-md"
+          data-selection-zone
+        >
           {isSelecting ? (
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
@@ -273,7 +302,6 @@ export default function MobileClientsList({
                   onClick={handleBatchVerify}
                   className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
                   aria-label="Verify clients"
-                  title="Start Verification"
                 >
                   <Shield size={16} />
                 </button>
@@ -281,7 +309,6 @@ export default function MobileClientsList({
                   onClick={handleBatchSuspend}
                   className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
                   aria-label="Suspend clients"
-                  title="Suspend"
                 >
                   <Ban size={16} />
                 </button>
@@ -289,107 +316,139 @@ export default function MobileClientsList({
                   onClick={handleBatchArchive}
                   className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
                   aria-label="Archive clients"
-                  title="Archive"
                 >
                   <Archive size={16} />
                 </button>
               </div>
             </div>
           ) : (
-            <div className="space-y-2.5">
-              {/* Search takes full width — segment dropdown removed */}
-              <div className="relative">
-                <Search
-                  size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
-                />
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  onFocus={() => setSearchFocused(true)}
-                  onBlur={() => {
-                    setTimeout(() => setSearchFocused(false), 150);
-                  }}
-                  placeholder={activeTab === "corporate" ? "Search corporate clients..." : "Search clients..."}
-                  className="w-full h-10 pl-9 pr-10 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all"
-                />
-                {search && (
+            <div className="space-y-2">
+              {/* ✅ Unified search + embedded filter pill */}
+              <div className="flex items-center h-11 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] overflow-hidden transition-colors">
+                <div className="relative flex-1 h-full">
+                  <Search
+                    size={16}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                  />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    onFocus={() => setSearchFocused(true)}
+                    onBlur={() => {
+                      setTimeout(() => setSearchFocused(false), 150);
+                    }}
+                    placeholder={activeTab === "corporate" ? "Search corporate clients..." : "Search clients..."}
+                    className="w-full h-full pl-10 pr-2 bg-transparent text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] outline-none"
+                  />
+                  {search && (
+                    <button
+                      type="button"
+                      onMouseDown={(e) => e.preventDefault()}
+                      onClick={handleClearSearch}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[var(--color-surface-hover)] flex items-center justify-center hover:bg-[var(--color-surface-border)] transition-colors"
+                      aria-label="Clear search"
+                    >
+                      <X size={12} className="text-[var(--color-ink-muted)]" />
+                    </button>
+                  )}
+                </div>
+
+                <div className="pr-1.5">
                   <button
                     type="button"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={handleClearSearch}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[var(--color-surface-hover)] flex items-center justify-center hover:bg-[var(--color-surface-border)] transition-colors"
-                    aria-label="Clear search"
-                  >
-                    <X size={12} className="text-[var(--color-ink-muted)]" />
-                  </button>
-                )}
-              </div>
-
-              <div className={`overflow-x-auto scrollbar-none transition-all duration-200 ${searchFocused ? "max-h-0 opacity-0 overflow-hidden" : "max-h-20 opacity-100"}`}>
-                <div className="flex items-center gap-2 py-1">
-                  <button
-                    onClick={() => setStatusFilter(null)}
-                    className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-bold transition-colors border ${
-                      statusFilter === null || statusFilter === ""
-                        ? "text-[var(--color-primary)] border-[var(--color-primary)]"
-                        : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setFiltersOpen((v) => !v);
+                    }}
+                    aria-label={filtersOpen ? "Hide filters" : "Show filters"}
+                    aria-expanded={filtersOpen}
+                    className={`relative h-8 px-2.5 rounded-lg flex items-center justify-center gap-1 transition-all active:scale-95 ${
+                      filtersOpen
+                        ? "bg-[var(--color-primary)] text-white shadow-sm"
+                        : hasActiveFilter
+                          ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/15"
+                          : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
                     }`}
                   >
-                    All
-                  </button>
-                  {statusOptions
-                    .filter((opt) => opt.value !== "pending" && opt.value !== "inactive")
-                    .map((opt) => {
-                      const isActive = statusFilter === opt.value;
-                      return (
-                        <button
-                          key={opt.value}
-                          onClick={() => setStatusFilter(opt.value)}
-                          className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
-                            isActive
-                              ? "text-[var(--color-primary)] border-[var(--color-primary)]"
-                              : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                          }`}
-                        >
-                          {opt.label}
-                          {isActive && (
-                            <span className="text-[9px] font-extrabold tabular-nums text-[var(--color-primary)]">
-                              {opt.count}
-                            </span>
-                          )}
-                        </button>
-                      );
-                    })}
-                  <button
-                    onClick={() => setStatusFilter("with_booking")}
-                    className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
-                      statusFilter === "with_booking"
-                        ? "text-[var(--color-primary)] border-[var(--color-primary)]"
-                        : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                    }`}
-                  >
-                    <Calendar size={11} className="flex-shrink-0" />
-                    With Booking
-                  </button>
-                  <button
-                    onClick={() => setStatusFilter("inactive")}
-                    className={`flex-shrink-0 h-7 px-3 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
-                      statusFilter === "inactive"
-                        ? "text-[var(--color-primary)] border-[var(--color-primary)]"
-                        : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                    }`}
-                  >
-                    <Archive size={11} className="flex-shrink-0" />
-                    Archived
+                    <SlidersHorizontal size={14} />
+                    {hasActiveFilter && !filtersOpen && (
+                      <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]" />
+                    )}
                   </button>
                 </div>
               </div>
+
+              {filtersOpen && !searchFocused && (
+                <div className="relative animate-in slide-in-from-top-1 fade-in duration-200">
+                  <div className="overflow-x-auto scrollbar-none">
+                    <div className="flex items-center gap-2 py-1 pr-6">
+                      <button
+                        onClick={() => setStatusFilter(null)}
+                        className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border ${
+                          statusFilter === null || statusFilter === ""
+                            ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
+                            : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                        }`}
+                      >
+                        All
+                      </button>
+                      {statusOptions
+                        .filter((opt) => opt.value !== "pending" && opt.value !== "inactive")
+                        .map((opt) => {
+                          const isActive = statusFilter === opt.value;
+                          return (
+                            <button
+                              key={opt.value}
+                              onClick={() => setStatusFilter(opt.value)}
+                              className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border ${
+                                isActive
+                                  ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
+                                  : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                              }`}
+                            >
+                              {opt.label}
+                            </button>
+                          );
+                        })}
+                      <button
+                        onClick={() => setStatusFilter("with_booking")}
+                        className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
+                          statusFilter === "with_booking"
+                            ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
+                            : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                        }`}
+                      >
+                        <Calendar size={11} className="flex-shrink-0" />
+                        With Booking
+                      </button>
+                      <button
+                        onClick={() => setStatusFilter("inactive")}
+                        className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
+                          statusFilter === "inactive"
+                            ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
+                            : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                        }`}
+                      >
+                        <Archive size={11} className="flex-shrink-0" />
+                        Archived
+                      </button>
+                    </div>
+                  </div>
+
+                  <div
+                    className="pointer-events-none absolute top-0 right-0 bottom-0 w-12 bg-gradient-to-l from-[var(--color-bg)] via-[var(--color-bg)]/80 to-transparent"
+                    aria-hidden="true"
+                  />
+                </div>
+              )}
             </div>
           )}
         </div>
+
+        {/* Spacer */}
+        <div className={`${toolbarSpacerHeight} transition-[height] duration-200`} />
 
         <div className={searchFocused || isSelecting ? "hidden" : ""}>
           {!loading && pendingClients > 0 && statusFilter !== "pending" && (
@@ -478,28 +537,27 @@ export default function MobileClientsList({
                   ? { label: "ID pending", tone: "text-amber-600 dark:text-amber-400" }
                   : { label: "ID missing", tone: "text-[var(--color-ink-subtle)]" };
 
+              // ✅ Avatar colors based on status
+              const avatarColors = getAvatarColors(item.status);
+
               return (
                 <div
                   data-selection-zone
                   onTouchStart={handleTouchStart(item)}
                   onTouchMove={handleTouchMove}
                   onTouchEnd={handleTouchEnd}
-                  // ✅ Removed background highlight & added select-none
                   className={`flex items-start gap-3 w-full py-3 border-b border-[var(--color-surface-border)]/50 last:border-b-0 transition-colors select-none ${
                     isSuspended
                       ? "opacity-50"
                       : "hover:bg-[var(--color-surface-hover)]/40"
                   }`}
                 >
-                  {/* Avatar */}
+                  {/* ✅ Avatar: Initials + Status-based color */}
                   <div className="relative flex-shrink-0">
-                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-[var(--color-surface-hover)] flex items-center justify-center">
-                      <SecureImage
-                        src={item.avatar_image}
-                        alt={item.full_name}
-                        className="w-full h-full object-cover"
-                        fallback={<UserIcon size={22} className="text-[var(--color-ink-subtle)]" />}
-                      />
+                    <div
+                      className={`w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center font-bold text-sm ${avatarColors}`}
+                    >
+                      {getInitials(item.full_name)}
                     </div>
                   </div>
 
@@ -574,14 +632,12 @@ export default function MobileClientsList({
           />
         )}
 
-        {/* ✅ FAB stack — z-65 sits above the PullUpNav drawer and grab area. 
-            bottom-[108px] clears the nav bar (68px) + peek (24px) + breathing room. */}
+        {/* FAB stack */}
         {!isSelecting && !searchFocused && (
-          <div 
-            data-fab-stack 
+          <div
+            data-fab-stack
             className="fixed right-4 bottom-[108px] z-[65] flex flex-col items-end gap-3"
           >
-            {/* Segment toggle */}
             <button
               type="button"
               onClick={() =>
@@ -601,7 +657,6 @@ export default function MobileClientsList({
               )}
             </button>
 
-            {/* Add Client */}
             <button
               type="button"
               onClick={onAddClient}

@@ -3,7 +3,7 @@
 
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
-import { LayoutList, CalendarDays, Filter } from "lucide-react";
+import { LayoutList, CalendarDays } from "lucide-react";
 
 import BookingsList from "@/components/bookings/BookingsList";
 import ExtendBookingModal from "@/components/bookings/ExtendBookingModal";
@@ -11,13 +11,8 @@ import FleetTimelineCalendar from "@/components/bookings/FleetTimelineCalendar";
 import { Booking } from "@/lib/types";
 import { useBookingsPage, TabMode } from "@/hooks/bookings/useBookingsPage";
 import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
-import MobilePageToolbar from "@/components/ui/MobilePageToolbar";
 import MobileFloatingSegment from "@/components/ui/MobileFloatingSegment";
-import NewBookingButton from "@/components/bookings/NewBookingButton";
-
-/* ──────────────────────────────────────────────────────────────────────
-   Tabs config
-────────────────────────────────────────────────────────────────────── */
+import { useSetPageHeader } from "@/context/page-header-context";
 
 const TABS = [
   { id: "list",     label: "Reservations", icon: LayoutList },
@@ -25,10 +20,6 @@ const TABS = [
 ];
 
 const VALID_TABS = new Set<TabMode>(["list", "calendar"]);
-
-/* ──────────────────────────────────────────────────────────────────────
-   Component
-────────────────────────────────────────────────────────────────────── */
 
 export default function BookingsPage() {
   const router = useRouter();
@@ -50,8 +41,6 @@ export default function BookingsPage() {
     handleCreateBookingFromCalendar,
   } = useBookingsPage();
 
-  /* ✅ Hydrate FROM URL — deep links (search results, back/forward) land
-     on the right tab. Fallback to "list" if tab is invalid or absent. */
   useEffect(() => {
     const t = searchParams.get("tab") as TabMode | null;
     if (t && VALID_TABS.has(t) && t !== activeTab) {
@@ -60,7 +49,6 @@ export default function BookingsPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
-  /* ✅ Single source of tab-change — always syncs URL + hook state */
   const handleTabChange = (tabId: string) => {
     if (!VALID_TABS.has(tabId as TabMode)) return;
     const next = tabId as TabMode;
@@ -73,29 +61,26 @@ export default function BookingsPage() {
     return activeTab === "list"
       ? {
           title: "Manage Bookings",
+          mobileTitle: "Bookings",
           description:
             "Create new reservations, manage bookings, and handle extensions.",
           icon: (
-            <LayoutList
-              size={28}
-              strokeWidth={1.5}
-              className="text-[var(--color-primary)]"
-            />
+            <LayoutList size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />
           ),
         }
       : {
           title: "Fleet Timeline Calendar",
+          mobileTitle: "Calendar",
           description:
             "Real-time look at vehicle distribution, active reservations, and scheduling blocks.",
           icon: (
-            <CalendarDays
-              size={28}
-              strokeWidth={1.5}
-              className="text-[var(--color-primary)]"
-            />
+            <CalendarDays size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />
           ),
         };
   }, [activeTab]);
+
+  // ✅ Drive the mobile top bar
+  useSetPageHeader(currentTabInfo.mobileTitle, currentTabInfo.description);
 
   const bookingsArray = bookingsData.bookings || [];
 
@@ -118,8 +103,8 @@ export default function BookingsPage() {
 
   return (
     <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden">
-      {/* ── HEADER & DESKTOP TAB SWITCHER ── */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+      {/* DESKTOP-ONLY HEADER */}
+      <div className="hidden sm:flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-3">
             <span className="hidden sm:inline-flex">{currentTabInfo.icon}</span>
@@ -141,45 +126,20 @@ export default function BookingsPage() {
         </div>
       </div>
 
-      {/* ── MAIN CONTENT ── */}
+      {/* TAB CONTENT */}
       {activeTab === "list" ? (
         <>
-          {/* MOBILE — single card, toolbar + list */}
-          <div className="md:hidden bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
-            <div className="p-3 border-b border-[var(--color-surface-border)]">
-              <MobilePageToolbar
-                search={bookingsData.search}
-                onSearchChange={bookingsData.setSearch}
-                searchPlaceholder="Search bookings..."
-                segment={activeTab}
-                onSegmentChange={handleTabChange}
-                segments={TABS.map((t) => ({
-                  id: t.id,
-                  label: t.label,
-                  icon: t.icon,
-                }))}
-                segmentMenuMode="toggle"
-                segmentTriggerIcon={CalendarDays}
-                filters={[
-                  {
-                    id: "booking-status",
-                    label: "Status",
-                    options: statusOptions,
-                    value: bookingsData.statusFilter,
-                    onChange: bookingsData.setStatusFilter,
-                    icon: Filter,
-                  },
-                ]}
-                primaryAction={<NewBookingButton />}
-              />
-            </div>
-
+          {/* MOBILE — no card chrome. List owns its own fixed toolbar. */}
+          <div className="md:hidden">
             <BookingsList
               bookingsData={bookingsData}
               clientMap={clientMap}
               vehicleMap={vehicleMap}
               isReferenceDataLoading={isRefDataLoading}
               onExtendBooking={openExtendModal}
+              statusOptions={statusOptions}
+              activeTab={activeTab}
+              handleTabChange={handleTabChange}
             />
           </div>
 
@@ -191,6 +151,9 @@ export default function BookingsPage() {
               vehicleMap={vehicleMap}
               isReferenceDataLoading={isRefDataLoading}
               onExtendBooking={openExtendModal}
+              statusOptions={statusOptions}
+              activeTab={activeTab}
+              handleTabChange={handleTabChange}
             />
           </div>
         </>
@@ -208,7 +171,6 @@ export default function BookingsPage() {
         />
       )}
 
-      {/* ✅ FLOATING SEGMENT — mobile only, only on calendar tab */}
       {activeTab === "calendar" && (
         <MobileFloatingSegment
           segments={TABS.map((t) => ({
@@ -223,7 +185,6 @@ export default function BookingsPage() {
         />
       )}
 
-      {/* ── MODALS ── */}
       <ExtendBookingModal
         open={isExtendModalOpen}
         onClose={closeExtendModal}

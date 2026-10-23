@@ -9,6 +9,7 @@ import Topbar from "./TopBar";
 import BottomNav from "./BottomNav";
 import PullUpNav from "./PullUpNav";
 import type { NavItem } from "@/lib/nav-config";
+import { PageHeaderProvider, usePageHeader } from "@/context/page-header-context";
 
 interface DashboardShellProps {
   children: ReactNode;
@@ -16,8 +17,25 @@ interface DashboardShellProps {
 }
 
 export default function DashboardShell({ children, navItems }: DashboardShellProps) {
+  return (
+    <PageHeaderProvider>
+      <ShellInner navItems={navItems}>
+        {children}
+      </ShellInner>
+    </PageHeaderProvider>
+  );
+}
+
+function ShellInner({
+  children,
+  navItems,
+}: {
+  children: ReactNode;
+  navItems: NavItem[];
+}) {
   const pathname = usePathname();
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
+  const { header } = usePageHeader();
 
   useEffect(() => {
     setIsMobileNavOpen(false);
@@ -51,29 +69,37 @@ export default function DashboardShell({ children, navItems }: DashboardShellPro
         <Sidebar navItems={navItems} />
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0 lg:pl-[72px]">
-        <Topbar />
+      {/* Main Content — this column owns the scroll */}
+      <div className="flex-1 flex flex-col min-w-0 lg:pl-[72px] h-screen overflow-hidden">
+        {/* TopBar is sticky within its own column, and the column is the scroll parent */}
+        <Topbar
+          pageTitle={header.title}
+          pageDescription={header.description}
+          onInfoClick={header.onInfoClick}
+        />
 
-        <AnimatePresence mode="wait">
-          <motion.main
-            key={pathname}
-            variants={pageVariants}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-4 pb-[calc(7rem+env(safe-area-inset-bottom,0px))] lg:pb-8"
-          >
-            <motion.div
-              variants={containerVariants}
+        {/* Scrollable content area */}
+        <div className="flex-1 overflow-y-auto">
+          <AnimatePresence mode="wait">
+            <motion.main
+              key={pathname}
+              variants={pageVariants}
               initial="initial"
               animate="animate"
-              className="space-y-6"
+              exit="exit"
+              className="px-4 sm:px-6 lg:px-8 py-4 pb-[calc(7rem+env(safe-area-inset-bottom,0px))] lg:pb-8"
             >
-              {children}
-            </motion.div>
-          </motion.main>
-        </AnimatePresence>
+              <motion.div
+                variants={containerVariants}
+                initial="initial"
+                animate="animate"
+                className="space-y-6"
+              >
+                {children}
+              </motion.div>
+            </motion.main>
+          </AnimatePresence>
+        </div>
       </div>
 
       {/* Permanent bottom bar */}

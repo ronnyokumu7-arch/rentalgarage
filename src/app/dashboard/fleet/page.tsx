@@ -4,14 +4,16 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Car, BarChart3, Wrench, CarFront, LineChart, Wrench as WrenchIcon,
-  Info, X,
 } from "lucide-react";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useMobileFleet } from "@/hooks/fleet/useMobileFleet";
 import { useDesktopFleet } from "@/hooks/fleet/useDesktopFleet";
+import { useFleetTour } from "@/hooks/fleet/useFleetTour";
+import { useSetPageHeader } from "@/context/page-header-context";
 import QuickGarageModal from "@/components/ui/QuickGarageModal";
 import InvestorVehiclePricingModal from "@/components/fleet/InvestorVehiclePricingModal";
 import VehicleDetailsModal from "@/components/fleet/VehicleDetailsModal";
+import FleetTourSheet from "@/components/fleet/FleetTourSheet";
 import { bookingsApi } from "@/lib/api/bookings";
 import { vehiclesApi } from "@/lib/api/vehicles";
 import type { Booking, Vehicle } from "@/lib/types";
@@ -55,10 +57,10 @@ export default function FleetPage() {
   const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [editVehicle, setEditVehicle] = useState<Vehicle | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [tourOpen, setTourOpen] = useState(false);
 
   const mobile = useMobileFleet();
   const desktop = useDesktopFleet();
+  const tour = useFleetTour();
 
   useEffect(() => {
     const t = searchParams.get("tab") as TabMode | null;
@@ -141,15 +143,9 @@ export default function FleetPage() {
     if (activeTab === "fleet") {
       return {
         title: "Fleet Management",
-        mobileTitle: "Fleet",
+        mobileTitle: "Manage Fleet",
         description:
           "Oversee your vehicles, track performance statuses, and manage your garage pipelines.",
-        tour: [
-          "Search vehicles by make, model, or plate number.",
-          "Tap the filter icon to show status filters.",
-          "Tap a vehicle card to open its profile or long-press to select multiple.",
-          "Use the pull-up menu at the bottom to switch between Fleet, Garage, and Performance.",
-        ],
         icon: <CarFront size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
       };
     }
@@ -159,11 +155,6 @@ export default function FleetPage() {
         mobileTitle: "Performance",
         description:
           "Deep insights into your fleet's performance, utilization, and profitability.",
-        tour: [
-          "Track utilization, revenue, and profitability across your fleet.",
-          "Compare performance across time periods.",
-          "Identify your most and least profitable vehicles.",
-        ],
         icon: <LineChart size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
       };
     }
@@ -172,35 +163,29 @@ export default function FleetPage() {
       mobileTitle: "Garage",
       description:
         "Onboard new vehicles, manage maintenance, and track service schedules.",
-      tour: [
-        "See vehicles awaiting mileage updates.",
-        "Track vehicles currently in maintenance.",
-        "Review service schedules and upcoming due dates.",
-      ],
       icon: <WrenchIcon size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
     };
   }, [activeTab]);
 
+  // ✅ Drive the mobile top bar title + description + tour trigger
+  useSetPageHeader(
+    currentTabInfo.mobileTitle,
+    currentTabInfo.description,
+    tour.open
+  );
+
   return (
     <div className="space-y-6">
-      {/* ─── HEADER ──────────────────────────────────────────── */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {/* DESKTOP-ONLY HEADER */}
+      <div className="hidden sm:flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
             <span className="hidden sm:inline-flex">{currentTabInfo.icon}</span>
             <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
-              <span className="sm:hidden">{currentTabInfo.mobileTitle}</span>
-              <span className="hidden sm:inline">{currentTabInfo.title}</span>
+              {currentTabInfo.title}
             </h1>
-            <button
-              onClick={() => setTourOpen(true)}
-              className="sm:hidden p-1 rounded-full text-[var(--color-ink-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors"
-              aria-label="About this page"
-            >
-              <Info size={16} />
-            </button>
           </div>
-          <p className="hidden sm:block text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
+          <p className="text-sm sm:text-base leading-relaxed text-[var(--color-ink-muted)] mt-1">
             {currentTabInfo.description}
           </p>
         </div>
@@ -214,7 +199,7 @@ export default function FleetPage() {
         </div>
       </div>
 
-      {/* ─── TAB CONTENT ─────────────────────────────────────── */}
+      {/* TAB CONTENT */}
       {activeTab === "fleet" && (
         <>
           <MobileFleetList
@@ -371,7 +356,7 @@ export default function FleetPage() {
         </div>
       )}
 
-      {/* ─── MODALS ──────────────────────────────────────────── */}
+      {/* MODALS */}
       <VehicleDetailsModal
         vehicle={editVehicle}
         isOpen={isEditModalOpen}
@@ -406,73 +391,7 @@ export default function FleetPage() {
         }}
       />
 
-      {/* ─── FLOATING RETURN-TO-FLEET (garage only) ─────────── */}
-      {activeTab === "garage" && (
-        <div
-          data-fab-stack
-          className="lg:hidden fixed right-4 bottom-[108px] z-[65] pointer-events-none"
-        >
-          <button
-            type="button"
-            onClick={() => handleTabChange("fleet")}
-            aria-label="Back to Vehicles"
-            className="pointer-events-auto w-14 h-14 rounded-xl bg-[var(--color-primary)]/20 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.25)] flex items-center justify-center active:scale-95 hover:bg-[var(--color-primary)]/30 transition-all"
-          >
-            <CarFront size={22} strokeWidth={2} className="text-[var(--color-primary)]" />
-          </button>
-        </div>
-      )}
-
-      {/* ─── TOUR BOTTOM SHEET ─────────────────────────────────── */}
-      {tourOpen && (
-        <div
-          className="sm:hidden fixed inset-0 z-[70] flex items-end justify-center bg-black/50 backdrop-blur-sm"
-          onClick={() => setTourOpen(false)}
-        >
-          <div
-            className="bg-[var(--color-surface)] w-full rounded-t-2xl shadow-2xl animate-in slide-in-from-bottom duration-300 max-h-[80vh] flex flex-col"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex justify-center pt-3 pb-1">
-              <div className="w-10 h-1 rounded-full bg-[var(--color-ink-subtle)]/30" />
-            </div>
-
-            <div className="px-5 pb-3 flex items-start justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center shrink-0">
-                  <Info size={18} />
-                </div>
-                <div className="min-w-0">
-                  <h2 className="text-base font-bold text-[var(--color-ink)]">{currentTabInfo.title}</h2>
-                  <p className="text-xs text-[var(--color-ink-muted)]">{currentTabInfo.description}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setTourOpen(false)}
-                className="p-2 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors shrink-0"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-5 pb-5">
-              <div className="space-y-2 mt-1">
-                {currentTabInfo.tour.map((tip, i) => (
-                  <div
-                    key={i}
-                    className="flex items-start gap-2.5 p-2.5 rounded-lg bg-[var(--color-surface-hover)]/50 border border-[var(--color-surface-border)]/60"
-                  >
-                    <span className="w-5 h-5 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center text-[10px] font-bold shrink-0">
-                      {i + 1}
-                    </span>
-                    <p className="text-xs text-[var(--color-ink)] leading-relaxed">{tip}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      <FleetTourSheet isOpen={tour.isOpen} onClose={tour.close} />
     </div>
   );
 }

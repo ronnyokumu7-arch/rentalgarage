@@ -7,9 +7,22 @@ import BookingsListMobile from "./BookingsListMobile";
 import BookingsListDesktop from "./BookingsListDesktop";
 import type { BookingsListProps } from "./types";
 
+interface ExtendedBookingsListProps extends BookingsListProps {
+  statusOptions: { label: string; value: string; count?: number }[];
+  activeTab: string;
+  handleTabChange: (tab: string) => void;
+}
+
 export default function BookingsList({
-  bookingsData, clientMap, vehicleMap, isReferenceDataLoading, onExtendBooking,
-}: BookingsListProps) {
+  bookingsData,
+  clientMap,
+  vehicleMap,
+  isReferenceDataLoading,
+  onExtendBooking,
+  statusOptions,
+  activeTab,
+  handleTabChange,
+}: ExtendedBookingsListProps) {
   const {
     loading: bookingsLoading,
     search, setSearch,
@@ -33,13 +46,15 @@ export default function BookingsList({
 
   return (
     <div className="md:bg-[var(--color-surface)] md:rounded-2xl md:border md:border-[var(--color-surface-border)] md:shadow-[var(--shadow-card)] md:overflow-hidden animate-in fade-in duration-300 font-sans">
-      <BookingsToolbar
-        search={search} setSearch={setSearch}
-        statusFilter={statusFilter} setStatusFilter={setStatusFilter}
-        upcomingCount={upcomingCount}
-        activeTripsCount={activeTripsCount}
-        completedCount={completedCount}
-      />
+      <div className="hidden md:block">
+        <BookingsToolbar
+          search={search} setSearch={setSearch}
+          statusFilter={statusFilter} setStatusFilter={setStatusFilter}
+          upcomingCount={upcomingCount}
+          activeTripsCount={activeTripsCount}
+          completedCount={completedCount}
+        />
+      </div>
 
       {loading ? (
         <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2 text-sm font-medium">
@@ -57,13 +72,19 @@ export default function BookingsList({
         </div>
       ) : (
         <>
-          {/* ✅ MOBILE: full unpaginated filtered list — user scrolls to see everything */}
           <BookingsListMobile
             bookings={filteredBookings}
-            clientMap={clientMap} vehicleMap={vehicleMap}
+            clientMap={clientMap}
+            vehicleMap={vehicleMap}
             actionsCtx={actionsCtx}
+            search={search}
+            setSearch={setSearch}
+            statusFilter={statusFilter}
+            setStatusFilter={setStatusFilter}
+            statusOptions={statusOptions}
+            activeTab={activeTab}
+            handleTabChange={handleTabChange}
           />
-          {/* ✅ DESKTOP: paginated table */}
           <BookingsListDesktop
             bookings={paginatedBookings}
             clientMap={clientMap} vehicleMap={vehicleMap}

@@ -2,7 +2,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Building2,
   User as UserIcon,
@@ -18,6 +18,7 @@ import DesktopClientsList from "@/components/client/DesktopClientsList";
 import AddClientModal from "@/components/client/AddClientModal";
 import { useMobileClients } from "@/hooks/clients/useMobileClients";
 import { useDesktopClients } from "@/hooks/clients/useDesktopClients";
+import { useSetPageHeader } from "@/context/page-header-context";
 
 /* ──────────────────────────────────────────────────────────────────────
    Tabs
@@ -66,6 +67,7 @@ export default function ClientsPage() {
     if (activeTab === "individual") {
       return {
         title: "Individual Clients",
+        mobileTitle: "Clients",
         description: "Manage individual customer accounts, personal verification steps, and driver records.",
         icon: <UserRound size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
       };
@@ -73,21 +75,29 @@ export default function ClientsPage() {
     if (activeTab === "corporate") {
       return {
         title: "Corporate Clients",
+        mobileTitle: "Corporate",
         description: "Oversee commercial agency relationships, corporate profiles, and company contracts.",
         icon: <Building size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
       };
     }
     return {
       title: "Client Invites",
+      mobileTitle: "Invites",
       description: "Generate single-use onboarding links and manage pending invitations.",
       icon: <UserPlus size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
     };
   }, [activeTab]);
 
+  // ✅ Drive the mobile top bar title + description
+  useSetPageHeader(
+    currentTabInfo.mobileTitle,
+    currentTabInfo.description
+  );
+
   return (
     <div className="space-y-6">
-      {/* HEADER */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {/* DESKTOP-ONLY HEADER */}
+      <div className="hidden sm:flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
             <span className="hidden sm:inline-flex">{currentTabInfo.icon}</span>
@@ -112,9 +122,6 @@ export default function ClientsPage() {
 
       {activeTab === "corporate" && (
         <>
-          {/* ✅ Mobile: reuse MobileClientsList so it inherits the segment-toggle FAB.
-              No client data yet for corporate, so we pass empty arrays — the list
-              renders its empty state, and the FAB toggle stays visible. */}
           <MobileClientsList
             search={mobile.search}
             setSearch={mobile.setSearch}
@@ -134,7 +141,6 @@ export default function ClientsPage() {
             onAddClient={() => setAddClientOpen(true)}
           />
 
-          {/* Desktop: unchanged placeholder */}
           <div className="hidden md:block p-12 text-center bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)]">
             <Building2 size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" />
             <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">Corporate Client Hub</h3>
