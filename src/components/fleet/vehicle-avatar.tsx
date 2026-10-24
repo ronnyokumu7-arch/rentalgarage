@@ -2,13 +2,14 @@
 "use client";
 
 import { Car, Truck, Van, Motorcycle, CarProfile } from "@phosphor-icons/react";
+import brands from "car-brand-logos/brands.json";
 import type { Vehicle } from "@/lib/types";
 
 type BodyType =
   | "sedan" | "suv" | "pickup" | "van" | "bus"
   | "motorcycle" | "coupe" | "hatchback" | "truck";
 
-/** Body-type → icon, used only when there is no real photo. */
+/** Body-type → icon, used only when there is no real photo or brand logo. */
 const BODY_TYPE_ICONS: Record<BodyType, React.ElementType> = {
   sedan: Car,
   coupe: Car,
@@ -16,15 +17,11 @@ const BODY_TYPE_ICONS: Record<BodyType, React.ElementType> = {
   suv: Car,
   pickup: Truck,
   truck: Truck,
-  van: Van, // Phosphor's Van icon is a great fit for cargo/passenger vans
-  bus: Van, // Using Van for bus as Phosphor doesn't have a dedicated Bus icon
+  van: Van,
+  bus: Van,
   motorcycle: Motorcycle,
 };
 
-/**
- * Placeholder shown when there is neither a real photo nor a
- * recognizable body type. This is the ultimate fallback.
- */
 const PLACEHOLDER_ICON: React.ElementType = CarProfile;
 
 const BODY_TYPE_PATTERNS: Array<[BodyType, RegExp]> = [
@@ -48,29 +45,40 @@ function inferBodyType(vehicle: Vehicle): BodyType | null {
 }
 
 /**
- * Returns the real photo URL for a vehicle, or null if there isn't one.
- * STUB: the Vehicle type currently has no image field. When the backend
- * adds e.g. `image_url`, return `vehicle.image_url ?? null` here — this
- * is the only place that needs to change.
+ * Returns the CDN URL for a car brand logo based on the vehicle's make.
+ * Handles case-insensitivity and trailing whitespace.
+ * Returns null if the make isn't in the manifest.
  */
-function getVehicleImageUrl(_vehicle: Vehicle): string | null {
-  return null;
+export function getVehicleBrandLogoUrl(vehicle: Vehicle): string | null {
+  const rawMake = vehicle.make;
+  if (!rawMake) return null;
+
+  const manifest = brands as Record<string, string>;
+  const trimmed = rawMake.trim();
+
+  // Exact match first (fast path)
+  let logoFile = manifest[trimmed];
+
+  // Case-insensitive fallback
+  if (!logoFile) {
+    const lower = trimmed.toLowerCase();
+    const key = Object.keys(manifest).find((k) => k.toLowerCase() === lower);
+    if (key) logoFile = manifest[key];
+  }
+
+  if (!logoFile) return null;
+
+  return `https://cdn.jsdelivr.net/gh/vehiclespecs/brand-logos@v1.0.0/${logoFile}`;
 }
 
 /**
- * Resolves what to render for a vehicle's avatar:
- *   1. real image, if one exists
- *   2. body-type icon, if the type is recognizable
- *   3. CarProfile placeholder otherwise
+ * Returns a Phosphor icon component for the vehicle's inferred body type.
+ * Used as a fallback when there is no real photo and no brand logo
+ * (e.g. in dark mode, or when the make isn't in the brand manifest).
  */
 export function getVehicleBodyIcon(vehicle: Vehicle): React.ElementType {
-  // (1) is handled by the caller when a URL exists; this helper only
-  // deals with the icon path (2) and (3).
-  const hasImage = getVehicleImageUrl(vehicle) !== null;
-  if (hasImage) return Car; // unused in practice; caller renders <img>
-
   const bodyType = inferBodyType(vehicle);
   return (bodyType && BODY_TYPE_ICONS[bodyType]) || PLACEHOLDER_ICON;
 }
 
-export { getVehicleImageUrl, PLACEHOLDER_ICON };
+export { PLACEHOLDER_ICON };

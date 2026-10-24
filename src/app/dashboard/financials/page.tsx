@@ -20,8 +20,9 @@ import PaymentsTab from "@/components/financials/PaymentsTab";
 import OverviewTab from "@/components/financials/OverviewTab";
 import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
 import MobileFloatingSegment from "@/components/ui/MobileFloatingSegment";
+import { useSetPageHeader } from "@/context/page-header-context";
 
-/* ──────────────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────────────
    Config
 ────────────────────────────────────────────────────────────────────── */
 
@@ -104,27 +105,34 @@ export default function FinancialsPage() {
       ({
         overview: {
           title: "Financials",
+          mobileTitle: "Financials",
           description: "Complete financial health at a glance",
           icon: <PiggyBank size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
         },
         invoices: {
           title: "Invoices",
+          mobileTitle: "Invoices",
           description: "Create, send, and track all invoices",
           icon: <FilePlus2 size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
         },
         contracts: {
           title: "Contracts",
+          mobileTitle: "Contracts",
           description: "Manage your rental contracts seamlessly",
           icon: <FileSignature size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
         },
         payments: {
           title: "Payments",
+          mobileTitle: "Payments",
           description: "Monitor and reconcile incoming payments",
           icon: <Banknote size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
         },
       })[activeTab],
     [activeTab],
   );
+
+  // ✅ Drive the mobile top bar (like Fleet page)
+  useSetPageHeader(currentTabInfo.mobileTitle, currentTabInfo.description);
 
   const isOnMobileTab = MOBILE_TABS.some((t) => t.id === activeTab);
   const floatingActive = isOnMobileTab ? activeTab : "overview";
@@ -135,8 +143,8 @@ export default function FinancialsPage() {
 
   return (
     <div className="space-y-6 antialiased">
-      {/* ─── Header ─────────────────────────────────────────────── */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+      {/* ── Header — Desktop only (mobile uses TopBar) ───────────── */}
+      <div className="hidden sm:flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
             <span className="hidden sm:inline-flex">{currentTabInfo.icon}</span>
@@ -183,7 +191,8 @@ export default function FinancialsPage() {
       </div>
 
       {/* ─── Tab content ─────────────────────────────────────────── */}
-      <div className="animate-in fade-in duration-200 min-h-[400px] pt-2">
+      {/* ✅ FIX: pt-0 on mobile eliminates the gap between TopBar and sticky toolbar */}
+      <div className="animate-in fade-in duration-200 min-h-[400px] pt-0 sm:pt-2">
         {activeTab === "overview" && <OverviewTab />}
         {activeTab === "payments" && <PaymentsTab />}
         {activeTab === "invoices" && <InvoicesTab />}
@@ -191,7 +200,6 @@ export default function FinancialsPage() {
       </div>
 
       {/* ─── Floating segment — mobile only ─────────────────────── */}
-      {/* ✅ Wrapper forces the inner fixed component up above the nav + peek area. */}
       <div
         data-fab-stack
         className="lg:hidden fixed right-4 bottom-[108px] z-[65] pointer-events-none transition-all duration-200"

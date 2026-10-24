@@ -3,6 +3,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useMemo } from "react";
+import { useTheme } from "next-themes";
 import {
   Car, Archive, Shield, Loader2,
   Ban, Wrench, CarFront, Gauge,
@@ -10,7 +11,7 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 import CardGrid, { RowAction } from "@/components/ui/CardGrid";
-import { getVehicleBodyIcon } from "@/components/fleet/vehicle-avatar";
+import { getVehicleBodyIcon, getVehicleBrandLogoUrl } from "@/components/fleet/vehicle-avatar";
 import type { Vehicle, VehicleStatus, Booking } from "@/lib/types";
 
 /* ──────────────────────────────────────────────────────────────────────
@@ -26,27 +27,27 @@ const formatPrice = (amount: number | string) => {
 
 const formatMileage = (km: number) => km.toString();
 
-/** Returns avatar tile styling (bg + icon color) based on the vehicle's status. */
-const getVehicleAvatarColors = (
+/** 
+ * ✅ Returns the outer ring color ONLY if the vehicle needs attention.
+ * Returns null when the vehicle is available / retired / archived (no ring).
+ * 
+ * Attention states: rented, pending_activation, maintenance, mileage_due.
+ */
+const getStatusRingColor = (
   vehicle: Vehicle,
   isDueForService: boolean
-): { bg: string; icon: string } => {
-  if (vehicle.is_archived) {
-    return { bg: "bg-slate-500/10", icon: "text-slate-600 dark:text-slate-400" };
-  }
+): string | null => {
+  if (vehicle.is_archived) return null;
   if (vehicle.status === "maintenance" || isDueForService || vehicle.mileage_due) {
-    return { bg: "bg-amber-500/10", icon: "text-amber-600 dark:text-amber-400" };
+    return "ring-amber-400/80";
   }
   if (vehicle.status === "rented") {
-    return { bg: "bg-blue-500/10", icon: "text-blue-600 dark:text-blue-400" };
-  }
-  if (vehicle.status === "available") {
-    return { bg: "bg-emerald-500/10", icon: "text-emerald-600 dark:text-emerald-400" };
+    return "ring-blue-400/80";
   }
   if (vehicle.status === "pending_activation") {
-    return { bg: "bg-violet-500/10", icon: "text-violet-600 dark:text-violet-400" };
+    return "ring-violet-400/80";
   }
-  return { bg: "bg-slate-500/10", icon: "text-slate-600 dark:text-slate-400" };
+  return null; // available / retired → no ring
 };
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -99,6 +100,12 @@ export default function MobileFleetList({
   onAddVehicle,
 }: MobileFleetListProps) {
   const router = useRouter();
+  const { resolvedTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const [selected, setSelected] = useState<Vehicle[]>([]);
   const isSelecting = selected.length > 0;
@@ -332,7 +339,7 @@ export default function MobileFleetList({
 
   return (
     <div className="md:hidden animate-in fade-in duration-300 relative">
-      {/* TOOLBAR: Full width (px-0) */}
+      {/* TOOLBAR */}
       <div
         className="sticky top-0 z-20 bg-[var(--color-bg)] py-2"
         data-selection-zone
@@ -379,7 +386,6 @@ export default function MobileFleetList({
             </div>
           ) : (
             <div className="space-y-2">
-              {/* Search Bar: rounded-2xl for premium edge-to-edge look */}
               <div className="flex items-center h-11 rounded-2xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] overflow-hidden transition-colors mx-0">
                 <div className="relative flex-1 h-full">
                   <Search
@@ -493,7 +499,7 @@ export default function MobileFleetList({
         </div>
       </div>
 
-      {/* Banners: px-3 for text readability, but visually full-width */}
+      {/* Banners */}
       <div className={`px-3 ${searchFocused || isSelecting ? "hidden" : ""}`}>
         {!loading && pendingCount > 0 && statusFilter !== "pending_activation" && (
           <button
@@ -569,10 +575,11 @@ export default function MobileFleetList({
           </p>
         </div>
       ) : (
-        /* CARD LIST: Seamless edge-to-edge pattern */
         <div className="pb-4">
           {displayVehicles.map((item, index) => {
             const isSelected = selected.some((v) => v.id === item.id);
+            const isDark = mounted && resolvedTheme === "dark";
+            const brandLogoUrl = getVehicleBrandLogoUrl(item);
 
             const kmToService = item.next_service_km
               ? item.next_service_km - item.current_mileage
@@ -595,8 +602,9 @@ export default function MobileFleetList({
               ? "text-amber-600 dark:text-amber-400"
               : "text-[var(--color-ink-muted)]";
 
-            const avatarColors = getVehicleAvatarColors(item, isDueForService);
+            const ringColor = getStatusRingColor(item, isDueForService);
             const BodyIcon = getVehicleBodyIcon(item);
+            const needsAttention = Boolean(ringColor);
 
             return (
               <div
@@ -614,38 +622,44 @@ export default function MobileFleetList({
                     toggleSelection(item);
                     return;
                   }
-                  // Open actions menu instead of navigating
                   const trigger = document.querySelector(`[data-card-actions="${item.id}"] button`) as HTMLButtonElement | null;
                   trigger?.click();
                 }}
-                /* 
-                  Updated card styling:
-                  - py-2.5 px-3: Tighter vertical padding so the avatar dominates the height
-                  - pr-2 on content: Balanced horizontal spacing since the 3-dots menu is gone
-                */
                 className={`relative flex items-center gap-3 py-2.5 px-3 transition-all cursor-pointer select-none bg-[var(--color-surface)] first:rounded-t-2xl last:rounded-b-2xl ${
                   isSelected
                     ? "border-y border-[var(--color-primary)] bg-[var(--color-primary)]/[0.04]"
                     : "hover:bg-[var(--color-surface-hover)]"
                 }`}
               >
-                {/* Premium fade border - 80% width, very thin, fades at sides */}
                 {index !== displayVehicles.length - 1 && (
                   <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-px bg-gradient-to-r from-transparent via-[var(--color-surface-border)] to-transparent" />
                 )}
                 
                 {/* 
-                  Avatar Container: 
-                  - w-20 h-16 gives real photos excellent breathing room while dominating vertical space 
-                  - (Note: If your photos are strictly square, change this to w-16 h-16)
+                  ✅ Avatar Container:
+                  - Squircle shape (w-20 h-14 rounded-xl)
+                  - Feather-thin ring only on attention states
+                  - Ring-offset for the WhatsApp gap effect
                 */}
                 <div
-                  className={`w-20 h-16 rounded-xl flex items-center justify-center shrink-0 overflow-hidden ${avatarColors.bg}`}
+                  className={`relative w-20 h-14 rounded-xl flex items-center justify-center shrink-0 overflow-hidden bg-[var(--color-surface)] ${
+                    needsAttention
+                      ? `ring-1 ring-offset-1 ring-offset-[var(--color-surface)] ${ringColor}`
+                      : "border border-[var(--color-surface-border)]"
+                  }`}
                 >
-                  <BodyIcon size={32} className={avatarColors.icon} strokeWidth={1.75} />
+                  {brandLogoUrl && !isDark ? (
+                    <img
+                      src={brandLogoUrl}
+                      alt={item.make}
+                      className="w-12 h-12 object-contain mix-blend-multiply"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <BodyIcon size={28} className="text-[var(--color-ink-muted)]" strokeWidth={1.75} />
+                  )}
                 </div>
 
-                {/* Reduced right padding (pr-2) to balance the left side now that the menu button is gone */}
                 <div className="min-w-0 flex-1 pr-2">
                   <div className="flex items-center gap-2 min-w-0">
                     <h3 className="text-base font-bold text-[var(--color-ink)] truncate tracking-tight">
