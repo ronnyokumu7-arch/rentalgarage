@@ -7,7 +7,7 @@ import {
   Car, Archive, Shield, Loader2,
   Ban, Wrench, CarFront, Gauge,
   Banknote, Pencil, Plus, Search, CheckCircle2, Circle, X,
-  SlidersHorizontal, MoreHorizontal,
+  SlidersHorizontal,
 } from "lucide-react";
 import CardGrid, { RowAction } from "@/components/ui/CardGrid";
 import { getVehicleBodyIcon } from "@/components/fleet/vehicle-avatar";
@@ -49,7 +49,7 @@ const getVehicleAvatarColors = (
   return { bg: "bg-slate-500/10", icon: "text-slate-600 dark:text-slate-400" };
 };
 
-/* ──────────────────────────────────────────────────────────────────────
+/* ─────────────────────────────────────────────────────────────────────
    Props
 ────────────────────────────────────────────────────────────────────── */
 
@@ -332,19 +332,14 @@ export default function MobileFleetList({
 
   return (
     <div className="md:hidden animate-in fade-in duration-300 relative">
-      {/* 
-        TOOLBAR 
-        - No px-4 on the sticky container.
-        - Using px-3 (or your app's standard padding) on the inner items so it aligns perfectly with the TopBar.
-      */}
+      {/* TOOLBAR: Full width (px-0) */}
       <div
         className="sticky top-0 z-20 bg-[var(--color-bg)] py-2"
         data-selection-zone
       >
-        {/* Aligns search bar with TopBar standard padding (usually px-3 or px-4 depending on app config) */}
-        <div className="px-3 sm:px-4">
+        <div className="px-0">
           {isSelecting ? (
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex items-center justify-between gap-2 px-3">
               <div className="flex items-center gap-2">
                 <button
                   onClick={clearSelection}
@@ -384,7 +379,8 @@ export default function MobileFleetList({
             </div>
           ) : (
             <div className="space-y-2">
-              <div className="flex items-center h-11 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] overflow-hidden transition-colors">
+              {/* Search Bar: rounded-2xl for premium edge-to-edge look */}
+              <div className="flex items-center h-11 rounded-2xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] overflow-hidden transition-colors mx-0">
                 <div className="relative flex-1 h-full">
                   <Search
                     size={16}
@@ -443,7 +439,7 @@ export default function MobileFleetList({
               {filtersOpen && !searchFocused && (
                 <div className="relative animate-in slide-in-from-top-1 fade-in duration-200">
                   <div className="overflow-x-auto scrollbar-none">
-                    <div className="flex items-center gap-2 py-1 pr-6">
+                    <div className="flex items-center gap-2 py-1 px-3 pr-6">
                       <button
                         onClick={() => setStatusFilter("")}
                         className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border ${
@@ -497,8 +493,8 @@ export default function MobileFleetList({
         </div>
       </div>
 
-      {/* Banners */}
-      <div className={`px-3 sm:px-4 ${searchFocused || isSelecting ? "hidden" : ""}`}>
+      {/* Banners: px-3 for text readability, but visually full-width */}
+      <div className={`px-3 ${searchFocused || isSelecting ? "hidden" : ""}`}>
         {!loading && pendingCount > 0 && statusFilter !== "pending_activation" && (
           <button
             type="button"
@@ -573,8 +569,9 @@ export default function MobileFleetList({
           </p>
         </div>
       ) : (
-        <div className="space-y-2.5 pb-4 px-3 sm:px-4">
-          {displayVehicles.map((item) => {
+        /* CARD LIST: Seamless edge-to-edge pattern */
+        <div className="pb-4">
+          {displayVehicles.map((item, index) => {
             const isSelected = selected.some((v) => v.id === item.id);
 
             const kmToService = item.next_service_km
@@ -617,21 +614,39 @@ export default function MobileFleetList({
                     toggleSelection(item);
                     return;
                   }
-                  router.push(`/dashboard/fleet/${item.id}`);
+                  // Open actions menu instead of navigating
+                  const trigger = document.querySelector(`[data-card-actions="${item.id}"] button`) as HTMLButtonElement | null;
+                  trigger?.click();
                 }}
-                className={`relative flex items-center gap-4 p-3.5 rounded-2xl border transition-all cursor-pointer select-none bg-[var(--color-surface)] ${
+                /* 
+                  Updated card styling:
+                  - py-2.5 px-3: Tighter vertical padding so the avatar dominates the height
+                  - pr-2 on content: Balanced horizontal spacing since the 3-dots menu is gone
+                */
+                className={`relative flex items-center gap-3 py-2.5 px-3 transition-all cursor-pointer select-none bg-[var(--color-surface)] first:rounded-t-2xl last:rounded-b-2xl ${
                   isSelected
-                    ? "border-[var(--color-primary)] bg-[var(--color-primary)]/[0.04]"
-                    : "border-[var(--color-surface-border)] hover:border-[var(--color-primary)]/30 shadow-sm"
+                    ? "border-y border-[var(--color-primary)] bg-[var(--color-primary)]/[0.04]"
+                    : "hover:bg-[var(--color-surface-hover)]"
                 }`}
               >
+                {/* Premium fade border - 80% width, very thin, fades at sides */}
+                {index !== displayVehicles.length - 1 && (
+                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-px bg-gradient-to-r from-transparent via-[var(--color-surface-border)] to-transparent" />
+                )}
+                
+                {/* 
+                  Avatar Container: 
+                  - w-20 h-16 gives real photos excellent breathing room while dominating vertical space 
+                  - (Note: If your photos are strictly square, change this to w-16 h-16)
+                */}
                 <div
-                  className={`w-20 h-14 rounded-xl flex items-center justify-center shrink-0 overflow-hidden ${avatarColors.bg}`}
+                  className={`w-20 h-16 rounded-xl flex items-center justify-center shrink-0 overflow-hidden ${avatarColors.bg}`}
                 >
-                  <BodyIcon size={28} className={avatarColors.icon} strokeWidth={1.75} />
+                  <BodyIcon size={32} className={avatarColors.icon} strokeWidth={1.75} />
                 </div>
 
-                <div className="min-w-0 flex-1 pr-6">
+                {/* Reduced right padding (pr-2) to balance the left side now that the menu button is gone */}
+                <div className="min-w-0 flex-1 pr-2">
                   <div className="flex items-center gap-2 min-w-0">
                     <h3 className="text-base font-bold text-[var(--color-ink)] truncate tracking-tight">
                       {item.make} {item.model}
@@ -661,18 +676,6 @@ export default function MobileFleetList({
                     </div>
                   </div>
                 </div>
-
-                <button
-                  className="absolute top-3.5 right-3.5 p-1.5 rounded-md text-[var(--color-ink-subtle)] hover:bg-[var(--color-surface-hover)] transition-colors"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    const trigger = document.querySelector(`[data-card-actions="${item.id}"] button`) as HTMLButtonElement | null;
-                    trigger?.click();
-                  }}
-                  aria-label="Vehicle actions"
-                >
-                  <MoreHorizontal size={18} />
-                </button>
 
                 {isSelecting && (
                   <div className="absolute top-3.5 left-3.5 z-10">
