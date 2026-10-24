@@ -28,10 +28,8 @@ const formatPrice = (amount: number | string) => {
 const formatMileage = (km: number) => km.toString();
 
 /** 
- * ✅ Returns the outer ring color ONLY if the vehicle needs attention.
+ * Returns the outer ring color ONLY if the vehicle needs attention.
  * Returns null when the vehicle is available / retired / archived (no ring).
- * 
- * Attention states: rented, pending_activation, maintenance, mileage_due.
  */
 const getStatusRingColor = (
   vehicle: Vehicle,
@@ -47,7 +45,7 @@ const getStatusRingColor = (
   if (vehicle.status === "pending_activation") {
     return "ring-violet-400/80";
   }
-  return null; // available / retired → no ring
+  return null;
 };
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -578,7 +576,6 @@ export default function MobileFleetList({
         <div className="pb-4">
           {displayVehicles.map((item, index) => {
             const isSelected = selected.some((v) => v.id === item.id);
-            const isDark = mounted && resolvedTheme === "dark";
             const brandLogoUrl = getVehicleBrandLogoUrl(item);
 
             const kmToService = item.next_service_km
@@ -605,6 +602,7 @@ export default function MobileFleetList({
             const ringColor = getStatusRingColor(item, isDueForService);
             const BodyIcon = getVehicleBodyIcon(item);
             const needsAttention = Boolean(ringColor);
+            const isDarkWithLogo = mounted && resolvedTheme === "dark" && brandLogoUrl;
 
             return (
               <div
@@ -637,22 +635,28 @@ export default function MobileFleetList({
                 
                 {/* 
                   ✅ Avatar Container:
-                  - Squircle shape (w-20 h-14 rounded-xl)
-                  - Feather-thin ring only on attention states
-                  - Ring-offset for the WhatsApp gap effect
+                  - Light mode: normal surface with optional ring
+                  - Dark mode + logo: white plate with premium inner feather shadow
+                  - Dark mode + no logo: normal surface with BodyIcon
                 */}
                 <div
-                  className={`relative w-20 h-14 rounded-xl flex items-center justify-center shrink-0 overflow-hidden bg-[var(--color-surface)] ${
+                  className={`relative w-20 h-14 rounded-xl flex items-center justify-center shrink-0 overflow-hidden transition-colors ${
+                    isDarkWithLogo
+                      ? "bg-white shadow-[inset_0_0_6px_rgba(0,0,0,0.08)]" // ✅ Premium inner feather shadow
+                      : "bg-[var(--color-surface)]"
+                  } ${
                     needsAttention
                       ? `ring-1 ring-offset-1 ring-offset-[var(--color-surface)] ${ringColor}`
                       : "border border-[var(--color-surface-border)]"
                   }`}
                 >
-                  {brandLogoUrl && !isDark ? (
+                  {brandLogoUrl ? (
                     <img
                       src={brandLogoUrl}
                       alt={item.make}
-                      className="w-12 h-12 object-contain mix-blend-multiply"
+                      className={`w-12 h-12 object-contain ${
+                        mounted && resolvedTheme === "dark" ? "" : "mix-blend-multiply"
+                      }`}
                       loading="lazy"
                     />
                   ) : (

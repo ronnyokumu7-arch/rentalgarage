@@ -3,10 +3,12 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/auth-context"; // ✅ Added for profile routing
 import {
   ChevronLeft, ChevronRight, SlidersHorizontal, UserCog,
   Landmark as LandmarkIcon, ServerCog, ShieldHalf, LayoutDashboard,
   FileText, FileSignature, Users, Building2, Palette, Bell, ScrollText, DollarSign,
+  User, // ✅ Added for Profile Settings icon
 } from "lucide-react";
 
 export function ParentPanel({
@@ -55,7 +57,11 @@ export function SubPanelItem({
   );
 }
 
-export function SettingsPanel({ onBack, onNavigate }: { onBack: () => void; onNavigate: (panel: string) => void; }) {
+export function SettingsPanel({ onBack, onNavigate, onClose }: { onBack: () => void; onNavigate: (panel: string) => void; onClose?: () => void; }) {
+  const router = useRouter();
+  const { user } = useAuth();
+  const isSuperAdmin = user?.role === "super_admin";
+
   const SETTINGS_TABS = [
     { id: "general", label: "General", description: "Agency configuration", icon: SlidersHorizontal },
     { id: "team", label: "Team & Access", description: "Manage staff roles", icon: UserCog },
@@ -63,9 +69,29 @@ export function SettingsPanel({ onBack, onNavigate }: { onBack: () => void; onNa
     { id: "system", label: "System", description: "API keys and webhooks", icon: ServerCog },
     { id: "advanced", label: "Advanced", description: "Backups and health", icon: ShieldHalf },
   ];
+
+  // ✅ Handles dismissing the sheet and navigating to the user's profile
+  const handleProfileClick = () => {
+    onClose?.();
+    setTimeout(() => {
+      const profileUrl = isSuperAdmin && user?.id 
+        ? `/super-admin/users/${user.id}` 
+        : `/dashboard/users/${user?.id}`;
+      router.push(profileUrl, { scroll: false });
+    }, 0);
+  };
+
   return (
     <ParentPanel title="Settings" onBack={onBack}>
       <div className="space-y-1">
+        {/* ✅ NEW: Profile Settings placed directly above General */}
+        <SubPanelItem
+          icon={User}
+          title="Profile Settings"
+          description="Your account & preferences"
+          onClick={handleProfileClick}
+        />
+
         {SETTINGS_TABS.map((tab) => (
           <SubPanelItem
             key={tab.id} icon={tab.icon} title={tab.label} description={tab.description}
