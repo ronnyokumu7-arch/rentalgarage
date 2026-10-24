@@ -1,4 +1,4 @@
-// src/app/dashboard/financials/PaymentsTab.tsx
+// src/components/financials/PaymentsTab.tsx
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
@@ -6,7 +6,7 @@ import { Search, FileText, Filter, Upload, Calendar } from "lucide-react";
 import FilterDropdown from "@/components/ui/FilterDropdown";
 import { usePayments } from "@/hooks/financials/usePayments";
 import PaymentsTable from "./payments/PaymentsTable";
-import type { PaymentStatus } from "@/lib/types"; // ✅ FIXED: Added PaymentStatus import
+import type { PaymentStatus } from "@/lib/types";
 
 type DateRange = "all" | "today" | "yesterday" | "this_week" | "this_month" | "last_month" | "last_3_months" | "last_6_months" | "last_year";
 
@@ -18,10 +18,8 @@ export default function PaymentsTab() {
   } = usePayments();
 
   const [dateFilter, setDateFilter] = useState<DateRange>("all");
-
   const pageSize = 7;
 
-  // Helper function to get date range boundaries
   const getDateRange = useMemo(() => {
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -68,7 +66,6 @@ export default function PaymentsTab() {
       
       const matchesStatus = statusFilter === "all" || payment.status === statusFilter;
       
-      // Date filtering
       let matchesDate = true;
       if (dateFilter !== "all" && getDateRange) {
         const paymentDate = new Date(payment.paid_at || payment.created_at);
@@ -84,13 +81,10 @@ export default function PaymentsTab() {
     return displayedPayments.slice(start, start + pageSize);
   }, [displayedPayments, currentPage]);
 
-  const totalPages = Math.ceil(displayedPayments.length / pageSize);
-
   useEffect(() => {
     setCurrentPage(1);
   }, [search, statusFilter, dateFilter, setCurrentPage]);
 
-  // --- Action Handlers ---
   const handleDownloadPdf = (id: number) => {
     console.log(`Download PDF for payment ${id}`);
   };
@@ -134,12 +128,12 @@ export default function PaymentsTab() {
 
   return (
     <>
-      <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden">
+      {/* ✅ FIX: md:overflow-hidden ensures mobile viewport scrolling isn't blocked, allowing sticky to work */}
+      <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] md:overflow-hidden">
         
-        {/* Toolbar - DNA matched to Contracts/Clients/Invoices */}
-        <div className="p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
+        {/* ✅ FIX: Sticky toolbar on mobile */}
+        <div className="sticky top-0 z-20 bg-[var(--color-surface)] p-4 border-b border-[var(--color-surface-border)] md:bg-[var(--color-surface-hover)]/50 flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
           
-          {/* Metrics Breakdown Panel - Completed | Pending | Failed (Evenly Distributed) */}
           <div className="hidden sm:flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
             <div className="flex items-center gap-2 whitespace-nowrap flex-1 min-w-0">
               <span className="text-xs font-medium text-[var(--color-ink-muted)]">Completed</span>
@@ -157,10 +151,8 @@ export default function PaymentsTab() {
             </div>
           </div>
 
-          {/* Controls: Search + Date Filter + Status Filter + Export Button */}
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <div className="flex items-center gap-2 flex-1 sm:w-80">
-              {/* Search Input */}
               <div className="relative flex-1">
                 <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
                 <input
@@ -172,7 +164,6 @@ export default function PaymentsTab() {
                 />
               </div>
 
-              {/* ✅ Reusable FilterDropdown for Date */}
               <FilterDropdown
                 filterId="payment-date"
                 label="Date"
@@ -191,7 +182,6 @@ export default function PaymentsTab() {
                 icon={Calendar}
               />
 
-              {/* ✅ Reusable FilterDropdown for Status */}
               <FilterDropdown
                 filterId="payment-status"
                 label="Status"
@@ -206,7 +196,6 @@ export default function PaymentsTab() {
               />
             </div>
 
-            {/* Export CSV Button */}
             <button 
               onClick={handleExportAllCsv}
               disabled={displayedPayments.length === 0}
@@ -219,7 +208,6 @@ export default function PaymentsTab() {
           </div>
         </div>
 
-        {/* Content Area - Edge-to-edge table */}
         {loading ? (
           <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2">
             <div className="w-5 h-5 rounded-full border-2 border-[var(--color-primary)] border-t-transparent animate-spin" />
@@ -239,7 +227,6 @@ export default function PaymentsTab() {
           </div>
         ) : (
           <>
-            {/* ✅ EDGE-TO-EDGE TABLE: No p-4 wrapper */}
             <PaymentsTable 
               data={paginatedPayments}
               onExportCsv={handleExportSingleCsv}
@@ -247,7 +234,6 @@ export default function PaymentsTab() {
               onIssueRefund={handleIssueRefund}
             />
             
-            {/* Pagination Footer */}
             <div className="hidden md:flex p-4 border-t border-[var(--color-surface-border)] flex-col sm:flex-row items-center justify-between gap-3">
               <p className="text-xs text-[var(--color-ink-muted)] text-center sm:text-left">
                 Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, displayedPayments.length)} of {displayedPayments.length} payments
@@ -262,12 +248,12 @@ export default function PaymentsTab() {
                   Previous
                 </button>
                 <span className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--color-primary)] text-white">
-                  {currentPage} / {totalPages}
+                  {currentPage} / {Math.ceil(displayedPayments.length / pageSize) || 1}
                 </span>
                 <button
                   type="button"
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage((p) => Math.min(Math.ceil(displayedPayments.length / pageSize) || 1, p + 1))}
+                  disabled={currentPage >= Math.ceil(displayedPayments.length / pageSize) || 1}
                   className="px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] disabled:opacity-30 transition-all active:scale-95"
                 >
                   Next

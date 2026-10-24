@@ -1,7 +1,7 @@
 // src/components/bookings/booking_list/BookingsList.tsx
 "use client";
 
-import { CalendarDays, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import BookingsToolbar from "./BookingsToolbar";
 import BookingsListMobile from "./BookingsListMobile";
 import BookingsListDesktop from "./BookingsListDesktop";
@@ -60,18 +60,13 @@ export default function BookingsList({
         <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2 text-sm font-medium">
           <Loader2 className="w-5 h-5 animate-spin" /> Loading bookings...
         </div>
-      ) : filteredBookings.length === 0 ? (
-        <div className="p-12 text-center">
-          <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
-            <CalendarDays size={24} className="text-[var(--color-ink-subtle)]" />
-          </div>
-          <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No bookings found</h3>
-          <p className="text-sm text-[var(--color-ink-muted)] mb-4">
-            {search || statusFilter ? "Try adjusting your search query or filters." : "Create a new booking to start."}
-          </p>
-        </div>
       ) : (
         <>
+          {/* 
+            ✅ FIX: Always render BookingsListMobile. 
+            It has its own internal empty state that keeps the search bar 
+            and filters visible even when filteredBookings.length === 0.
+          */}
           <BookingsListMobile
             bookings={filteredBookings}
             clientMap={clientMap}
@@ -85,12 +80,16 @@ export default function BookingsList({
             activeTab={activeTab}
             handleTabChange={handleTabChange}
           />
+          
           <BookingsListDesktop
             bookings={paginatedBookings}
-            clientMap={clientMap} vehicleMap={vehicleMap}
+            clientMap={clientMap} 
+            vehicleMap={vehicleMap}
             loading={loading}
-            currentPage={currentPage} totalPages={totalPages}
-            totalItems={filteredBookings.length} pageSize={pageSize}
+            currentPage={currentPage} 
+            totalPages={totalPages}
+            totalItems={filteredBookings.length} 
+            pageSize={pageSize}
             setCurrentPage={setCurrentPage}
             actionsCtx={actionsCtx}
           />

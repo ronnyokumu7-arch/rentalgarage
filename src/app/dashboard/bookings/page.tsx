@@ -59,14 +59,20 @@ export default function BookingsPage() {
       ? {
           title: "Manage Bookings",
           mobileTitle: "Bookings",
-          description: "Create new reservations, manage bookings, and handle extensions.",
-          icon: <LayoutList size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+          description:
+            "Create new reservations, manage bookings, and handle extensions.",
+          icon: (
+            <LayoutList size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />
+          ),
         }
       : {
           title: "Fleet Timeline Calendar",
           mobileTitle: "Calendar",
-          description: "Real-time look at vehicle distribution, active reservations, and scheduling blocks.",
-          icon: <CalendarDays size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+          description:
+            "Real-time look at vehicle distribution, active reservations, and scheduling blocks.",
+          icon: (
+            <CalendarDays size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />
+          ),
         };
   }, [activeTab]);
 
@@ -84,11 +90,15 @@ export default function BookingsPage() {
       { label: "No Show", value: "no_show" },
       { label: "Awaiting Mileage", value: "awaiting_mileage" },
     ],
-    [bookingsData.upcomingCount, bookingsData.activeTripsCount, bookingsData.completedCount]
+    [
+      bookingsData.upcomingCount,
+      bookingsData.activeTripsCount,
+      bookingsData.completedCount,
+    ]
   );
 
   return (
-    // ✅ FIXED: Removed "max-w-full overflow-hidden" which was breaking sticky positioning
+    // ✅ FIXED: Removed "max-w-full overflow-hidden" - this was breaking sticky positioning!
     <div className="space-y-4 sm:space-y-6">
       {/* DESKTOP-ONLY HEADER */}
       <div className="hidden sm:flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
