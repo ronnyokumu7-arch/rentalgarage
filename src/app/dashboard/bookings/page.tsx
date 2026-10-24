@@ -1,10 +1,8 @@
 // src/app/dashboard/bookings/page.tsx
 "use client";
-
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import { LayoutList, CalendarDays } from "lucide-react";
-
 import BookingsList from "@/components/bookings/BookingsList";
 import ExtendBookingModal from "@/components/bookings/ExtendBookingModal";
 import FleetTimelineCalendar from "@/components/bookings/FleetTimelineCalendar";
@@ -15,8 +13,8 @@ import MobileFloatingSegment from "@/components/ui/MobileFloatingSegment";
 import { useSetPageHeader } from "@/context/page-header-context";
 
 const TABS = [
-  { id: "list",     label: "Reservations", icon: LayoutList },
-  { id: "calendar", label: "Calendar",     icon: CalendarDays },
+  { id: "list", label: "Reservations", icon: LayoutList },
+  { id: "calendar", label: "Calendar", icon: CalendarDays },
 ];
 
 const VALID_TABS = new Set<TabMode>(["list", "calendar"]);
@@ -24,7 +22,6 @@ const VALID_TABS = new Set<TabMode>(["list", "calendar"]);
 export default function BookingsPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const {
     activeTab,
     setActiveTab,
@@ -62,20 +59,14 @@ export default function BookingsPage() {
       ? {
           title: "Manage Bookings",
           mobileTitle: "Bookings",
-          description:
-            "Create new reservations, manage bookings, and handle extensions.",
-          icon: (
-            <LayoutList size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />
-          ),
+          description: "Create new reservations, manage bookings, and handle extensions.",
+          icon: <LayoutList size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
         }
       : {
           title: "Fleet Timeline Calendar",
           mobileTitle: "Calendar",
-          description:
-            "Real-time look at vehicle distribution, active reservations, and scheduling blocks.",
-          icon: (
-            <CalendarDays size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />
-          ),
+          description: "Real-time look at vehicle distribution, active reservations, and scheduling blocks.",
+          icon: <CalendarDays size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
         };
   }, [activeTab]);
 
@@ -83,26 +74,22 @@ export default function BookingsPage() {
   useSetPageHeader(currentTabInfo.mobileTitle, currentTabInfo.description);
 
   const bookingsArray = bookingsData.bookings || [];
-
   const statusOptions = useMemo(
     () => [
-      { label: "Pending",          value: "pending",           count: bookingsData.upcomingCount },
-      { label: "Confirmed",        value: "confirmed" },
-      { label: "Active",           value: "active",            count: bookingsData.activeTripsCount },
-      { label: "Completed",        value: "completed",         count: bookingsData.completedCount },
-      { label: "Cancelled",        value: "cancelled" },
-      { label: "No Show",          value: "no_show" },
+      { label: "Pending", value: "pending", count: bookingsData.upcomingCount },
+      { label: "Confirmed", value: "confirmed" },
+      { label: "Active", value: "active", count: bookingsData.activeTripsCount },
+      { label: "Completed", value: "completed", count: bookingsData.completedCount },
+      { label: "Cancelled", value: "cancelled" },
+      { label: "No Show", value: "no_show" },
       { label: "Awaiting Mileage", value: "awaiting_mileage" },
     ],
-    [
-      bookingsData.upcomingCount,
-      bookingsData.activeTripsCount,
-      bookingsData.completedCount,
-    ],
+    [bookingsData.upcomingCount, bookingsData.activeTripsCount, bookingsData.completedCount]
   );
 
   return (
-    <div className="space-y-4 sm:space-y-6 max-w-full overflow-hidden">
+    // ✅ FIXED: Removed "max-w-full overflow-hidden" which was breaking sticky positioning
+    <div className="space-y-4 sm:space-y-6">
       {/* DESKTOP-ONLY HEADER */}
       <div className="hidden sm:flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div className="min-w-0 flex-1">
@@ -116,7 +103,6 @@ export default function BookingsPage() {
             {currentTabInfo.description}
           </p>
         </div>
-
         <div className="hidden md:block">
           <PremiumTabSwitcher
             tabs={TABS}
@@ -142,7 +128,6 @@ export default function BookingsPage() {
               handleTabChange={handleTabChange}
             />
           </div>
-
           {/* DESKTOP — unchanged card */}
           <div className="hidden md:block bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
             <BookingsList

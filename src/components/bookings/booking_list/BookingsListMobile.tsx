@@ -6,6 +6,7 @@ import { useState, useMemo } from "react";
 import {
   CalendarDays, Phone, ChevronRight,
   Search, X, SlidersHorizontal,
+  AlertCircle, ArrowRight,
 } from "lucide-react";
 import CardGrid from "@/components/ui/CardGrid";
 import type { Booking, Client, Vehicle } from "@/lib/types";
@@ -74,6 +75,11 @@ export default function BookingsListMobile({
 
   const hasActiveFilter = statusFilter !== null && statusFilter !== "";
 
+  // Count pending bookings for banner
+  const pendingCount = useMemo(() => {
+    return bookings.filter((b) => b.status === "pending").length;
+  }, [bookings]);
+
   // ✅ Auto-sort by status priority
   const sortedBookings = useMemo(() => {
     const priority: Record<string, number> = {
@@ -89,21 +95,26 @@ export default function BookingsListMobile({
       const aPriority = priority[a.status] ?? 99;
       const bPriority = priority[b.status] ?? 99;
 
-      // Primary sort: status priority
       if (aPriority !== bPriority) {
         return aPriority - bPriority;
       }
 
-      // Secondary sort: most recent first within the same status
       const aDate = new Date(a.start_date).getTime();
       const bDate = new Date(b.start_date).getTime();
       return bDate - aDate;
     });
   }, [bookings]);
 
+  const handleCallClient = (phone: string | null | undefined, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (phone) {
+      window.location.href = `tel:${phone.replace(/\s/g, "")}`;
+    }
+  };
+
   return (
     <div className="block md:hidden relative">
-      {/* TOOLBAR: Full width (px-0) */}
+      {/* TOOLBAR: Sticky like fleet/clients pages */}
       <div className="sticky top-0 z-20 bg-[var(--color-bg)] py-2">
         <div className="px-0">
           <div className="space-y-2">
@@ -208,6 +219,37 @@ export default function BookingsListMobile({
         </div>
       </div>
 
+      {/* Banners - similar to clients page */}
+      <div className={`px-3 ${searchFocused ? "hidden" : ""}`}>
+        {!search && pendingCount > 0 && statusFilter !== "pending" && (
+          <button
+            type="button"
+            onClick={() => setStatusFilter("pending")}
+            className="w-full flex items-center justify-start gap-2 py-3 px-1 text-amber-600 dark:text-amber-400 hover:opacity-80 transition-opacity text-xs font-semibold"
+          >
+            <AlertCircle size={14} />
+            {pendingCount} {pendingCount === 1 ? "booking" : "bookings"} pending your review
+            <ArrowRight size={12} className="opacity-70" />
+          </button>
+        )}
+
+        {!search && statusFilter === "pending" && (
+          <div className="w-full flex items-center justify-between py-3 px-1 text-blue-600 dark:text-blue-400 text-xs font-semibold">
+            <span className="flex items-center gap-2">
+              <AlertCircle size={14} />
+              Viewing {sortedBookings.length} pending {sortedBookings.length === 1 ? "booking" : "bookings"}
+            </span>
+            <button
+              type="button"
+              onClick={() => setStatusFilter(null)}
+              className="text-[11px] font-bold px-2 py-1 rounded-md bg-blue-500/15 hover:bg-blue-500/25 transition-colors"
+            >
+              Clear Filter
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Card List: Seamless edge-to-edge pattern */}
       <div className="pb-4">
         {sortedBookings.length === 0 ? (
@@ -228,19 +270,16 @@ export default function BookingsListMobile({
               const client = getClient(clientMap, item.client_id);
               const vehicle = getVehicle(vehicleMap, item.vehicle_id);
               const clientName = client?.full_name || `Client #${item.client_id}`;
-              const initials = clientName
-                .trim()
-                .split(/\s+/)
-                .map((n) => n[0])
-                .join("")
-                .substring(0, 2)
-                .toUpperCase();
 
               return (
                 <div
                   key={item.id}
                   className="relative flex flex-col w-full py-3.5 px-3 transition-colors cursor-pointer select-none hover:bg-[var(--color-surface-hover)]/40"
-                  onClick={() => router.push(`/dashboard/bookings/${item.id}`)}
+                  onClick={() => {
+                    // Open action sheet instead of navigating
+                    const trigger = document.querySelector(`[data-card-actions="${item.id}"] button`) as HTMLButtonElement | null;
+                    trigger?.click();
+                  }}
                 >
                   {/* Premium fade border - 80% width, very thin, fades at sides */}
                   {index !== sortedBookings.length - 1 && (
@@ -280,9 +319,14 @@ export default function BookingsListMobile({
                   {/* Body Section */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                      <div className="w-9 h-9 rounded-lg bg-[var(--color-surface-hover)] flex items-center justify-center text-[var(--color-ink-muted)] font-bold text-[11px] flex-shrink-0">
-                        {initials}
-                      </div>
+                      {/* Large Phone Icon - tappable to call */}
+                      <button
+                        onClick={(e) => handleCallClient(client?.phone, e)}
+                        className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)] flex-shrink-0 transition-colors active:scale-95"
+                        aria-label="Call client"
+                      >
+                        <Phone size={20} strokeWidth={2} />
+                      </button>
                       <div className="min-w-0">
                         <p className="text-xs font-semibold text-[var(--color-ink)] leading-tight truncate">
                           {clientName}
