@@ -4,7 +4,7 @@
 import { useRouter } from "next/navigation";
 import { useState, useMemo } from "react";
 import {
-  CalendarDays, Phone, ChevronRight,
+  CalendarDays, Phone, MessageCircle, ChevronRight,
   Search, X, SlidersHorizontal,
   AlertCircle, ArrowRight,
 } from "lucide-react";
@@ -32,6 +32,16 @@ const getClient = (map: Map<number, Client>, id: number) =>
   map.get(id) || map.get(Number(id));
 const getVehicle = (map: Map<number, Vehicle>, id: number) =>
   map.get(id) || map.get(Number(id));
+
+const getWhatsAppNumber = (rawPhone?: string | null): string | null => {
+  if (!rawPhone) return null;
+  const digits = rawPhone.replace(/\D/g, "");
+  if (!digits) return null;
+  if (digits.startsWith("254")) return digits;
+  if (digits.startsWith("0")) return `254${digits.slice(1)}`;
+  if (digits.startsWith("7") || digits.startsWith("1")) return `254${digits}`;
+  return digits;
+};
 
 const getBookingAvatarColors = (status: string): { bg: string; icon: string } => {
   switch (status) {
@@ -75,12 +85,10 @@ export default function BookingsListMobile({
 
   const hasActiveFilter = statusFilter !== null && statusFilter !== "";
 
-  // Count pending bookings for banner
   const pendingCount = useMemo(() => {
     return bookings.filter((b) => b.status === "pending").length;
   }, [bookings]);
 
-  // ✅ Auto-sort by status priority
   const sortedBookings = useMemo(() => {
     const priority: Record<string, number> = {
       active: 1,
@@ -105,20 +113,13 @@ export default function BookingsListMobile({
     });
   }, [bookings]);
 
-  const handleCallClient = (phone: string | null | undefined, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (phone) {
-      window.location.href = `tel:${phone.replace(/\s/g, "")}`;
-    }
-  };
-
   return (
-    <div className="block md:hidden relative">
-      {/* TOOLBAR: Sticky like fleet/clients pages */}
-      <div className="sticky top-0 z-20 bg-[var(--color-bg)] py-2">
+    <div className="block md:hidden relative min-h-screen">
+      {/* TOOLBAR: Always visible, sticky at top */}
+      <div className="sticky top-0 z-30 bg-[var(--color-bg)] py-2">
         <div className="px-0">
           <div className="space-y-2">
-            {/* Search + filter pill: rounded-2xl for premium edge-to-edge look */}
+            {/* Search bar - ALWAYS renders */}
             <div className="flex items-center h-11 rounded-2xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] overflow-hidden transition-colors mx-0">
               <div className="relative flex-1 h-full">
                 <Search
@@ -175,8 +176,8 @@ export default function BookingsListMobile({
               </div>
             </div>
 
-            {/* Filter pills: px-3 to prevent touching physical edge */}
-            {filtersOpen && !searchFocused && (
+            {/* Filter pills - ALWAYS renders when open, regardless of search focus */}
+            {filtersOpen && (
               <div className="relative animate-in slide-in-from-top-1 fade-in duration-200">
                 <div className="overflow-x-auto scrollbar-none">
                   <div className="flex items-center gap-2 py-1 px-3 pr-6">
@@ -219,38 +220,57 @@ export default function BookingsListMobile({
         </div>
       </div>
 
-      {/* Banners - similar to clients page */}
-      <div className={`px-3 ${searchFocused ? "hidden" : ""}`}>
-        {!search && pendingCount > 0 && statusFilter !== "pending" && (
-          <button
-            type="button"
-            onClick={() => setStatusFilter("pending")}
-            className="w-full flex items-center justify-start gap-2 py-3 px-1 text-amber-600 dark:text-amber-400 hover:opacity-80 transition-opacity text-xs font-semibold"
-          >
-            <AlertCircle size={14} />
-            {pendingCount} {pendingCount === 1 ? "booking" : "bookings"} pending your review
-            <ArrowRight size={12} className="opacity-70" />
-          </button>
-        )}
-
-        {!search && statusFilter === "pending" && (
-          <div className="w-full flex items-center justify-between py-3 px-1 text-blue-600 dark:text-blue-400 text-xs font-semibold">
-            <span className="flex items-center gap-2">
-              <AlertCircle size={14} />
-              Viewing {sortedBookings.length} pending {sortedBookings.length === 1 ? "booking" : "bookings"}
-            </span>
+      {/* Banners - Only show when relevant, but never hide the toolbar */}
+      {!searchFocused && (
+        <div className="px-3">
+          {!search && pendingCount > 0 && statusFilter !== "pending" && (
             <button
               type="button"
-              onClick={() => setStatusFilter(null)}
-              className="text-[11px] font-bold px-2 py-1 rounded-md bg-blue-500/15 hover:bg-blue-500/25 transition-colors"
+              onClick={() => setStatusFilter("pending")}
+              className="w-full flex items-center justify-start gap-2 py-3 px-1 text-amber-600 dark:text-amber-400 hover:opacity-80 transition-opacity text-xs font-semibold"
             >
-              Clear Filter
+              <AlertCircle size={14} />
+              {pendingCount} {pendingCount === 1 ? "booking" : "bookings"} pending your review
+              <ArrowRight size={12} className="opacity-70" />
             </button>
-          </div>
-        )}
-      </div>
+          )}
 
-      {/* Card List: Seamless edge-to-edge pattern */}
+          {!search && statusFilter === "pending" && sortedBookings.length > 0 && (
+            <div className="w-full flex items-center justify-between py-3 px-1 text-blue-600 dark:text-blue-400 text-xs font-semibold">
+              <span className="flex items-center gap-2">
+                <AlertCircle size={14} />
+                Viewing {sortedBookings.length} pending {sortedBookings.length === 1 ? "booking" : "bookings"}
+              </span>
+              <button
+                type="button"
+                onClick={() => setStatusFilter(null)}
+                className="text-[11px] font-bold px-2 py-1 rounded-md bg-blue-500/15 hover:bg-blue-500/25 transition-colors"
+              >
+                Clear Filter
+              </button>
+            </div>
+          )}
+
+          {/* Show "Viewing X [status] bookings" for any active filter */}
+          {!search && hasActiveFilter && statusFilter !== "pending" && sortedBookings.length > 0 && (
+            <div className="w-full flex items-center justify-between py-3 px-1 text-blue-600 dark:text-blue-400 text-xs font-semibold">
+              <span className="flex items-center gap-2">
+                <AlertCircle size={14} />
+                Viewing {sortedBookings.length} {statusFilter} {sortedBookings.length === 1 ? "booking" : "bookings"}
+              </span>
+              <button
+                type="button"
+                onClick={() => setStatusFilter(null)}
+                className="text-[11px] font-bold px-2 py-1 rounded-md bg-blue-500/15 hover:bg-blue-500/25 transition-colors"
+              >
+                Clear Filter
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Card List */}
       <div className="pb-4">
         {sortedBookings.length === 0 ? (
           <div className="p-12 text-center">
@@ -259,8 +279,19 @@ export default function BookingsListMobile({
             </div>
             <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No bookings found</h3>
             <p className="text-sm text-[var(--color-ink-muted)] mb-4">
-              Try adjusting your search query or filters.
+              {search || hasActiveFilter
+                ? "Try adjusting your search query or filters."
+                : "Create your first booking to get started."}
             </p>
+            {hasActiveFilter && (
+              <button
+                type="button"
+                onClick={() => setStatusFilter(null)}
+                className="text-xs font-bold px-3 py-1.5 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/20 transition-colors"
+              >
+                Clear Filter
+              </button>
+            )}
           </div>
         ) : (
           <div className="bg-[var(--color-surface)] first:rounded-t-2xl last:rounded-b-2xl">
@@ -270,18 +301,17 @@ export default function BookingsListMobile({
               const client = getClient(clientMap, item.client_id);
               const vehicle = getVehicle(vehicleMap, item.vehicle_id);
               const clientName = client?.full_name || `Client #${item.client_id}`;
+              const waNumber = getWhatsAppNumber(client?.phone);
 
               return (
                 <div
                   key={item.id}
                   className="relative flex flex-col w-full py-3.5 px-3 transition-colors cursor-pointer select-none hover:bg-[var(--color-surface-hover)]/40"
                   onClick={() => {
-                    // Open action sheet instead of navigating
                     const trigger = document.querySelector(`[data-card-actions="${item.id}"] button`) as HTMLButtonElement | null;
                     trigger?.click();
                   }}
                 >
-                  {/* Premium fade border - 80% width, very thin, fades at sides */}
                   {index !== sortedBookings.length - 1 && (
                     <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-px bg-gradient-to-r from-transparent via-[var(--color-surface-border)] to-transparent" />
                   )}
@@ -317,35 +347,45 @@ export default function BookingsListMobile({
                   </div>
 
                   {/* Body Section */}
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                      {/* Large Phone Icon - tappable to call */}
-                      <button
-                        onClick={(e) => handleCallClient(client?.phone, e)}
-                        className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)] flex-shrink-0 transition-colors active:scale-95"
-                        aria-label="Call client"
-                      >
-                        <Phone size={20} strokeWidth={2} />
-                      </button>
-                      <div className="min-w-0">
-                        <p className="text-xs font-semibold text-[var(--color-ink)] leading-tight truncate">
-                          {clientName}
-                        </p>
-                        {client?.phone && (
-                          <div className="flex items-center gap-1 text-[10px] text-[var(--color-ink-muted)] font-medium mt-0.5">
-                            <Phone size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                            <span className="truncate">{client.phone}</span>
-                          </div>
-                        )}
-                      </div>
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-bold text-[var(--color-ink)] leading-tight truncate mb-1.5">
+                        {clientName}
+                      </p>
+                      
+                      {client?.phone && (
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={`tel:${client.phone.replace(/\s/g, "")}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-border)] transition-colors text-[10px] font-bold text-[var(--color-ink)]"
+                          >
+                            <Phone size={10} className="text-[var(--color-ink-muted)]" />
+                            Call
+                          </a>
+                          
+                          {waNumber && (
+                            <a
+                              href={`https://wa.me/${waNumber}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-border)] transition-colors text-[10px] font-bold text-[var(--color-ink)]"
+                            >
+                              <MessageCircle size={10} className="text-[var(--color-ink-muted)]" />
+                              Message
+                            </a>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     <div className="min-w-0 flex-1 text-right">
-                      <p className="text-xs font-semibold text-[var(--color-ink)] leading-tight truncate">
+                      <p className="text-xs font-bold text-[var(--color-ink)] leading-tight truncate">
                         {vehicle ? `${vehicle.make} ${vehicle.model}` : `Vehicle #${item.vehicle_id}`}
                       </p>
                       {vehicle?.plate_number && (
-                        <span className="text-[10px] font-mono font-bold text-[var(--color-ink-subtle)]">
+                        <span className="text-[10px] font-mono font-bold text-[var(--color-ink-subtle)] block mt-0.5">
                           {vehicle.plate_number}
                         </span>
                       )}
@@ -368,7 +408,7 @@ export default function BookingsListMobile({
         )}
       </div>
 
-      {/* Hidden CardGrid to render action sheets */}
+      {/* Hidden CardGrid */}
       <div className="hidden">
         <CardGrid
           data={sortedBookings}
