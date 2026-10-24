@@ -103,12 +103,12 @@ export default function BookingsListMobile({
 
   return (
     <div className="block md:hidden relative">
-      {/* TOOLBAR */}
+      {/* TOOLBAR: Full width (px-0) */}
       <div className="sticky top-0 z-20 bg-[var(--color-bg)] py-2">
-        <div className="px-3 sm:px-4">
+        <div className="px-0">
           <div className="space-y-2">
-            {/* Search + filter pill */}
-            <div className="flex items-center h-11 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] overflow-hidden transition-colors">
+            {/* Search + filter pill: rounded-2xl for premium edge-to-edge look */}
+            <div className="flex items-center h-11 rounded-2xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] overflow-hidden transition-colors mx-0">
               <div className="relative flex-1 h-full">
                 <Search
                   size={16}
@@ -164,11 +164,11 @@ export default function BookingsListMobile({
               </div>
             </div>
 
-            {/* Filter pills */}
+            {/* Filter pills: px-3 to prevent touching physical edge */}
             {filtersOpen && !searchFocused && (
               <div className="relative animate-in slide-in-from-top-1 fade-in duration-200">
                 <div className="overflow-x-auto scrollbar-none">
-                  <div className="flex items-center gap-2 py-1 pr-6">
+                  <div className="flex items-center gap-2 py-1 px-3 pr-6">
                     <button
                       onClick={() => setStatusFilter(null)}
                       className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border ${
@@ -208,111 +208,133 @@ export default function BookingsListMobile({
         </div>
       </div>
 
-      {/* Card list wrapper */}
-      <div className="px-3 sm:px-4">
-        <CardGrid
-          data={sortedBookings}
-          getCardId={(booking) => booking.id}
-          compact={true}
-          cardClassName="!p-3.5 !rounded-2xl border border-[var(--color-surface-border)] hover:border-[var(--color-primary)]/30 transition-all duration-300 shadow-sm"
-          containerClassName="space-y-2.5 pb-4"
-          renderCardHeader={({ item }) => {
-            const statusLabel = statusLabels[item.status] || item.status;
-            const avatar = getBookingAvatarColors(item.status);
+      {/* Card List: Seamless edge-to-edge pattern */}
+      <div className="pb-4">
+        {sortedBookings.length === 0 ? (
+          <div className="p-12 text-center">
+            <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
+              <CalendarDays size={24} className="text-[var(--color-ink-subtle)]" />
+            </div>
+            <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No bookings found</h3>
+            <p className="text-sm text-[var(--color-ink-muted)] mb-4">
+              Try adjusting your search query or filters.
+            </p>
+          </div>
+        ) : (
+          <div className="bg-[var(--color-surface)] first:rounded-t-2xl last:rounded-b-2xl">
+            {sortedBookings.map((item, index) => {
+              const statusLabel = statusLabels[item.status] || item.status;
+              const avatar = getBookingAvatarColors(item.status);
+              const client = getClient(clientMap, item.client_id);
+              const vehicle = getVehicle(vehicleMap, item.vehicle_id);
+              const clientName = client?.full_name || `Client #${item.client_id}`;
+              const initials = clientName
+                .trim()
+                .split(/\s+/)
+                .map((n) => n[0])
+                .join("")
+                .substring(0, 2)
+                .toUpperCase();
 
-            return (
-              <div
-                className="flex items-center justify-between w-full cursor-pointer"
-                onClick={() => router.push(`/dashboard/bookings/${item.id}`)}
-              >
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <div
-                    className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${avatar.bg}`}
-                  >
-                    <CalendarDays size={20} className={avatar.icon} strokeWidth={1.75} />
-                  </div>
+              return (
+                <div
+                  key={item.id}
+                  className="relative flex flex-col w-full py-3.5 px-3 transition-colors cursor-pointer select-none hover:bg-[var(--color-surface-hover)]/40"
+                  onClick={() => router.push(`/dashboard/bookings/${item.id}`)}
+                >
+                  {/* Premium fade border - 80% width, very thin, fades at sides */}
+                  {index !== sortedBookings.length - 1 && (
+                    <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-px bg-gradient-to-r from-transparent via-[var(--color-surface-border)] to-transparent" />
+                  )}
 
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-1.5">
-                      <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
-                        {item.booking_number || `BK-${item.id}`}
-                      </span>
-                      <span className="text-[8px] font-bold text-[var(--color-ink-muted)] px-1.5 py-0.5 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] whitespace-nowrap uppercase tracking-wide">
-                        {statusLabel}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1 mt-0.5">
-                      <CalendarDays size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                      <span className="text-[10px] text-[var(--color-ink-muted)] font-medium">
-                        {formatDateShort(item.start_date)}
-                      </span>
-                      <span className="text-[9px] text-[var(--color-ink-subtle)]">→</span>
-                      <span className="text-[10px] text-[var(--color-ink-muted)] font-medium">
-                        {formatDateShort(item.end_date)}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                <ChevronRight size={16} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
-              </div>
-            );
-          }}
-          renderCardBody={({ item }) => {
-            const client = getClient(clientMap, item.client_id);
-            const vehicle = getVehicle(vehicleMap, item.vehicle_id);
-            const clientName = client?.full_name || `Client #${item.client_id}`;
-            const initials = clientName
-              .trim()
-              .split(/\s+/)
-              .map((n) => n[0])
-              .join("")
-              .substring(0, 2)
-              .toUpperCase();
-
-            return (
-              <div className="mt-3 pt-3 border-t border-[var(--color-surface-border)]/60">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                    <div className="w-9 h-9 rounded-lg bg-[var(--color-surface-hover)] flex items-center justify-center text-[var(--color-ink-muted)] font-bold text-[11px] flex-shrink-0">
-                      {initials}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-semibold text-[var(--color-ink)] leading-tight truncate">
-                        {clientName}
-                      </p>
-                      {client?.phone && (
-                        <div className="flex items-center gap-1 text-[10px] text-[var(--color-ink-muted)] font-medium mt-0.5">
-                          <Phone size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
-                          <span className="truncate">{client.phone}</span>
+                  {/* Header Section */}
+                  <div className="flex items-center justify-between w-full mb-3">
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${avatar.bg}`}>
+                        <CalendarDays size={20} className={avatar.icon} strokeWidth={1.75} />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
+                            {item.booking_number || `BK-${item.id}`}
+                          </span>
+                          <span className="text-[8px] font-bold text-[var(--color-ink-muted)] px-1.5 py-0.5 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] whitespace-nowrap uppercase tracking-wide">
+                            {statusLabel}
+                          </span>
                         </div>
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <CalendarDays size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                          <span className="text-[10px] text-[var(--color-ink-muted)] font-medium">
+                            {formatDateShort(item.start_date)}
+                          </span>
+                          <span className="text-[9px] text-[var(--color-ink-subtle)]">→</span>
+                          <span className="text-[10px] text-[var(--color-ink-muted)] font-medium">
+                            {formatDateShort(item.end_date)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <ChevronRight size={16} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
+                  </div>
+
+                  {/* Body Section */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                      <div className="w-9 h-9 rounded-lg bg-[var(--color-surface-hover)] flex items-center justify-center text-[var(--color-ink-muted)] font-bold text-[11px] flex-shrink-0">
+                        {initials}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-[var(--color-ink)] leading-tight truncate">
+                          {clientName}
+                        </p>
+                        {client?.phone && (
+                          <div className="flex items-center gap-1 text-[10px] text-[var(--color-ink-muted)] font-medium mt-0.5">
+                            <Phone size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                            <span className="truncate">{client.phone}</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="min-w-0 flex-1 text-right">
+                      <p className="text-xs font-semibold text-[var(--color-ink)] leading-tight truncate">
+                        {vehicle ? `${vehicle.make} ${vehicle.model}` : `Vehicle #${item.vehicle_id}`}
+                      </p>
+                      {vehicle?.plate_number && (
+                        <span className="text-[10px] font-mono font-bold text-[var(--color-ink-subtle)]">
+                          {vehicle.plate_number}
+                        </span>
                       )}
                     </div>
                   </div>
 
-                  <div className="min-w-0 flex-1 text-right">
-                    <p className="text-xs font-semibold text-[var(--color-ink)] leading-tight truncate">
-                      {vehicle ? `${vehicle.make} ${vehicle.model}` : `Vehicle #${item.vehicle_id}`}
+                  {/* Footer Section */}
+                  <div className="mt-3 pt-3 border-t border-[var(--color-surface-border)]/50 flex items-center justify-between">
+                    <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)]">
+                      Trip Total
+                    </span>
+                    <p className="text-base font-extrabold text-[var(--color-primary)] tabular-nums tracking-tight">
+                      {item.currency_code} {Number(item.total_amount).toLocaleString()}
                     </p>
-                    {vehicle?.plate_number && (
-                      <span className="text-[10px] font-mono font-bold text-[var(--color-ink-subtle)]">
-                        {vehicle.plate_number}
-                      </span>
-                    )}
                   </div>
                 </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
-                <div className="mt-3 pt-3 border-t border-[var(--color-surface-border)]/50 flex items-center justify-between">
-                  <span className="text-[9px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)]">
-                    Trip Total
-                  </span>
-                  <p className="text-base font-extrabold text-[var(--color-primary-text)] tabular-nums tracking-tight">
-                    {item.currency_code} {Number(item.total_amount).toLocaleString()}
-                  </p>
-                </div>
-              </div>
-            );
-          }}
+      {/* Hidden CardGrid to render action sheets */}
+      <div className="hidden">
+        <CardGrid
+          data={sortedBookings}
+          getCardId={(booking) => booking.id}
+          compact={true}
+          onCardClick={() => {}}
+          cardClassName="!p-0"
+          containerClassName="!p-0"
+          renderCardHeader={() => <div className="hidden" />}
+          renderCardBody={() => null}
           rowActions={getRowActions}
         />
       </div>

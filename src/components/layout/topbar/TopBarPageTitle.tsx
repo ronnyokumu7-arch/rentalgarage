@@ -5,6 +5,7 @@ import { ChevronDown, Info } from "lucide-react";
 
 interface TopBarPageTitleProps {
   title: string;
+  icon?: React.ElementType;
   expanded: boolean;
   onToggleExpanded: () => void;
   onInfoClick?: () => void;
@@ -12,16 +13,26 @@ interface TopBarPageTitleProps {
 
 export default function TopBarPageTitle({
   title,
+  icon: Icon,
   expanded,
   onToggleExpanded,
   onInfoClick,
 }: TopBarPageTitleProps) {
   return (
-    <div className="flex items-center gap-1.5 min-w-0 max-w-full w-full">
+    <div className="flex items-center gap-2 min-w-0 max-w-full w-full">
+      {/* ✅ Front-facing Car icon renders here with duotone weight */}
+      {Icon && (
+        <Icon 
+          size={18} 
+          weight="duotone"
+          className="flex-shrink-0 text-[var(--color-primary)]" 
+        />
+      )}
+
       <button
         type="button"
         onClick={onToggleExpanded}
-        className="flex items-center gap-1.5 min-w-0 flex-1 text-left active:opacity-80 transition-opacity"
+        className="flex items-center gap-1 min-w-0 flex-1 text-left active:opacity-80 transition-opacity"
         aria-expanded={expanded}
         aria-label={expanded ? "Collapse page details" : "Expand page details"}
       >

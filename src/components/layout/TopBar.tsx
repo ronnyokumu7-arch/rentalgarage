@@ -19,6 +19,7 @@ import ThemeToggle from "@/components/layout/ThemeToggle";
 import TopBarBrand from "@/components/layout/topbar/TopBarBrand";
 import TopBarPageTitle from "@/components/layout/topbar/TopBarPageTitle";
 import { emitMobileHeaderExpanded } from "@/hooks/useMobileHeaderExpanded";
+import { navIconMap } from "@/lib/nav-config";
 
 interface SearchScope {
   id: string;
@@ -34,6 +35,20 @@ const SEARCH_SCOPES: SearchScope[] = [
   { id: "bookings", label: "Bookings", placeholder: "Search bookings...", icon: CalendarDays },
   { id: "fleet", label: "Fleet", placeholder: "Search fleet...", icon: Car },
 ];
+
+/** 
+ * ✅ Resolves the appropriate icon for the page based on the URL path,
+ * pulling directly from the shared navIconMap.
+ */
+const getPageIcon = (pathname: string) => {
+  if (pathname.startsWith("/dashboard/fleet")) return navIconMap["Fleet"];
+  if (pathname.startsWith("/dashboard/bookings")) return navIconMap["Bookings"];
+  if (pathname.startsWith("/dashboard/clients")) return navIconMap["Clients"];
+  if (pathname.startsWith("/dashboard/financials")) return navIconMap["Financials"];
+  if (pathname.startsWith("/dashboard/settings")) return navIconMap["Settings"];
+  if (pathname.startsWith("/dashboard/users")) return navIconMap["Team"]; // ✅ Added Team mapping
+  return navIconMap["Dashboard"];
+};
 
 interface TopbarProps {
   pageTitle?: string;
@@ -99,12 +114,10 @@ export default function Topbar({
     setMobileHeaderExpanded(false);
   }, [pathname]);
 
-  // ✅ Notify mobile toolbars when the header expands/collapses
   useEffect(() => {
     emitMobileHeaderExpanded(mobileHeaderExpanded);
   }, [mobileHeaderExpanded]);
 
-  // ✅ Auto-collapse expanded topbar on scroll
   useEffect(() => {
     if (!mobileHeaderExpanded) return;
 
@@ -202,13 +215,10 @@ export default function Topbar({
   };
 
   const hasPageHeader = Boolean(pageTitle && pageDescription);
+  const PageIcon = getPageIcon(pathname);
 
   return (
     <>
-      {/* 
-        Added 'transform: translateZ(0)' to force a new stacking context. 
-        This prevents parent overflow hidden/auto from breaking sticky.
-      */}
       <header
         className={`
           sticky top-0 z-40 bg-bg
@@ -219,12 +229,12 @@ export default function Topbar({
         style={{ transform: "translateZ(0)" }}
       >
         {hasPageHeader && mobileHeaderExpanded ? (
-          /* ── MOBILE EXPANDED SHEET ───────────────────────── */
           <div className="sm:hidden flex flex-col">
             <div className="h-14 flex items-center gap-2 px-3">
               <div className="flex-1 min-w-0">
                 <TopBarPageTitle
                   title={pageTitle!}
+                  icon={PageIcon}
                   expanded
                   onToggleExpanded={() => setMobileHeaderExpanded(false)}
                   onInfoClick={onInfoClick}
@@ -257,12 +267,12 @@ export default function Topbar({
             </div>
           </div>
         ) : (
-          /* ── STANDARD BAR ──────────────────────────────────── */
           <div className="h-14 sm:h-16 flex items-center gap-2 sm:gap-4 px-3 sm:px-6">
             <div className="flex flex-col justify-center flex-shrink min-w-0 sm:hidden">
               {hasPageHeader ? (
                 <TopBarPageTitle
                   title={pageTitle!}
+                  icon={PageIcon}
                   expanded={false}
                   onToggleExpanded={() => setMobileHeaderExpanded(true)}
                   onInfoClick={onInfoClick}

@@ -8,8 +8,8 @@ import {
   ChartBar,
   Gear,
   Calendar,
-  AddressBook,
   Users,
+  UsersThree,
   Car,
   Wallet,
   HardDrives,
@@ -33,8 +33,6 @@ export interface NavItem {
 }
 
 // ── PREMIUM PHOSPHOR ICON COMPONENTS ─────────────────────────────────────────
-// Phosphor components accept 'weight' and 'size' props directly.
-// We pass 'weight' through so the BottomNav can control active/inactive states.
 
 const PremiumDashboardIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
   <Storefront size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
@@ -44,12 +42,14 @@ const PremiumCalendarIcon = ({ size = 20, weight = "regular", className = "" }: 
   <Calendar size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
 );
 
+// ✅ Clients: Two-heads icon
 const PremiumContactIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
-  <AddressBook size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <Users size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
 );
 
-const PremiumUsersIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
-  <Users size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+// ✅ Team (formerly Users): Three-heads icon for internal community
+const PremiumTeamIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
+  <UsersThree size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
 );
 
 const PremiumWalletIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
@@ -88,9 +88,28 @@ const PremiumDriversIcon = ({ size = 20, weight = "regular", className = "" }: a
   <UserCircle size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
 );
 
+// ✅ Fleet: Front-facing car
 const PremiumFleetIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
   <Car size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
 );
+
+// ─── EXPORTABLE ICON MAP ──────────────────────────────────────────────────────
+export const navIconMap: Record<string, React.ElementType> = {
+  Dashboard: PremiumDashboardIcon,
+  Bookings: PremiumCalendarIcon,
+  Clients: PremiumContactIcon,
+  Fleet: PremiumFleetIcon,
+  Financials: PremiumWalletIcon,
+  Reports: PremiumBarChartIcon,
+  Settings: PremiumSettingsIcon,
+  Team: PremiumTeamIcon, // Updated from "Users"
+  Drivers: PremiumDriversIcon,
+  Tasks: PremiumTasksIcon,
+  Agencies: PremiumBuildingIcon,
+  Subscriptions: PremiumCreditCardIcon,
+  System: PremiumServerIcon,
+  Support: PremiumLifeBuoyIcon,
+};
 
 // ─── SUPER ADMIN NAVIGATION ───────────────────────────────────────────────────
 export const superAdminNav: NavItem[] = [
@@ -110,8 +129,8 @@ export const tenantAdminNav: NavItem[] = [
   { label: "Clients", href: "/dashboard/clients", icon: PremiumContactIcon },
   { label: "Fleet", href: "/dashboard/fleet", icon: PremiumFleetIcon },
   { label: "Drivers", href: "/dashboard/drivers", icon: PremiumDriversIcon },
-  { label: "Investors", href: "/dashboard/investors", icon: PremiumUsersIcon },
-  { label: "Users", href: "/dashboard/users", icon: PremiumUsersIcon },
+  { label: "Investors", href: "/dashboard/investors", icon: PremiumContactIcon }, // Keeping Two-Heads for investors too
+  { label: "Team", href: "/dashboard/users", icon: PremiumTeamIcon }, // ✅ Renamed to "Team"
   { label: "Financials", href: "/dashboard/financials", icon: PremiumWalletIcon },
   { label: "Reports", href: "/dashboard/reports", icon: PremiumBarChartIcon },
   { label: "Tasks", href: "/dashboard/tasks", icon: PremiumTasksIcon },

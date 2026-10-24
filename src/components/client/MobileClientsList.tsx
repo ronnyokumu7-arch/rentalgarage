@@ -79,7 +79,7 @@ function getDLStatus(dlExpiry?: string | null): {
   if (!dlExpiry) return { kind: "none", label: "DL not provided", tone: "muted" };
   const expiry = new Date(dlExpiry);
   if (Number.isNaN(expiry.getTime())) {
-    return { kind: "none", label: "DL not provided", tone: "muted" };
+return { kind: "none", label: "DL not provided", tone: "muted" };
   }
   const diffDays = Math.ceil((expiry.getTime() - Date.now()) / 86_400_000);
   if (diffDays < 0) return { kind: "expired", label: "DL expired", tone: "rose" };
@@ -278,16 +278,15 @@ export default function MobileClientsList({
       <div className="md:hidden animate-in fade-in duration-300 relative">
         {/* 
           TOOLBAR 
-          - Sticky top-0
-          - Full width background, inner padding
+          - Full width (px-0)
         */}
         <div
           className="sticky top-0 z-20 bg-[var(--color-bg)] py-2"
           data-selection-zone
         >
-          <div className="px-3 sm:px-4">
+          <div className="px-0">
             {isSelecting ? (
-              <div className="flex items-center justify-between gap-2">
+              <div className="flex items-center justify-between gap-2 px-3">
                 <div className="flex items-center gap-2">
                   <button
                     onClick={clearSelection}
@@ -327,8 +326,8 @@ export default function MobileClientsList({
               </div>
             ) : (
               <div className="space-y-2">
-                {/* Unified search + embedded filter pill */}
-                <div className="flex items-center h-11 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] overflow-hidden transition-colors">
+                {/* Unified search + embedded filter pill - rounded-2xl for premium edge-to-edge */}
+                <div className="flex items-center h-11 rounded-2xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] overflow-hidden transition-colors mx-0">
                   <div className="relative flex-1 h-full">
                     <Search
                       size={16}
@@ -387,7 +386,7 @@ export default function MobileClientsList({
                 {filtersOpen && !searchFocused && (
                   <div className="relative animate-in slide-in-from-top-1 fade-in duration-200">
                     <div className="overflow-x-auto scrollbar-none">
-                      <div className="flex items-center gap-2 py-1 pr-6">
+                      <div className="flex items-center gap-2 py-1 px-3 pr-6">
                         <button
                           onClick={() => setStatusFilter(null)}
                           className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border ${
@@ -452,8 +451,8 @@ export default function MobileClientsList({
           </div>
         </div>
 
-        {/* Banners — moved into the normal flow so they sit right under the search bar */}
-        <div className={`px-3 sm:px-4 ${searchFocused || isSelecting ? "hidden" : ""}`}>
+        {/* Banners — px-3 for text readability */}
+        <div className={`px-3 ${searchFocused || isSelecting ? "hidden" : ""}`}>
           {!loading && pendingClients > 0 && statusFilter !== "pending" && (
             <button
               type="button"
@@ -483,8 +482,8 @@ export default function MobileClientsList({
           )}
         </div>
 
-        {/* Card List */}
-        <div className="px-3 sm:px-4 pb-4">
+        {/* Card List - Seamless edge-to-edge pattern with unified background */}
+        <div className="pb-4">
           {loading ? (
             <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2">
               <Loader2 className="w-5 h-5 animate-spin" /> Loading clients...
@@ -500,34 +499,14 @@ export default function MobileClientsList({
               </p>
             </div>
           ) : (
-            <CardGrid
-              data={paginatedClients}
-              getCardId={(client: any) => client.id}
-              compact={true}
-              onCardClick={(client: any) => {
-                if (longPressFired.current) {
-                  longPressFired.current = false;
-                  return;
-                }
-                if (isSelecting) {
-                  toggleSelection(client);
-                  return;
-                }
-                const trigger = document.querySelector(
-                  `[data-card-actions="${client.id}"] button`,
-                ) as HTMLButtonElement | null;
-                trigger?.click();
-              }}
-              cardClassName={`!p-0 !rounded-none !border-0 !bg-transparent !shadow-none transition-colors [&_[data-card-actions]]:absolute [&_[data-card-actions]]:top-0 [&_[data-card-actions]]:right-0 [&_[data-card-actions]>button]:w-0 [&_[data-card-actions]>button]:h-0 [&_[data-card-actions]>button]:overflow-hidden [&_[data-card-actions]>button]:opacity-0`}
-              containerClassName="!p-0"
-              // ✅ REMOVED maxHeight constraint so the list flows naturally with the page
-              renderCardHeader={({ item }: { item: any }) => {
-                const phone = item.phone || "";
-                const isVerified = item.verification_status === "verified";
-                const isPending = item.status === "pending" || item.verification_status === "under_review" || item.verification_status === "sent";
-                const isSuspended = item.status === "suspended";
-                const isSelected = selected.some((c) => c.id === item.id);
-                const dl = getDLStatus(item.dl_expiry);
+            <div className="bg-[var(--color-surface)] first:rounded-t-2xl last:rounded-b-2xl">
+              {paginatedClients.map((client, index) => {
+                const phone = client.phone || "";
+                const isVerified = client.verification_status === "verified";
+                const isPending = client.status === "pending" || client.verification_status === "under_review" || client.verification_status === "sent";
+                const isSuspended = client.status === "suspended";
+                const isSelected = selected.some((c) => c.id === client.id);
+                const dl = getDLStatus(client.dl_expiry);
 
                 const dlToneClasses: Record<typeof dl.tone, string> = {
                   emerald: "text-emerald-600 dark:text-emerald-400",
@@ -542,32 +521,53 @@ export default function MobileClientsList({
                     ? { label: "ID pending", tone: "text-amber-600 dark:text-amber-400" }
                     : { label: "ID missing", tone: "text-[var(--color-ink-subtle)]" };
 
-                const avatarColors = getAvatarColors(item.status);
+                const avatarColors = getAvatarColors(client.status);
 
                 return (
                   <div
+                    key={client.id}
                     data-selection-zone
-                    onTouchStart={handleTouchStart(item)}
+                    onTouchStart={handleTouchStart(client)}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
-                    className={`flex items-start gap-3 w-full py-3 border-b border-[var(--color-surface-border)]/50 last:border-b-0 transition-colors select-none ${
+                    onClick={() => {
+                      if (longPressFired.current) {
+                        longPressFired.current = false;
+                        return;
+                      }
+                      if (isSelecting) {
+                        toggleSelection(client);
+                        return;
+                      }
+                      const trigger = document.querySelector(
+                        `[data-card-actions="${client.id}"] button`,
+                      ) as HTMLButtonElement | null;
+                      trigger?.click();
+                    }}
+                    className={`relative flex items-start gap-3 w-full py-3 px-3 transition-colors select-none ${
                       isSuspended
                         ? "opacity-50"
                         : "hover:bg-[var(--color-surface-hover)]/40"
                     }`}
                   >
+                    {/* Premium fade border - 80% width, very thin, fades at sides */}
+                    {index !== paginatedClients.length - 1 && (
+                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-px bg-gradient-to-r from-transparent via-[var(--color-surface-border)] to-transparent" />
+                    )}
+
+                    {/* Avatar - KEPT AT ORIGINAL SIZE (w-12 h-12) */}
                     <div className="relative flex-shrink-0">
                       <div
                         className={`w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center font-bold text-sm ${avatarColors}`}
                       >
-                        {getInitials(item.full_name)}
+                        {getInitials(client.full_name)}
                       </div>
                     </div>
 
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5 flex-wrap">
                         <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
-                          {item.full_name}
+                          {client.full_name}
                         </span>
                       </div>
 
@@ -610,30 +610,43 @@ export default function MobileClientsList({
                     )}
                   </div>
                 );
-              }}
-              renderCardBody={() => null}
-              rowActions={getClientActions}
-              renderActionSheetBadge={(client: any) => {
-                const style = CLIENT_STATUS_STYLES[client.status] || CLIENT_STATUS_STYLES.inactive;
-                return (
-                  <span
-                    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-extrabold uppercase tracking-wider border ${
-                      client.status === "active"
-                        ? "text-emerald-500 bg-emerald-500/10 border-emerald-500/20"
-                        : client.status === "pending"
-                          ? "text-amber-500 bg-amber-500/10 border-amber-500/20"
-                          : client.status === "suspended"
-                            ? "text-rose-500 bg-rose-500/10 border-rose-500/20"
-                            : "text-[var(--color-ink-muted)] bg-[var(--color-surface-hover)] border-[var(--color-surface-border)]"
-                    }`}
-                  >
-                    <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
-                    {style.label}
-                  </span>
-                );
-              }}
-            />
+              })}
+            </div>
           )}
+        </div>
+
+        {/* Hidden CardGrid to render action sheets */}
+        <div className="hidden">
+          <CardGrid
+            data={paginatedClients}
+            getCardId={(client: any) => client.id}
+            compact={true}
+            onCardClick={() => {}}
+            cardClassName="!p-0"
+            containerClassName="!p-0"
+            renderCardHeader={() => <div className="hidden" />}
+            renderCardBody={() => null}
+            rowActions={getClientActions}
+            renderActionSheetBadge={(client: any) => {
+              const style = CLIENT_STATUS_STYLES[client.status] || CLIENT_STATUS_STYLES.inactive;
+              return (
+                <span
+                  className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-extrabold uppercase tracking-wider border ${
+                    client.status === "active"
+                      ? "text-emerald-500 bg-emerald-500/10 border-emerald-500/20"
+                      : client.status === "pending"
+                        ? "text-amber-500 bg-amber-500/10 border-amber-500/20"
+                        : client.status === "suspended"
+                          ? "text-rose-500 bg-rose-500/10 border-rose-500/20"
+                          : "text-[var(--color-ink-muted)] bg-[var(--color-surface-hover)] border-[var(--color-surface-border)]"
+                  }`}
+                >
+                  <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} />
+                  {style.label}
+                </span>
+              );
+            }}
+          />
         </div>
 
         {/* FAB stack */}
