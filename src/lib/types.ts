@@ -558,6 +558,11 @@ export interface Booking {
   // (e.g., wedding extra hours, decoration fees, airport tolls).
   service_details?: Record<string, any> | null;
 
+  // ✅ DELIVERY FEE: Phone-agreed surcharge for vehicle delivery
+  toll_fees?: number | null;
+  parking_fees?: number | null;
+  delivery_fee?: number | null; // ✅ NEW
+
   // Joined Relations
   client?: BookingClientRelation | null;
   vehicle?: BookingVehicleRelation | null;
@@ -595,6 +600,7 @@ export interface BookingCreate {
   // ✅ MILESTONE 2 & 3: Add-ons and Service Details
   toll_fees?: number;
   parking_fees?: number;
+  delivery_fee?: number; // ✅ NEW
   service_details?: Record<string, any>;
 }
 
@@ -619,6 +625,7 @@ export interface BookingUpdate {
   // ✅ MILESTONE 2 & 3: Add-ons and Service Details
   toll_fees?: number;
   parking_fees?: number;
+  delivery_fee?: number; // ✅ NEW
   service_details?: Record<string, any>;
 }
 
@@ -636,6 +643,7 @@ export interface BookingQuote {
   // ✅ MILESTONE 2 & 3: Add-ons and Service Details
   toll_fees?: number;
   parking_fees?: number;
+  delivery_fee?: number; // ✅ NEW
   service_details?: Record<string, any>;
 }
 

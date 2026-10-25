@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CalendarDays, MapPin, User, Info, Car, Users, Loader2, CheckCircle } from 'lucide-react';
+import { CalendarDays, MapPin, User, Info, Car, Users, Loader2, CheckCircle, DollarSign } from 'lucide-react';
 import { useNewBooking } from '@/hooks/bookings/useNewBooking';
 import ClientSearch from '../ClientSearch';
 import VehicleSearch from '../VehicleSearch';
@@ -39,6 +39,11 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
   const selectedVehicle = getSelectedVehicle();
   const selectedDriver = getSelectedDriver();
 
+  // ✅ Local state to control fee input visibility
+  const [showDeliveryInput, setShowDeliveryInput] = useState(false);
+  const [showTollInput, setShowTollInput] = useState(false);
+  const [showParkingInput, setShowParkingInput] = useState(false);
+
   const [bookingMode, setBookingMode] = useState<'selfdrive' | 'chauffeur'>(
     formData.service_type === 'pro_driver' ? 'chauffeur' : 'selfdrive'
   );
@@ -63,6 +68,12 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
   };
 
   const is24HBooking = !!(formData.service_details as Record<string, any>)?.accommodation_fee;
+
+  // ✅ Helper for numeric fee inputs to prevent NaN
+  const handleFeeChange = (field: 'toll_fees' | 'parking_fees' | 'delivery_fee', value: string) => {
+    const num = parseFloat(value);
+    updateField(field, isNaN(num) ? 0 : num);
+  };
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -240,7 +251,129 @@ export default function BookingForm({ formId, onClose }: BookingFormProps) {
         </div>
       </section>
 
-      {/* ── Right Sidebar: Summary & Submit ────────────────────── */}
+      {/* ✅ NEW: Section 4 - Additional Fees (Standardized Toggle Pattern) */}
+      <section className={sectionClass}>
+        <div className="flex items-center gap-2.5 mb-4">
+          <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center">
+            <DollarSign size={16} />
+          </div>
+          <h3 className="text-sm font-bold text-[var(--color-ink)]">Additional Fees</h3>
+        </div>
+
+        <div className="space-y-3">
+          
+          {/* ✅ Toll Fees Toggle + Conditional Input */}
+          <label className="flex items-start gap-3 cursor-pointer group p-3 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 hover:bg-[var(--color-surface-hover)] transition-colors">
+            <input
+              type="checkbox"
+              checked={showTollInput}
+              onChange={(e) => {
+                setShowTollInput(e.target.checked);
+                if (!e.target.checked) updateField('toll_fees', 0);
+              }}
+              className="w-4 h-4 mt-0.5 rounded border-[var(--color-surface-border)] text-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:ring-offset-2 transition-all"
+            />
+            <div className="flex flex-col flex-1">
+              <span className="text-xs font-semibold text-[var(--color-ink)] group-hover:text-[var(--color-ink-primary)] transition-colors">
+                Toll Fees
+              </span>
+              <span className="text-[10px] text-[var(--color-ink-muted)]">
+                Highway or bridge tolls incurred during trip.
+              </span>
+              
+              {showTollInput && (
+                <div className="mt-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.toll_fees || ''}
+                    onChange={(e) => handleFeeChange('toll_fees', e.target.value)}
+                    placeholder="Enter toll amount..."
+                    autoFocus
+                    className="w-full pl-3 pr-10 py-2 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/30 focus:border-[var(--color-primary)] outline-none transition-all text-sm"
+                  />
+                </div>
+              )}
+            </div>
+          </label>
+
+          {/* ✅ Parking Fees Toggle + Conditional Input */}
+          <label className="flex items-start gap-3 cursor-pointer group p-3 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 hover:bg-[var(--color-surface-hover)] transition-colors">
+            <input
+              type="checkbox"
+              checked={showParkingInput}
+              onChange={(e) => {
+                setShowParkingInput(e.target.checked);
+                if (!e.target.checked) updateField('parking_fees', 0);
+              }}
+              className="w-4 h-4 mt-0.5 rounded border-[var(--color-surface-border)] text-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:ring-offset-2 transition-all"
+            />
+            <div className="flex flex-col flex-1">
+              <span className="text-xs font-semibold text-[var(--color-ink)] group-hover:text-[var(--color-ink-primary)] transition-colors">
+                Parking Fees
+              </span>
+              <span className="text-[10px] text-[var(--color-ink-muted)]">
+                Paid parking at destination or pickup points.
+              </span>
+              
+              {showParkingInput && (
+                <div className="mt-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.parking_fees || ''}
+                    onChange={(e) => handleFeeChange('parking_fees', e.target.value)}
+                    placeholder="Enter parking amount..."
+                    autoFocus
+                    className="w-full pl-3 pr-10 py-2 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/30 focus:border-[var(--color-primary)] outline-none transition-all text-sm"
+                  />
+                </div>
+              )}
+            </div>
+          </label>
+
+          {/* ✅ Delivery Fee Toggle + Conditional Input */}
+          <label className="flex items-start gap-3 cursor-pointer group p-3 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 hover:bg-[var(--color-surface-hover)] transition-colors">
+            <input
+              type="checkbox"
+              checked={showDeliveryInput}
+              onChange={(e) => {
+                setShowDeliveryInput(e.target.checked);
+                if (!e.target.checked) updateField('delivery_fee', 0);
+              }}
+              className="w-4 h-4 mt-0.5 rounded border-[var(--color-surface-border)] text-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:ring-offset-2 transition-all"
+            />
+            <div className="flex flex-col flex-1">
+              <span className="text-xs font-semibold text-[var(--color-ink)] group-hover:text-[var(--color-ink-primary)] transition-colors">
+                Delivery Fee
+              </span>
+              <span className="text-[10px] text-[var(--color-ink-muted)]">
+                Add delivery fee (charge twice to include collection fee if applicable).
+              </span>
+              
+              {showDeliveryInput && (
+                <div className="mt-2 animate-in fade-in slide-in-from-top-1 duration-200">
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    value={formData.delivery_fee || ''}
+                    onChange={(e) => handleFeeChange('delivery_fee', e.target.value)}
+                    placeholder="Enter delivery fee amount..."
+                    autoFocus
+                    className="w-full pl-3 pr-10 py-2 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/30 focus:border-[var(--color-primary)] outline-none transition-all text-sm"
+                  />
+                </div>
+              )}
+            </div>
+          </label>
+
+        </div>
+      </section>
+
+      {/* ─ Right Sidebar: Summary & Submit ────────────────────── */}
       <div className="lg:sticky lg:top-4 space-y-3">
         <BookingSummary
           client={selectedClient}

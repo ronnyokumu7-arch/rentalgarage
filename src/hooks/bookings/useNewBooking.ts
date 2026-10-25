@@ -35,6 +35,7 @@ export function useNewBooking() {
     service_details: {} as Record<string, any>,
     toll_fees: 0,
     parking_fees: 0,
+    delivery_fee: 0, // ✅ NEW: Delivery fee state
   });
 
   const [quote, setQuote] = useState<PricingResult | null>(null);
@@ -63,7 +64,6 @@ export function useNewBooking() {
   }, []);
 
   // ─── Client filtering ────────────────────────────────────────────────────
-  // No cap — the dropdown's max-h-80 overflow-y-auto handles the visual limit.
   const filteredClients = useMemo(() => {
     if (!clientSearch.trim()) return clients;
     const search = clientSearch.toLowerCase();
@@ -75,10 +75,7 @@ export function useNewBooking() {
     );
   }, [clients, clientSearch]);
 
-  // ─── Vehicle filtering ───────────────────────────────────────────────────
-  // ✅ Only bookable vehicles (status === 'available') reach the dropdown.
-  // Prevents selecting retired/maintenance vehicles that the backend will
-  // reject on create/quote. No cap — scroll handles the visual limit.
+  // ─── Vehicle filtering ──────────────────────────────────────────────────
   const filteredVehicles = useMemo(() => {
     const bookable = vehicles.filter(v => v.status === 'available');
     if (!vehicleSearch.trim()) return bookable;
@@ -91,8 +88,6 @@ export function useNewBooking() {
   }, [vehicles, vehicleSearch]);
 
   // ─── Driver filtering ────────────────────────────────────────────────────
-  // ✅ Only assignable drivers (available | on_trip, not archived).
-  // No cap — scroll handles the visual limit.
   const filteredDrivers = useMemo(() => {
     const assignable = drivers.filter(d =>
       !d.is_archived && (d.status === 'available' || d.status === 'on_trip')
@@ -153,6 +148,7 @@ export function useNewBooking() {
         driver_id: formData.driver_id ? parseInt(formData.driver_id) : undefined,
         toll_fees: formData.toll_fees || undefined,
         parking_fees: formData.parking_fees || undefined,
+        delivery_fee: formData.delivery_fee || undefined, // ✅ NEW: Send delivery fee to quote API
         service_details: Object.keys(formData.service_details).length > 0
           ? formData.service_details
           : undefined,
@@ -204,6 +200,7 @@ export function useNewBooking() {
     formData.driver_id,
     formData.toll_fees,
     formData.parking_fees,
+    formData.delivery_fee, // ✅ NEW: Trigger re-quote when delivery fee changes
     formData.service_details,
   ]);
 
@@ -211,9 +208,7 @@ export function useNewBooking() {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  // ✅ Selection lookups resolve against the FULL source arrays — NOT the
-  // filtered lists. Prevents silent-selection failures when a vehicle/driver
-  // found via search would otherwise drop out of the filtered view.
+  // ✅ Selection lookups resolve against the FULL source arrays
   const getSelectedClient = () => clients.find(c => c.id.toString() === formData.client_id);
   const getSelectedVehicle = () => vehicles.find(v => v.id.toString() === formData.vehicle_id);
   const getSelectedDriver = () => drivers.find(d => d.id.toString() === formData.driver_id);
@@ -247,6 +242,7 @@ export function useNewBooking() {
         currency_code: 'KES',
         toll_fees: formData.toll_fees || undefined,
         parking_fees: formData.parking_fees || undefined,
+        delivery_fee: formData.delivery_fee || undefined, // ✅ NEW: Include delivery fee in create payload
         service_details: Object.keys(formData.service_details).length > 0 ? formData.service_details : undefined,
       };
       if (formData.driver_id) {

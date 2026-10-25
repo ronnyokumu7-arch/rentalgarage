@@ -183,7 +183,8 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
   let content;
 
   if (currentPanel === "settings") {
-    content = <SettingsPanel onBack={popPanel} onNavigate={pushPanel} />;
+    // ✅ FIXED: Added onClose={closeDrawer} so Profile Settings can dismiss the sheet
+    content = <SettingsPanel onBack={popPanel} onNavigate={pushPanel} onClose={closeDrawer} />;
   } else if (parts[0] === "settings" && level === 2) {
     content = (
       <SettingsSubPanel

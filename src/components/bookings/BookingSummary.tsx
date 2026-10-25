@@ -13,7 +13,7 @@ interface BookingSummaryProps {
   serviceType?: ServiceType;
   quote?: PricingResult | null;
   quoteLoading?: boolean;
-  quoteError?: string | null;  // ✅ NEW: show error if quote failed
+  quoteError?: string | null;
 }
 
 const SERVICE_LABELS: Record<ServiceType, string> = {
@@ -200,16 +200,25 @@ export default function BookingSummary({
             {quoteLoading && <Loader2 size={10} className="animate-spin text-[var(--color-ink-muted)]" />}
           </div>
           <div className="space-y-1.5">
-            {quote.lines.map((line, i) => (
-              <div key={i} className="flex justify-between gap-2 text-xs">
-                <span className="text-[var(--color-ink-muted)]">
-                  {line.description} <span className="opacity-70">· {line.quantity}</span>
-                </span>
-                <span className="font-medium text-[var(--color-ink)] whitespace-nowrap">
-                  KES {fmtMoney(line.amount)}
-                </span>
-              </div>
-            ))}
+            {quote.lines.map((line, i) => {
+              // ✅ FIX: Format flat fees (Delivery, Tolls, Parking) differently than daily rates
+              const isFlatFee = line.description.toLowerCase().includes('delivery') || 
+                                line.description.toLowerCase().includes('toll') || 
+                                line.description.toLowerCase().includes('parking');
+              
+              const quantityDisplay = isFlatFee ? '(Flat Rate)' : `· ${line.quantity}`;
+
+              return (
+                <div key={i} className="flex justify-between gap-2 text-xs">
+                  <span className="text-[var(--color-ink-muted)]">
+                    {line.description} <span className="opacity-70">{quantityDisplay}</span>
+                  </span>
+                  <span className="font-medium text-[var(--color-ink)] whitespace-nowrap">
+                    KES {fmtMoney(line.amount)}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}
