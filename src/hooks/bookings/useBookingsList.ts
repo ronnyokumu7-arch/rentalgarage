@@ -1,3 +1,4 @@
+// src/hooks/bookings/useBookingsList.ts
 "use client";
 
 import { confirmAction } from "@/lib/utils/confirmAction";
@@ -44,22 +45,34 @@ export function useBookingsList() {
 
       setBookings(data);
 
-      // ✅ DOC AWARENESS (batched, non-blocking): one contracts + one invoices call
+      // ✅ DOC AWARENESS: fetch contracts + invoices for link generation
       try {
         const [contracts, invoices] = await Promise.all([
           contractsApi.list(),
           invoicesApi.list({ page: 1, page_size: 200 }),
         ]);
+        
         setContractBookingIds(
-          new Set((contracts ?? []).map((c) => c.booking_id).filter((id): id is number => id !== null)),
+          new Set((contracts ?? []).map((c: any) => c.booking_id).filter((id: any): id is number => id !== null)),
         );
+
         const invMap = new Map<number, { id: number; share_token: string | null }>();
-        (invoices ?? []).forEach((inv) => {
-          // first invoice per booking = the morphing quotation/invoice row
-          if (inv.booking_id !== null && !invMap.has(inv.booking_id)) {
-            invMap.set(inv.booking_id, { id: inv.id, share_token: inv.share_token ?? null });
+        
+        const invoiceList = Array.isArray(invoices) 
+          ? invoices 
+          : (invoices as any)?.items || (invoices as any)?.data || [];
+
+        invoiceList.forEach((inv: any) => {
+          if (!inv.booking_id) return;
+          
+          if (!invMap.has(inv.booking_id)) {
+            invMap.set(inv.booking_id, {
+              id: inv.id,
+              share_token: inv.share_token ?? null,
+            });
           }
         });
+        
         setInvoiceByBooking(invMap);
       } catch {
         // Non-fatal: dropdown degrades gracefully (toasts instead of links)
@@ -81,21 +94,13 @@ export function useBookingsList() {
 
   // ✅ AUTO-REFRESH: listen for booking creation from modals
   useEffect(() => {
-    const handleBookingCreated = () => fetchBookings();
-    window.addEventListener('booking:created', handleBookingCreated);
+    const handleBookingObserved = () => fetchBookings();
+    window.addEventListener('booking:created', handleBookingObserved);
+    window.addEventListener('booking:updated', handleBookingObserved);
 
     return () => {
-      window.removeEventListener('booking:created', handleBookingCreated);
-    };
-  }, [fetchBookings]);
-
-  // ✅ AUTO-REFRESH: listen for booking updates from inline contexts (Operations Center, tasks)
-  useEffect(() => {
-    const handleBookingUpdated = () => fetchBookings();
-    window.addEventListener('booking:updated', handleBookingUpdated);
-
-    return () => {
-      window.removeEventListener('booking:updated', handleBookingUpdated);
+      window.removeEventListener('booking:created', handleBookingObserved);
+      window.removeEventListener('booking:updated', handleBookingObserved);
     };
   }, [fetchBookings]);
 
@@ -135,9 +140,6 @@ export function useBookingsList() {
     [bookings],
   );
 
-  // ✅ SORT: newest-first by created_at (id desc fallback).
-  // ✅ SEARCH: expands to client (name/phone/email/id/dl) + vehicle (make/model/plate)
-  //    + booking identifiers (number, id, destination, locations).
   const filteredBookings = useMemo(() => {
     let result = bookings;
 
@@ -159,13 +161,11 @@ export function useBookingsList() {
         const vehicle = b.vehicle as any;
 
         return (
-          // Booking identifiers
           b.booking_number?.toLowerCase().includes(q) ||
           b.id.toString().includes(q) ||
           b.destination?.toLowerCase().includes(q) ||
           b.pickup_location?.toLowerCase().includes(q) ||
           b.return_location?.toLowerCase().includes(q) ||
-          // Client — denormalized OR nested
           b.client_name?.toLowerCase().includes(q) ||
           b.client_phone?.toLowerCase().includes(q) ||
           client?.full_name?.toLowerCase().includes(q) ||
@@ -173,7 +173,6 @@ export function useBookingsList() {
           client?.email?.toLowerCase().includes(q) ||
           client?.id_number?.toLowerCase().includes(q) ||
           client?.dl_number?.toLowerCase().includes(q) ||
-          // Vehicle — denormalized OR nested
           b.vehicle_name?.toLowerCase().includes(q) ||
           b.vehicle_plate?.toLowerCase().includes(q) ||
           vehicle?.make?.toLowerCase().includes(q) ||
@@ -183,7 +182,6 @@ export function useBookingsList() {
       });
     }
 
-    // ✅ Newest first — copy before sort to avoid mutating state arrays
     return [...result].sort((a, b) => {
       const aT = new Date(a.created_at).getTime() || 0;
       const bT = new Date(b.created_at).getTime() || 0;
@@ -202,8 +200,6 @@ export function useBookingsList() {
     setCurrentPage(1);
   }, [search, statusFilter, view]);
 
-  // ✅ Deprecated: dashboard confirmation is no longer shown in UI.
-  // Kept for backward compatibility with existing context signatures.
   const handleConfirm = async (bookingId: number) => {
     setActionLoadingId(bookingId);
     try {
@@ -246,8 +242,6 @@ export function useBookingsList() {
     }
   };
 
-  // ✅ LIFECYCLE: dashboard/operator cancel uses agency_cancelled.
-  // Client-side cancellations come from the public quotation flow as client_cancelled.
   const handleCancel = async (bookingId: number) => {
     if (!confirmAction("Are you sure you want to cancel this booking?")) return;
 
@@ -264,7 +258,6 @@ export function useBookingsList() {
     }
   };
 
-  // ✅ LIFECYCLE: no-show is now stored as cancellation_reason=no_show.
   const handleNoShow = async (bookingId: number) => {
     if (!confirmAction("Mark this booking as a No-Show?")) return;
 
@@ -314,7 +307,6 @@ export function useBookingsList() {
     }
   };
 
-  // ✅ SEND QUOTATION: copies the public link (invoice token; morphs quotation→invoice)
   const handleCopyQuotationLink = async (bookingId: number) => {
     try {
       const entry = invoiceByBooking.get(bookingId);
@@ -371,6 +363,7 @@ export function useBookingsList() {
     actionLoadingId,
     openDropdownId,
     setOpenDropdownId,
+    invoiceByBooking, // Kept for quotation link generation
     handleConfirm,
     handleStartTrip,
     handleCompleteTrip,

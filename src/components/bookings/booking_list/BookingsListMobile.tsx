@@ -2,17 +2,18 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   CalendarDays, Phone, MessageCircle, ChevronRight,
   Search, X, SlidersHorizontal,
-  AlertCircle, ArrowRight,
+  AlertCircle, ArrowRight, Car, BadgeCheck,
 } from "lucide-react";
 import CardGrid from "@/components/ui/CardGrid";
 import type { Booking, Client, Vehicle } from "@/lib/types";
 import { getBookingActions, type BookingActionsContext } from "./getBookingActions";
-import { formatDateShort, statusLabels } from "./constants";
+import { formatDateShort } from "./constants";
 import { NewBookingFab } from "@/components/bookings/NewBookingButton";
+import { invoicesApi } from "@/lib/api/invoices"; // ✅ Direct API access
 
 interface BookingsListMobileProps {
   bookings: Booking[];
@@ -54,12 +55,18 @@ const getBookingAvatarColors = (status: string): { bg: string; icon: string } =>
     case "completed":
       return { bg: "bg-slate-500/10", icon: "text-slate-600 dark:text-slate-400" };
     case "cancelled":
-    case "no_show":
       return { bg: "bg-rose-500/10", icon: "text-rose-600 dark:text-rose-400" };
     default:
       return { bg: "bg-slate-500/10", icon: "text-slate-600 dark:text-slate-400" };
   }
 };
+
+// ✅ DIRECTLY fetches and aggregates invoices (same source of truth as Financials page)
+interface PaymentSnapshot {
+  amount_paid: number;
+  amount_due: number;
+  status: string;
+}
 
 export default function BookingsListMobile({
   bookings,
@@ -82,6 +89,37 @@ export default function BookingsListMobile({
 
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
+  
+  // ✅ Local state for payment data (fetched directly from invoices API)
+  const [paymentMap, setPaymentMap] = useState<Map<number, PaymentSnapshot>>(new Map());
+
+  useEffect(() => {
+    // Fetch invoices exactly like the Financials page does
+    invoicesApi.list({ page_size: 200 }).then((invoices) => {
+      const map = new Map<number, PaymentSnapshot>();
+      (invoices || []).forEach((inv: any) => {
+        if (inv.booking_id) {
+          const existing = map.get(inv.booking_id);
+          if (!existing) {
+            map.set(inv.booking_id, {
+              amount_paid: Number(inv.amount_paid || 0),
+              amount_due: Number(inv.amount_due || 0),
+              status: inv.status,
+            });
+          } else {
+            // Aggregate if a booking has multiple invoices (e.g. quotation + final invoice)
+            existing.amount_paid += Number(inv.amount_paid || 0);
+            existing.amount_due += Number(inv.amount_due || 0);
+            if (inv.status === "paid") existing.status = "paid";
+            else if (inv.status === "partially_paid" && existing.status !== "paid") {
+              existing.status = "partially_paid";
+            }
+          }
+        }
+      });
+      setPaymentMap(map);
+    }).catch(err => console.error("Failed to fetch invoices for payment pills:", err));
+  }, []);
 
   const hasActiveFilter = statusFilter !== null && statusFilter !== "";
 
@@ -96,7 +134,6 @@ export default function BookingsListMobile({
       pending: 3,
       completed: 4,
       cancelled: 5,
-      no_show: 6,
     };
 
     return [...bookings].sort((a, b) => {
@@ -112,6 +149,33 @@ export default function BookingsListMobile({
       return bDate - aDate;
     });
   }, [bookings]);
+
+  // ✅ Helper to determine pill color based on aggregated payment data
+  const getPaymentPill = (booking: Booking) => {
+    const paymentData = paymentMap.get(booking.id);
+    const total = Number(booking.total_amount || 0);
+    const paid = paymentData?.amount_paid || 0;
+
+    if (total > 0 && paid >= total) {
+      return {
+        label: "Paid",
+        icon: BadgeCheck,
+        classes: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20",
+      };
+    }
+    if (paid > 0) {
+      return {
+        label: "Partial",
+        icon: AlertCircle,
+        classes: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+      };
+    }
+    return {
+      label: "Unpaid",
+      icon: AlertCircle,
+      classes: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20",
+    };
+  };
 
   return (
     <div className="block md:hidden relative min-h-screen">
@@ -296,12 +360,15 @@ export default function BookingsListMobile({
         ) : (
           <div className="bg-[var(--color-surface)] first:rounded-t-2xl last:rounded-b-2xl">
             {sortedBookings.map((item, index) => {
-              const statusLabel = statusLabels[item.status] || item.status;
               const avatar = getBookingAvatarColors(item.status);
               const client = getClient(clientMap, item.client_id);
               const vehicle = getVehicle(vehicleMap, item.vehicle_id);
               const clientName = client?.full_name || `Client #${item.client_id}`;
               const waNumber = getWhatsAppNumber(client?.phone);
+              
+              // ✅ Get payment pill data directly from the fetched map
+              const paymentPill = getPaymentPill(item);
+              const PaymentIcon = paymentPill.icon;
 
               return (
                 <div
@@ -327,8 +394,12 @@ export default function BookingsListMobile({
                           <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
                             {item.booking_number || `BK-${item.id}`}
                           </span>
-                          <span className="text-[8px] font-bold text-[var(--color-ink-muted)] px-1.5 py-0.5 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] whitespace-nowrap uppercase tracking-wide">
-                            {statusLabel}
+                          {/* ✅ Payment Status Pill */}
+                          <span
+                            className={`inline-flex items-center gap-1 flex-shrink-0 px-2 py-0.5 rounded-full border text-[8px] font-bold uppercase tracking-wide whitespace-nowrap ${paymentPill.classes}`}
+                          >
+                            <PaymentIcon size={9} className="flex-shrink-0" strokeWidth={2.5} />
+                            {paymentPill.label}
                           </span>
                         </div>
                         <div className="flex items-center gap-1 mt-0.5">
@@ -385,8 +456,9 @@ export default function BookingsListMobile({
                         {vehicle ? `${vehicle.make} ${vehicle.model}` : `Vehicle #${item.vehicle_id}`}
                       </p>
                       {vehicle?.plate_number && (
-                        <span className="text-[10px] font-mono font-bold text-[var(--color-ink-subtle)] block mt-0.5">
-                          {vehicle.plate_number}
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-border)] transition-colors text-[10px] font-bold text-[var(--color-ink)] mt-1.5">
+                          <Car size={10} className="text-[var(--color-ink-muted)]" />
+                          <span className="font-mono tracking-tight">{vehicle.plate_number}</span>
                         </span>
                       )}
                     </div>

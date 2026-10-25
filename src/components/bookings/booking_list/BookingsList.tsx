@@ -63,9 +63,10 @@ export default function BookingsList({
       ) : (
         <>
           {/* 
-            ✅ FIX: Always render BookingsListMobile. 
+            ✅ Always render BookingsListMobile. 
             It has its own internal empty state that keeps the search bar 
             and filters visible even when filteredBookings.length === 0.
+            Payment status is fetched internally via useBookingPayments().
           */}
           <BookingsListMobile
             bookings={filteredBookings}

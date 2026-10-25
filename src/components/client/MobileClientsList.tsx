@@ -79,7 +79,7 @@ function getDLStatus(dlExpiry?: string | null): {
   if (!dlExpiry) return { kind: "none", label: "DL not provided", tone: "muted" };
   const expiry = new Date(dlExpiry);
   if (Number.isNaN(expiry.getTime())) {
-return { kind: "none", label: "DL not provided", tone: "muted" };
+    return { kind: "none", label: "DL not provided", tone: "muted" };
   }
   const diffDays = Math.ceil((expiry.getTime() - Date.now()) / 86_400_000);
   if (diffDays < 0) return { kind: "expired", label: "DL expired", tone: "rose" };
@@ -276,10 +276,7 @@ export default function MobileClientsList({
   return (
     <>
       <div className="md:hidden animate-in fade-in duration-300 relative">
-        {/* 
-          TOOLBAR 
-          - Full width (px-0)
-        */}
+        {/* TOOLBAR - Full width (px-0) */}
         <div
           className="sticky top-0 z-20 bg-[var(--color-bg)] py-2"
           data-selection-zone
@@ -326,7 +323,7 @@ export default function MobileClientsList({
               </div>
             ) : (
               <div className="space-y-2">
-                {/* Unified search + embedded filter pill - rounded-2xl for premium edge-to-edge */}
+                {/* Unified search + embedded filter pill */}
                 <div className="flex items-center h-11 rounded-2xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] overflow-hidden transition-colors mx-0">
                   <div className="relative flex-1 h-full">
                     <Search
@@ -502,6 +499,7 @@ export default function MobileClientsList({
             <div className="bg-[var(--color-surface)] first:rounded-t-2xl last:rounded-b-2xl">
               {paginatedClients.map((client, index) => {
                 const phone = client.phone || "";
+                const waNumber = getWhatsAppNumber(client.phone);
                 const isVerified = client.verification_status === "verified";
                 const isPending = client.status === "pending" || client.verification_status === "under_review" || client.verification_status === "sent";
                 const isSuspended = client.status === "suspended";
@@ -583,16 +581,32 @@ export default function MobileClientsList({
                         </span>
                       </div>
 
-                      <div className="flex items-center gap-1.5 mt-1 min-w-0">
+                      {/* ✅ NEW: Contact pills — full number + Message (bookings DNA) */}
+                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                         {phone ? (
-                          <a
-                            href={`tel:${phone.replace(/\s/g, "")}`}
-                            onClick={(e) => e.stopPropagation()}
-                            className="flex items-center gap-1 text-xs font-medium text-[var(--color-ink-muted)] hover:text-[var(--color-primary)] transition-colors min-w-0"
-                          >
-                            <Phone size={11} className="flex-shrink-0" />
-                            <span className="truncate">{phone}</span>
-                          </a>
+                          <>
+                            <a
+                              href={`tel:${phone.replace(/\s/g, "")}`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-border)] transition-colors text-[10px] font-bold text-[var(--color-ink)]"
+                            >
+                              <Phone size={10} className="text-[var(--color-ink-muted)] flex-shrink-0" />
+                              <span className="font-mono tracking-tight whitespace-nowrap">{phone}</span>
+                            </a>
+
+                            {waNumber && (
+                              <a
+                                href={`https://wa.me/${waNumber}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                onClick={(e) => e.stopPropagation()}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-border)] transition-colors text-[10px] font-bold text-[var(--color-ink)]"
+                              >
+                                <MessageCircle size={10} className="text-[var(--color-ink-muted)] flex-shrink-0" />
+                                Message
+                              </a>
+                            )}
+                          </>
                         ) : (
                           <span className="text-xs text-[var(--color-ink-subtle)] italic">No phone</span>
                         )}

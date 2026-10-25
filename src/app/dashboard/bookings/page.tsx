@@ -59,24 +59,17 @@ export default function BookingsPage() {
       ? {
           title: "Manage Bookings",
           mobileTitle: "Bookings",
-          description:
-            "Create new reservations, manage bookings, and handle extensions.",
-          icon: (
-            <LayoutList size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />
-          ),
+          description: "Create new reservations, manage bookings, and handle extensions.",
+          icon: <LayoutList size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
         }
       : {
           title: "Fleet Timeline Calendar",
           mobileTitle: "Calendar",
-          description:
-            "Real-time look at vehicle distribution, active reservations, and scheduling blocks.",
-          icon: (
-            <CalendarDays size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />
-          ),
+          description: "Real-time look at vehicle distribution, active reservations, and scheduling blocks.",
+          icon: <CalendarDays size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
         };
   }, [activeTab]);
 
-  // ✅ Drive the mobile top bar
   useSetPageHeader(currentTabInfo.mobileTitle, currentTabInfo.description);
 
   const bookingsArray = bookingsData.bookings || [];
@@ -90,17 +83,11 @@ export default function BookingsPage() {
       { label: "No Show", value: "no_show" },
       { label: "Awaiting Mileage", value: "awaiting_mileage" },
     ],
-    [
-      bookingsData.upcomingCount,
-      bookingsData.activeTripsCount,
-      bookingsData.completedCount,
-    ]
+    [bookingsData.upcomingCount, bookingsData.activeTripsCount, bookingsData.completedCount]
   );
 
   return (
-    // ✅ FIXED: Removed "max-w-full overflow-hidden" - this was breaking sticky positioning!
     <div className="space-y-4 sm:space-y-6">
-      {/* DESKTOP-ONLY HEADER */}
       <div className="hidden sm:flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-3">
@@ -114,18 +101,12 @@ export default function BookingsPage() {
           </p>
         </div>
         <div className="hidden md:block">
-          <PremiumTabSwitcher
-            tabs={TABS}
-            activeTab={activeTab}
-            onTabChange={handleTabChange}
-          />
+          <PremiumTabSwitcher tabs={TABS} activeTab={activeTab} onTabChange={handleTabChange} />
         </div>
       </div>
 
-      {/* TAB CONTENT */}
       {activeTab === "list" ? (
         <>
-          {/* MOBILE — no card chrome. List owns its own fixed toolbar. */}
           <div className="md:hidden">
             <BookingsList
               bookingsData={bookingsData}
@@ -138,7 +119,6 @@ export default function BookingsPage() {
               handleTabChange={handleTabChange}
             />
           </div>
-          {/* DESKTOP — unchanged card */}
           <div className="hidden md:block bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden animate-in fade-in duration-300">
             <BookingsList
               bookingsData={bookingsData}
@@ -168,11 +148,7 @@ export default function BookingsPage() {
 
       {activeTab === "calendar" && (
         <MobileFloatingSegment
-          segments={TABS.map((t) => ({
-            id: t.id,
-            label: t.label,
-            icon: t.icon,
-          }))}
+          segments={TABS.map((t) => ({ id: t.id, label: t.label, icon: t.icon }))}
           active={activeTab}
           onChange={handleTabChange}
           toggleTarget="list"
