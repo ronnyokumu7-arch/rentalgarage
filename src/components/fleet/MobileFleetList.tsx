@@ -33,7 +33,6 @@ const formatPrice = (amount: number | string) => {
 
 const formatMileage = (km: number) => km.toLocaleString();
 
-/** Attention ring on avatar — only when vehicle needs attention */
 const getAttentionRing = (
   vehicle: Vehicle,
   isDueForService: boolean
@@ -47,7 +46,6 @@ const getAttentionRing = (
   return null;
 };
 
-/** Status text + color (no more dot) */
 const getStatusText = (
   vehicle: Vehicle,
   isDueForService: boolean
@@ -125,7 +123,6 @@ export default function MobileFleetList({
   const [filtersOpen, setFiltersOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
-  // ─── Collections state ─────────────────────────────────────────────
   const [collections, setCollections] = useState<VehicleCollection[]>([]);
   const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const [collectionsModalOpen, setCollectionsModalOpen] = useState(false);
@@ -157,7 +154,6 @@ export default function MobileFleetList({
     setCollapsedSections((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
-  // ─── Long press / selection ────────────────────────────────────────
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressFired = useRef(false);
   const longPressStartPos = useRef<{ x: number; y: number } | null>(null);
@@ -231,7 +227,6 @@ export default function MobileFleetList({
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, [isSelecting]);
 
-  // ─── Batch actions ────────────────────────────────────────────────
   const handleBatchArchive = () => {
     if (selected.length === 0) return;
     selected.forEach((v) => handleArchive(v.id));
@@ -386,7 +381,6 @@ export default function MobileFleetList({
     ? mileageDueVehicles
     : sortedVehicles;
 
-  // ─── Grouping by collection ────────────────────────────────────────
   const groupedSections = useMemo(() => {
     if (collectionFilter) {
       const col = collections.find((c) => c.id === collectionFilter);
@@ -420,7 +414,6 @@ export default function MobileFleetList({
   const displayVehicles = baseVehicles;
   const hasActiveFilter = statusFilter !== "" || collectionFilter !== null;
 
-  // ─── Vehicle row renderer (used by sections) ──────────────────────
   const renderVehicleRow = (item: Vehicle, index: number, total: number) => {
     const isSelected = selected.some((v) => v.id === item.id);
     const brandLogoUrl = getVehicleBrandLogoUrl(item);
@@ -490,35 +483,34 @@ export default function MobileFleetList({
           )}
         </div>
 
-        {/* Content: full-width 3-row layout */}
+        {/* Content: 3-row layout */}
         <div className="min-w-0 flex-1">
-          {/* Row 1: Name (full) + Plate + Status text (right) */}
+          {/* Row 1: Name (full) + Status text (right) */}
           <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0 flex-1">
-              <h3 className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
-                {item.make} {item.model}
-              </h3>
-              <span className="inline-flex items-center mt-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-mono font-bold tracking-tight bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] border border-[var(--color-surface-border)]">
-                {formatPlate(item.plate_number)}
-              </span>
-            </div>
+            <h3 className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight min-w-0">
+              {item.make} {item.model}
+            </h3>
             <span className={`text-[11px] font-bold tracking-wide flex-shrink-0 ${statusText.color}`}>
               {statusText.label}
             </span>
           </div>
 
           {/* Row 2: Price */}
-          <div className="flex items-baseline gap-1 mt-1.5">
+          <div className="flex items-baseline gap-1 mt-1">
             <span className="text-[10px] font-semibold text-[var(--color-ink-muted)]">KES</span>
             <span className="text-[13px] font-bold text-[var(--color-ink)] tabular-nums">
               {formatPrice(item.daily_rate)}
             </span>
           </div>
 
-          {/* Row 3: Mileage + Next Service pills */}
-          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--color-surface-hover)] text-[10px] font-bold text-[var(--color-ink-muted)]">
-              <Gauge size={10} className="flex-shrink-0" />
+          {/* Row 3: Plate + Mileage + Next Service pills */}
+          <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+            <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-mono font-bold tracking-tight bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] border border-[var(--color-surface-border)]">
+              {formatPlate(item.plate_number)}
+            </span>
+
+            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--color-surface-hover)] text-[9px] font-bold text-[var(--color-ink-muted)]">
+              <Gauge size={9} className="flex-shrink-0" />
               <span className="font-mono tracking-tight">
                 {formatMileage(item.current_mileage)} km
               </span>
@@ -526,13 +518,13 @@ export default function MobileFleetList({
 
             {item.next_service_km && (
               <span
-                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold ${
+                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold ${
                   needsMileageAttention
                     ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
                     : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)]"
                 }`}
               >
-                <Wrench size={10} className="flex-shrink-0" />
+                <Wrench size={9} className="flex-shrink-0" />
                 <span className="font-mono tracking-tight">
                   {formatMileage(item.next_service_km)} km
                 </span>
@@ -840,8 +832,6 @@ export default function MobileFleetList({
 
             return (
               <div key={sectionId} className="mb-4 last:mb-0">
-                
-                {/* Section Header (The "Tab") */}
                 <div className="flex items-center justify-between px-1 py-1.5 mb-1.5">
                   <button
                     type="button"
@@ -882,7 +872,6 @@ export default function MobileFleetList({
                   )}
                 </div>
 
-                {/* Section List (The "Card") */}
                 {!isCollapsed && (
                   <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-sm overflow-hidden">
                     {section.vehicles.map((item, idx) =>
@@ -896,7 +885,6 @@ export default function MobileFleetList({
         </div>
       )}
 
-      {/* Hidden CardGrid to render action sheets */}
       <div className="hidden">
         <CardGrid
           data={displayVehicles}
@@ -911,7 +899,6 @@ export default function MobileFleetList({
         />
       </div>
 
-      {/* FAB stack */}
       {!isSelecting && !searchFocused && (
         <div
           data-fab-stack
@@ -944,7 +931,6 @@ export default function MobileFleetList({
         </div>
       )}
 
-      {/* Collections modal */}
       <CollectionsModal
         open={collectionsModalOpen}
         onClose={() => {
