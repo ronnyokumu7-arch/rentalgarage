@@ -24,6 +24,7 @@ import {
   Building2,
   Calendar,
   SlidersHorizontal,
+  Clock,
 } from "lucide-react";
 import CardGrid, { RowAction } from "@/components/ui/CardGrid";
 import ReviewVerificationModal from "@/components/client/ReviewVerificationModal";
@@ -237,6 +238,9 @@ export default function MobileClientsList({
     searchInputRef.current?.blur();
   };
 
+  /* ──────────────────────────────────────────────────────────────────────
+     ✅ Row actions — mirrors the desktop verification logic
+  ────────────────────────────────────────────────────────────────────── */
   const getClientActions = (client: any): RowAction<any>[] =>
     [
       {
@@ -262,9 +266,50 @@ export default function MobileClientsList({
         },
         disabled: !getWhatsAppNumber(client.phone),
       },
+      // ✅ Verification CTA — mirrors desktop logic
+      {
+        label:
+          client.verification_status === "under_review"
+            ? "Review Verification"
+            : client.verification_status === "rejected" || client.status === "pending"
+              ? "Start Verification"
+              : "Suspend Client",
+        icon:
+          client.verification_status === "under_review"
+            ? Clock
+            : Shield,
+        variant:
+          client.verification_status === "under_review" ||
+          client.verification_status === "rejected" ||
+          client.status === "pending"
+            ? "primary"
+            : "default",
+        separator: true,
+        onClick: () => {
+          if (client.verification_status === "under_review") {
+            setReviewClientId(client.id);
+            setReviewModalOpen(true);
+          } else {
+            handleVerify(client.id);
+          }
+        },
+        disabled:
+          client.status !== "pending" &&
+          client.status !== "active" &&
+          client.verification_status !== "rejected" &&
+          client.verification_status !== "under_review",
+      },
+      // ✅ Reactivate when suspended
+      {
+        label: client.status === "suspended" ? "Reactivate Client" : undefined,
+        icon: Shield,
+        variant: "primary",
+        onClick: () => handleVerify(client.id), // reuse verify handler; swap if you have a dedicated handler
+        disabled: client.status !== "suspended",
+      },
       {
         label: "Archive Client",
-        icon: Users,
+        icon: Archive,
         variant: "danger",
         separator: true,
         onClick: () => handleArchive(client.id),
@@ -276,7 +321,7 @@ export default function MobileClientsList({
   return (
     <>
       <div className="md:hidden animate-in fade-in duration-300 relative">
-        {/* TOOLBAR - Full width (px-0) */}
+        {/* TOOLBAR */}
         <div
           className="sticky top-0 z-20 bg-[var(--color-bg)] py-2"
           data-selection-zone
@@ -323,7 +368,7 @@ export default function MobileClientsList({
               </div>
             ) : (
               <div className="space-y-2">
-                {/* Unified search + embedded filter pill */}
+                {/* Search + filter toggle */}
                 <div className="flex items-center h-11 rounded-2xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] overflow-hidden transition-colors mx-0">
                   <div className="relative flex-1 h-full">
                     <Search
@@ -448,7 +493,7 @@ export default function MobileClientsList({
           </div>
         </div>
 
-        {/* Banners — px-3 for text readability */}
+        {/* Banners */}
         <div className={`px-3 ${searchFocused || isSelecting ? "hidden" : ""}`}>
           {!loading && pendingClients > 0 && statusFilter !== "pending" && (
             <button
@@ -479,7 +524,7 @@ export default function MobileClientsList({
           )}
         </div>
 
-        {/* Card List - Seamless edge-to-edge pattern with unified background */}
+        {/* Card List */}
         <div className="pb-4">
           {loading ? (
             <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2">
@@ -548,12 +593,10 @@ export default function MobileClientsList({
                         : "hover:bg-[var(--color-surface-hover)]/40"
                     }`}
                   >
-                    {/* Premium fade border - 80% width, very thin, fades at sides */}
                     {index !== paginatedClients.length - 1 && (
                       <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-px bg-gradient-to-r from-transparent via-[var(--color-surface-border)] to-transparent" />
                     )}
 
-                    {/* Avatar - KEPT AT ORIGINAL SIZE (w-12 h-12) */}
                     <div className="relative flex-shrink-0">
                       <div
                         className={`w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center font-bold text-sm ${avatarColors}`}
@@ -581,7 +624,6 @@ export default function MobileClientsList({
                         </span>
                       </div>
 
-                      {/* ✅ NEW: Contact pills — full number + Message (bookings DNA) */}
                       <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                         {phone ? (
                           <>

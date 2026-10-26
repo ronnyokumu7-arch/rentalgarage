@@ -2,16 +2,22 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useRef, useEffect, useMemo } from "react";
+import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useTheme } from "next-themes";
 import {
   Car, Archive, Shield, Loader2,
   Ban, Wrench, CarFront, Gauge,
   Banknote, Pencil, Plus, Search, CheckCircle2, Circle, X,
-  SlidersHorizontal,
+  SlidersHorizontal, ChevronDown, ChevronRight, FolderPlus,
+  Folder, MoreHorizontal,
 } from "lucide-react";
 import CardGrid, { RowAction } from "@/components/ui/CardGrid";
 import { getVehicleBodyIcon, getVehicleBrandLogoUrl } from "@/components/fleet/vehicle-avatar";
+import CollectionsModal from "@/components/fleet/CollectionsModal";
+import {
+  getCollections,
+  type VehicleCollection,
+} from "@/lib/collections";
 import type { Vehicle, VehicleStatus, Booking } from "@/lib/types";
 
 /* ──────────────────────────────────────────────────────────────────────
@@ -25,27 +31,32 @@ const formatPrice = (amount: number | string) => {
   return num.toLocaleString("en-KE", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 };
 
-const formatMileage = (km: number) => km.toString();
+const formatMileage = (km: number) => km.toLocaleString();
 
-/** 
- * Returns the outer ring color ONLY if the vehicle needs attention.
- * Returns null when the vehicle is available / retired / archived (no ring).
- */
-const getStatusRingColor = (
+const getAttentionRing = (
   vehicle: Vehicle,
   isDueForService: boolean
 ): string | null => {
   if (vehicle.is_archived) return null;
   if (vehicle.status === "maintenance" || isDueForService || vehicle.mileage_due) {
-    return "ring-amber-400/80";
+    return "ring-amber-400/70";
   }
-  if (vehicle.status === "rented") {
-    return "ring-blue-400/80";
-  }
-  if (vehicle.status === "pending_activation") {
-    return "ring-violet-400/80";
-  }
+  if (vehicle.status === "rented") return "ring-blue-400/70";
+  if (vehicle.status === "pending_activation") return "ring-violet-400/70";
   return null;
+};
+
+const getStatusDot = (
+  vehicle: Vehicle,
+  isDueForService: boolean
+): { color: string; label: string } => {
+  if (vehicle.is_archived) return { color: "bg-slate-400", label: "Archived" };
+  if (vehicle.status === "maintenance") return { color: "bg-amber-500", label: "Maintenance" };
+  if (isDueForService || vehicle.mileage_due) return { color: "bg-amber-500", label: "Mileage due" };
+  if (vehicle.status === "rented") return { color: "bg-blue-500", label: "Rented" };
+  if (vehicle.status === "available") return { color: "bg-emerald-500", label: "Available" };
+  if (vehicle.status === "pending_activation") return { color: "bg-violet-500", label: "Pending" };
+  return { color: "bg-slate-400", label: "Retired" };
 };
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -112,6 +123,39 @@ export default function MobileFleetList({
   const [filtersOpen, setFiltersOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
 
+  // ─── Collections state ─────────────────────────────────────────────
+  const [collections, setCollections] = useState<VehicleCollection[]>([]);
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
+  const [collectionsModalOpen, setCollectionsModalOpen] = useState(false);
+  const [editingCollectionId, setEditingCollectionId] = useState<string | null>(null);
+  const [collectionFilter, setCollectionFilter] = useState<string | null>(null);
+
+  const loadCollections = useCallback(() => {
+    setCollections(getCollections());
+  }, []);
+
+  useEffect(() => {
+    loadCollections();
+    const handler = () => loadCollections();
+    window.addEventListener("rg.collections.changed", handler);
+    return () => window.removeEventListener("rg.collections.changed", handler);
+  }, [loadCollections]);
+
+  const openCreateCollection = () => {
+    setEditingCollectionId(null);
+    setCollectionsModalOpen(true);
+  };
+
+  const openEditCollection = (id: string) => {
+    setEditingCollectionId(id);
+    setCollectionsModalOpen(true);
+  };
+
+  const toggleSection = (id: string) => {
+    setCollapsedSections((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  // ─── Long press / selection ────────────────────────────────────────
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressFired = useRef(false);
   const longPressStartPos = useRef<{ x: number; y: number } | null>(null);
@@ -185,6 +229,7 @@ export default function MobileFleetList({
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, [isSelecting]);
 
+  // ─── Batch actions ────────────────────────────────────────────────
   const handleBatchArchive = () => {
     if (selected.length === 0) return;
     selected.forEach((v) => handleArchive(v.id));
@@ -204,6 +249,12 @@ export default function MobileFleetList({
     setGarageVehicle(selected[0]);
     setGarageModalOpen(true);
     clearSelection();
+  };
+
+  const handleBatchAddToCollection = () => {
+    if (selected.length === 0) return;
+    setEditingCollectionId(null);
+    setCollectionsModalOpen(true);
   };
 
   const handleClearSearch = () => {
@@ -329,11 +380,176 @@ export default function MobileFleetList({
     [sortedVehicles],
   );
 
-  const displayVehicles = (statusFilter as any) === "mileage_due"
+  const baseVehicles = (statusFilter as any) === "mileage_due"
     ? mileageDueVehicles
     : sortedVehicles;
 
-  const hasActiveFilter = statusFilter !== "";
+  // ─── Grouping by collection ────────────────────────────────────────
+  const groupedSections = useMemo(() => {
+    if (collectionFilter) {
+      const col = collections.find((c) => c.id === collectionFilter);
+      if (!col) return [];
+      return [{
+        collection: col,
+        vehicles: col.vehicleIds
+          .map((id) => baseVehicles.find((v) => v.id === id))
+          .filter((v): v is Vehicle => Boolean(v)),
+      }];
+    }
+
+    const sections = collections.map((c) => ({
+      collection: c,
+      vehicles: c.vehicleIds
+        .map((id) => baseVehicles.find((v) => v.id === id))
+        .filter((v): v is Vehicle => Boolean(v)),
+    }));
+
+    const groupedIds = new Set(collections.flatMap((c) => c.vehicleIds));
+    const ungrouped = baseVehicles.filter((v) => !groupedIds.has(v.id));
+
+    return [
+      ...sections.filter((s) => s.vehicles.length > 0),
+      ...(ungrouped.length > 0
+        ? [{ collection: null, vehicles: ungrouped }]
+        : []),
+    ];
+  }, [collections, baseVehicles, collectionFilter]);
+
+  const displayVehicles = baseVehicles;
+  const hasActiveFilter = statusFilter !== "" || collectionFilter !== null;
+
+  // ─── Vehicle row renderer (used by sections) ──────────────────────
+  const renderVehicleRow = (item: Vehicle, index: number, total: number) => {
+    const isSelected = selected.some((v) => v.id === item.id);
+    const brandLogoUrl = getVehicleBrandLogoUrl(item);
+
+    const kmToService = item.next_service_km
+      ? item.next_service_km - item.current_mileage
+      : null;
+    const isDueForService = kmToService !== null && kmToService <= 500;
+    const needsMileageAttention =
+      isDueForService || item.mileage_due || item.status === "maintenance";
+
+    const statusDot = getStatusDot(item, isDueForService);
+    const attentionRing = getAttentionRing(item, isDueForService);
+    const BodyIcon = getVehicleBodyIcon(item);
+    const isDarkWithLogo = mounted && resolvedTheme === "dark" && brandLogoUrl;
+
+    return (
+      <div
+        key={item.id}
+        data-selection-zone
+        onTouchStart={handleTouchStart(item)}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onClick={() => {
+          if (longPressFired.current) {
+            longPressFired.current = false;
+            return;
+          }
+          if (isSelecting) {
+            toggleSelection(item);
+            return;
+          }
+          const trigger = document.querySelector(
+            `[data-card-actions="${item.id}"] button`,
+          ) as HTMLButtonElement | null;
+          trigger?.click();
+        }}
+        className={`relative flex items-center gap-3 w-full py-3 px-3 transition-colors select-none bg-[var(--color-surface)] first:rounded-t-2xl last:rounded-b-2xl hover:bg-[var(--color-surface-hover)]/40`}
+      >
+        {index !== total - 1 && (
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-px bg-gradient-to-r from-transparent via-[var(--color-surface-border)] to-transparent" />
+        )}
+
+        <div
+          className={`relative flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden transition-all ${
+            isDarkWithLogo
+              ? "bg-white shadow-[inset_0_0_6px_rgba(0,0,0,0.08)]"
+              : "bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)]"
+          } ${
+            attentionRing
+              ? `ring-1 ring-offset-1 ring-offset-[var(--color-surface)] ${attentionRing}`
+              : ""
+          }`}
+        >
+          {brandLogoUrl ? (
+            <img
+              src={brandLogoUrl}
+              alt={item.make}
+              className={`w-8 h-8 object-contain ${
+                mounted && resolvedTheme === "dark" ? "" : "mix-blend-multiply"
+              }`}
+              loading="lazy"
+            />
+          ) : (
+            <BodyIcon size={20} className="text-[var(--color-ink-muted)]" strokeWidth={1.75} />
+          )}
+        </div>
+
+        <div className="min-w-0 flex-1 flex items-center justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-1.5 min-w-0">
+              <h3 className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
+                {item.make} {item.model}
+              </h3>
+              <span
+                className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${statusDot.color}`}
+                title={statusDot.label}
+                aria-label={statusDot.label}
+              />
+            </div>
+            <span className="inline-flex items-center mt-1 px-1.5 py-0.5 rounded-md text-[9px] font-mono font-bold tracking-tight bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] border border-[var(--color-surface-border)]">
+              {formatPlate(item.plate_number)}
+            </span>
+          </div>
+
+          <div className="flex flex-col items-end flex-shrink-0 gap-1.5">
+            <div className="flex items-baseline gap-1">
+              <span className="text-[9px] font-semibold text-[var(--color-ink-muted)]">KES</span>
+              <span className="text-[12px] font-bold text-[var(--color-ink)] tabular-nums">
+                {formatPrice(item.daily_rate)}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-1">
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[var(--color-surface-hover)] text-[9px] font-bold text-[var(--color-ink-muted)]">
+                <Gauge size={9} className="flex-shrink-0" />
+                <span className="font-mono tracking-tight">
+                  {formatMileage(item.current_mileage)} km
+                </span>
+              </span>
+
+              {item.next_service_km && (
+                <span
+                  className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold ${
+                    needsMileageAttention
+                      ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                      : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)]"
+                  }`}
+                >
+                  <Wrench size={9} className="flex-shrink-0" />
+                  <span className="font-mono tracking-tight">
+                    {formatMileage(item.next_service_km)} km
+                  </span>
+                </span>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {isSelecting && (
+          <div className="flex-shrink-0 self-center pl-1">
+            {isSelected ? (
+              <CheckCircle2 size={22} className="text-[var(--color-primary)]" strokeWidth={2.25} />
+            ) : (
+              <Circle size={22} className="text-[var(--color-ink-subtle)]" strokeWidth={1.5} />
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
 
   return (
     <div className="md:hidden animate-in fade-in duration-300 relative">
@@ -359,6 +575,14 @@ export default function MobileFleetList({
               </div>
 
               <div className="flex items-center gap-1">
+                <button
+                  onClick={handleBatchAddToCollection}
+                  className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors"
+                  aria-label="Add to collection"
+                  title="Add to collection"
+                >
+                  <FolderPlus size={16} />
+                </button>
                 <button
                   onClick={handleBatchMileage}
                   className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
@@ -445,15 +669,40 @@ export default function MobileFleetList({
                   <div className="overflow-x-auto scrollbar-none">
                     <div className="flex items-center gap-2 py-1 px-3 pr-6">
                       <button
-                        onClick={() => setStatusFilter("")}
+                        onClick={() => { setStatusFilter(""); setCollectionFilter(null); }}
                         className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border ${
-                          statusFilter === ""
+                          statusFilter === "" && collectionFilter === null
                             ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
                             : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
                         }`}
                       >
                         All
                       </button>
+
+                      {collections.length > 0 && (
+                        <>
+                          <div className="h-5 w-px bg-[var(--color-surface-border)] mx-1 flex-shrink-0" />
+                          {collections.map((c) => {
+                            const isActive = collectionFilter === c.id;
+                            return (
+                              <button
+                                key={c.id}
+                                onClick={() => setCollectionFilter(isActive ? null : c.id)}
+                                className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
+                                  isActive
+                                    ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
+                                    : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
+                                }`}
+                              >
+                                <Folder size={11} className="flex-shrink-0" />
+                                {c.name}
+                              </button>
+                            );
+                          })}
+                          <div className="h-5 w-px bg-[var(--color-surface-border)] mx-1 flex-shrink-0" />
+                        </>
+                      )}
+
                       {pillOptions.map((opt) => {
                         const isActive = statusFilter === opt.value;
                         return (
@@ -482,6 +731,13 @@ export default function MobileFleetList({
                       >
                         <Wrench size={11} className="flex-shrink-0" />
                         Garage
+                      </button>
+                      <button
+                        onClick={() => { setCollectionFilter(null); openCreateCollection(); }}
+                        className="flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border border-dashed border-[var(--color-surface-border)] text-[var(--color-ink-muted)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] flex items-center gap-1.5"
+                      >
+                        <Plus size={11} className="flex-shrink-0" />
+                        New Collection
                       </button>
                     </div>
                   </div>
@@ -573,134 +829,62 @@ export default function MobileFleetList({
           </p>
         </div>
       ) : (
-        <div className="pb-4">
-          {displayVehicles.map((item, index) => {
-            const isSelected = selected.some((v) => v.id === item.id);
-            const brandLogoUrl = getVehicleBrandLogoUrl(item);
-
-            const kmToService = item.next_service_km
-              ? item.next_service_km - item.current_mileage
-              : null;
-            const isDueForService = kmToService !== null && kmToService <= 500;
-            const needsMileageAttention = isDueForService || item.mileage_due || item.status === "maintenance";
-
-            const statusDisplay = (() => {
-              if (item.is_archived) return { label: "Archived", color: "text-[var(--color-ink-muted)]" };
-              if (item.status === "maintenance") return { label: "Maintenance", color: "text-amber-600 dark:text-amber-400" };
-              if (isDueForService || item.mileage_due) return { label: "Mileage due", color: "text-amber-600 dark:text-amber-400" };
-              if (item.status === "rented") return { label: "Rented", color: "text-blue-600 dark:text-blue-400" };
-              if (item.status === "available") return { label: "Available", color: "text-emerald-600 dark:text-emerald-400" };
-              if (item.status === "pending_activation") return { label: "Pending", color: "text-violet-600 dark:text-violet-400" };
-              return { label: "Retired", color: "text-[var(--color-ink-muted)]" };
-            })();
-
-            const MileageIcon = needsMileageAttention ? Wrench : Gauge;
-            const mileageColorClass = needsMileageAttention
-              ? "text-amber-600 dark:text-amber-400"
-              : "text-[var(--color-ink-muted)]";
-
-            const ringColor = getStatusRingColor(item, isDueForService);
-            const BodyIcon = getVehicleBodyIcon(item);
-            const needsAttention = Boolean(ringColor);
-            const isDarkWithLogo = mounted && resolvedTheme === "dark" && brandLogoUrl;
+        /* ✅ UPDATED SECTIONS: Tab header + Bordered Card */
+        <div className="pb-4 px-2">
+          {groupedSections.map((section) => {
+            const isUngrouped = section.collection === null;
+            const sectionId = isUngrouped ? "__ungrouped__" : section.collection!.id;
+            const isCollapsed = !isUngrouped && collapsedSections[sectionId];
 
             return (
-              <div
-                key={item.id}
-                data-selection-zone
-                onTouchStart={handleTouchStart(item)}
-                onTouchMove={handleTouchMove}
-                onTouchEnd={handleTouchEnd}
-                onClick={() => {
-                  if (longPressFired.current) {
-                    longPressFired.current = false;
-                    return;
-                  }
-                  if (isSelecting) {
-                    toggleSelection(item);
-                    return;
-                  }
-                  const trigger = document.querySelector(`[data-card-actions="${item.id}"] button`) as HTMLButtonElement | null;
-                  trigger?.click();
-                }}
-                className={`relative flex items-center gap-3 py-2.5 px-3 transition-all cursor-pointer select-none bg-[var(--color-surface)] first:rounded-t-2xl last:rounded-b-2xl ${
-                  isSelected
-                    ? "border-y border-[var(--color-primary)] bg-[var(--color-primary)]/[0.04]"
-                    : "hover:bg-[var(--color-surface-hover)]"
-                }`}
-              >
-                {index !== displayVehicles.length - 1 && (
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-px bg-gradient-to-r from-transparent via-[var(--color-surface-border)] to-transparent" />
-                )}
+              <div key={sectionId} className="mb-4 last:mb-0">
                 
-                {/* 
-                  ✅ Avatar Container:
-                  - Light mode: normal surface with optional ring
-                  - Dark mode + logo: white plate with premium inner feather shadow
-                  - Dark mode + no logo: normal surface with BodyIcon
-                */}
-                <div
-                  className={`relative w-20 h-14 rounded-xl flex items-center justify-center shrink-0 overflow-hidden transition-colors ${
-                    isDarkWithLogo
-                      ? "bg-white shadow-[inset_0_0_6px_rgba(0,0,0,0.08)]" // ✅ Premium inner feather shadow
-                      : "bg-[var(--color-surface)]"
-                  } ${
-                    needsAttention
-                      ? `ring-1 ring-offset-1 ring-offset-[var(--color-surface)] ${ringColor}`
-                      : "border border-[var(--color-surface-border)]"
-                  }`}
-                >
-                  {brandLogoUrl ? (
-                    <img
-                      src={brandLogoUrl}
-                      alt={item.make}
-                      className={`w-12 h-12 object-contain ${
-                        mounted && resolvedTheme === "dark" ? "" : "mix-blend-multiply"
-                      }`}
-                      loading="lazy"
-                    />
-                  ) : (
-                    <BodyIcon size={28} className="text-[var(--color-ink-muted)]" strokeWidth={1.75} />
+                {/* Section Header (The "Tab") */}
+                <div className="flex items-center justify-between px-1 py-1.5 mb-1.5">
+                  <button
+                    type="button"
+                    onClick={() => !isUngrouped && toggleSection(sectionId)}
+                    className="flex items-center gap-2 min-w-0 flex-1 group"
+                  >
+                    {isUngrouped ? (
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)]">
+                        Ungrouped
+                      </span>
+                    ) : (
+                      <>
+                        <div className="w-6 h-6 rounded-lg bg-[var(--color-surface)] border border-[var(--color-surface-border)] flex items-center justify-center shrink-0">
+                          {isCollapsed ? (
+                            <ChevronRight size={12} className="text-[var(--color-ink-muted)]" />
+                          ) : (
+                            <ChevronDown size={12} className="text-[var(--color-ink-muted)]" />
+                          )}
+                        </div>
+                        <span className="text-sm font-bold text-[var(--color-ink)] truncate group-hover:text-[var(--color-primary)] transition-colors">
+                          {section.collection!.name}
+                        </span>
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] text-[var(--color-ink-muted)] tabular-nums">
+                          {section.vehicles.length}
+                        </span>
+                      </>
+                    )}
+                  </button>
+                  {!isUngrouped && (
+                    <button
+                      type="button"
+                      onClick={() => openEditCollection(section.collection!.id)}
+                      className="w-7 h-7 rounded-md flex items-center justify-center text-[var(--color-ink-subtle)] hover:bg-[var(--color-surface-hover)] transition-colors"
+                      aria-label="Edit collection"
+                    >
+                      <MoreHorizontal size={16} />
+                    </button>
                   )}
                 </div>
 
-                <div className="min-w-0 flex-1 pr-2">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <h3 className="text-base font-bold text-[var(--color-ink)] truncate tracking-tight">
-                      {item.make} {item.model}
-                    </h3>
-                    <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-mono font-bold tracking-tight bg-[var(--color-surface-hover)] text-[var(--color-ink)] border border-[var(--color-surface-border)] flex-shrink-0">
-                      {formatPlate(item.plate_number)}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-1 mt-1">
-                    <MileageIcon size={11} className={`flex-shrink-0 ${mileageColorClass}`} strokeWidth={2.25} />
-                    <span className={`text-[11px] font-mono font-semibold ${mileageColorClass}`}>
-                      {formatMileage(item.current_mileage)} km
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between gap-2 mt-1.5">
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-[10px] font-semibold text-[var(--color-ink-muted)]">KES</span>
-                      <span className="text-[12px] font-bold text-[var(--color-ink)] tabular-nums">
-                        {formatPrice(item.daily_rate)}
-                      </span>
-                    </div>
-
-                    <div className={`text-[11px] font-bold tracking-wide ${statusDisplay.color}`}>
-                      {statusDisplay.label}
-                    </div>
-                  </div>
-                </div>
-
-                {isSelecting && (
-                  <div className="absolute top-3.5 left-3.5 z-10">
-                    {isSelected ? (
-                      <CheckCircle2 size={20} className="text-[var(--color-primary)] bg-white rounded-full" />
-                    ) : (
-                      <Circle size={20} className="text-[var(--color-ink-subtle)] bg-white rounded-full" />
+                {/* Section List (The "Card") */}
+                {!isCollapsed && (
+                  <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-sm overflow-hidden">
+                    {section.vehicles.map((item, idx) =>
+                      renderVehicleRow(item, idx, section.vehicles.length)
                     )}
                   </div>
                 )}
@@ -725,6 +909,7 @@ export default function MobileFleetList({
         />
       </div>
 
+      {/* FAB stack */}
       {!isSelecting && !searchFocused && (
         <div
           data-fab-stack
@@ -756,6 +941,18 @@ export default function MobileFleetList({
           </button>
         </div>
       )}
+
+      {/* Collections modal */}
+      <CollectionsModal
+        open={collectionsModalOpen}
+        onClose={() => {
+          setCollectionsModalOpen(false);
+          setEditingCollectionId(null);
+        }}
+        vehicles={sortedVehicles}
+        initialVehicleIds={selected.map((v) => v.id)}
+        editingCollectionId={editingCollectionId}
+      />
     </div>
   );
 }
