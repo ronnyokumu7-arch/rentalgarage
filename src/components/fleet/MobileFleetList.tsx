@@ -806,7 +806,7 @@ export default function MobileFleetList({
         </div>
       ) : (
         <div className="pb-4 px-2">
-          {groupedSections.map((section, sIdx) => {
+          {groupedSections.map((section) => {
             const isUngrouped = section.collection === null;
             const sectionId = isUngrouped ? "__ungrouped__" : section.collection!.id;
             const isCollapsed = !isUngrouped && collapsedSections[sectionId];
