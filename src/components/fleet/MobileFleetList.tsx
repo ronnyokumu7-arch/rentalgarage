@@ -33,30 +33,21 @@ const formatPrice = (amount: number | string) => {
 
 const formatMileage = (km: number) => km.toLocaleString();
 
-const getAttentionRing = (
+/** 
+ * Returns the status ring color. Applies to EVERY vehicle (not just attention ones).
+ */
+const getStatusRing = (
   vehicle: Vehicle,
   isDueForService: boolean
-): string | null => {
-  if (vehicle.is_archived) return null;
+): string => {
+  if (vehicle.is_archived) return "ring-slate-500/30";
   if (vehicle.status === "maintenance" || isDueForService || vehicle.mileage_due) {
-    return "ring-amber-400/70";
+    return "ring-amber-500/70";
   }
-  if (vehicle.status === "rented") return "ring-blue-400/70";
-  if (vehicle.status === "pending_activation") return "ring-violet-400/70";
-  return null;
-};
-
-const getStatusText = (
-  vehicle: Vehicle,
-  isDueForService: boolean
-): { label: string; color: string } => {
-  if (vehicle.is_archived) return { label: "Archived", color: "text-[var(--color-ink-muted)]" };
-  if (vehicle.status === "maintenance") return { label: "Maintenance", color: "text-amber-600 dark:text-amber-400" };
-  if (isDueForService || vehicle.mileage_due) return { label: "Mileage due", color: "text-amber-600 dark:text-amber-400" };
-  if (vehicle.status === "rented") return { label: "Rented", color: "text-blue-600 dark:text-blue-400" };
-  if (vehicle.status === "available") return { label: "Available", color: "text-emerald-600 dark:text-emerald-400" };
-  if (vehicle.status === "pending_activation") return { label: "Pending", color: "text-violet-600 dark:text-violet-400" };
-  return { label: "Retired", color: "text-[var(--color-ink-muted)]" };
+  if (vehicle.status === "rented") return "ring-blue-500/70";
+  if (vehicle.status === "pending_activation") return "ring-violet-500/70";
+  if (vehicle.status === "available") return "ring-emerald-500/70";
+  return "ring-slate-500/30";
 };
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -425,8 +416,7 @@ export default function MobileFleetList({
     const needsMileageAttention =
       isDueForService || item.mileage_due || item.status === "maintenance";
 
-    const statusText = getStatusText(item, isDueForService);
-    const attentionRing = getAttentionRing(item, isDueForService);
+    const statusRing = getStatusRing(item, isDueForService);
     const BodyIcon = getVehicleBodyIcon(item);
     const isDarkWithLogo = mounted && resolvedTheme === "dark" && brandLogoUrl;
 
@@ -457,16 +447,12 @@ export default function MobileFleetList({
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-px bg-gradient-to-r from-transparent via-[var(--color-surface-border)] to-transparent" />
         )}
 
-        {/* Avatar */}
+        {/* Avatar with always-on status ring */}
         <div
-          className={`relative flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden transition-all ${
+          className={`relative flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden transition-all ring-2 ring-offset-2 ring-offset-[var(--color-surface)] ${statusRing} ${
             isDarkWithLogo
               ? "bg-white shadow-[inset_0_0_6px_rgba(0,0,0,0.08)]"
-              : "bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)]"
-          } ${
-            attentionRing
-              ? `ring-1 ring-offset-1 ring-offset-[var(--color-surface)] ${attentionRing}`
-              : ""
+              : "bg-[var(--color-surface-hover)]"
           }`}
         >
           {brandLogoUrl ? (
@@ -483,17 +469,12 @@ export default function MobileFleetList({
           )}
         </div>
 
-        {/* Content: 3-row layout */}
+        {/* Content */}
         <div className="min-w-0 flex-1">
-          {/* Row 1: Name (full) + Status text (right) */}
-          <div className="flex items-start justify-between gap-2">
-            <h3 className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight min-w-0">
-              {item.make} {item.model}
-            </h3>
-            <span className={`text-[11px] font-bold tracking-wide flex-shrink-0 ${statusText.color}`}>
-              {statusText.label}
-            </span>
-          </div>
+          {/* Row 1: Name */}
+          <h3 className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
+            {item.make} {item.model}
+          </h3>
 
           {/* Row 2: Price */}
           <div className="flex items-baseline gap-1 mt-1">
