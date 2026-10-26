@@ -33,6 +33,7 @@ const formatPrice = (amount: number | string) => {
 
 const formatMileage = (km: number) => km.toLocaleString();
 
+/** Attention ring on avatar — only when vehicle needs attention */
 const getAttentionRing = (
   vehicle: Vehicle,
   isDueForService: boolean
@@ -46,17 +47,18 @@ const getAttentionRing = (
   return null;
 };
 
-const getStatusDot = (
+/** Status text + color (no more dot) */
+const getStatusText = (
   vehicle: Vehicle,
   isDueForService: boolean
-): { color: string; label: string } => {
-  if (vehicle.is_archived) return { color: "bg-slate-400", label: "Archived" };
-  if (vehicle.status === "maintenance") return { color: "bg-amber-500", label: "Maintenance" };
-  if (isDueForService || vehicle.mileage_due) return { color: "bg-amber-500", label: "Mileage due" };
-  if (vehicle.status === "rented") return { color: "bg-blue-500", label: "Rented" };
-  if (vehicle.status === "available") return { color: "bg-emerald-500", label: "Available" };
-  if (vehicle.status === "pending_activation") return { color: "bg-violet-500", label: "Pending" };
-  return { color: "bg-slate-400", label: "Retired" };
+): { label: string; color: string } => {
+  if (vehicle.is_archived) return { label: "Archived", color: "text-[var(--color-ink-muted)]" };
+  if (vehicle.status === "maintenance") return { label: "Maintenance", color: "text-amber-600 dark:text-amber-400" };
+  if (isDueForService || vehicle.mileage_due) return { label: "Mileage due", color: "text-amber-600 dark:text-amber-400" };
+  if (vehicle.status === "rented") return { label: "Rented", color: "text-blue-600 dark:text-blue-400" };
+  if (vehicle.status === "available") return { label: "Available", color: "text-emerald-600 dark:text-emerald-400" };
+  if (vehicle.status === "pending_activation") return { label: "Pending", color: "text-violet-600 dark:text-violet-400" };
+  return { label: "Retired", color: "text-[var(--color-ink-muted)]" };
 };
 
 /* ─────────────────────────────────────────────────────────────────────
@@ -430,7 +432,7 @@ export default function MobileFleetList({
     const needsMileageAttention =
       isDueForService || item.mileage_due || item.status === "maintenance";
 
-    const statusDot = getStatusDot(item, isDueForService);
+    const statusText = getStatusText(item, isDueForService);
     const attentionRing = getAttentionRing(item, isDueForService);
     const BodyIcon = getVehicleBodyIcon(item);
     const isDarkWithLogo = mounted && resolvedTheme === "dark" && brandLogoUrl;
@@ -456,12 +458,13 @@ export default function MobileFleetList({
           ) as HTMLButtonElement | null;
           trigger?.click();
         }}
-        className={`relative flex items-center gap-3 w-full py-3 px-3 transition-colors select-none bg-[var(--color-surface)] first:rounded-t-2xl last:rounded-b-2xl hover:bg-[var(--color-surface-hover)]/40`}
+        className={`relative flex items-start gap-3 w-full py-3 px-3 transition-colors select-none bg-[var(--color-surface)] first:rounded-t-2xl last:rounded-b-2xl hover:bg-[var(--color-surface-hover)]/40`}
       >
         {index !== total - 1 && (
           <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-px bg-gradient-to-r from-transparent via-[var(--color-surface-border)] to-transparent" />
         )}
 
+        {/* Avatar */}
         <div
           className={`relative flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden transition-all ${
             isDarkWithLogo
@@ -487,54 +490,54 @@ export default function MobileFleetList({
           )}
         </div>
 
-        <div className="min-w-0 flex-1 flex items-center justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-1.5 min-w-0">
+        {/* Content: full-width 3-row layout */}
+        <div className="min-w-0 flex-1">
+          {/* Row 1: Name (full) + Plate + Status text (right) */}
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 flex-1">
               <h3 className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
                 {item.make} {item.model}
               </h3>
-              <span
-                className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${statusDot.color}`}
-                title={statusDot.label}
-                aria-label={statusDot.label}
-              />
+              <span className="inline-flex items-center mt-0.5 px-1.5 py-0.5 rounded-md text-[9px] font-mono font-bold tracking-tight bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] border border-[var(--color-surface-border)]">
+                {formatPlate(item.plate_number)}
+              </span>
             </div>
-            <span className="inline-flex items-center mt-1 px-1.5 py-0.5 rounded-md text-[9px] font-mono font-bold tracking-tight bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] border border-[var(--color-surface-border)]">
-              {formatPlate(item.plate_number)}
+            <span className={`text-[11px] font-bold tracking-wide flex-shrink-0 ${statusText.color}`}>
+              {statusText.label}
             </span>
           </div>
 
-          <div className="flex flex-col items-end flex-shrink-0 gap-1.5">
-            <div className="flex items-baseline gap-1">
-              <span className="text-[9px] font-semibold text-[var(--color-ink-muted)]">KES</span>
-              <span className="text-[12px] font-bold text-[var(--color-ink)] tabular-nums">
-                {formatPrice(item.daily_rate)}
-              </span>
-            </div>
+          {/* Row 2: Price */}
+          <div className="flex items-baseline gap-1 mt-1.5">
+            <span className="text-[10px] font-semibold text-[var(--color-ink-muted)]">KES</span>
+            <span className="text-[13px] font-bold text-[var(--color-ink)] tabular-nums">
+              {formatPrice(item.daily_rate)}
+            </span>
+          </div>
 
-            <div className="flex items-center gap-1">
-              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[var(--color-surface-hover)] text-[9px] font-bold text-[var(--color-ink-muted)]">
-                <Gauge size={9} className="flex-shrink-0" />
+          {/* Row 3: Mileage + Next Service pills */}
+          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--color-surface-hover)] text-[10px] font-bold text-[var(--color-ink-muted)]">
+              <Gauge size={10} className="flex-shrink-0" />
+              <span className="font-mono tracking-tight">
+                {formatMileage(item.current_mileage)} km
+              </span>
+            </span>
+
+            {item.next_service_km && (
+              <span
+                className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold ${
+                  needsMileageAttention
+                    ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                    : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)]"
+                }`}
+              >
+                <Wrench size={10} className="flex-shrink-0" />
                 <span className="font-mono tracking-tight">
-                  {formatMileage(item.current_mileage)} km
+                  {formatMileage(item.next_service_km)} km
                 </span>
               </span>
-
-              {item.next_service_km && (
-                <span
-                  className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9px] font-bold ${
-                    needsMileageAttention
-                      ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                      : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)]"
-                  }`}
-                >
-                  <Wrench size={9} className="flex-shrink-0" />
-                  <span className="font-mono tracking-tight">
-                    {formatMileage(item.next_service_km)} km
-                  </span>
-                </span>
-              )}
-            </div>
+            )}
           </div>
         </div>
 
@@ -829,9 +832,8 @@ export default function MobileFleetList({
           </p>
         </div>
       ) : (
-        /* ✅ UPDATED SECTIONS: Tab header + Bordered Card */
         <div className="pb-4 px-2">
-          {groupedSections.map((section) => {
+          {groupedSections.map((section, sIdx) => {
             const isUngrouped = section.collection === null;
             const sectionId = isUngrouped ? "__ungrouped__" : section.collection!.id;
             const isCollapsed = !isUngrouped && collapsedSections[sectionId];
