@@ -1,3 +1,4 @@
+// src/app/invite/[token]/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -16,9 +17,13 @@ export default function PublicInvitePage() {
   const token = params.token as string;
 
   const [status, setStatus] = useState<PageStatus>("loading");
-  const [branding, setBranding] = useState<{ name: string; logo?: string; phone?: string; email?: string } | null>(null);
-  
-  // ✅ FIX 1: Initialize ALL fields that NewClientForm expects and backend requires
+  const [branding, setBranding] = useState<{
+    name: string;
+    logo?: string;
+    phone?: string;
+    email?: string;
+  } | null>(null);
+
   const [formData, setFormData] = useState<Record<string, string>>({
     first_name: "",
     last_name: "",
@@ -47,12 +52,22 @@ export default function PublicInvitePage() {
   const [idBackFile, setIdBackFile] = useState<File | null>(null);
   const [dlFrontFile, setDlFrontFile] = useState<File | null>(null);
 
+  // ✅ NEW: Driver document uploads
+  const [driverIdFrontFile, setDriverIdFrontFile] = useState<File | null>(null);
+  const [driverDlFrontFile, setDriverDlFrontFile] = useState<File | null>(null);
+
   useEffect(() => {
     const fetchPreview = async () => {
       try {
         const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/clients/invite/${token}`);
-        if (res.status === 410) { setStatus("expired"); return; }
-        if (!res.ok) { setStatus("invalid"); return; }
+        if (res.status === 410) {
+          setStatus("expired");
+          return;
+        }
+        if (!res.ok) {
+          setStatus("invalid");
+          return;
+        }
 
         const data = await res.json();
         setBranding({
@@ -78,9 +93,21 @@ export default function PublicInvitePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // ✅ FIX 2: Backend strictly requires ID Front and ID Back
+    const arrangement = formData.driving_arrangement || "self_drive";
+
+    // ✅ Contextual validation based on arrangement
+    if (arrangement === "self_drive" && !dlFrontFile) {
+      toast.error("Client DL Front photo is required for Self Drive");
+      return;
+    }
+    if (arrangement === "own_driver") {
+      if (!driverIdFrontFile || !driverDlFrontFile) {
+        toast.error("Driver ID Front and DL Front photos are required");
+        return;
+      }
+    }
     if (!idFrontFile || !idBackFile) {
-      toast.error("ID Front and ID Back photos are required");
+      toast.error("Client ID Front and ID Back photos are required");
       return;
     }
 
@@ -93,7 +120,7 @@ export default function PublicInvitePage() {
       const uploadDoc = async (file: File, field: string) => {
         const uploadFormData = new FormData();
         uploadFormData.append("file", file);
-        
+
         const res = await fetch(
           `${env.NEXT_PUBLIC_API_URL}/clients/invite/${token}/upload?field=${field}`,
           { method: "POST", body: uploadFormData }
@@ -101,7 +128,9 @@ export default function PublicInvitePage() {
 
         if (!res.ok) {
           const errorData = await res.json();
-          throw new Error(getApiErrorMessageFromBody(errorData, "Unable to upload this document."));
+          throw new Error(
+            getApiErrorMessageFromBody(errorData, "Unable to upload this document.")
+          );
         }
 
         const data = await res.json();
@@ -112,21 +141,20 @@ export default function PublicInvitePage() {
       if (idFrontFile) uploadPromises.push(uploadDoc(idFrontFile, "id_front"));
       if (idBackFile) uploadPromises.push(uploadDoc(idBackFile, "id_back"));
       if (dlFrontFile) uploadPromises.push(uploadDoc(dlFrontFile, "dl_front"));
+      if (driverIdFrontFile) uploadPromises.push(uploadDoc(driverIdFrontFile, "driver_id_front"));
+      if (driverDlFrontFile) uploadPromises.push(uploadDoc(driverDlFrontFile, "driver_dl_front"));
 
       if (uploadPromises.length > 0) {
         await Promise.all(uploadPromises);
       }
 
-      // ✅ FIX 3: Perfectly match the backend ClientIntakeCreate contract
       const payload = {
-        // Required Strings
         first_name: formData.first_name?.trim() || "",
         last_name: formData.last_name?.trim() || "",
         phone: formData.phone?.trim() || "",
         id_type: formData.id_type || "national_id",
         id_number: formData.id_number?.trim().toUpperCase() || "",
 
-        // Optional Strings (MUST be undefined, NOT null or "")
         email: formData.email?.trim() || undefined,
         dl_number: formData.dl_number?.trim().toUpperCase() || undefined,
         residential_address: formData.residential_address?.trim() || undefined,
@@ -134,28 +162,28 @@ export default function PublicInvitePage() {
         next_of_kin_name: formData.next_of_kin_name?.trim() || undefined,
         next_of_kin_phone: formData.next_of_kin_phone?.trim() || undefined,
 
-        // Dates (MUST be undefined or valid date string, NOT null)
         dl_expiry: formData.dl_expiry || undefined,
         dl_issued_date: formData.dl_issued_date || undefined,
 
-        driving_arrangement: formData.driving_arrangement || "self_drive",
+        driving_arrangement: arrangement,
 
-        // Nested Driver Object (MUST be null if not own_driver)
-        driver: formData.driving_arrangement === "own_driver" 
-          ? {
-              full_name: formData.driver_full_name?.trim() || "",
-              phone: formData.driver_phone?.trim() || "",
-              id_number: formData.driver_id_number?.trim().toUpperCase() || "",
-              dl_number: formData.driver_dl_number?.trim().toUpperCase() || "",
-              dl_expiry: formData.driver_dl_expiry || undefined,
-              dl_issued_date: formData.driver_dl_issued_date || undefined,
-            }
-          : null,
+        driver:
+          arrangement === "own_driver"
+            ? {
+                full_name: formData.driver_full_name?.trim() || "",
+                phone: formData.driver_phone?.trim() || "",
+                id_number: formData.driver_id_number?.trim().toUpperCase() || "",
+                dl_number: formData.driver_dl_number?.trim().toUpperCase() || "",
+                dl_expiry: formData.driver_dl_expiry || undefined,
+                dl_issued_date: formData.driver_dl_issued_date || undefined,
+                id_image_front: uploadedUrls.driver_id_front || undefined,
+                dl_image_front: uploadedUrls.driver_dl_front || undefined,
+              }
+            : null,
 
-        // Document URLs (Backend requires id_image_front/back as strings)
         avatar_image: uploadedUrls.avatar || undefined,
-        id_image_front: uploadedUrls.id_front || "", 
-        id_image_back: uploadedUrls.id_back || "",   
+        id_image_front: uploadedUrls.id_front || "",
+        id_image_back: uploadedUrls.id_back || "",
         dl_image_front: uploadedUrls.dl_front || undefined,
       };
 
@@ -173,21 +201,27 @@ export default function PublicInvitePage() {
       if (res.status === 410) {
         setStatus("expired");
         const errorData = await res.json();
-        toast.error(getApiErrorMessageFromBody(errorData, "This invite link is no longer valid."));
+        toast.error(
+          getApiErrorMessageFromBody(errorData, "This invite link is no longer valid.")
+        );
         return;
       }
 
       if (res.status === 409) {
         const errorData = await res.json();
-        toast.error(getApiErrorMessageFromBody(errorData, "These details are already registered."));
+        toast.error(
+          getApiErrorMessageFromBody(errorData, "These details are already registered.")
+        );
         setStatus("ready");
         return;
       }
 
       if (res.status === 422) {
         const errorData = await res.json();
-        console.error("422 Validation Error:", errorData); // Logs exact failing field to console
-        toast.error(getApiErrorMessageFromBody(errorData, "Please check your input and try again."));
+        console.error("422 Validation Error:", errorData);
+        toast.error(
+          getApiErrorMessageFromBody(errorData, "Please check your input and try again.")
+        );
         setStatus("ready");
         return;
       }
@@ -200,13 +234,15 @@ export default function PublicInvitePage() {
     }
   };
 
-  // --- UI STATES (Loading, Invalid, Expired, Success) ---
+  // --- UI STATES ---
   if (status === "loading") {
     return (
       <div className="public-root min-h-screen flex items-center justify-center p-4">
         <div className="flex flex-col items-center gap-4 text-center">
-          <Loader2 className="h-10 w-10 animate-spin" style={{ color: '#6D28D9' }} />
-          <p className="font-medium text-sm" style={{ color: '#57534E' }}>Verifying your invite link...</p>
+          <Loader2 className="h-10 w-10 animate-spin" style={{ color: "#6D28D9" }} />
+          <p className="font-medium text-sm" style={{ color: "#57534E" }}>
+            Verifying your invite link...
+          </p>
         </div>
       </div>
     );
@@ -220,7 +256,9 @@ export default function PublicInvitePage() {
             <AlertCircle className="h-8 w-8 text-red-700" />
           </div>
           <h1 className="text-xl font-bold mb-2 text-stone-900">Invalid Invite Link</h1>
-          <p className="text-sm text-stone-600">This link is invalid or broken. Please contact the agency for a new link.</p>
+          <p className="text-sm text-stone-600">
+            This link is invalid or broken. Please contact the agency for a new link.
+          </p>
         </div>
       </div>
     );
@@ -234,7 +272,9 @@ export default function PublicInvitePage() {
             <Clock className="h-8 w-8 text-amber-700" />
           </div>
           <h1 className="text-xl font-bold mb-2 text-stone-900">Invite Expired or Used</h1>
-          <p className="text-sm text-stone-600">This single-use link has expired or been used. Please contact the agency.</p>
+          <p className="text-sm text-stone-600">
+            This single-use link has expired or been used. Please contact the agency.
+          </p>
         </div>
       </div>
     );
@@ -247,22 +287,43 @@ export default function PublicInvitePage() {
           <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5 bg-emerald-100">
             <CheckCircle2 className="h-10 w-10 text-emerald-700" />
           </div>
-          <h1 className="text-2xl font-extrabold mb-3 text-stone-900">Application Submitted!</h1>
+          <h1 className="text-2xl font-extrabold mb-3 text-stone-900">
+            Application Submitted!
+          </h1>
           <p className="text-sm leading-relaxed mb-6 text-stone-600">
-            Thank you, <span className="font-bold text-stone-900">{formData.first_name} {formData.last_name}</span>. Your profile has been submitted to <span className="font-bold text-stone-900">{branding?.name}</span>.
+            Thank you,{" "}
+            <span className="font-bold text-stone-900">
+              {formData.first_name} {formData.last_name}
+            </span>
+            . Your profile has been submitted to{" "}
+            <span className="font-bold text-stone-900">{branding?.name}</span>.
           </p>
           <div className="rounded-xl p-4 text-left space-y-3 mb-6 bg-blue-50 border border-blue-200">
             <h3 className="text-sm font-bold flex items-center gap-2 text-blue-800">
               <ShieldCheck size={16} /> What happens next?
             </h3>
             <ul className="text-xs space-y-2 text-blue-800">
-              <li className="flex items-start gap-2"><span className="font-bold">1.</span> The agency will review your details.</li>
-              <li className="flex items-start gap-2"><span className="font-bold">2.</span> Once approved, your account will be activated.</li>
+              <li className="flex items-start gap-2">
+                <span className="font-bold">1.</span> The agency will review your details.
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="font-bold">2.</span> Once approved, your account will be activated.
+              </li>
             </ul>
           </div>
           <p className="text-[10px] text-stone-500">
-            You can safely close this window. {branding?.phone && (
-              <>Questions? Call <a href={`tel:${branding.phone}`} className="font-bold hover:underline text-purple-700">{branding.phone}</a>.</>
+            You can safely close this window.{" "}
+            {branding?.phone && (
+              <>
+                Questions? Call{" "}
+                <a
+                  href={`tel:${branding.phone}`}
+                  className="font-bold hover:underline text-purple-700"
+                >
+                  {branding.phone}
+                </a>
+                .
+              </>
             )}
           </p>
         </div>
@@ -270,25 +331,31 @@ export default function PublicInvitePage() {
     );
   }
 
-  // --- READY STATE: The Form ---
+  // --- READY STATE ---
   return (
-    <div className="public-root min-h-screen pb-12 bg-white">
-      <NewClientForm
-        loading={status === "submitting"}
-        formData={formData}
-        updateField={updateField}
-        handleSubmit={handleSubmit}
-        mode="public_intake"
-        tenantBranding={branding || undefined}
-        avatarFile={avatarFile}
-        setAvatarFile={setAvatarFile}
-        idFrontFile={idFrontFile}
-        setIdFrontFile={setIdFrontFile}
-        idBackFile={idBackFile}
-        setIdBackFile={setIdBackFile}
-        dlFrontFile={dlFrontFile}
-        setDlFrontFile={setDlFrontFile}
-      />
+    <div className="public-root min-h-screen bg-[var(--public-bg-elevated)]">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-6 sm:py-8">
+        <NewClientForm
+          loading={status === "submitting"}
+          formData={formData}
+          updateField={updateField}
+          handleSubmit={handleSubmit}
+          mode="public_intake"
+          tenantBranding={branding || undefined}
+          avatarFile={avatarFile}
+          setAvatarFile={setAvatarFile}
+          idFrontFile={idFrontFile}
+          setIdFrontFile={setIdFrontFile}
+          idBackFile={idBackFile}
+          setIdBackFile={setIdBackFile}
+          dlFrontFile={dlFrontFile}
+          setDlFrontFile={setDlFrontFile}
+          driverIdFrontFile={driverIdFrontFile}
+          setDriverIdFrontFile={setDriverIdFrontFile}
+          driverDlFrontFile={driverDlFrontFile}
+          setDriverDlFrontFile={setDriverDlFrontFile}
+        />
+      </div>
     </div>
   );
 }

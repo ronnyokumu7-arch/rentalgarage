@@ -77,21 +77,68 @@
 }
 
 /* ══════════════════════════════════════════════════════════
-   🛑 FORCED HIGH-CONTRAST OVERRIDES (Prevents washed-out text)
+   🛡️ FORCE APP TOKENS TO LIGHT VALUES (fixes dark mode bleed)
+   ─────────────────────────────────────────────────────────
+   The dashboard sets --color-* tokens inside .dark { ... } on
+   <html>. Since .dark cascades down, public pages inheriting
+   --color-surface, --color-ink, etc. would get dark values.
+   This block overrides every --color-* token used by public
+   components (NewClientForm, invite pages, etc.) to its light
+   value — using !important to beat the .dark cascade.
+   ═══════════════════════════════════════════════════════════ */
+.public-root {
+  --color-bg: #F7F4F0 !important;
+  --color-bg-elevated: #F0EDE8 !important;
+  --color-surface: #FFFFFF !important;
+  --color-surface-warm: #FDFCFA !important;
+  --color-surface-hover: #FAF8F5 !important;
+  --color-surface-active: #F5F2ED !important;
+  --color-surface-sunken: #F0EDE8 !important;
+  --color-surface-border: rgba(44, 38, 32, 0.08) !important;
+  --color-surface-border-strong: rgba(44, 38, 32, 0.14) !important;
+  --color-surface-border-subtle: rgba(44, 38, 32, 0.04) !important;
+
+  --color-ink-primary: #1C1917 !important;
+  --color-ink-secondary: #292524 !important;
+  --color-ink-muted: #57534E !important;
+  --color-ink-subtle: #78716C !important;
+  --color-ink-faint: #A8A39E !important;
+  --color-ink-inverse: #FAF8F5 !important;
+
+  --color-primary: #7C3AED !important;
+  --color-primary-hover: #6D28D9 !important;
+  --color-primary-active: #5B21B6 !important;
+  --color-primary-muted: rgba(124, 58, 237, 0.10) !important;
+  --color-primary-subtle: rgba(124, 58, 237, 0.05) !important;
+  --color-primary-text: #6D28D9 !important;
+
+  --color-danger: #B91C1C !important;
+  --color-danger-bg: rgba(185, 28, 28, 0.10) !important;
+  --color-danger-text: #B91C1C !important;
+  --color-success-bg: rgba(4, 120, 87, 0.10) !important;
+  --color-success-text: #047857 !important;
+  --color-warning-bg: rgba(180, 83, 9, 0.10) !important;
+  --color-warning-text: #B45309 !important;
+}
+
+/* ══════════════════════════════════════════════════════════
+   🛑 FORCED HIGH-CONTRAST OVERRIDES
+   ─────────────────────────────────────────────────────────
+   NOTE: Do NOT use `opacity: 1 !important` here. It breaks
+   hidden inputs (file pickers), fades, and animations by
+   forcing everything to full opacity.
    ═══════════════════════════════════════════════════════════ */
 
-/* Force all text to be dark */
+/* Force all text to be dark (color only, NOT opacity) */
 .public-root,
 .public-root * {
   color: #1C1917 !important;
-  opacity: 1 !important;
   text-shadow: none !important;
 }
 
 /* ✅ Headings - pure dark and bold */
 .public-root h1,
 .public-root h2,
-.public-root h3,
 .public-root h4,
 .public-root h5,
 .public-root h6,
@@ -117,13 +164,24 @@
   text-transform: uppercase;
 }
 
-/* ✅ Subheadings (h3) - dark and readable */
+/* ✅ Subheadings (h3) - dark and readable, default to uppercase for page-level sections */
 .public-root h3 {
   color: #44403C !important;
   font-weight: 700 !important;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-size: 0.75rem;
+}
+
+/* ✅ BUT: Inside forms, section titles should keep their natural case and size.
+   This makes the invite form match the manual modal form. */
+.public-root form h3,
+.public-root .public-form h3 {
+  text-transform: none !important;
+  letter-spacing: -0.01em !important;
+  font-size: 0.875rem !important;
+  font-weight: 700 !important;
+  color: #1C1917 !important;
 }
 
 /* ✅ Muted/subtle text - readable but slightly softer */
