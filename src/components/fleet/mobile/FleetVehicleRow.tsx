@@ -241,7 +241,7 @@ export default function FleetVehicleRow({
           {getInlineStatus()}
         </div>
 
-        {/* ✅ Row 3: plain inline labels, no pills */}
+        {/* Row 3: plain inline labels, no pills */}
         <div className="flex items-center gap-3 mt-1.5 text-[10px] font-semibold text-[var(--color-ink-muted)] flex-wrap">
           <span className="font-mono tracking-tight">
             {formatPlate(item.plate_number)}
@@ -254,7 +254,8 @@ export default function FleetVehicleRow({
             </span>
           </span>
 
-          {item.next_service_km && (
+          {/* ✅ Service slot — always renders */}
+          {item.next_service_km ? (
             <span
               className={`inline-flex items-center gap-1 ${
                 needsMileageAttention
@@ -262,10 +263,22 @@ export default function FleetVehicleRow({
                   : ""
               }`}
             >
-              <Wrench size={11} className="flex-shrink-0 text-[var(--color-ink-subtle)]" />
+              <Wrench
+                size={11}
+                className={`flex-shrink-0 ${
+                  needsMileageAttention
+                    ? ""
+                    : "text-[var(--color-ink-subtle)]"
+                }`}
+              />
               <span className="font-mono tracking-tight">
                 {formatMileage(item.next_service_km)} km
               </span>
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 text-[var(--color-ink-subtle)]">
+              <Wrench size={11} className="flex-shrink-0" />
+              <span className="font-mono tracking-tight italic">Not set</span>
             </span>
           )}
         </div>

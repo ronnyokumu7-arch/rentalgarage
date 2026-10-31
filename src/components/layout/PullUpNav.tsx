@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
-import { ChevronUp, ChevronRight, LogOut } from "lucide-react";
+import { ChevronUp, ChevronRight, LogOut, Briefcase } from "lucide-react";
 import type { NavItem } from "@/lib/nav-config";
 import { useAuth } from "@/context/auth-context";
 
@@ -146,13 +146,11 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
   const handleTouchEnd = () => {
     setIsDragging(false);
 
-    // ✅ Tap: toggle based on current state
     if (!hasMoved.current) {
       setCurrentOffset((prev) => (prev >= travel / 2 ? 0 : travel));
       return;
     }
 
-    // ✅ Drag: snap to nearest edge
     setCurrentOffset((prev) => (prev >= travel / 2 ? travel : 0));
   };
 
@@ -183,7 +181,6 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
   let content;
 
   if (currentPanel === "settings") {
-    // ✅ FIXED: Added onClose={closeDrawer} so Profile Settings can dismiss the sheet
     content = <SettingsPanel onBack={popPanel} onNavigate={pushPanel} onClose={closeDrawer} />;
   } else if (parts[0] === "settings" && level === 2) {
     content = (
@@ -201,78 +198,68 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
   } else if (parts[0] === "financials" && level === 2) {
     content = <FinancialsLeaf tabId={parts[1]} onClose={closeDrawer} />;
   } else {
+    // ✅ Default content — no duplicate title, grid starts immediately
     content = (
-      <>
-        <div className="px-5 pt-4 pb-4 flex items-center justify-between flex-shrink-0">
-          <h2 className="text-lg font-bold text-[var(--color-ink)] tracking-tight">
-            Business Tools
-          </h2>
-          <span className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)]">
-            {drawerItems.length + 1} items
-          </span>
-        </div>
+      <nav className="flex-1 overflow-y-auto custom-scrollbar px-4 pt-3 pb-8">
+        <div className="grid grid-cols-3 gap-x-2 gap-y-6">
+          {drawerItems.map((item) => {
+            const active = isActive(item.href, item.children);
+            const Icon = item.icon as LucideIcon;
+            const href = item.href ?? (item.children?.[0]?.href || "#");
+            const label = getDisplayLabel(item.label);
+            const caption = (item as any).description || label;
+            const hasSubPanel = label === "Settings" || label === "Financials";
 
-        <nav className="flex-1 overflow-y-auto custom-scrollbar px-4 pb-8">
-          <div className="grid grid-cols-3 gap-x-2 gap-y-6">
-            {drawerItems.map((item) => {
-              const active = isActive(item.href, item.children);
-              const Icon = item.icon as LucideIcon;
-              const href = item.href ?? (item.children?.[0]?.href || "#");
-              const label = getDisplayLabel(item.label);
-              const caption = (item as any).description || label;
-              const hasSubPanel = label === "Settings" || label === "Financials";
-
-              return (
-                <Link
-                  key={item.label}
-                  href={href}
-                  onClick={(e) => handleItemClick(e, item)}
-                  className="group flex flex-col items-center gap-1.5 rounded-xl py-2 px-1 transition-colors active:bg-[var(--color-surface-hover)]/60"
-                >
-                  <div className="relative">
-                    <Icon
-                      size={22}
-                      strokeWidth={active ? 2.25 : 1.8}
-                      className={`transition-colors ${
-                        active
-                          ? "text-[var(--color-primary)]"
-                          : "text-[var(--color-ink-muted)] group-hover:text-[var(--color-ink)]"
-                      }`}
-                    />
-                    {hasSubPanel && (
-                      <ChevronRight
-                        size={10}
-                        className="absolute -bottom-1 -right-1 text-[var(--color-ink-subtle)] bg-[var(--color-surface)] rounded-full"
-                      />
-                    )}
-                  </div>
-                  <span
-                    className={`text-[11px] font-semibold leading-tight text-center truncate max-w-full ${
-                      active ? "text-[var(--color-primary)]" : "text-[var(--color-ink)]"
+            return (
+              <Link
+                key={item.label}
+                href={href}
+                onClick={(e) => handleItemClick(e, item)}
+                className="group flex flex-col items-center gap-1.5 rounded-xl py-2 px-1 transition-colors active:bg-[var(--color-surface-hover)]/60"
+              >
+                <div className="relative">
+                  <Icon
+                    size={22}
+                    strokeWidth={active ? 2.25 : 1.8}
+                    className={`transition-colors ${
+                      active
+                        ? "text-[var(--color-primary)]"
+                        : "text-[var(--color-ink-muted)] group-hover:text-[var(--color-ink)]"
                     }`}
-                  >
-                    {caption}
-                  </span>
-                </Link>
-              );
-            })}
+                  />
+                  {hasSubPanel && (
+                    <ChevronRight
+                      size={10}
+                      className="absolute -bottom-1 -right-1 text-[var(--color-ink-subtle)] bg-[var(--color-surface)] rounded-full"
+                    />
+                  )}
+                </div>
+                <span
+                  className={`text-[11px] font-semibold leading-tight text-center truncate max-w-full ${
+                    active ? "text-[var(--color-primary)]" : "text-[var(--color-ink)]"
+                  }`}
+                >
+                  {caption}
+                </span>
+              </Link>
+            );
+          })}
 
-            <button
-              onClick={handleLogout}
-              className="group flex flex-col items-center gap-1.5 rounded-xl py-2 px-1 transition-colors active:bg-[var(--color-surface-hover)]/60 cursor-pointer"
-            >
-              <LogOut
-                size={22}
-                strokeWidth={1.8}
-                className="text-[var(--color-ink-muted)] group-hover:text-[var(--color-danger)] transition-colors"
-              />
-              <span className="text-[11px] font-semibold leading-tight text-center truncate max-w-full text-[var(--color-ink-muted)] group-hover:text-[var(--color-danger)] transition-colors">
-                Sign out
-              </span>
-            </button>
-          </div>
-        </nav>
-      </>
+          <button
+            onClick={handleLogout}
+            className="group flex flex-col items-center gap-1.5 rounded-xl py-2 px-1 transition-colors active:bg-[var(--color-surface-hover)]/60 cursor-pointer"
+          >
+            <LogOut
+              size={22}
+              strokeWidth={1.8}
+              className="text-[var(--color-ink-muted)] group-hover:text-[var(--color-danger)] transition-colors"
+            />
+            <span className="text-[11px] font-semibold leading-tight text-center truncate max-w-full text-[var(--color-ink-muted)] group-hover:text-[var(--color-danger)] transition-colors">
+              Sign out
+            </span>
+          </button>
+        </div>
+      </nav>
     );
   }
 
@@ -308,8 +295,13 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
           onTouchEnd={handleTouchEnd}
         >
           <div className="absolute left-5 flex items-center gap-1.5 pointer-events-none">
+            <Briefcase
+              size={13}
+              className="text-[var(--color-ink-muted)] flex-shrink-0"
+              strokeWidth={2}
+            />
             <span className="text-[11px] font-medium text-[var(--color-ink-muted)]">
-              More Options
+              Business Tools
             </span>
           </div>
           <div className="flex items-center justify-center w-14 h-full pointer-events-none">

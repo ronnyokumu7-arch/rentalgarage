@@ -14,13 +14,27 @@ const DISPLAY_LABELS: Record<string, string> = {
   dashboard: "Home",
 };
 
-const SECTION_BORDER: Record<string, string> = {
-  dashboard: "var(--color-ink-muted)",
-  bookings: "var(--color-ink-muted)",
-  fleet: "var(--color-ink-muted)",
-  clients: "var(--color-ink-muted)",
-  financials: "var(--color-ink-muted)",
-};
+/**
+ * Mapping from route → accent color for the top border.
+ * - Pages directly in the bottom nav use the four "primary" sections.
+ * - Pages reachable via the PullUpNav (Tasks, Team, Drivers, Investors,
+ *   Settings, Reports) each get their own color so the border changes
+ *   when the user is inside one of them.
+ */
+const ROUTE_ACCENT: Array<{ match: string; color: string }> = [
+  { match: "/dashboard/bookings", color: "var(--color-primary)" },
+  { match: "/dashboard/fleet",    color: "var(--color-primary)" },
+  { match: "/dashboard/clients",  color: "var(--color-primary)" },
+  { match: "/dashboard",          color: "var(--color-primary)" },
+  { match: "/dashboard/financials", color: "var(--color-primary)" },
+  // ✅ PullUp nav pages — still tint the border so users know something is active
+  { match: "/dashboard/users",     color: "var(--color-primary)" },
+  { match: "/dashboard/drivers",   color: "var(--color-primary)" },
+  { match: "/dashboard/investors", color: "var(--color-primary)" },
+  { match: "/dashboard/tasks",     color: "var(--color-primary)" },
+  { match: "/dashboard/settings",  color: "var(--color-primary)" },
+  { match: "/dashboard/reports",   color: "var(--color-primary)" },
+];
 
 export default function BottomNav({ navItems }: BottomNavProps) {
   const pathname = usePathname();
@@ -63,35 +77,29 @@ export default function BottomNav({ navItems }: BottomNavProps) {
   const getDisplayLabel = (label: string) =>
     DISPLAY_LABELS[label.toLowerCase()] ?? label;
 
-  const activeItem = visibleItems.find((item) =>
-    isActive(item.href, item.children)
-  );
-  const activeLabel = activeItem?.label.toLowerCase() ?? "";
-
-  const accentBorder =
-    SECTION_BORDER[activeLabel] ?? "var(--color-ink-muted)";
-  const hasActiveSection = Boolean(activeItem);
+  // ✅ Resolve the accent color: match against the current route
+  const accentColor =
+    ROUTE_ACCENT.find(({ match }) => pathname === match || pathname.startsWith(match + "/"))
+      ?.color ?? "var(--color-ink-muted)";
 
   return (
-    /* 
-      Removed rounded-t-[24px] and overflow-hidden.
-      The background is now a straight, full-width frosted panel.
-    */
     <div className="relative bg-[var(--color-surface)]/90 backdrop-blur-xl shadow-[0_-4px_24px_rgba(0,0,0,0.06)]">
       <nav
         className="relative flex items-center justify-around h-[68px] px-2 pb-[env(safe-area-inset-bottom,0px)]"
         aria-label="Primary navigation"
       >
-        {/* ── Feather-Thin Masked Border ─────────────────────── */}
+        {/* ✅ Feather-thin masked border — always visible, color reflects active route */}
         <div
           aria-hidden="true"
-          className="absolute top-0 left-0 right-0 transition-opacity duration-300"
+          className="absolute top-0 left-0 right-0 transition-colors duration-300"
           style={{
             height: "0.5px",
-            backgroundColor: accentBorder,
-            maskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)",
-            WebkitMaskImage: "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)",
-            opacity: hasActiveSection ? 0.8 : 0,
+            backgroundColor: accentColor,
+            maskImage:
+              "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)",
+            WebkitMaskImage:
+              "linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%)",
+            opacity: 0.8,
           }}
         />
 

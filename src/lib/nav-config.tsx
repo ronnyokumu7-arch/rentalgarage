@@ -2,7 +2,7 @@
 "use client";
 
 import {
-  Storefront,
+  House,
   Buildings,
   CreditCard,
   ChartBar,
@@ -34,8 +34,9 @@ export interface NavItem {
 
 // ── PREMIUM PHOSPHOR ICON COMPONENTS ─────────────────────────────────────────
 
+// ✅ Dashboard: House icon (matches the "Home" label in bottom nav)
 const PremiumDashboardIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
-  <Storefront size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <House size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
 );
 
 const PremiumCalendarIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
@@ -102,7 +103,7 @@ export const navIconMap: Record<string, React.ElementType> = {
   Financials: PremiumWalletIcon,
   Reports: PremiumBarChartIcon,
   Settings: PremiumSettingsIcon,
-  Team: PremiumTeamIcon, // Updated from "Users"
+  Team: PremiumTeamIcon,
   Drivers: PremiumDriversIcon,
   Tasks: PremiumTasksIcon,
   Agencies: PremiumBuildingIcon,
@@ -129,8 +130,8 @@ export const tenantAdminNav: NavItem[] = [
   { label: "Clients", href: "/dashboard/clients", icon: PremiumContactIcon },
   { label: "Fleet", href: "/dashboard/fleet", icon: PremiumFleetIcon },
   { label: "Drivers", href: "/dashboard/drivers", icon: PremiumDriversIcon },
-  { label: "Investors", href: "/dashboard/investors", icon: PremiumContactIcon }, // Keeping Two-Heads for investors too
-  { label: "Team", href: "/dashboard/users", icon: PremiumTeamIcon }, // ✅ Renamed to "Team"
+  { label: "Investors", href: "/dashboard/investors", icon: PremiumContactIcon },
+  { label: "Team", href: "/dashboard/users", icon: PremiumTeamIcon },
   { label: "Financials", href: "/dashboard/financials", icon: PremiumWalletIcon },
   { label: "Reports", href: "/dashboard/reports", icon: PremiumBarChartIcon },
   { label: "Tasks", href: "/dashboard/tasks", icon: PremiumTasksIcon },
