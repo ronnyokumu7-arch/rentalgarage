@@ -21,8 +21,9 @@ interface FleetSectionProps {
     onTouchMove: (e: React.TouchEvent) => void;
     onTouchEnd: () => void;
     onClick: () => void;
+    onMoreClick: (e: React.MouseEvent) => void;
   };
-  isFirst: boolean; // ✅ To handle rounded top corners
+  isFirst: boolean;
 }
 
 export default function FleetSection({
@@ -42,9 +43,9 @@ export default function FleetSection({
 
   return (
     <div className="w-full">
-      {/* ✅ The Group Header Stripe */}
+      {/* Section header */}
       <div
-        className={`flex items-center justify-between px-3 py-2 bg-[var(--color-surface-hover)]/50 ${
+        className={`flex items-center justify-between px-3 py-2 ${
           isFirst ? "rounded-t-2xl" : ""
         }`}
       >
@@ -69,7 +70,7 @@ export default function FleetSection({
               <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink)] truncate group-hover:text-[var(--color-primary)] transition-colors">
                 {section.collection!.name}
               </span>
-              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--color-surface)] border border-[var(--color-surface-border)] text-[var(--color-ink-muted)] tabular-nums">
+              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] text-[var(--color-ink-muted)] tabular-nums">
                 {section.vehicles.length}
               </span>
             </>
@@ -87,22 +88,24 @@ export default function FleetSection({
         )}
       </div>
 
-      {/* ✅ The Vehicle Rows (no extra background/border, they flow inside the main container) */}
+      {/* ✅ Each vehicle becomes its own rounded card with spacing */}
       {!isCollapsed && (
-        <div>
-          {section.vehicles.map((item, idx) => (
-            <FleetVehicleRow
+        <div className="flex flex-col gap-2 px-3 pb-3">
+          {section.vehicles.map((item) => (
+            <div
               key={item.id}
-              item={item}
-              index={idx}
-              total={section.vehicles.length}
-              isSelected={selectedIds.has(item.id)}
-              isSelecting={isSelecting}
-              activeRental={activeRentals[item.id]}
-              isMounted={isMounted}
-              isDark={isDark}
-              {...makeHandlers(item)}
-            />
+              className="rounded-2xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] overflow-hidden shadow-sm"
+            >
+              <FleetVehicleRow
+                item={item}
+                isSelected={selectedIds.has(item.id)}
+                isSelecting={isSelecting}
+                activeRental={activeRentals[item.id]}
+                isMounted={isMounted}
+                isDark={isDark}
+                {...makeHandlers(item)}
+              />
+            </div>
           ))}
         </div>
       )}

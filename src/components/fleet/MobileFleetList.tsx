@@ -394,6 +394,18 @@ export default function MobileFleetList({
       ) as HTMLButtonElement | null;
       trigger?.click();
     },
+    // ✅ 3-dots button triggers the same action sheet
+    onMoreClick: (e: React.MouseEvent) => {
+      e.stopPropagation();
+      if (isSelecting) {
+        toggleSelection(item);
+        return;
+      }
+      const trigger = document.querySelector(
+        `[data-card-actions="${item.id}"] button`
+      ) as HTMLButtonElement | null;
+      trigger?.click();
+    },
   });
 
   return (

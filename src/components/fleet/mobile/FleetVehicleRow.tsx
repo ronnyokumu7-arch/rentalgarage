@@ -2,7 +2,7 @@
 "use client";
 
 import {
-  Gauge, Wrench, CheckCircle2, Circle, Clock,
+  Gauge, Wrench, CheckCircle2, Circle, Clock, MoreVertical,
 } from "lucide-react";
 import {
   getVehicleBodyIcon,
@@ -18,7 +18,6 @@ const formatPrice = (amount: number | string) => {
     maximumFractionDigits: 2,
   });
 };
-// ✅ No commas for mileage
 const formatMileage = (km: number) => km.toString();
 
 const getStatusRing = (
@@ -62,8 +61,6 @@ const formatCountdown = (endDate: string): string | null => {
 
 interface FleetVehicleRowProps {
   item: Vehicle;
-  index: number;
-  total: number;
   isSelected: boolean;
   isSelecting: boolean;
   activeRental?: Booking;
@@ -73,12 +70,11 @@ interface FleetVehicleRowProps {
   onTouchMove: (e: React.TouchEvent) => void;
   onTouchEnd: () => void;
   onClick: () => void;
+  onMoreClick: (e: React.MouseEvent) => void;
 }
 
 export default function FleetVehicleRow({
   item,
-  index,
-  total,
   isSelected,
   isSelecting,
   activeRental,
@@ -88,6 +84,7 @@ export default function FleetVehicleRow({
   onTouchMove,
   onTouchEnd,
   onClick,
+  onMoreClick,
 }: FleetVehicleRowProps) {
   const brandLogoUrl = getVehicleBrandLogoUrl(item);
   const BodyIcon = getVehicleBodyIcon(item);
@@ -187,10 +184,6 @@ export default function FleetVehicleRow({
         isMuted ? "opacity-60" : ""
       }`}
     >
-      {index !== total - 1 && (
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-px bg-gradient-to-r from-transparent via-[var(--color-surface-border)] to-transparent" />
-      )}
-
       {/* Avatar */}
       <div
         className={`relative flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center overflow-hidden transition-all ring-2 ring-offset-2 ring-offset-[var(--color-surface)] ${statusRing} ${
@@ -219,8 +212,7 @@ export default function FleetVehicleRow({
 
       {/* Content */}
       <div className="min-w-0 flex-1">
-        {/* Row 1: Name + year */}
-        <div className="flex items-baseline gap-1.5 min-w-0">
+        <div className="flex items-baseline gap-1.5 min-w-0 pr-6">
           <h3 className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
             {item.make} {item.model}
           </h3>
@@ -241,7 +233,6 @@ export default function FleetVehicleRow({
           {getInlineStatus()}
         </div>
 
-        {/* Row 3: plain inline labels, no pills */}
         <div className="flex items-center gap-3 mt-1.5 text-[10px] font-semibold text-[var(--color-ink-muted)] flex-wrap">
           <span className="font-mono tracking-tight">
             {formatPlate(item.plate_number)}
@@ -254,7 +245,6 @@ export default function FleetVehicleRow({
             </span>
           </span>
 
-          {/* ✅ Service slot — always renders */}
           {item.next_service_km ? (
             <span
               className={`inline-flex items-center gap-1 ${
@@ -283,6 +273,21 @@ export default function FleetVehicleRow({
           )}
         </div>
       </div>
+
+      {/* ✅ 3-dots CTA — same action as tapping the row */}
+      {!isSelecting && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onMoreClick(e);
+          }}
+          aria-label="Vehicle actions"
+          className="absolute top-3 right-3 w-7 h-7 rounded-md flex items-center justify-center text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors active:scale-90"
+        >
+          <MoreVertical size={16} strokeWidth={2} />
+        </button>
+      )}
 
       {isSelecting && (
         <div className="flex-shrink-0 self-center pl-1">

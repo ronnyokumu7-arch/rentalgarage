@@ -82,6 +82,16 @@ export default function CardGrid<T>({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
+  // ✅ Lock body scroll while action sheet is open
+  useEffect(() => {
+    if (openActionId === null) return;
+    const original = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = original;
+    };
+  }, [openActionId]);
+
   useEffect(() => {
     if (!openActionId) return;
     const handleClickOutside = (event: MouseEvent) => {
@@ -137,7 +147,6 @@ export default function CardGrid<T>({
     return () => document.removeEventListener("touchstart", handleTouchOutside);
   }, [openActionId]);
 
-  // ✅ FIX: Accept the action list as a parameter so we never read stale `openActionId`.
   const calculateDropdownPosition = useCallback(
     (buttonRect: DOMRect, actions: RowAction<T>[]): { top: number; right: number } => {
       if (!actions.length) return { top: 0, right: 0 };
@@ -197,7 +206,6 @@ export default function CardGrid<T>({
         return;
       }
 
-      // ✅ Compute actions NOW from the current item — no stale state.
       const actionList = typeof rowActions === "function" ? rowActions(item) : rowActions || [];
       const position = calculateDropdownPosition(rect, actionList);
 
@@ -408,10 +416,23 @@ export default function CardGrid<T>({
         if (isMobile) {
           return createPortal(
             <>
+              {/* ✅ Mobile backdrop: stops propagation on BOTH click and touchstart */}
               <div
                 className="fixed inset-0 z-[9990] bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
-                onClick={() => { setOpenActionId(null); setDropdownPos(null); setTouchAnchor(null); }}
-                onTouchStart={() => { setOpenActionId(null); setDropdownPos(null); setTouchAnchor(null); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setOpenActionId(null);
+                  setDropdownPos(null);
+                  setTouchAnchor(null);
+                }}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setOpenActionId(null);
+                  setDropdownPos(null);
+                  setTouchAnchor(null);
+                }}
               />
 
               <div
@@ -435,7 +456,12 @@ export default function CardGrid<T>({
                 <div className="flex items-center justify-between px-5 py-3 border-b border-[var(--color-surface-border)]">
                   <span className="text-base font-bold text-[var(--color-ink)]">Quick Actions</span>
                   <button
-                    onClick={() => { setOpenActionId(null); setDropdownPos(null); setTouchAnchor(null); }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setOpenActionId(null);
+                      setDropdownPos(null);
+                      setTouchAnchor(null);
+                    }}
                     className="p-2 rounded-full bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-border)] transition-all active:scale-95"
                     aria-label="Close"
                   >
@@ -467,10 +493,19 @@ export default function CardGrid<T>({
         if (dropdownPos) {
           return createPortal(
             <>
+              {/* ✅ Desktop backdrop: stops propagation on click */}
               <div
                 className="fixed inset-0 z-[9990]"
-                onClick={() => { setOpenActionId(null); setDropdownPos(null); }}
-                onTouchStart={() => { setOpenActionId(null); setDropdownPos(null); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpenActionId(null);
+                  setDropdownPos(null);
+                }}
+                onTouchStart={(e) => {
+                  e.stopPropagation();
+                  setOpenActionId(null);
+                  setDropdownPos(null);
+                }}
               />
 
               <div
