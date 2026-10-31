@@ -85,6 +85,26 @@ export const clientsApi = {
       .then((r) => r.data);
   },
 
+  // ✅ Client-owned personal driver document uploads (own_driver only)
+  uploadDriverIdFront: (id: number, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiClient
+      .post<Client>(`/clients/${id}/upload-driver-id-front`, formData, { 
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then((r) => r.data);
+  },
+  uploadDriverDlFront: (id: number, file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiClient
+      .post<Client>(`/clients/${id}/upload-driver-dl-front`, formData, { 
+        headers: { "Content-Type": "multipart/form-data" },
+      })
+      .then((r) => r.data);
+  },
+
   // ── Related Data ───────────────────────────────────────────────────────────
   getBookings: (clientId: number) =>
     apiClient

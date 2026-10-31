@@ -1,4 +1,4 @@
-// src/components/client/form/ClientIdentitySection.tsx
+// src/components/client/form/ClientDetailsSection.tsx
 "use client";
 
 import {
@@ -7,13 +7,21 @@ import {
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import SecureImage from "@/components/ui/SecureImage";
+import AddressAutocomplete from "@/components/ui/AddressAutocomplete";
+import DocUploadSlot from "./DocUploadSlot";
 import type { SectionProps } from "./types";
 import "@/styles/phone-input.css";
 
-interface ClientIdentitySectionProps extends SectionProps {
+interface ClientDetailsSectionProps extends SectionProps {
   avatarFile: File | null;
   setAvatarFile: (f: File | null) => void;
   existingAvatar?: string | null;
+  idFrontFile: File | null;
+  setIdFrontFile: (f: File | null) => void;
+  idBackFile: File | null;
+  setIdBackFile: (f: File | null) => void;
+  existingIdFront?: string | null;
+  existingIdBack?: string | null;
 }
 
 const labelClass =
@@ -21,9 +29,10 @@ const labelClass =
 const sectionClass =
   "bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] p-4 sm:p-5";
 
-export default function ClientIdentitySection({
+export default function ClientDetailsSection({
   formData,
   updateField,
+  fieldErrors,
   hasErr,
   inputCls,
   renderError,
@@ -31,19 +40,24 @@ export default function ClientIdentitySection({
   avatarFile,
   setAvatarFile,
   existingAvatar,
-}: ClientIdentitySectionProps) {
+  idFrontFile,
+  setIdFrontFile,
+  idBackFile,
+  setIdBackFile,
+  existingIdFront,
+  existingIdBack,
+}: ClientDetailsSectionProps) {
   const idType = formData.id_type || "national_id";
 
   return (
     <section className={sectionClass}>
+      {/* Header with avatar */}
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
             <User size={16} />
           </div>
-          <h3 className="text-sm font-bold text-[var(--color-ink)]">
-            Client Identity
-          </h3>
+          <h3 className="text-sm font-bold text-[var(--color-ink)]">Client Details</h3>
         </div>
 
         <div className="flex flex-col items-center gap-1.5">
@@ -60,9 +74,7 @@ export default function ClientIdentitySection({
                   src={existingAvatar}
                   alt="Avatar"
                   className="w-full h-full object-cover"
-                  fallback={
-                    <Camera size={16} className="text-[var(--color-ink-subtle)]" />
-                  }
+                  fallback={<Camera size={16} className="text-[var(--color-ink-subtle)]" />}
                 />
               ) : (
                 <Camera
@@ -75,7 +87,7 @@ export default function ClientIdentitySection({
               type="file"
               accept="image/*"
               capture="user"
-              className="absolute inset-0 opacity-0 cursor-pointer"
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
               onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
             />
             <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center shadow-lg border-2 border-[var(--color-surface)]">
@@ -99,7 +111,8 @@ export default function ClientIdentitySection({
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* Identity fields */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div id="field-first_name">
           <label className={labelClass}>
             First Name <span className="text-[var(--color-danger)]">*</span>
@@ -168,14 +181,15 @@ export default function ClientIdentitySection({
             value={formData.phone}
             onChange={(value) => updateField("phone", value || "")}
             placeholder="+254 712 345678"
-            className={`phone-input-custom ${
-              hasErr("phone") ? "phone-input-error" : ""
-            }`}
+            className={`phone-input-custom ${hasErr("phone") ? "phone-input-error" : ""}`}
             countryCallingCodeEditable={false}
           />
           {renderError("phone")}
         </div>
+      </div>
 
+      {/* Identity document */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
         <div className="sm:col-span-2">
           <label className={labelClass}>
             Identity Document <span className="text-[var(--color-danger)]">*</span>
@@ -248,14 +262,57 @@ export default function ClientIdentitySection({
               value={formData.id_number || ""}
               onChange={(e) => updateField("id_number", e.target.value)}
               placeholder={
-                idType === "national_id"
-                  ? "National ID Number"
-                  : "Passport Number"
+                idType === "national_id" ? "National ID Number" : "Passport Number"
               }
               className={`${inputCls("id_number")} pl-9`}
             />
           </div>
           {renderError("id_number")}
+        </div>
+      </div>
+
+      {/* Addresses */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+        <AddressAutocomplete
+          value={formData.residential_address}
+          onChange={(value) => updateField("residential_address", value)}
+          label="Residential Address"
+          placeholder="Search residential address..."
+        />
+        <AddressAutocomplete
+          value={formData.work_address}
+          onChange={(value) => updateField("work_address", value)}
+          label="Work Address"
+          placeholder="Search work address..."
+        />
+      </div>
+
+      {/* Identity document uploads */}
+      <div>
+        <label className={labelClass}>Identity Documents</label>
+        <div className="grid grid-cols-2 gap-3">
+          <DocUploadSlot
+            label="ID Front"
+            icon={FileText}
+            file={idFrontFile}
+            setFile={setIdFrontFile}
+            required
+            existingUrl={existingIdFront}
+            captureMode="environment"
+            error={fieldErrors["idFront"]}
+            fieldId="field-idFront"
+          />
+          <DocUploadSlot
+            label="ID Back"
+            icon={FileText}
+            file={idBackFile}
+            setFile={setIdBackFile}
+            required
+            existingUrl={existingIdBack}
+            captureMode="environment"
+            error={fieldErrors["idBack"]}
+            fieldId="field-idBack"
+          />
         </div>
       </div>
     </section>

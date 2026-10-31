@@ -106,18 +106,20 @@ export interface Client {
   // ✅ Driving License
   dl_number: string | null;
   dl_expiry: string | null;
-  dl_issued_date: string | null; // ✅ NEW: For experience calculation
+  dl_issued_date: string | null;
   
   // ✅ Driving Arrangement
-  driving_arrangement: DrivingArrangement; // ✅ NEW
+  driving_arrangement: DrivingArrangement;
+  // ✅ NEW: client-owned driver block (returned by backend when own_driver)
+  driver: ClientDriverBlock | null;
   
   status: ClientStatus;
   
   // ✅ Vetting Track (read-only on frontend, managed by backend)
-  verification_status: ClientVerificationStatus; // ✅ NEW
-  selfie_with_id_image: string | null; // ✅ NEW
-  vetted_at: string | null; // ✅ NEW
-  rejection_notes: string | null; // ✅ NEW
+  verification_status: ClientVerificationStatus;
+  selfie_with_id_image: string | null;
+  vetted_at: string | null;
+  rejection_notes: string | null;
   
   // Addresses & Documents
   residential_address: string | null;
@@ -142,7 +144,7 @@ export interface Client {
   updated_at: string;
 }
 
-// ✅ NEW: Nested driver block for "own_driver" arrangement
+// ✅ Client-owned driver block (own_driver arrangement only)
 export interface ClientDriverBlock {
   full_name: string;
   phone: string;
@@ -150,6 +152,9 @@ export interface ClientDriverBlock {
   dl_number: string;
   dl_expiry?: string | null;
   dl_issued_date?: string | null;
+  // ✅ NEW: driver document image URLs (populated via upload endpoints)
+  id_image_front?: string | null;
+  dl_image_front?: string | null;
 }
 
 export type ClientCreate = {
@@ -167,7 +172,7 @@ export type ClientCreate = {
   next_of_kin_name?: string | null;
   next_of_kin_phone?: string | null;
   driving_arrangement?: DrivingArrangement;
-  driver?: ClientDriverBlock | null; // ✅ NEW: Nested driver details
+  driver?: ClientDriverBlock | null;
 };
 
 export type ClientUpdate = Partial<{
@@ -186,6 +191,8 @@ export type ClientUpdate = Partial<{
   next_of_kin_name: string | null;
   next_of_kin_phone: string | null;
   driving_arrangement: DrivingArrangement;
+  // ✅ NEW: allow editing client-owned driver details
+  driver: ClientDriverBlock | null;
 }>;
 
 // ── Vehicles ────────────────────────────────────────────────────────────────

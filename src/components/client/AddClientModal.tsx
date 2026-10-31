@@ -13,8 +13,8 @@ export default function AddClientModal({ isOpen, onClose }: AddClientModalProps)
     <Modal 
       open={isOpen} 
       onClose={onClose} 
-      title="Add New Client" 
-      subtitle="Invite a client via secure link or add them manually"
+      title="New Client" 
+      subtitle="Invite new clients or add them manually"
       size="xl"
     >
       <AddClientWorkspace onSuccess={onClose} onCancel={onClose} />

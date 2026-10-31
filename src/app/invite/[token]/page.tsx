@@ -1,7 +1,7 @@
 // src/app/invite/[token]/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "next/navigation";
 import { CheckCircle2, AlertCircle, Loader2, Clock, ShieldCheck } from "lucide-react";
 import toast from "react-hot-toast";
@@ -52,9 +52,15 @@ export default function PublicInvitePage() {
   const [idBackFile, setIdBackFile] = useState<File | null>(null);
   const [dlFrontFile, setDlFrontFile] = useState<File | null>(null);
 
-  // ✅ NEW: Driver document uploads
+  // ✅ Client-owned driver document files (own_driver only)
   const [driverIdFrontFile, setDriverIdFrontFile] = useState<File | null>(null);
   const [driverDlFrontFile, setDriverDlFrontFile] = useState<File | null>(null);
+
+  // ✅ Persists uploaded URLs across re-renders (retry-safe).
+  //    The backend already holds these in invite.uploaded_files; this ref
+  //    simply mirrors them so the payload always carries the right URL
+  //    and validation can ask "is this slot already done?".
+  const uploadedUrlsRef = useRef<Record<string, string>>({});
 
   useEffect(() => {
     const fetchPreview = async () => {
@@ -95,29 +101,54 @@ export default function PublicInvitePage() {
 
     const arrangement = formData.driving_arrangement || "self_drive";
 
-    // ✅ Contextual validation based on arrangement
-    if (arrangement === "self_drive" && !dlFrontFile) {
-      toast.error("Client DL Front photo is required for Self Drive");
+    // ✅ Slot presence = "has a new File OR already uploaded earlier"
+    const hasSlot = (field: string, file: File | null) =>
+      !!file || !!uploadedUrlsRef.current[field];
+
+    // ✅ Client ID always required (matches KYC gate for every arrangement)
+    if (!hasSlot("id_front", idFrontFile) || !hasSlot("id_back", idBackFile)) {
+      toast.error("Client ID Front and ID Back photos are required");
       return;
     }
-    if (arrangement === "own_driver") {
-      if (!driverIdFrontFile || !driverDlFrontFile) {
-        toast.error("Driver ID Front and DL Front photos are required");
+
+    // ✅ Self-drive: client DL data + image required.
+    if (arrangement === "self_drive") {
+      if (!formData.dl_number?.trim()) {
+        toast.error("Client driver's licence number is required for Self Drive");
+        return;
+      }
+      if (!formData.dl_expiry) {
+        toast.error("Client driver's licence expiry date is required for Self Drive");
+        return;
+      }
+      if (!hasSlot("dl_front", dlFrontFile)) {
+        toast.error("Client DL Front photo is required for Self Drive");
         return;
       }
     }
-    if (!idFrontFile || !idBackFile) {
-      toast.error("Client ID Front and ID Back photos are required");
-      return;
+
+    // ✅ Own-driver: personal driver docs required.
+    if (arrangement === "own_driver") {
+      if (!hasSlot("driver_id_front", driverIdFrontFile)) {
+        toast.error("Driver ID Front photo is required for Own Driver");
+        return;
+      }
+      if (!hasSlot("driver_dl_front", driverDlFrontFile)) {
+        toast.error("Driver DL Front photo is required for Own Driver");
+        return;
+      }
     }
 
     setStatus("submitting");
 
     try {
-      const uploadedUrls: Record<string, string> = {};
       const uploadPromises: Promise<void>[] = [];
 
-      const uploadDoc = async (file: File, field: string) => {
+      const uploadDoc = async (
+        file: File,
+        field: string,
+        clearFn: () => void,
+      ) => {
         const uploadFormData = new FormData();
         uploadFormData.append("file", file);
 
@@ -134,15 +165,43 @@ export default function PublicInvitePage() {
         }
 
         const data = await res.json();
-        uploadedUrls[field] = data.url;
+        uploadedUrlsRef.current[field] = data.url;
+        // ✅ Clear local File — the invite row already holds the URL.
+        //    A retry only uploads what's newly added.
+        clearFn();
       };
 
-      if (avatarFile) uploadPromises.push(uploadDoc(avatarFile, "avatar"));
-      if (idFrontFile) uploadPromises.push(uploadDoc(idFrontFile, "id_front"));
-      if (idBackFile) uploadPromises.push(uploadDoc(idBackFile, "id_back"));
-      if (dlFrontFile) uploadPromises.push(uploadDoc(dlFrontFile, "dl_front"));
-      if (driverIdFrontFile) uploadPromises.push(uploadDoc(driverIdFrontFile, "driver_id_front"));
-      if (driverDlFrontFile) uploadPromises.push(uploadDoc(driverDlFrontFile, "driver_dl_front"));
+      // Client-level documents
+      if (avatarFile) {
+        uploadPromises.push(uploadDoc(avatarFile, "avatar", () => setAvatarFile(null)));
+      }
+      if (idFrontFile) {
+        uploadPromises.push(uploadDoc(idFrontFile, "id_front", () => setIdFrontFile(null)));
+      }
+      if (idBackFile) {
+        uploadPromises.push(uploadDoc(idBackFile, "id_back", () => setIdBackFile(null)));
+      }
+      if (arrangement === "self_drive" && dlFrontFile) {
+        uploadPromises.push(uploadDoc(dlFrontFile, "dl_front", () => setDlFrontFile(null)));
+      }
+
+      // ✅ Client-owned driver documents (own_driver only)
+      if (arrangement === "own_driver") {
+        if (driverIdFrontFile) {
+          uploadPromises.push(
+            uploadDoc(driverIdFrontFile, "driver_id_front", () =>
+              setDriverIdFrontFile(null)
+            )
+          );
+        }
+        if (driverDlFrontFile) {
+          uploadPromises.push(
+            uploadDoc(driverDlFrontFile, "driver_dl_front", () =>
+              setDriverDlFrontFile(null)
+            )
+          );
+        }
+      }
 
       if (uploadPromises.length > 0) {
         await Promise.all(uploadPromises);
@@ -176,15 +235,21 @@ export default function PublicInvitePage() {
                 dl_number: formData.driver_dl_number?.trim().toUpperCase() || "",
                 dl_expiry: formData.driver_dl_expiry || undefined,
                 dl_issued_date: formData.driver_dl_issued_date || undefined,
-                id_image_front: uploadedUrls.driver_id_front || undefined,
-                dl_image_front: uploadedUrls.driver_dl_front || undefined,
+                // ✅ Driver identity only. Document URLs live server-side in
+                //    invite.uploaded_files and are mapped onto the client's
+                //    inline driver_id_image_front / driver_dl_image_front
+                //    columns by submit_invite. ClientDriverBlock marks those
+                //    fields read-only, so we must not echo them back here.
               }
             : null,
 
-        avatar_image: uploadedUrls.avatar || undefined,
-        id_image_front: uploadedUrls.id_front || "",
-        id_image_back: uploadedUrls.id_back || "",
-        dl_image_front: uploadedUrls.dl_front || undefined,
+        // ✅ Read from the ref so retries send the real stored URLs,
+        //    not undefined/empty. Backend overwrites these from
+        //    invite.uploaded_files anyway — this is just for schema validity.
+        avatar_image: uploadedUrlsRef.current.avatar || undefined,
+        id_image_front: uploadedUrlsRef.current.id_front || "",
+        id_image_back: uploadedUrlsRef.current.id_back || "",
+        dl_image_front: uploadedUrlsRef.current.dl_front || undefined,
       };
 
       const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/clients/invite/${token}`, {

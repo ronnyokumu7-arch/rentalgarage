@@ -30,7 +30,7 @@ export default function NewClientPage() {
                 <ArrowLeft size={20} />
               </button>
               <div>
-                <h1 className="text-lg font-bold text-[var(--color-ink)]">Add New Client</h1>
+                <h1 className="text-lg font-bold text-[var(--color-ink)]">New Client</h1>
                 <p className="text-xs text-[var(--color-ink-muted)] hidden sm:block">Invite a client via secure link or add them manually</p>
               </div>
             </div>

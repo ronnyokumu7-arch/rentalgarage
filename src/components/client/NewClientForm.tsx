@@ -4,13 +4,20 @@
 import { useState, useEffect } from "react";
 import { Car } from "lucide-react";
 import SecureLightbox from "@/components/ui/SecureLightbox";
-import ClientIdentitySection from "./form/ClientIdentitySection";
+import ClientDetailsSection from "./form/ClientDetailsSection";
 import DrivingArrangementSection from "./form/DrivingArrangementSection";
-import ComplianceSection from "./form/ComplianceSection";
 import EmergencyContactSection from "./form/EmergencyContactSection";
 import PreviewCard from "./form/PreviewCard";
 import SubmitCard from "./form/SubmitCard";
 import type { TenantBranding } from "./form/types";
+
+/**
+ * NOTE: ComplianceSection is intentionally NOT mounted here.
+ * Its DL fields/uploads are owned by DrivingArrangementSection's
+ * self_drive branch, and its address fields are already rendered by
+ * ClientDetailsSection. Re-mounting it would duplicate fieldIds
+ * (notably `field-dlFront`) and DL inputs.
+ */
 
 interface NewClientFormProps {
   loading: boolean;
@@ -23,13 +30,10 @@ interface NewClientFormProps {
   setIdBackFile: (f: File | null) => void;
   dlFrontFile: File | null;
   setDlFrontFile: (f: File | null) => void;
-
-  // ✅ Driver documents (optional — only used in own_driver flow)
   driverIdFrontFile?: File | null;
   setDriverIdFrontFile?: (f: File | null) => void;
   driverDlFrontFile?: File | null;
   setDriverDlFrontFile?: (f: File | null) => void;
-
   updateField: (field: string, value: string) => void;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
   mode?: "create" | "edit" | "public_intake";
@@ -39,6 +43,9 @@ interface NewClientFormProps {
   existingIdFront?: string | null;
   existingIdBack?: string | null;
   existingDlFront?: string | null;
+  // ✅ Client-owned driver document URLs (edit mode)
+  existingDriverIdFront?: string | null;
+  existingDriverDlFront?: string | null;
 }
 
 const inputClass =
@@ -68,11 +75,13 @@ export default function NewClientForm({
   existingIdFront,
   existingIdBack,
   existingDlFront,
+  existingDriverIdFront,
+  existingDriverDlFront,
 }: NewClientFormProps) {
   const isPublicIntake = mode === "public_intake";
   const drivingArrangement = formData.driving_arrangement || "self_drive";
-  const requiresSelfDriveDL = drivingArrangement === "self_drive";
-  const requiresDriverDocs = drivingArrangement === "own_driver";
+  const isSelfDrive = drivingArrangement === "self_drive";
+  const isOwnDriver = drivingArrangement === "own_driver";
 
   const [lightbox, setLightbox] = useState<{ url: string; title: string } | null>(null);
 
@@ -80,7 +89,6 @@ export default function NewClientForm({
     setLightbox({ url, title });
   };
 
-  // ✅ Listen for doc-preview events dispatched from DocUploadSlot
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
@@ -112,17 +120,32 @@ export default function NewClientForm({
       </p>
     ) : null;
 
-  // ✅ Dynamic doc count based on arrangement
-  const clientDocsUploaded =
-    (idFrontFile ? 1 : 0) + (idBackFile ? 1 : 0) + (requiresSelfDriveDL && dlFrontFile ? 1 : 0);
-  const clientDocsRequired = requiresSelfDriveDL ? 3 : 2;
-  const driverDocsUploaded = requiresDriverDocs
-    ? (driverIdFrontFile ? 1 : 0) + (driverDlFrontFile ? 1 : 0)
-    : 0;
-  const driverDocsRequired = requiresDriverDocs ? 2 : 0;
+  // ── Document counters (new File OR existing URL both count) ──
+  const hasDoc = (file: File | null, existing?: string | null) =>
+    !!file || !!existing;
 
-  const totalDocsUploaded = clientDocsUploaded + driverDocsUploaded;
-  const totalDocsRequired = clientDocsRequired + driverDocsRequired;
+  const clientDocsUploaded =
+    (hasDoc(idFrontFile, existingIdFront) ? 1 : 0) +
+    (hasDoc(idBackFile, existingIdBack) ? 1 : 0);
+  const clientDocsRequired = 2;
+
+  const drivingDocsUploaded = isSelfDrive
+    ? hasDoc(dlFrontFile, existingDlFront)
+      ? 1
+      : 0
+    : 0;
+  const drivingDocsRequired = isSelfDrive ? 1 : 0;
+
+  const driverDocsUploaded = isOwnDriver
+    ? (hasDoc(driverIdFrontFile, existingDriverIdFront) ? 1 : 0) +
+      (hasDoc(driverDlFrontFile, existingDriverDlFront) ? 1 : 0)
+    : 0;
+  const driverDocsRequired = isOwnDriver ? 2 : 0;
+
+  const totalDocsUploaded =
+    clientDocsUploaded + drivingDocsUploaded + driverDocsUploaded;
+  const totalDocsRequired =
+    clientDocsRequired + drivingDocsRequired + driverDocsRequired;
 
   const sectionProps = {
     formData,
@@ -169,32 +192,31 @@ export default function NewClientForm({
             </div>
           )}
 
-          <ClientIdentitySection
+          <ClientDetailsSection
             {...sectionProps}
             avatarFile={avatarFile}
             setAvatarFile={setAvatarFile}
             existingAvatar={existingAvatar}
-          />
-
-          <DrivingArrangementSection
-            {...sectionProps}
-            driverIdFrontFile={driverIdFrontFile}
-            setDriverIdFrontFile={setDriverIdFrontFile}
-            driverDlFrontFile={driverDlFrontFile}
-            setDriverDlFrontFile={setDriverDlFrontFile}
-          />
-
-          <ComplianceSection
-            {...sectionProps}
             idFrontFile={idFrontFile}
             setIdFrontFile={setIdFrontFile}
             idBackFile={idBackFile}
             setIdBackFile={setIdBackFile}
-            dlFrontFile={dlFrontFile}
-            setDlFrontFile={setDlFrontFile}
             existingIdFront={existingIdFront}
             existingIdBack={existingIdBack}
+          />
+
+          <DrivingArrangementSection
+            {...sectionProps}
+            dlFrontFile={dlFrontFile}
+            setDlFrontFile={setDlFrontFile}
             existingDlFront={existingDlFront}
+            driverIdFrontFile={driverIdFrontFile}
+            setDriverIdFrontFile={setDriverIdFrontFile}
+            driverDlFrontFile={driverDlFrontFile}
+            setDriverDlFrontFile={setDriverDlFrontFile}
+            // ✅ forward existing driver URLs so edit mode shows "View Document"
+            existingDriverIdFront={existingDriverIdFront}
+            existingDriverDlFront={existingDriverDlFront}
           />
         </div>
 
