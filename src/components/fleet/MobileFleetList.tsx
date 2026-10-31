@@ -454,9 +454,9 @@ export default function MobileFleetList({
           </p>
         </div>
       ) : (
-        /* ✅ NEW: Single unified card containing all grouped sections */
-        <div className="pb-4 px-2">
-          <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-sm overflow-hidden">
+        /* ✅ Full-bleed list container with rounded corners */
+        <div className="pb-4">
+          <div className="bg-[var(--color-surface)] rounded-2xl overflow-hidden">
             {groupedSections.map((section, sIdx) => {
               const isUngrouped = section.collection === null;
               const sectionId = isUngrouped
@@ -466,32 +466,24 @@ export default function MobileFleetList({
                 !isUngrouped && collapsedSections[sectionId];
 
               return (
-                <div
+                <FleetSection
                   key={sectionId}
-                  className={
-                    sIdx > 0
-                      ? "border-t border-[var(--color-surface-border)]"
-                      : ""
+                  section={section}
+                  isCollapsed={isCollapsed}
+                  onToggleCollapse={() => toggleSection(sectionId)}
+                  onEditCollection={
+                    isUngrouped
+                      ? undefined
+                      : () => openEditCollection(section.collection!.id)
                   }
-                >
-                  <FleetSection
-                    section={section}
-                    isCollapsed={isCollapsed}
-                    onToggleCollapse={() => toggleSection(sectionId)}
-                    onEditCollection={
-                      isUngrouped
-                        ? undefined
-                        : () => openEditCollection(section.collection!.id)
-                    }
-                    isMounted={mounted}
-                    isDark={isDark}
-                    isSelecting={isSelecting}
-                    selectedIds={selectedIds}
-                    activeRentals={activeRentals}
-                    makeHandlers={makeHandlers}
-                    isFirst={sIdx === 0}
-                  />
-                </div>
+                  isMounted={mounted}
+                  isDark={isDark}
+                  isSelecting={isSelecting}
+                  selectedIds={selectedIds}
+                  activeRentals={activeRentals}
+                  makeHandlers={makeHandlers}
+                  isFirst={sIdx === 0}
+                />
               );
             })}
           </div>
