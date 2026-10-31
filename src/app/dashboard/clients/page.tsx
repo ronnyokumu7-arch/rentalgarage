@@ -19,10 +19,9 @@ import AddClientModal from "@/components/client/AddClientModal";
 import { useMobileClients } from "@/hooks/clients/useMobileClients";
 import { useDesktopClients } from "@/hooks/clients/useDesktopClients";
 import { useSetPageHeader } from "@/context/page-header-context";
-
-/* ──────────────────────────────────────────────────────────────────────
-   Tabs
-────────────────────────────────────────────────────────────────────── */
+import { bookingsApi } from "@/lib/api/bookings";
+import type { Booking } from "@/lib/types";
+import type { ClientBookingState } from "@/components/client/mobile/types";
 
 type ClientSegment = "individual" | "corporate" | "invites";
 
@@ -44,6 +43,50 @@ export default function ClientsPage() {
   const [activeTab, setActiveTab] = useState<ClientSegment>(initialTab);
 
   const [addClientOpen, setAddClientOpen] = useState(false);
+
+  // ✅ Fetch active bookings so we can compute ring states
+  const [activeBookings, setActiveBookings] = useState<Booking[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    bookingsApi
+      .list({ page: 1, page_size: 100 })
+      .then((items) => {
+        if (cancelled) return;
+        setActiveBookings(
+          items.filter(
+            (b) => b.status === "active" || b.status === "confirmed"
+          )
+        );
+      })
+      .catch(() => {
+        // silent — rings just won't render
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  // ✅ Compute map: client_id → "booked" | "on_trip"
+  const clientBookingStateMap = useMemo(() => {
+    const map = new Map<number, ClientBookingState>();
+    const now = Date.now();
+
+    activeBookings.forEach((b) => {
+      if (!b.client_id) return;
+      const start = new Date(b.start_date).getTime();
+      const end = new Date(b.end_date).getTime();
+
+      const state: ClientBookingState =
+        now >= start && now <= end ? "on_trip" : "booked";
+
+      // "on_trip" wins over "booked"
+      if (map.get(b.client_id) === "on_trip") return;
+      map.set(b.client_id, state);
+    });
+
+    return map;
+  }, [activeBookings]);
 
   useEffect(() => {
     const t = searchParams.get("tab") as ClientSegment | null;
@@ -68,7 +111,8 @@ export default function ClientsPage() {
       return {
         title: "Individual Clients",
         mobileTitle: "Clients",
-        description: "Manage individual customer accounts, personal verification steps, and driver records.",
+        description:
+          "Manage individual customer accounts, personal verification steps, and driver records.",
         icon: <UserRound size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
       };
     }
@@ -76,27 +120,25 @@ export default function ClientsPage() {
       return {
         title: "Corporate Clients",
         mobileTitle: "Corporate",
-        description: "Oversee commercial agency relationships, corporate profiles, and company contracts.",
+        description:
+          "Oversee commercial agency relationships, corporate profiles, and company contracts.",
         icon: <Building size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
       };
     }
     return {
       title: "Client Invites",
       mobileTitle: "Invites",
-      description: "Generate single-use onboarding links and manage pending invitations.",
+      description:
+        "Generate single-use onboarding links and manage pending invitations.",
       icon: <UserPlus size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
     };
   }, [activeTab]);
 
-  // ✅ Drive the mobile top bar title + description
-  useSetPageHeader(
-    currentTabInfo.mobileTitle,
-    currentTabInfo.description
-  );
+  useSetPageHeader(currentTabInfo.mobileTitle, currentTabInfo.description);
 
   return (
     <div className="space-y-6">
-      {/* DESKTOP-ONLY HEADER */}
+      {/* DESKTOP HEADER */}
       <div className="hidden sm:flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <div className="flex items-center gap-3">
@@ -132,18 +174,20 @@ export default function ClientsPage() {
             handleTabChange={handleTabChange}
             loading={false}
             filteredClients={[]}
-            paginatedClients={[]}
             pendingClients={0}
             handleVerify={mobile.handleVerify}
             handleSuspend={mobile.handleSuspend}
             handleArchive={mobile.handleArchive}
             refetch={mobile.refetch}
             onAddClient={() => setAddClientOpen(true)}
+            clientBookingStateMap={clientBookingStateMap}
           />
 
           <div className="hidden md:block p-12 text-center bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)]">
             <Building2 size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" />
-            <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">Corporate Client Hub</h3>
+            <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">
+              Corporate Client Hub
+            </h3>
             <p className="text-sm text-[var(--color-ink-muted)] max-w-md mx-auto">
               Commercial profiles, group company multi-driver billing, agency agreements coming soon.
             </p>
@@ -163,13 +207,13 @@ export default function ClientsPage() {
             handleTabChange={handleTabChange}
             loading={mobile.loading}
             filteredClients={mobile.filteredClients}
-            paginatedClients={mobile.paginatedClients}
             pendingClients={mobile.pendingClients}
             handleVerify={mobile.handleVerify}
             handleSuspend={mobile.handleSuspend}
             handleArchive={mobile.handleArchive}
             refetch={mobile.refetch}
             onAddClient={() => setAddClientOpen(true)}
+            clientBookingStateMap={clientBookingStateMap}
           />
 
           <DesktopClientsList

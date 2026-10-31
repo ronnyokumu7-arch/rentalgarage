@@ -1,102 +1,29 @@
-// src/components/clients/MobileClientsList.tsx
+// src/components/client/MobileClientsList.tsx
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import {
   Users,
-  Phone,
   Loader2,
-  ShieldAlert,
-  ArrowRight,
   UserIcon,
   MessageCircle,
-  CreditCard,
-  Car,
   Shield,
-  Ban,
   Archive,
-  Search,
-  CheckCircle2,
-  Circle,
-  X,
   Plus,
   Building2,
-  Calendar,
-  SlidersHorizontal,
   Clock,
+  Phone,
 } from "lucide-react";
 import CardGrid, { RowAction } from "@/components/ui/CardGrid";
 import ReviewVerificationModal from "@/components/client/ReviewVerificationModal";
-
-/* ──────────────────────────────────────────────────────────────────────
-   Types & helpers
-────────────────────────────────────────────────────────────────────── */
+import ClientsToolbar from "./mobile/ClientsToolbar";
+import ClientsBanner from "./mobile/ClientsBanner";
+import ClientRow from "./mobile/ClientRow";
+import { getWhatsAppNumber, CLIENT_STATUS_STYLES } from "./mobile/helpers";
+import type { ClientListItem, ClientBookingState } from "./mobile/types";
 
 export type ClientSegment = "individual" | "corporate" | "invites";
-
-const CLIENT_STATUS_STYLES: Record<string, { bg: string; text: string; dot: string; label: string }> = {
-  active:    { bg: "bg-emerald-500/10", text: "text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500", label: "Active" },
-  pending:   { bg: "bg-amber-500/10",   text: "text-amber-600 dark:text-amber-400",     dot: "bg-amber-500",   label: "Pending" },
-  suspended: { bg: "bg-red-500/10",     text: "text-red-600 dark:text-red-400",         dot: "bg-red-500",     label: "Suspended" },
-  inactive:  { bg: "bg-gray-500/10",    text: "text-gray-600 dark:text-gray-400",       dot: "bg-gray-500",    label: "Inactive" },
-};
-
-const getInitials = (name?: string | null) => {
-  if (!name) return "?";
-  const parts = name.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-};
-
-const getAvatarColors = (status: string) => {
-  switch (status) {
-    case "active":
-      return "bg-emerald-500/15 text-emerald-700 dark:text-emerald-400";
-    case "pending":
-      return "bg-amber-500/15 text-amber-700 dark:text-amber-400";
-    case "suspended":
-      return "bg-rose-500/15 text-rose-700 dark:text-rose-400";
-    default:
-      return "bg-slate-500/15 text-slate-700 dark:text-slate-400";
-  }
-};
-
-const getWhatsAppNumber = (rawPhone?: string | null): string | null => {
-  if (!rawPhone) return null;
-  const digits = rawPhone.replace(/\D/g, "");
-  if (!digits) return null;
-  if (digits.startsWith("254")) return digits;
-  if (digits.startsWith("0")) return `254${digits.slice(1)}`;
-  if (digits.startsWith("7") || digits.startsWith("1")) return `254${digits}`;
-  return digits;
-};
-
-function getDLStatus(dlExpiry?: string | null): {
-  kind: "none" | "expired" | "expiring" | "valid";
-  label: string;
-  tone: "emerald" | "amber" | "rose" | "muted";
-} {
-  if (!dlExpiry) return { kind: "none", label: "DL not provided", tone: "muted" };
-  const expiry = new Date(dlExpiry);
-  if (Number.isNaN(expiry.getTime())) {
-    return { kind: "none", label: "DL not provided", tone: "muted" };
-  }
-  const diffDays = Math.ceil((expiry.getTime() - Date.now()) / 86_400_000);
-  if (diffDays < 0) return { kind: "expired", label: "DL expired", tone: "rose" };
-  if (diffDays <= 30) {
-    return {
-      kind: "expiring",
-      label: diffDays === 0 ? "DL expires today" : `DL expires in ${diffDays} day${diffDays === 1 ? "" : "s"}`,
-      tone: "amber",
-    };
-  }
-  return { kind: "valid", label: "DL valid", tone: "emerald" };
-}
-
-/* ──────────────────────────────────────────────────────────────────────
-   Props
-────────────────────────────────────────────────────────────────────── */
 
 interface MobileClientsListProps {
   search: string;
@@ -108,13 +35,19 @@ interface MobileClientsListProps {
   handleTabChange: (tab: string) => void;
   loading: boolean;
   filteredClients: any[];
-  paginatedClients: any[];
   pendingClients: number;
   handleVerify: (id: number) => void;
   handleSuspend: (id: number) => void;
   handleArchive: (id: number) => void;
   refetch: () => void;
   onAddClient: () => void;
+  /**
+   * Map from client_id → booking state:
+   *   - "booked"  → has booking, trip hasn't started yet
+   *   - "on_trip" → trip is in progress right now
+   *   - missing   → no booking
+   */
+  clientBookingStateMap?: Map<number, ClientBookingState>;
 }
 
 export default function MobileClientsList({
@@ -127,13 +60,13 @@ export default function MobileClientsList({
   handleTabChange,
   loading,
   filteredClients,
-  paginatedClients,
   pendingClients,
   handleVerify,
   handleSuspend,
   handleArchive,
   refetch,
   onAddClient,
+  clientBookingStateMap,
 }: MobileClientsListProps) {
   const router = useRouter();
 
@@ -142,6 +75,7 @@ export default function MobileClientsList({
 
   const [selected, setSelected] = useState<any[]>([]);
   const isSelecting = selected.length > 0;
+  const selectedIds = useMemo(() => new Set(selected.map((c) => c.id)), [selected]);
 
   const [searchFocused, setSearchFocused] = useState(false);
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -151,6 +85,7 @@ export default function MobileClientsList({
   const longPressFired = useRef(false);
   const longPressStartPos = useRef<{ x: number; y: number } | null>(null);
 
+  // ─── Selection ────────────────────────────────────────────────────
   const clearSelection = () => {
     setSelected([]);
     longPressFired.current = false;
@@ -212,6 +147,7 @@ export default function MobileClientsList({
     return () => document.removeEventListener("mousedown", handleOutsideClick);
   }, [isSelecting]);
 
+  // ─── Batch actions ───────────────────────────────────────────────
   const handleBatchVerify = () => {
     if (selected.length === 0) return;
     selected.forEach((c) => handleVerify(c.id));
@@ -238,9 +174,7 @@ export default function MobileClientsList({
     searchInputRef.current?.blur();
   };
 
-  /* ──────────────────────────────────────────────────────────────────────
-     ✅ Row actions — mirrors the desktop verification logic
-  ────────────────────────────────────────────────────────────────────── */
+  // ─── Row actions ─────────────────────────────────────────────────
   const getClientActions = (client: any): RowAction<any>[] =>
     [
       {
@@ -266,7 +200,6 @@ export default function MobileClientsList({
         },
         disabled: !getWhatsAppNumber(client.phone),
       },
-      // ✅ Verification CTA — mirrors desktop logic
       {
         label:
           client.verification_status === "under_review"
@@ -274,10 +207,7 @@ export default function MobileClientsList({
             : client.verification_status === "rejected" || client.status === "pending"
               ? "Start Verification"
               : "Suspend Client",
-        icon:
-          client.verification_status === "under_review"
-            ? Clock
-            : Shield,
+        icon: client.verification_status === "under_review" ? Clock : Shield,
         variant:
           client.verification_status === "under_review" ||
           client.verification_status === "rejected" ||
@@ -299,12 +229,11 @@ export default function MobileClientsList({
           client.verification_status !== "rejected" &&
           client.verification_status !== "under_review",
       },
-      // ✅ Reactivate when suspended
       {
         label: client.status === "suspended" ? "Reactivate Client" : undefined,
         icon: Shield,
         variant: "primary",
-        onClick: () => handleVerify(client.id), // reuse verify handler; swap if you have a dedicated handler
+        onClick: () => handleVerify(client.id),
         disabled: client.status !== "suspended",
       },
       {
@@ -317,356 +246,115 @@ export default function MobileClientsList({
     ].filter((action) => !!action.label) as RowAction<any>[];
 
   const hasActiveFilter = statusFilter !== null && statusFilter !== "";
+  const placeholder =
+    activeTab === "corporate" ? "Search corporate clients..." : "Search clients...";
+
+  // ✅ Non-paginated list + sort:
+  //    1. Suspended → always last
+  //    2. Everyone else → alphabetical by full_name
+  const displayClients: ClientListItem[] = useMemo(() => {
+    const enriched = filteredClients.map((c) => ({
+      ...c,
+      booking_state: clientBookingStateMap?.get(c.id) ?? "none",
+    }));
+
+    return enriched.sort((a, b) => {
+      // Suspended clients sink to the bottom
+      const aSuspended = a.status === "suspended" ? 1 : 0;
+      const bSuspended = b.status === "suspended" ? 1 : 0;
+      if (aSuspended !== bSuspended) return aSuspended - bSuspended;
+
+      // Then alphabetical by name
+      const aName = (a.full_name ?? "").toLowerCase();
+      const bName = (b.full_name ?? "").toLowerCase();
+      return aName.localeCompare(bName);
+    });
+  }, [filteredClients, clientBookingStateMap]);
+
+  const handleRowClick = (client: any) => {
+    if (longPressFired.current) {
+      longPressFired.current = false;
+      return;
+    }
+    if (isSelecting) {
+      toggleSelection(client);
+      return;
+    }
+    const trigger = document.querySelector(
+      `[data-card-actions="${client.id}"] button`
+    ) as HTMLButtonElement | null;
+    trigger?.click();
+  };
 
   return (
     <>
       <div className="md:hidden animate-in fade-in duration-300 relative">
-        {/* TOOLBAR */}
-        <div
-          className="sticky top-0 z-20 bg-[var(--color-bg)] py-2"
-          data-selection-zone
-        >
-          <div className="px-0">
-            {isSelecting ? (
-              <div className="flex items-center justify-between gap-2 px-3">
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={clearSelection}
-                    className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] transition-colors"
-                    aria-label="Clear selection"
-                  >
-                    <X size={16} />
-                  </button>
-                  <span className="text-sm font-bold text-[var(--color-ink)] tabular-nums">
-                    {selected.length} selected
-                  </span>
-                </div>
+        <ClientsToolbar
+          isSelecting={isSelecting}
+          selectedCount={selected.length}
+          onClearSelection={clearSelection}
+          onBatchVerify={handleBatchVerify}
+          onBatchSuspend={handleBatchSuspend}
+          onBatchArchive={handleBatchArchive}
+          search={search}
+          setSearch={setSearch}
+          onSearchFocus={() => setSearchFocused(true)}
+          onSearchBlur={() => setTimeout(() => setSearchFocused(false), 150)}
+          onClearSearch={handleClearSearch}
+          searchInputRef={searchInputRef}
+          placeholder={placeholder}
+          filtersOpen={filtersOpen}
+          onToggleFilters={() => setFiltersOpen((v) => !v)}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          statusOptions={statusOptions}
+          hasActiveFilter={hasActiveFilter}
+          searchFocused={searchFocused}
+        />
 
-                <div className="flex items-center gap-1">
-                  <button
-                    onClick={handleBatchVerify}
-                    className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
-                    aria-label="Verify clients"
-                  >
-                    <Shield size={16} />
-                  </button>
-                  <button
-                    onClick={handleBatchSuspend}
-                    className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
-                    aria-label="Suspend clients"
-                  >
-                    <Ban size={16} />
-                  </button>
-                  <button
-                    onClick={handleBatchArchive}
-                    className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
-                    aria-label="Archive clients"
-                  >
-                    <Archive size={16} />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {/* Search + filter toggle */}
-                <div className="flex items-center h-11 rounded-2xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] overflow-hidden transition-colors mx-0">
-                  <div className="relative flex-1 h-full">
-                    <Search
-                      size={16}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
-                    />
-                    <input
-                      ref={searchInputRef}
-                      type="text"
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      onFocus={() => setSearchFocused(true)}
-                      onBlur={() => {
-                        setTimeout(() => setSearchFocused(false), 150);
-                      }}
-                      placeholder={activeTab === "corporate" ? "Search corporate clients..." : "Search clients..."}
-                      className="w-full h-full pl-10 pr-2 bg-transparent text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] outline-none"
-                    />
-                    {search && (
-                      <button
-                        type="button"
-                        onMouseDown={(e) => e.preventDefault()}
-                        onClick={handleClearSearch}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[var(--color-surface-hover)] flex items-center justify-center hover:bg-[var(--color-surface-border)] transition-colors"
-                        aria-label="Clear search"
-                      >
-                        <X size={12} className="text-[var(--color-ink-muted)]" />
-                      </button>
-                    )}
-                  </div>
+        <ClientsBanner
+          loading={loading}
+          pendingClients={pendingClients}
+          filteredCount={filteredClients.length}
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          hidden={searchFocused || isSelecting}
+        />
 
-                  <div className="pr-1.5">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setFiltersOpen((v) => !v);
-                      }}
-                      aria-label={filtersOpen ? "Hide filters" : "Show filters"}
-                      aria-expanded={filtersOpen}
-                      className={`relative h-8 px-2.5 rounded-lg flex items-center justify-center gap-1 transition-all active:scale-95 ${
-                        filtersOpen
-                          ? "bg-[var(--color-primary)] text-white shadow-sm"
-                          : hasActiveFilter
-                            ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/15"
-                            : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                      }`}
-                    >
-                      <SlidersHorizontal size={14} />
-                      {hasActiveFilter && !filtersOpen && (
-                        <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {filtersOpen && !searchFocused && (
-                  <div className="relative animate-in slide-in-from-top-1 fade-in duration-200">
-                    <div className="overflow-x-auto scrollbar-none">
-                      <div className="flex items-center gap-2 py-1 px-3 pr-6">
-                        <button
-                          onClick={() => setStatusFilter(null)}
-                          className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border ${
-                            statusFilter === null || statusFilter === ""
-                              ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
-                              : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                          }`}
-                        >
-                          All
-                        </button>
-                        {statusOptions
-                          .filter((opt) => opt.value !== "pending" && opt.value !== "inactive")
-                          .map((opt) => {
-                            const isActive = statusFilter === opt.value;
-                            return (
-                              <button
-                                key={opt.value}
-                                onClick={() => setStatusFilter(opt.value)}
-                                className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border ${
-                                  isActive
-                                    ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
-                                    : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                                }`}
-                              >
-                                {opt.label}
-                              </button>
-                            );
-                          })}
-                        <button
-                          onClick={() => setStatusFilter("with_booking")}
-                          className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
-                            statusFilter === "with_booking"
-                              ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
-                              : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                          }`}
-                        >
-                          <Calendar size={11} className="flex-shrink-0" />
-                          With Booking
-                        </button>
-                        <button
-                          onClick={() => setStatusFilter("inactive")}
-                          className={`flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border flex items-center gap-1.5 ${
-                            statusFilter === "inactive"
-                              ? "text-[var(--color-primary)] border-[var(--color-primary)] bg-[var(--color-primary)]/5"
-                              : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
-                          }`}
-                        >
-                          <Archive size={11} className="flex-shrink-0" />
-                          Archived
-                        </button>
-                      </div>
-                    </div>
-
-                    <div
-                      className="pointer-events-none absolute top-0 right-0 bottom-0 w-12 bg-gradient-to-l from-[var(--color-bg)] via-[var(--color-bg)]/80 to-transparent"
-                      aria-hidden="true"
-                    />
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Banners */}
-        <div className={`px-3 ${searchFocused || isSelecting ? "hidden" : ""}`}>
-          {!loading && pendingClients > 0 && statusFilter !== "pending" && (
-            <button
-              type="button"
-              onClick={() => setStatusFilter("pending")}
-              className="w-full flex items-center justify-start gap-2 py-3 px-1 text-amber-600 dark:text-amber-400 hover:opacity-80 transition-opacity text-xs font-semibold"
-            >
-              <ShieldAlert size={14} />
-              {pendingClients} {pendingClients === 1 ? "client" : "clients"} awaiting your review
-              <ArrowRight size={12} className="opacity-70" />
-            </button>
-          )}
-
-          {!loading && statusFilter === "pending" && (
-            <div className="w-full flex items-center justify-between py-3 px-1 text-blue-600 dark:text-blue-400 text-xs font-semibold">
-              <span className="flex items-center gap-2">
-                <ShieldAlert size={14} />
-                Viewing {filteredClients.length} pending {filteredClients.length === 1 ? "client" : "clients"}
-              </span>
-              <button
-                type="button"
-                onClick={() => setStatusFilter(null)}
-                className="text-[11px] font-bold px-2 py-1 rounded-md bg-blue-500/15 hover:bg-blue-500/25 transition-colors"
-              >
-                Clear Filter
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Card List */}
+        {/* Card List — no pagination */}
         <div className="pb-4">
           {loading ? (
             <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2">
               <Loader2 className="w-5 h-5 animate-spin" /> Loading clients...
             </div>
-          ) : filteredClients.length === 0 ? (
+          ) : displayClients.length === 0 ? (
             <div className="p-12 text-center">
               <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
                 <Users size={24} className="text-[var(--color-ink-subtle)]" />
               </div>
-              <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No clients found</h3>
+              <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">
+                No clients found
+              </h3>
               <p className="text-sm text-[var(--color-ink-muted)] mb-4">
                 Try adjusting your search query or filters.
               </p>
             </div>
           ) : (
             <div className="bg-[var(--color-surface)] first:rounded-t-2xl last:rounded-b-2xl">
-              {paginatedClients.map((client, index) => {
-                const phone = client.phone || "";
-                const waNumber = getWhatsAppNumber(client.phone);
-                const isVerified = client.verification_status === "verified";
-                const isPending = client.status === "pending" || client.verification_status === "under_review" || client.verification_status === "sent";
-                const isSuspended = client.status === "suspended";
-                const isSelected = selected.some((c) => c.id === client.id);
-                const dl = getDLStatus(client.dl_expiry);
-
-                const dlToneClasses: Record<typeof dl.tone, string> = {
-                  emerald: "text-emerald-600 dark:text-emerald-400",
-                  amber: "text-amber-600 dark:text-amber-400",
-                  rose: "text-rose-600 dark:text-rose-400",
-                  muted: "text-[var(--color-ink-subtle)]",
-                };
-
-                const idStatus = isVerified
-                  ? { label: "ID verified", tone: "text-emerald-600 dark:text-emerald-400" }
-                  : isPending
-                    ? { label: "ID pending", tone: "text-amber-600 dark:text-amber-400" }
-                    : { label: "ID missing", tone: "text-[var(--color-ink-subtle)]" };
-
-                const avatarColors = getAvatarColors(client.status);
-
-                return (
-                  <div
-                    key={client.id}
-                    data-selection-zone
-                    onTouchStart={handleTouchStart(client)}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
-                    onClick={() => {
-                      if (longPressFired.current) {
-                        longPressFired.current = false;
-                        return;
-                      }
-                      if (isSelecting) {
-                        toggleSelection(client);
-                        return;
-                      }
-                      const trigger = document.querySelector(
-                        `[data-card-actions="${client.id}"] button`,
-                      ) as HTMLButtonElement | null;
-                      trigger?.click();
-                    }}
-                    className={`relative flex items-start gap-3 w-full py-3 px-3 transition-colors select-none ${
-                      isSuspended
-                        ? "opacity-50"
-                        : "hover:bg-[var(--color-surface-hover)]/40"
-                    }`}
-                  >
-                    {index !== paginatedClients.length - 1 && (
-                      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[80%] h-px bg-gradient-to-r from-transparent via-[var(--color-surface-border)] to-transparent" />
-                    )}
-
-                    <div className="relative flex-shrink-0">
-                      <div
-                        className={`w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center font-bold text-sm ${avatarColors}`}
-                      >
-                        {getInitials(client.full_name)}
-                      </div>
-                    </div>
-
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
-                          {client.full_name}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-3 mt-1 flex-wrap">
-                        <span className={`inline-flex items-center gap-1 text-[11px] font-semibold ${idStatus.tone}`}>
-                          <CreditCard size={11} className="flex-shrink-0" />
-                          {idStatus.label}
-                        </span>
-
-                        <span className={`inline-flex items-center gap-1 text-[11px] font-semibold ${dlToneClasses[dl.tone]}`}>
-                          <Car size={11} className="flex-shrink-0" />
-                          {dl.label}
-                        </span>
-                      </div>
-
-                      <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                        {phone ? (
-                          <>
-                            <a
-                              href={`tel:${phone.replace(/\s/g, "")}`}
-                              onClick={(e) => e.stopPropagation()}
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-border)] transition-colors text-[10px] font-bold text-[var(--color-ink)]"
-                            >
-                              <Phone size={10} className="text-[var(--color-ink-muted)] flex-shrink-0" />
-                              <span className="font-mono tracking-tight whitespace-nowrap">{phone}</span>
-                            </a>
-
-                            {waNumber && (
-                              <a
-                                href={`https://wa.me/${waNumber}`}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                onClick={(e) => e.stopPropagation()}
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-border)] transition-colors text-[10px] font-bold text-[var(--color-ink)]"
-                              >
-                                <MessageCircle size={10} className="text-[var(--color-ink-muted)] flex-shrink-0" />
-                                Message
-                              </a>
-                            )}
-                          </>
-                        ) : (
-                          <span className="text-xs text-[var(--color-ink-subtle)] italic">No phone</span>
-                        )}
-                      </div>
-                    </div>
-
-                    {isSelecting && (
-                      <div className="flex-shrink-0 self-center pl-1">
-                        {isSelected ? (
-                          <CheckCircle2 size={22} className="text-[var(--color-primary)]" strokeWidth={2.25} />
-                        ) : (
-                          <Circle size={22} className="text-[var(--color-ink-subtle)]" strokeWidth={1.5} />
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+              {displayClients.map((client, index) => (
+                <ClientRow
+                  key={client.id}
+                  client={client}
+                  index={index}
+                  total={displayClients.length}
+                  isSelected={selectedIds.has(client.id)}
+                  isSelecting={isSelecting}
+                  onTouchStart={handleTouchStart(client)}
+                  onTouchMove={handleTouchMove}
+                  onTouchEnd={handleTouchEnd}
+                  onClick={() => handleRowClick(client)}
+                />
+              ))}
             </div>
           )}
         </div>
@@ -674,7 +362,7 @@ export default function MobileClientsList({
         {/* Hidden CardGrid to render action sheets */}
         <div className="hidden">
           <CardGrid
-            data={paginatedClients}
+            data={displayClients}
             getCardId={(client: any) => client.id}
             compact={true}
             onCardClick={() => {}}
@@ -684,7 +372,8 @@ export default function MobileClientsList({
             renderCardBody={() => null}
             rowActions={getClientActions}
             renderActionSheetBadge={(client: any) => {
-              const style = CLIENT_STATUS_STYLES[client.status] || CLIENT_STATUS_STYLES.inactive;
+              const style =
+                CLIENT_STATUS_STYLES[client.status] || CLIENT_STATUS_STYLES.inactive;
               return (
                 <span
                   className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-[11px] font-extrabold uppercase tracking-wider border ${
