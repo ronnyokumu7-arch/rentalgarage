@@ -18,7 +18,8 @@ const formatPrice = (amount: number | string) => {
     maximumFractionDigits: 2,
   });
 };
-const formatMileage = (km: number) => km.toLocaleString();
+// ✅ No commas for mileage
+const formatMileage = (km: number) => km.toString();
 
 const getStatusRing = (
   vehicle: Vehicle,
@@ -240,16 +241,14 @@ export default function FleetVehicleRow({
           {getInlineStatus()}
         </div>
 
-        <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-          {/* ✅ Plate pill — now matches mileage/service pill style */}
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--color-surface-hover)] text-[9px] font-bold text-[var(--color-ink-muted)]">
-            <span className="font-mono tracking-tight">
-              {formatPlate(item.plate_number)}
-            </span>
+        {/* ✅ Row 3: plain inline labels, no pills */}
+        <div className="flex items-center gap-3 mt-1.5 text-[10px] font-semibold text-[var(--color-ink-muted)] flex-wrap">
+          <span className="font-mono tracking-tight">
+            {formatPlate(item.plate_number)}
           </span>
 
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--color-surface-hover)] text-[9px] font-bold text-[var(--color-ink-muted)]">
-            <Gauge size={9} className="flex-shrink-0" />
+          <span className="inline-flex items-center gap-1">
+            <Gauge size={11} className="flex-shrink-0 text-[var(--color-ink-subtle)]" />
             <span className="font-mono tracking-tight">
               {formatMileage(item.current_mileage)} km
             </span>
@@ -257,13 +256,13 @@ export default function FleetVehicleRow({
 
           {item.next_service_km && (
             <span
-              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold ${
+              className={`inline-flex items-center gap-1 ${
                 needsMileageAttention
-                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                  : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)]"
+                  ? "text-amber-600 dark:text-amber-400"
+                  : ""
               }`}
             >
-              <Wrench size={9} className="flex-shrink-0" />
+              <Wrench size={11} className="flex-shrink-0 text-[var(--color-ink-subtle)]" />
               <span className="font-mono tracking-tight">
                 {formatMileage(item.next_service_km)} km
               </span>
