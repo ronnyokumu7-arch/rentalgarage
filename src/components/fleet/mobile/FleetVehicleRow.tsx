@@ -49,14 +49,14 @@ const formatCountdown = (endDate: string): string | null => {
   if (days > 0) {
     const dayStr = days === 1 ? "day" : "days";
     const hrStr = hours === 1 ? "hr" : "hrs";
-    return `${days} ${dayStr} ${hours} ${hrStr}`;
+    return `${days} ${dayStr} ${hours} ${hrStr} left`;
   }
   if (hours > 0) {
     const hrStr = hours === 1 ? "hr" : "hrs";
     const minStr = mins === 1 ? "min" : "mins";
-    return `${hours} ${hrStr} ${mins} ${minStr}`;
+    return `${hours} ${hrStr} ${mins} ${minStr} left`;
   }
-  return `${mins} mins`;
+  return `${mins} mins left`;
 };
 
 interface FleetVehicleRowProps {
@@ -218,7 +218,7 @@ export default function FleetVehicleRow({
 
       {/* Content */}
       <div className="min-w-0 flex-1">
-        {/* ✅ Row 1: Name + year badge */}
+        {/* Row 1: Name + year */}
         <div className="flex items-baseline gap-1.5 min-w-0">
           <h3 className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
             {item.make} {item.model}
@@ -241,8 +241,11 @@ export default function FleetVehicleRow({
         </div>
 
         <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
-          <span className="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-mono font-bold tracking-tight bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] border border-[var(--color-surface-border)]">
-            {formatPlate(item.plate_number)}
+          {/* ✅ Plate pill — now matches mileage/service pill style */}
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--color-surface-hover)] text-[9px] font-bold text-[var(--color-ink-muted)]">
+            <span className="font-mono tracking-tight">
+              {formatPlate(item.plate_number)}
+            </span>
           </span>
 
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-[var(--color-surface-hover)] text-[9px] font-bold text-[var(--color-ink-muted)]">
