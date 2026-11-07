@@ -18,8 +18,6 @@ interface ComplianceDocumentsSectionProps {
   files: {
     idFrontFile: File | null;
     setIdFrontFile: (f: File | null) => void;
-    idBackFile: File | null;
-    setIdBackFile: (f: File | null) => void;
     dlFrontFile: File | null;
     setDlFrontFile: (f: File | null) => void;
   };
@@ -30,7 +28,7 @@ interface ComplianceDocumentsSectionProps {
   onManageVerification: () => void;
 }
 
-type DocTab = "idFront" | "idBack" | "dlFront" | "selfie";
+type DocTab = "idFront" | "dlFront" | "selfie";
 
 export default function ComplianceDocumentsSection({
   client,
@@ -45,7 +43,7 @@ export default function ComplianceDocumentsSection({
 
   // ✅ My Driver is still a self-drive rental: the client supplies their own
   //    driver, while Chauffeur means the agency assigns one.
-  //    All arrangements require the client's ID front/back. Self Drive also
+  //    All arrangements require the client's ID front. Self Drive also
   //    requires the client's DL; My Driver requires the personal driver's ID/DL.
   //    The client DL slot should not render for My Driver or Chauffeur.
   const showDlSlot = client.driving_arrangement === "self_drive";
@@ -57,13 +55,6 @@ export default function ComplianceDocumentsSection({
       file: files.idFrontFile,
       setFile: files.setIdFrontFile,
       existing: client.id_image_front,
-    },
-    {
-      id: "idBack" as const,
-      label: "ID Back",
-      file: files.idBackFile,
-      setFile: files.setIdBackFile,
-      existing: client.id_image_back,
     },
     ...(showDlSlot
       ? [
@@ -98,16 +89,13 @@ export default function ComplianceDocumentsSection({
   //    Driver ID/DL live in ClientDriverSection, not here.
   const isEmpty =
     !client.id_image_front &&
-    !client.id_image_back &&
     (!showDlSlot || !client.dl_image_front) &&
     !client.selfie_with_id_image &&
     !files.idFrontFile &&
-    !files.idBackFile &&
     (!showDlSlot || !files.dlFrontFile);
 
   const hasUnsaved =
     !!files.idFrontFile ||
-    !!files.idBackFile ||
     (showDlSlot && !!files.dlFrontFile);
 
   return (

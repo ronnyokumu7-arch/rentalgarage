@@ -39,7 +39,6 @@ export default function PublicInvitePage() {
 
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [idFrontFile, setIdFrontFile] = useState<File | null>(null);
-  const [idBackFile, setIdBackFile] = useState<File | null>(null);
   const [dlFrontFile, setDlFrontFile] = useState<File | null>(null);
 
   const [driverIdFrontFile, setDriverIdFrontFile] = useState<File | null>(null);
@@ -279,8 +278,6 @@ export default function PublicInvitePage() {
           setAvatarFile={setAvatarFile}
           idFrontFile={idFrontFile}
           setIdFrontFile={setIdFrontFile}
-          idBackFile={idBackFile}
-          setIdBackFile={setIdBackFile}
           dlFrontFile={dlFrontFile}
           setDlFrontFile={setDlFrontFile}
           driverIdFrontFile={driverIdFrontFile}

@@ -133,7 +133,6 @@ export default function ReviewVerificationModal({
   //    whose only files are the driver's isn't misreported as "nothing uploaded".
   const hasAnyDocuments = !!(
     person.id_image_front ||
-    person.id_image_back ||
     person.dl_image_front ||
     person.selfie_with_id_image ||
     (personType === "client" && hasDriverDocs)
@@ -244,31 +243,6 @@ export default function ReviewVerificationModal({
                       </button>
                     )}
 
-                    {person.id_image_back && (
-                      <button
-                        onClick={() => handleOpenLightbox(person.id_image_back)}
-                        className="group relative aspect-[4/3] rounded-lg bg-[var(--color-surface-hover)] border-2 border-dashed border-[var(--color-surface-border)] hover:border-[var(--color-primary)] transition-all overflow-hidden"
-                        title="Click to view ID Back"
-                      >
-                        <SecureImage
-                          src={person.id_image_back}
-                          alt="ID Back"
-                          className="w-full h-full object-cover"
-                          fallback={
-                            <div className="w-full h-full flex flex-col items-center justify-center text-[var(--color-ink-subtle)] p-2">
-                              <CreditCard size={20} className="mb-1" />
-                              <p className="text-[10px] text-center font-medium">
-                                ID Back
-                              </p>
-                            </div>
-                          }
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                          <Eye size={20} className="text-white" />
-                        </div>
-                      </button>
-                    )}
-
                     {person.dl_image_front && (
                       <button
                         onClick={() => handleOpenLightbox(person.dl_image_front)}
@@ -295,7 +269,6 @@ export default function ReviewVerificationModal({
                     )}
 
                     {!person.id_image_front &&
-                      !person.id_image_back &&
                       !person.dl_image_front && (
                         <div className="col-span-2 p-4 text-center rounded-lg bg-[var(--color-surface-hover)] border border-dashed border-[var(--color-surface-border)]">
                           <p className="text-xs text-[var(--color-ink-muted)] italic">

@@ -29,11 +29,10 @@ type VettingPreview = {
 
 type Step = "details" | "selfie" | "success";
 type Arrangement = "self_drive" | "own_driver" | "chauffeur";
-type DocumentSlot = "id_front" | "id_back" | "dl_front" | "driver_id_front" | "driver_dl_front";
+type DocumentSlot = "id_front" | "dl_front" | "driver_id_front" | "driver_dl_front";
 
 const INITIAL_DOCUMENTS: Record<DocumentSlot, File | null> = {
   id_front: null,
-  id_back: null,
   dl_front: null,
   driver_id_front: null,
   driver_dl_front: null,
@@ -111,7 +110,6 @@ export default function VettingPage() {
 
   const requiredSlots: DocumentSlot[] = [
     "id_front",
-    "id_back",
     ...(arrangement === "self_drive"
       ? ["dl_front" as const]
       : arrangement === "own_driver"
@@ -310,7 +308,6 @@ export default function VettingPage() {
                 <h3 className="text-sm font-bold">Upload documents</h3>
                 <div className="grid gap-3 sm:grid-cols-2">
                   <DocumentCard slot="id_front" label="ID front" />
-                  <DocumentCard slot="id_back" label="ID back" />
                   {arrangement === "self_drive" && <DocumentCard slot="dl_front" label="Driving licence front" />}
                   {arrangement === "own_driver" && (
                     <>

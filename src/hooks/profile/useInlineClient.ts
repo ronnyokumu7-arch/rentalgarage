@@ -23,7 +23,6 @@ export function useInlineClient(client: Client, _taskId: number) {
 
   // Refs for hidden file inputs
   const idFrontRef = useRef<HTMLInputElement>(null);
-  const idBackRef = useRef<HTMLInputElement>(null);
   const dlFrontRef = useRef<HTMLInputElement>(null);
 
   // Reset form data if the client prop changes (e.g., switching tasks)
@@ -82,11 +81,10 @@ export function useInlineClient(client: Client, _taskId: number) {
     }
   };
 
-  const handleDocUpload = async (docType: "id_front" | "id_back" | "dl_front", file: File) => {
+  const handleDocUpload = async (docType: "id_front" | "dl_front", file: File) => {
     setUploadingDoc(docType);
     try {
       if (docType === "id_front") await clientsApi.uploadIdFront(client.id, file);
-      else if (docType === "id_back") await clientsApi.uploadIdBack(client.id, file);
       else if (docType === "dl_front") await clientsApi.uploadDlFront(client.id, file);
       toast.success(`${docType.replace("_", " ").toUpperCase()} uploaded successfully!`);
     } catch {
@@ -102,7 +100,7 @@ export function useInlineClient(client: Client, _taskId: number) {
     uploadingDoc, viewingImage, setViewingImage,
     formData, setFormData,
     isExpired,
-    idFrontRef, idBackRef, dlFrontRef,
+    idFrontRef, dlFrontRef,
     handleSave, handleStatusAction, handleDocUpload,
   };
 }

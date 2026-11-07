@@ -114,7 +114,7 @@ export function useClientProfile() {
   };
 
   const handleUploadDocument = async (
-    type: "avatar" | "id_front" | "id_back" | "dl_front",
+    type: "avatar" | "id_front" | "dl_front",
     file: File
   ) => {
     setActionLoading(true);
@@ -125,8 +125,6 @@ export function useClientProfile() {
         updated = await clientsApi.uploadAvatar(clientId, file);
       } else if (type === "id_front") {
         updated = await clientsApi.uploadIdFront(clientId, file);
-      } else if (type === "id_back") {
-        updated = await clientsApi.uploadIdBack(clientId, file);
       } else if (type === "dl_front") {
         updated = await clientsApi.uploadDlFront(clientId, file);
       } else {

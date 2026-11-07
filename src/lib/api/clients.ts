@@ -86,15 +86,6 @@ export const clientsApi = {
       })
       .then((r) => r.data);
   },
-  uploadIdBack: (id: number, file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-    return apiClient
-      .post<Client>(`/clients/${id}/upload-id-back`, formData, { 
-        headers: { "Content-Type": "multipart/form-data" },
-      })
-      .then((r) => r.data);
-  },
   uploadDlFront: (id: number, file: File) => {
     const formData = new FormData();
     formData.append("file", file);

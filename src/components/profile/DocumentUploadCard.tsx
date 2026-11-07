@@ -5,7 +5,7 @@ import { Upload, User, CreditCard, Car, CheckCircle2 } from "lucide-react";
 import SectionCard from "@/components/ui/SectionCard";
 import type { Client } from "@/lib/types";
 
-type UploadType = "avatar" | "id_front" | "id_back" | "dl_front";
+type UploadType = "avatar" | "id_front" | "dl_front";
 
 interface DocumentUploadCardProps {
   client: Client;
@@ -119,15 +119,6 @@ export default function DocumentUploadCard({
           icon={CreditCard} 
           hasFile={!!client.id_image_front} 
         />
-        
-        <UploadSlot 
-          type="id_back" 
-          label="ID Back" 
-          sublabel="Reverse side"
-          icon={CreditCard} 
-          hasFile={!!client.id_image_back} 
-        />
-        
         <UploadSlot 
           type="dl_front" 
           label="DL Front" 

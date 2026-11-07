@@ -26,8 +26,6 @@ interface NewClientFormProps {
   setAvatarFile: (f: File | null) => void;
   idFrontFile: File | null;
   setIdFrontFile: (f: File | null) => void;
-  idBackFile: File | null;
-  setIdBackFile: (f: File | null) => void;
   dlFrontFile: File | null;
   setDlFrontFile: (f: File | null) => void;
   driverIdFrontFile?: File | null;
@@ -41,7 +39,6 @@ interface NewClientFormProps {
   fieldErrors?: Record<string, string>;
   existingAvatar?: string | null;
   existingIdFront?: string | null;
-  existingIdBack?: string | null;
   existingDlFront?: string | null;
   // ✅ Client-owned driver document URLs (edit mode)
   existingDriverIdFront?: string | null;
@@ -58,8 +55,6 @@ export default function NewClientForm({
   setAvatarFile,
   idFrontFile,
   setIdFrontFile,
-  idBackFile,
-  setIdBackFile,
   dlFrontFile,
   setDlFrontFile,
   driverIdFrontFile = null,
@@ -73,7 +68,6 @@ export default function NewClientForm({
   fieldErrors = {},
   existingAvatar,
   existingIdFront,
-  existingIdBack,
   existingDlFront,
   existingDriverIdFront,
   existingDriverDlFront,
@@ -124,9 +118,7 @@ export default function NewClientForm({
   const hasDoc = (file: File | null, existing?: string | null) =>
     !!file || !!existing;
 
-  const clientDocsUploaded =
-    (hasDoc(idFrontFile, existingIdFront) ? 1 : 0) +
-    (hasDoc(idBackFile, existingIdBack) ? 1 : 0);
+  const clientDocsUploaded = hasDoc(idFrontFile, existingIdFront) ? 1 : 0;
 
   const drivingDocsUploaded = isSelfDrive
     ? hasDoc(dlFrontFile, existingDlFront)
@@ -191,12 +183,7 @@ export default function NewClientForm({
             existingAvatar={existingAvatar}
             idFrontFile={idFrontFile}
             setIdFrontFile={setIdFrontFile}
-            idBackFile={idBackFile}
-            setIdBackFile={setIdBackFile}
             existingIdFront={existingIdFront}
-            existingIdBack={existingIdBack}
-            showIdentityUploads={mode === "edit"}
-            showIdFrontUpload={mode !== "edit"}
           />
 
           {mode === "edit" && <DrivingArrangementSection

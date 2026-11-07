@@ -14,12 +14,9 @@ import type { SectionProps } from "./types";
 interface ComplianceSectionProps extends SectionProps {
   idFrontFile: File | null;
   setIdFrontFile: (f: File | null) => void;
-  idBackFile: File | null;
-  setIdBackFile: (f: File | null) => void;
   dlFrontFile: File | null;
   setDlFrontFile: (f: File | null) => void;
   existingIdFront?: string | null;
-  existingIdBack?: string | null;
   existingDlFront?: string | null;
 }
 
@@ -37,12 +34,9 @@ export default function ComplianceSection({
   inputCls,
   idFrontFile,
   setIdFrontFile,
-  idBackFile,
-  setIdBackFile,
   dlFrontFile,
   setDlFrontFile,
   existingIdFront,
-  existingIdBack,
   existingDlFront,
 }: ComplianceSectionProps) {
   const drivingArrangement = formData.driving_arrangement || "self_drive";
@@ -171,17 +165,6 @@ export default function ComplianceSection({
             captureMode="environment"
             error={fieldErrors["idFront"]}
             fieldId="field-idFront"
-          />
-          <DocUploadSlot
-            label="ID Back"
-            icon={FileText}
-            file={idBackFile}
-            setFile={setIdBackFile}
-            required
-            existingUrl={existingIdBack}
-            captureMode="environment"
-            error={fieldErrors["idBack"]}
-            fieldId="field-idBack"
           />
           {requiresSelfDriveDL && (
             <DocUploadSlot

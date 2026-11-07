@@ -19,12 +19,7 @@ interface ClientDetailsSectionProps extends SectionProps {
   existingAvatar?: string | null;
   idFrontFile: File | null;
   setIdFrontFile: (f: File | null) => void;
-  idBackFile: File | null;
-  setIdBackFile: (f: File | null) => void;
   existingIdFront?: string | null;
-  existingIdBack?: string | null;
-  showIdentityUploads?: boolean;
-  showIdFrontUpload?: boolean;
 }
 
 const labelClass =
@@ -45,12 +40,7 @@ export default function ClientDetailsSection({
   existingAvatar,
   idFrontFile,
   setIdFrontFile,
-  idBackFile,
-  setIdBackFile,
   existingIdFront,
-  existingIdBack,
-  showIdentityUploads = true,
-  showIdFrontUpload = false,
 }: ClientDetailsSectionProps) {
   const idType = formData.id_type || "national_id";
 
@@ -278,37 +268,21 @@ export default function ClientDetailsSection({
           </div>
           {renderError("id_number")}
 
-          {(showIdentityUploads || showIdFrontUpload) && (
-            <div className="mt-4">
-              <label className={labelClass}>
-                Upload your ID or passport
-              </label>
-              <div className={showIdentityUploads ? "grid grid-cols-1 sm:grid-cols-2 gap-3" : ""}>
-                <DocUploadSlot
-                  label="Upload ID or Passport"
-                  icon={FileText}
-                  file={idFrontFile}
-                  setFile={setIdFrontFile}
-                  existingUrl={existingIdFront}
-                  captureMode="environment"
-                  error={fieldErrors["idFront"]}
-                  fieldId="field-idFront"
-                />
-                {showIdentityUploads && (
-                  <DocUploadSlot
-                    label="Upload ID Back"
-                    icon={FileText}
-                    file={idBackFile}
-                    setFile={setIdBackFile}
-                    existingUrl={existingIdBack}
-                    captureMode="environment"
-                    error={fieldErrors["idBack"]}
-                    fieldId="field-idBack"
-                  />
-                )}
-              </div>
-            </div>
-          )}
+          <div className="mt-4">
+            <label className={labelClass}>
+              Upload your ID or passport
+            </label>
+            <DocUploadSlot
+              label="Upload ID or Passport"
+              icon={FileText}
+              file={idFrontFile}
+              setFile={setIdFrontFile}
+              existingUrl={existingIdFront}
+              captureMode="environment"
+              error={fieldErrors["idFront"]}
+              fieldId="field-idFront"
+            />
+          </div>
         </div>
       </div>
 

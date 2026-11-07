@@ -110,8 +110,6 @@ export default function ClientProfilePage() {
               files={{
                 idFrontFile: profile.idFrontFile,
                 setIdFrontFile: profile.setIdFrontFile,
-                idBackFile: profile.idBackFile,
-                setIdBackFile: profile.setIdBackFile,
                 dlFrontFile: profile.dlFrontFile,
                 setDlFrontFile: profile.setDlFrontFile,
               }}

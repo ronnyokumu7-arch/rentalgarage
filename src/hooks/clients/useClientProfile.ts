@@ -123,7 +123,6 @@ export function useClientProfile(clientId: number) {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
   const [idFrontFile, setIdFrontFile] = useState<File | null>(null);
-  const [idBackFile, setIdBackFile] = useState<File | null>(null);
   const [dlFrontFile, setDlFrontFile] = useState<File | null>(null);
 
   // ✅ Client-owned driver document files
@@ -160,7 +159,6 @@ export function useClientProfile(clientId: number) {
 
   const clearDocFiles = () => {
     setIdFrontFile(null);
-    setIdBackFile(null);
     setDlFrontFile(null);
   };
 
@@ -272,13 +270,12 @@ export function useClientProfile(clientId: number) {
   /* ── Compliance document uploads (existing gallery) ──────────────── */
 
   const handleUploadDocuments = async () => {
-    if (!idFrontFile && !idBackFile && !dlFrontFile) return;
+    if (!idFrontFile && !dlFrontFile) return;
     setLoading(true);
 
     try {
       const uploads: Promise<any>[] = [];
       if (idFrontFile) uploads.push(clientsApi.uploadIdFront(clientId, idFrontFile));
-      if (idBackFile) uploads.push(clientsApi.uploadIdBack(clientId, idBackFile));
       if (dlFrontFile) uploads.push(clientsApi.uploadDlFront(clientId, dlFrontFile));
 
       await Promise.all(uploads);
@@ -363,8 +360,6 @@ export function useClientProfile(clientId: number) {
     setAvatarPreview,
     idFrontFile,
     setIdFrontFile,
-    idBackFile,
-    setIdBackFile,
     dlFrontFile,
     setDlFrontFile,
     driverIdFrontFile,

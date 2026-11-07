@@ -20,7 +20,7 @@ export default function InlineClientViewer({ client, taskId, task, onRefresh:_on
     isEditing, setIsEditing, isSaving, isActionLoading,
     uploadingDoc, viewingImage, setViewingImage,
     formData, setFormData, isExpired,
-    idFrontRef, idBackRef, dlFrontRef,
+    idFrontRef, dlFrontRef,
     handleSave, handleStatusAction, handleDocUpload,
   } = useInlineClient(client, taskId);
 
@@ -227,10 +227,6 @@ export default function InlineClientViewer({ client, taskId, task, onRefresh:_on
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
             <DocumentCard title="ID Front" imageUrl={client.id_image_front} isUploading={uploadingDoc === 'id_front'} onUpload={() => idFrontRef.current?.click()} onView={() => client.id_image_front && setViewingImage(client.id_image_front)} />
             <input ref={idFrontRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleDocUpload('id_front', e.target.files[0])} />
-            
-            <DocumentCard title="ID Back" imageUrl={client.id_image_back} isUploading={uploadingDoc === 'id_back'} onUpload={() => idBackRef.current?.click()} onView={() => client.id_image_back && setViewingImage(client.id_image_back)} />
-            <input ref={idBackRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleDocUpload('id_back', e.target.files[0])} />
-            
             <DocumentCard title="DL Front" imageUrl={client.dl_image_front} isUploading={uploadingDoc === 'dl_front'} onUpload={() => dlFrontRef.current?.click()} onView={() => client.dl_image_front && setViewingImage(client.dl_image_front)} />
             <input ref={dlFrontRef} type="file" accept="image/*" className="hidden" onChange={(e) => e.target.files?.[0] && handleDocUpload('dl_front', e.target.files[0])} />
           </div>
