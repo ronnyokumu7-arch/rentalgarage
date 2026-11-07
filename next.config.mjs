@@ -134,10 +134,10 @@ const nextConfig = {
           // 🛡️ CONTENT SECURITY POLICY (the main shield)
           { key: 'Content-Security-Policy', value: csp },
           
-          // 🛡️ Cross-origin isolation — PRODUCTION ONLY.
-          // Skipped in dev so localhost never breaks.
+          // 🛡️ Production-only browsing context and resource policies.
+          // COEP is intentionally omitted: third-party flags and signed
+          // Cloudinary images are embedded without CORP/CORS response headers.
           ...(isDev ? [] : [
-            { key: 'Cross-Origin-Embedder-Policy', value: 'require-corp' },
             { key: 'Cross-Origin-Opener-Policy', value: 'same-origin' },
             { key: 'Cross-Origin-Resource-Policy', value: 'same-origin' },
           ]),
