@@ -3,8 +3,8 @@
 
 import { useEffect, useState } from "react";
 import {
-  X, Copy, Check, Trash2, ExternalLink, Link2, Loader2, AlertCircle, Clock,
-} from "lucide-react";
+  X, Copy, Check, Trash as Trash2, ArrowSquareOut as ExternalLink, LinkSimple as Link2, CircleNotch as Loader2, WarningCircle as AlertCircle, Clock,
+} from "@phosphor-icons/react/ssr";
 import toast from "react-hot-toast";
 import { clientInvitesApi, ClientInvite } from "@/lib/api/clientInvites";
 import { createPortal } from "react-dom";
@@ -141,7 +141,7 @@ export default function InviteLinksModal({ isOpen, onClose }: InviteLinksModalPr
         <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-surface-border)] flex-shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
-              <Link2 size={16} />
+              <Link2 size={16} aria-hidden="true" />
             </div>
             <div>
               <h2 className="text-base font-bold text-[var(--color-ink)]">
@@ -157,7 +157,7 @@ export default function InviteLinksModal({ isOpen, onClose }: InviteLinksModalPr
             className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] transition-colors"
             aria-label="Close"
           >
-            <X size={18} />
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
 
@@ -165,18 +165,18 @@ export default function InviteLinksModal({ isOpen, onClose }: InviteLinksModalPr
         <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
           {loading ? (
             <div className="flex items-center justify-center gap-2 py-12 text-[var(--color-ink-muted)]">
-              <Loader2 size={18} className="animate-spin" />
+              <Loader2 size={18} className="animate-spin" aria-hidden="true" />
               <span className="text-sm">Loading invites...</span>
             </div>
           ) : error ? (
             <div className="flex flex-col items-center gap-3 py-12 text-center">
-              <AlertCircle size={24} className="text-[var(--color-danger)]" />
+              <AlertCircle size={24} className="text-[var(--color-danger)]" aria-hidden="true" />
               <p className="text-sm text-[var(--color-ink-muted)]">{error}</p>
             </div>
           ) : invites.length === 0 ? (
             <div className="flex flex-col items-center gap-3 py-12 text-center">
               <div className="w-14 h-14 rounded-2xl bg-[var(--color-surface-hover)] flex items-center justify-center">
-                <Link2 size={22} className="text-[var(--color-ink-subtle)]" />
+                <Link2 size={22} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
               </div>
               <p className="text-sm font-semibold text-[var(--color-ink)]">
                 No active invites
@@ -209,7 +209,7 @@ export default function InviteLinksModal({ isOpen, onClose }: InviteLinksModalPr
                         )}
                       </div>
                       <span className="flex items-center gap-1 text-[10px] font-semibold text-amber-600 dark:text-amber-400 flex-shrink-0">
-                        <Clock size={10} />
+                        <Clock size={10} aria-hidden="true" />
                         {formatExpiry(invite.expires_at)}
                       </span>
                     </div>
@@ -227,7 +227,7 @@ export default function InviteLinksModal({ isOpen, onClose }: InviteLinksModalPr
                             : "bg-[var(--color-primary)]/10 text-[var(--color-primary)] hover:bg-[var(--color-primary)]/20"
                         }`}
                       >
-                        {isCopied ? <Check size={12} /> : <Copy size={12} />}
+                        {isCopied ? <Check size={12} aria-hidden="true" /> : <Copy size={12} aria-hidden="true" />}
                         {isCopied ? "Copied" : "Copy link"}
                       </button>
 
@@ -238,7 +238,7 @@ export default function InviteLinksModal({ isOpen, onClose }: InviteLinksModalPr
                         className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] bg-[var(--color-surface)] border border-[var(--color-surface-border)] hover:bg-[var(--color-surface-hover)] transition-colors"
                         aria-label="Open link"
                       >
-                        <ExternalLink size={12} />
+                        <ExternalLink size={12} aria-hidden="true" />
                       </a>
 
                       <button
@@ -248,9 +248,9 @@ export default function InviteLinksModal({ isOpen, onClose }: InviteLinksModalPr
                         aria-label="Revoke invite"
                       >
                         {isRevoking ? (
-                          <Loader2 size={12} className="animate-spin" />
+                          <Loader2 size={12} className="animate-spin" aria-hidden="true" />
                         ) : (
-                          <Trash2 size={12} />
+                          <Trash2 size={12} aria-hidden="true" />
                         )}
                       </button>
                     </div>

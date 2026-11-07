@@ -1,5 +1,5 @@
 // src/components/tenants/TenantProfileTabs.tsx
-import { Building2, CreditCard, Activity } from 'lucide-react'; // ✅ Changed Settings to Activity
+import { Buildings as Building2, CreditCard, Pulse as Activity } from "@phosphor-icons/react/ssr"; // ✅ Changed Settings to Activity
 import { type TenantProfileTab } from '@/hooks/useTenantProfile';
 
 interface TenantProfileTabsProps {
@@ -36,7 +36,7 @@ export function TenantProfileTabs({ activeTab, setActiveTab }: TenantProfileTabs
                 className={`
                   -ml-0.5 mr-2 h-5 w-5 transition-colors
                   ${isActive ? 'text-[var(--color-primary)]' : 'text-[var(--color-ink-subtle)] group-hover:text-[var(--color-ink-muted)]'}
-                `} 
+                `} aria-hidden="true"
               />
               <span>{tab.label}</span>
             </button>

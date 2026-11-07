@@ -1,7 +1,7 @@
 // src/components/ui/Pagination.tsx
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { CaretLeft as ChevronLeft, CaretRight as ChevronRight } from "@phosphor-icons/react/ssr";
 
 interface PaginationProps {
   currentPage: number;
@@ -73,7 +73,7 @@ export default function Pagination({
           disabled={currentPage === 1}
           className="px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] disabled:opacity-30 transition-all active:scale-95"
         >
-          <ChevronLeft size={14} />
+          <ChevronLeft size={14} aria-hidden="true" />
         </button>
 
         {getPageNumbers().map((page, i) => {
@@ -110,7 +110,7 @@ export default function Pagination({
           disabled={currentPage === totalPages}
           className="px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] disabled:opacity-30 transition-all active:scale-95"
         >
-          <ChevronRight size={14} />
+          <ChevronRight size={14} aria-hidden="true" />
         </button>
       </div>
     </div>

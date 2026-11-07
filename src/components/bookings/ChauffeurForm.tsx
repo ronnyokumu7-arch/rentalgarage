@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CalendarDays, MapPin, User, Users, Loader2, CheckCircle } from 'lucide-react';
+import { CalendarDots as CalendarDays, MapPin, User, Users, CircleNotch as Loader2, CheckCircle } from "@phosphor-icons/react/ssr";
 import { useNewBooking } from '@/hooks/bookings/useNewBooking';
 import ClientSearch from './ClientSearch';
 import VehicleSearch from './VehicleSearch';
@@ -90,7 +90,7 @@ export default function ChauffeurForm({ formId, onClose }: ChauffeurFormProps) {
                   : 'text-[var(--color-ink-muted)] border-transparent hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] rounded-t-lg'
               }`}
             >
-              <Icon size={16} />
+              <Icon size={16} aria-hidden="true" />
               {tab.label}
             </button>
           );
@@ -101,7 +101,7 @@ export default function ChauffeurForm({ formId, onClose }: ChauffeurFormProps) {
       <section className={sectionClass}>
         <div className="flex items-center gap-2.5 mb-4">
           <div className="w-7 h-7 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
-            <User size={16} />
+            <User size={16} aria-hidden="true" />
           </div>
           <h3 className="text-sm font-bold text-[var(--color-ink)]">Client, Vehicle & Driver</h3>
         </div>
@@ -169,7 +169,7 @@ export default function ChauffeurForm({ formId, onClose }: ChauffeurFormProps) {
       <section className={sectionClass}>
         <div className="flex items-center gap-2.5 mb-4">
           <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-            <CalendarDays size={16} />
+            <CalendarDays size={16} aria-hidden="true" />
           </div>
           <h3 className="text-sm font-bold text-[var(--color-ink)]">Service Type & Schedule</h3>
         </div>
@@ -207,7 +207,7 @@ export default function ChauffeurForm({ formId, onClose }: ChauffeurFormProps) {
       <section className={sectionClass}>
         <div className="flex items-center gap-2.5 mb-4">
           <div className="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center">
-            <MapPin size={16} />
+            <MapPin size={16} aria-hidden="true" />
           </div>
           <h3 className="text-sm font-bold text-[var(--color-ink)]">Pickup & Return Locations</h3>
         </div>
@@ -258,9 +258,9 @@ export default function ChauffeurForm({ formId, onClose }: ChauffeurFormProps) {
             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] shadow-lg shadow-[var(--color-primary)]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
           >
             {loading || quoteLoading ? (
-              <><Loader2 size={16} className="animate-spin" /> Creating booking...</>
+              <><Loader2 size={16} className="animate-spin" aria-hidden="true" /> Creating booking...</>
             ) : (
-              <><CheckCircle size={16} /> Create Booking</>
+              <><CheckCircle size={16} aria-hidden="true" /> Create Booking</>
             )}
           </button>
         )}

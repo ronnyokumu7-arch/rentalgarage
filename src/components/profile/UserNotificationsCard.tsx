@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { Bell, Monitor, Moon, Sun, LayoutGrid, List } from "lucide-react";
+import { Bell, Monitor, Moon, Sun, SquaresFour as LayoutGrid, List } from "@phosphor-icons/react/ssr";
 import SectionCard from "@/components/ui/SectionCard";
 import type { User } from "@/lib/types";
 import type { UserUpdatePayload } from "@/lib/api/users";
@@ -35,7 +35,7 @@ export default function UserNotificationsCard({ user, onSave }: UserNotification
       {/* Unified Header */}
       <div className="flex items-center gap-3 p-6 pb-5 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/20">
         <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/10 flex items-center justify-center">
-          <Bell size={18} className="text-[var(--color-primary)]" />
+          <Bell size={18} className="text-[var(--color-primary)]" aria-hidden="true" />
         </div>
         <div>
           <h3 className="text-sm font-bold text-[var(--color-ink)]">Preferences</h3>
@@ -64,7 +64,7 @@ export default function UserNotificationsCard({ user, onSave }: UserNotification
                     : "bg-[var(--color-surface-hover)]/30 border-[var(--color-surface-border)] text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)]"
                 }`}
               >
-                <option.icon size={18} />
+                <option.icon size={18} aria-hidden="true" />
                 <span className="text-xs font-bold">{option.label}</span>
                 {theme === option.value && (
                   <div className="absolute top-3 right-3 w-2 h-2 rounded-full bg-[var(--color-primary)]" />
@@ -93,7 +93,7 @@ export default function UserNotificationsCard({ user, onSave }: UserNotification
                     : "bg-[var(--color-surface-hover)]/30 border-[var(--color-surface-border)] text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)]"
                 }`}
               >
-                <option.icon size={18} />
+                <option.icon size={18} aria-hidden="true" />
                 <div className="text-left">
                   <span className="text-xs font-bold block">{option.label}</span>
                   <span className="text-[10px] opacity-70">{option.desc}</span>

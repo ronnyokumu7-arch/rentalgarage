@@ -1,9 +1,9 @@
 "use client";
 
 import { 
-  User, Shield, CheckCircle, Mail, CreditCard, 
-  Upload, Camera, FileText, Car, Loader2, Calendar, Lock, Briefcase, Info, Building2, Smartphone
-} from "lucide-react";
+  User, Shield, CheckCircle, Envelope as Mail, CreditCard,
+  Upload, Camera, FileText, Car, CircleNotch as Loader2, Calendar, Lock, Briefcase, Info, Buildings as Building2, DeviceMobile as Smartphone
+} from "@phosphor-icons/react/ssr";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
 import PhoneInput from 'react-phone-number-input';
@@ -95,14 +95,14 @@ export default function NewUserForm({
         {file ? (
           <>
             <div className="w-7 h-7 rounded-full bg-[var(--color-success-bg)] text-[var(--color-success-text)] flex items-center justify-center mb-1">
-              <CheckCircle size={12} />
+              <CheckCircle size={12} aria-hidden="true" />
             </div>
             <p className="text-[9px] font-bold text-[var(--color-ink)] truncate max-w-[70px]">{file.name}</p>
           </>
         ) : (
           <>
             <div className="w-7 h-7 rounded-full bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] group-hover:text-[var(--color-primary)] flex items-center justify-center mb-1">
-              <Icon size={12} />
+              <Icon size={12} aria-hidden="true" />
             </div>
             <p className="text-[9px] font-semibold text-[var(--color-ink-muted)] group-hover:text-[var(--color-ink)]">
               {label} {required && <span className="text-[var(--color-danger)]">*</span>}
@@ -126,7 +126,7 @@ export default function NewUserForm({
               <img src={preview.tenant_logo_url} alt={preview.tenant_name} className="w-12 h-12 rounded-lg object-contain" />
             ) : (
               <div className="w-12 h-12 rounded-lg bg-[var(--color-primary)]/20 text-[var(--color-primary)] flex items-center justify-center">
-                <Briefcase size={24} />
+                <Briefcase size={24} aria-hidden="true" />
               </div>
             )}
             <div>
@@ -141,7 +141,7 @@ export default function NewUserForm({
           <div className="flex items-start justify-between mb-3">
             <div className="flex items-center gap-2">
               <div className="w-6 h-6 rounded-md bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
-                <User size={14} />
+                <User size={14} aria-hidden="true" />
               </div>
               <h3 className="text-sm font-bold text-[var(--color-ink)]">Your Identity</h3>
             </div>
@@ -152,12 +152,12 @@ export default function NewUserForm({
                 {avatarFile ? (
                   <img src={URL.createObjectURL(avatarFile)} alt="Avatar" className="w-full h-full object-cover" />
                 ) : (
-                  <Camera size={14} className="text-[var(--color-ink-subtle)] group-hover:text-[var(--color-primary)] transition-colors" />
+                  <Camera size={14} className="text-[var(--color-ink-subtle)] group-hover:text-[var(--color-primary)] transition-colors" aria-hidden="true" />
                 )}
               </div>
               <input type="file" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer" onChange={(e) => setAvatarFile(e.target.files?.[0] || null)} />
               <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center shadow-lg border-2 border-[var(--color-surface)]">
-                <Upload size={8} />
+                <Upload size={8} aria-hidden="true" />
               </div>
             </label>
           </div>
@@ -166,14 +166,14 @@ export default function NewUserForm({
             <div className="sm:col-span-2">
               <label className={labelClass}>Full Name <span className="text-[var(--color-danger)]">*</span></label>
               <div className="relative">
-                <User size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" />
+                <User size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                 <input type="text" value={formData.full_name} onChange={(e) => updateField("full_name", e.target.value)} placeholder="Your full name" className={`${inputClass} pl-8`} required />
               </div>
             </div>
             <div>
               <label className={labelClass}>Email Address <span className="text-[var(--color-danger)]">*</span></label>
               <div className="relative">
-                <Mail size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" />
+                <Mail size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                 <input type="email" value={formData.email} onChange={(e) => updateField("email", e.target.value)} placeholder="you@example.com" className={`${inputClass} pl-8`} required />
               </div>
             </div>
@@ -191,7 +191,7 @@ export default function NewUserForm({
             <div className="sm:col-span-2">
               <label className={labelClass}>National ID Number <span className="text-[var(--color-danger)]">*</span></label>
               <div className="relative">
-                <CreditCard size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" />
+                <CreditCard size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                 <input type="text" value={formData.id_number} onChange={(e) => updateField("id_number", e.target.value)} placeholder="National ID Number" className={`${inputClass} pl-8`} required />
               </div>
             </div>
@@ -202,7 +202,7 @@ export default function NewUserForm({
         <section className={sectionClass}>
           <div className="flex items-center gap-2 mb-3">
             <div className={`w-6 h-6 rounded-md flex items-center justify-center ${isInvestor ? 'bg-emerald-500/10 text-emerald-500' : 'bg-purple-500/10 text-purple-500'}`}>
-              {isInvestor ? <Building2 size={14} /> : <Shield size={14} />}
+              {isInvestor ? <Building2 size={14} aria-hidden="true" /> : <Shield size={14} aria-hidden="true" />}
             </div>
             <h3 className="text-sm font-bold text-[var(--color-ink)]">
               {isInvestor ? 'Payout & Banking Details' : 'Compliance & Documents'}
@@ -213,7 +213,7 @@ export default function NewUserForm({
             // ✅ INVESTOR PAYOUT FIELDS
             <div className="space-y-3">
               <div className="p-2.5 rounded-lg bg-emerald-500/5 border border-emerald-500/20 flex items-start gap-2">
-                <Info size={14} className="text-emerald-500 shrink-0 mt-0.5" />
+                <Info size={14} className="text-emerald-500 shrink-0 mt-0.5" aria-hidden="true" />
                 <p className="text-[10px] text-emerald-700 dark:text-emerald-400 leading-relaxed">
                   You're joining as a <span className="font-bold">Host Investor</span>. Please provide your preferred payout details. You can update these anytime in your settings.
                 </p>
@@ -222,7 +222,7 @@ export default function NewUserForm({
               <div>
                 <label className={labelClass}>M-Pesa Phone Number</label>
                 <div className="relative">
-                  <Smartphone size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)] z-10 pointer-events-none" />
+                  <Smartphone size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)] z-10 pointer-events-none" aria-hidden="true" />
                   <PhoneInput
                     international
                     defaultCountry="KE"
@@ -254,7 +254,7 @@ export default function NewUserForm({
             <>
               {isDriver && (
                 <div className="mb-3 p-2.5 rounded-lg bg-amber-500/5 border border-amber-500/20 flex items-start gap-2">
-                  <Info size={14} className="text-amber-500 shrink-0 mt-0.5" />
+                  <Info size={14} className="text-amber-500 shrink-0 mt-0.5" aria-hidden="true" />
                   <p className="text-[10px] text-amber-700 dark:text-amber-400 leading-relaxed">
                     You're joining as a <span className="font-bold">Driver</span>. Your Driver's License details and DL image are required.
                   </p>
@@ -265,14 +265,14 @@ export default function NewUserForm({
                 <div>
                   <label className={labelClass}>Driving License Number {isDriver && <span className="text-[var(--color-danger)]">*</span>}</label>
                   <div className="relative">
-                    <Car size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" />
+                    <Car size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                     <input type="text" value={formData.dl_number} onChange={(e) => updateField("dl_number", e.target.value)} placeholder="DL-01234" className={`${inputClass} pl-8`} required={isDriver} />
                   </div>
                 </div>
                 <div>
                   <label className={labelClass}>DL Expiry Date {isDriver && <span className="text-[var(--color-danger)]">*</span>}</label>
                   <div className="relative group">
-                    <Calendar size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)] pointer-events-none z-10" />
+                    <Calendar size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)] pointer-events-none z-10" aria-hidden="true" />
                     <Flatpickr
                       value={formData.dl_expiry}
                       onChange={(dates) => {
@@ -307,7 +307,7 @@ export default function NewUserForm({
         <section className={sectionClass}>
           <div className="flex items-center gap-2 mb-3">
             <div className="w-6 h-6 rounded-md bg-[var(--color-success-bg)] text-[var(--color-success-text)] flex items-center justify-center">
-              <Lock size={14} />
+              <Lock size={14} aria-hidden="true" />
             </div>
             <h3 className="text-sm font-bold text-[var(--color-ink)]">Set Your Password</h3>
           </div>
@@ -316,14 +316,14 @@ export default function NewUserForm({
             <div>
               <label className={labelClass}>Password <span className="text-[var(--color-danger)]">*</span></label>
               <div className="relative">
-                <Lock size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" />
+                <Lock size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                 <input type="password" value={formData.password} onChange={(e) => updateField("password", e.target.value)} placeholder="Min 8 characters" className={`${inputClass} pl-8`} required minLength={8} />
               </div>
             </div>
             <div>
               <label className={labelClass}>Confirm Password <span className="text-[var(--color-danger)]">*</span></label>
               <div className="relative">
-                <Lock size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" />
+                <Lock size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                 <input type="password" value={formData.confirmPassword} onChange={(e) => updateField("confirmPassword", e.target.value)} placeholder="Re-enter password" className={`${inputClass} pl-8`} required />
               </div>
               {formData.confirmPassword && !passwordsMatch && (
@@ -342,7 +342,7 @@ export default function NewUserForm({
         <section className={`${sectionClass} ${isInvestor ? 'border-emerald-500/20 bg-emerald-500/5' : 'border-[var(--color-primary)]/20 bg-[var(--color-primary)]/5'}`}>
           <div className="flex items-center gap-2 mb-3">
             <div className={`w-6 h-6 rounded-md flex items-center justify-center ${isInvestor ? 'bg-emerald-500/10 text-emerald-500' : 'bg-[var(--color-primary)]/10 text-[var(--color-primary)]'}`}>
-              <Briefcase size={14} />
+              <Briefcase size={14} aria-hidden="true" />
             </div>
             <h3 className="text-sm font-bold text-[var(--color-ink)]">Your Role</h3>
           </div>
@@ -386,7 +386,7 @@ export default function NewUserForm({
               <img src={URL.createObjectURL(avatarFile)} alt="Preview" className="w-12 h-12 rounded-full object-cover" />
             ) : (
               <div className="w-12 h-12 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
-                <User size={20} />
+                <User size={20} aria-hidden="true" />
               </div>
             )}
             <div className="min-w-0 flex-1">
@@ -431,12 +431,12 @@ export default function NewUserForm({
           >
             {loading ? (
               <>
-                <Loader2 size={16} className="animate-spin" />
+                <Loader2 size={16} className="animate-spin" aria-hidden="true" />
                 Activating...
               </>
             ) : (
               <>
-                <CheckCircle size={16} />
+                <CheckCircle size={16} aria-hidden="true" />
                 Activate Account
               </>
             )}

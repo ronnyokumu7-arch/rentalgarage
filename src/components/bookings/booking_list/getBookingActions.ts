@@ -7,8 +7,8 @@
  * as the operator's manual trigger (from pending OR confirmed).
  */
 import {
-  Link as LinkIcon, Ban, XCircle, FileText, CalendarPlus, Shield, Send,
-} from "lucide-react";
+  Link as LinkIcon, Prohibit as Ban, XCircle, FileText, CalendarPlus, Shield, PaperPlaneTilt as Send,
+} from "@phosphor-icons/react/ssr";
 import type { RowAction } from "@/components/ui/DataTable";
 import type { Booking } from "@/lib/types";
 

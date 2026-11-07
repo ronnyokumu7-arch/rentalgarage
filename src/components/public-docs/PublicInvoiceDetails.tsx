@@ -1,7 +1,7 @@
 // src/components/public-docs/PublicInvoiceDetails.tsx
 "use client";
 
-import { User, Car, Calendar, Banknote, UserCircle } from "lucide-react";
+import { User, Car, Calendar, Money as Banknote, UserCircle } from "@phosphor-icons/react/ssr";
 import type { PublicInvoiceView } from "@/lib/types";
 
 interface PublicInvoiceDetailsProps {
@@ -48,7 +48,7 @@ export default function PublicInvoiceDetails({ invoice }: PublicInvoiceDetailsPr
         <h3 style={sectionTitleStyle}>Client Details</h3>
         <div className="flex items-start gap-3">
           <div style={iconContainerStyle}>
-            <User size={18} style={iconStyle} />
+            <User size={18} style={iconStyle} aria-hidden="true" />
           </div>
           <div>
             <p style={nameStyle}>{invoice.client_name}</p>
@@ -61,7 +61,7 @@ export default function PublicInvoiceDetails({ invoice }: PublicInvoiceDetailsPr
         <h3 style={sectionTitleStyle}>Vehicle Details</h3>
         <div className="flex items-start gap-3">
           <div style={iconContainerStyle}>
-            <Car size={18} style={iconStyle} />
+            <Car size={18} style={iconStyle} aria-hidden="true" />
           </div>
           <div>
             <p style={nameStyle}>
@@ -82,7 +82,7 @@ export default function PublicInvoiceDetails({ invoice }: PublicInvoiceDetailsPr
           <h3 style={sectionTitleStyle}>Assigned Driver</h3>
           <div className="flex items-start gap-3">
             <div style={iconContainerStyle}>
-              <UserCircle size={18} style={iconStyle} />
+              <UserCircle size={18} style={iconStyle} aria-hidden="true" />
             </div>
             <div>
               <p style={nameStyle}>{invoice.driver_name}</p>
@@ -104,7 +104,7 @@ export default function PublicInvoiceDetails({ invoice }: PublicInvoiceDetailsPr
         <h3 style={sectionTitleStyle}>Invoice Dates</h3>
         <div className="flex items-start gap-3">
           <div style={iconContainerStyle}>
-            <Calendar size={18} style={iconStyle} />
+            <Calendar size={18} style={iconStyle} aria-hidden="true" />
           </div>
           <div>
             <p style={nameStyle}>Due: {new Date(invoice.due_date).toLocaleDateString()}</p>
@@ -117,7 +117,7 @@ export default function PublicInvoiceDetails({ invoice }: PublicInvoiceDetailsPr
         <h3 style={sectionTitleStyle}>Total Amount</h3>
         <div className="flex items-start gap-3">
           <div style={iconContainerStyle}>
-            <Banknote size={18} style={iconStyle} />
+            <Banknote size={18} style={iconStyle} aria-hidden="true" />
           </div>
           <div>
             <p style={nameStyle}>{invoice.currency_code} {Number(invoice.amount_due).toLocaleString()}</p>

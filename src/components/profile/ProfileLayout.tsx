@@ -3,7 +3,7 @@
 
 import { ReactNode, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, Loader2, User as UserIcon, Camera } from "lucide-react";
+import { ArrowLeft, CircleNotch as Loader2, User as UserIcon, Camera } from "@phosphor-icons/react/ssr";
 import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
 import MobileFloatingSegment from "@/components/ui/MobileFloatingSegment";
 import SecureImage from "@/components/ui/SecureImage";
@@ -58,7 +58,7 @@ export default function ProfileLayout({
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh] text-ink-muted">
-        <Loader2 className="w-6 h-6 animate-spin mr-3 text-primary" />
+        <Loader2 className="w-6 h-6 animate-spin mr-3 text-primary" aria-hidden="true" />
         Loading profile...
       </div>
     );
@@ -68,7 +68,7 @@ export default function ProfileLayout({
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4">
         <div className="w-16 h-16 rounded-2xl bg-surface-hover border border-surface-border flex items-center justify-center mb-4">
-          <UserIcon size={24} className="text-ink-subtle" />
+          <UserIcon size={24} className="text-ink-subtle" aria-hidden="true" />
         </div>
         <h2 className="text-lg font-bold text-ink mb-2">Profile Not Found</h2>
         <p className="text-sm text-ink-muted max-w-md mb-6">
@@ -78,7 +78,7 @@ export default function ProfileLayout({
           href={backHref}
           className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-white bg-primary hover:bg-primary-hover transition-all"
         >
-          <ArrowLeft size={16} /> Back to {backLabel}
+          <ArrowLeft size={16} aria-hidden="true" /> Back to {backLabel}
         </Link>
       </div>
     );
@@ -117,7 +117,7 @@ export default function ProfileLayout({
         href={backHref}
         className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors group"
       >
-        <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
+        <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" aria-hidden="true" />
         <span>Back to {backLabel}</span>
       </Link>
 
@@ -150,9 +150,9 @@ export default function ProfileLayout({
                   className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center shadow-lg hover:bg-[var(--color-primary-hover)] active:scale-95 transition-all border-2 border-[var(--color-bg)] disabled:opacity-60"
                 >
                   {isUploading ? (
-                    <Loader2 size={13} className="animate-spin" />
+                    <Loader2 size={13} className="animate-spin" aria-hidden="true" />
                   ) : (
-                    <Camera size={13} />
+                    <Camera size={13} aria-hidden="true" />
                   )}
                 </button>
                 <input
@@ -234,7 +234,7 @@ export function ProfileField({
     <div className="flex items-center justify-between py-3 border-b border-[var(--color-surface-border)]/50 last:border-0">
       <div className="flex items-center gap-3">
         <div className="w-8 h-8 rounded-lg bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)]/50 flex items-center justify-center text-[var(--color-ink-subtle)]">
-          <Icon size={14} />
+          <Icon size={14} aria-hidden="true" />
         </div>
         <span className="text-sm font-medium text-[var(--color-ink-muted)]">{label}</span>
       </div>

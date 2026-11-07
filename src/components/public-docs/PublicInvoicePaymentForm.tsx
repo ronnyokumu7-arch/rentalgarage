@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { CreditCard, Loader2 } from "lucide-react";
+import { CreditCard, CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
 import toast from "react-hot-toast";
 import type { PublicInvoiceView } from "@/lib/types";
 
@@ -81,7 +81,7 @@ export default function PublicInvoicePaymentForm({ invoice, isPaying, onRecordPa
   return (
     <div style={containerStyle}>
       <h4 className="flex items-center gap-2" style={titleStyle}>
-        <CreditCard size={16} style={{ color: '#57534E' }} /> Report a Payment
+        <CreditCard size={16} style={{ color: '#57534E' }} aria-hidden="true" /> Report a Payment
       </h4>
       {isPaid ? (
         <div className="text-center py-4">
@@ -198,7 +198,7 @@ export default function PublicInvoicePaymentForm({ invoice, isPaying, onRecordPa
               e.currentTarget.style.boxShadow = '0 4px 12px rgba(109, 40, 217, 0.25)';
             }}
           >
-            {isPaying ? (<><Loader2 className="h-4 w-4 animate-spin" /> Submitting report...</>) : (<><CreditCard size={16} /> Report Payment</>)}
+            {isPaying ? (<><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Submitting report...</>) : (<><CreditCard size={16} aria-hidden="true" /> Report Payment</>)}
           </button>
         </form>
       )}

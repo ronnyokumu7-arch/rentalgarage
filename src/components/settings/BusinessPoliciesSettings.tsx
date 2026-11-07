@@ -3,9 +3,9 @@
 
 import { useState } from "react";
 import {
-  ChevronDown, Save, RotateCcw, Power, Plus, Trash2, Loader2,
-  ScrollText, Scale, BookOpen, Sparkles, X,
-} from "lucide-react";
+  CaretDown as ChevronDown, FloppyDisk as Save, ArrowCounterClockwise as RotateCcw, Power, Plus, Trash as Trash2, CircleNotch as Loader2,
+  Scroll as ScrollText, Scales as Scale, BookOpen, Sparkle as Sparkles, X,
+} from "@phosphor-icons/react/ssr";
 import { useTenantPolicies } from "@/hooks/settings/useTenantPolicies";
 import { PolicyCategory } from "@/lib/api/policies";
 import { MarkdownLitePreview } from "@/lib/markdownLite";
@@ -43,7 +43,7 @@ export default function BusinessPoliciesSettings() {
   if (s.loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" />
+        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" aria-hidden="true" />
       </div>
     );
   }
@@ -77,7 +77,7 @@ export default function BusinessPoliciesSettings() {
                     : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
                 }`}
               >
-                <Icon size={13} strokeWidth={isActive ? 2.5 : 2} />
+                <Icon size={13} weight={isActive ? "bold" : "regular"} aria-hidden="true" />
                 {tab.label}
               </button>
             );
@@ -87,7 +87,7 @@ export default function BusinessPoliciesSettings() {
 
       {/* Guidance banner */}
       <div className="flex gap-3 p-3.5 rounded-xl bg-[var(--color-primary)]/[0.04] border border-[var(--color-primary)]/15">
-        <Sparkles size={14} className="text-[var(--color-primary)] shrink-0 mt-0.5" />
+        <Sparkles size={14} className="text-[var(--color-primary)] shrink-0 mt-0.5" aria-hidden="true" />
         <p className="text-[11px] text-[var(--color-ink-muted)] leading-relaxed">
           Clauses you don't customize inherit the platform default. Saved changes apply to contracts generated afterwards.
         </p>
@@ -98,7 +98,7 @@ export default function BusinessPoliciesSettings() {
         {clauses.length === 0 && !adding ? (
           <div className="flex flex-col items-center justify-center py-12 text-center px-6">
             <div className="w-12 h-12 rounded-2xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center mb-3">
-              <ScrollText size={20} />
+              <ScrollText size={20} aria-hidden="true" />
             </div>
             <p className="text-sm font-bold text-[var(--color-ink)] mb-1">No clauses yet</p>
             <p className="text-xs text-[var(--color-ink-muted)] mb-4 max-w-xs">
@@ -108,7 +108,7 @@ export default function BusinessPoliciesSettings() {
               onClick={() => setAdding(true)}
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition-all active:scale-95 shadow-sm"
             >
-              <Plus size={13} /> Add custom clause
+              <Plus size={13} aria-hidden="true" /> Add custom clause
             </button>
           </div>
         ) : (
@@ -159,7 +159,7 @@ export default function BusinessPoliciesSettings() {
                     <ChevronDown
                       className={`w-4 h-4 shrink-0 text-[var(--color-ink-subtle)] transition-transform duration-200 ${
                         open ? "rotate-180" : ""
-                      }`}
+                      }`} aria-hidden="true"
                     />
                   </button>
 
@@ -234,7 +234,7 @@ export default function BusinessPoliciesSettings() {
                 }}
                 className="w-full flex items-center justify-center gap-1.5 px-5 py-3 text-xs font-bold text-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 transition-colors"
               >
-                <Plus size={13} /> Add custom clause
+                <Plus size={13} aria-hidden="true" /> Add custom clause
               </button>
             )}
           </>
@@ -311,7 +311,7 @@ function ClauseEditorPanel({
                 <ChevronDown
                   className={`w-3 h-3 transition-transform duration-200 ${
                     showDefault ? "rotate-180" : ""
-                  }`}
+                  }`} aria-hidden="true"
                 />
                 {showDefault ? "Hide" : "View"} platform default
               </button>
@@ -348,9 +348,9 @@ function ClauseEditorPanel({
           className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm shadow-[var(--color-primary)]/20"
         >
           {saving ? (
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+            <Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" />
           ) : (
-            <Save className="w-3.5 h-3.5" />
+            <Save className="w-3.5 h-3.5" aria-hidden="true" />
           )}
           {createMode ? "Add clause" : "Save changes"}
         </button>
@@ -360,7 +360,7 @@ function ClauseEditorPanel({
             onClick={onToggle}
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-[var(--color-ink)] bg-[var(--color-surface)] border border-[var(--color-surface-border)] hover:bg-[var(--color-surface-hover)] transition-all active:scale-95"
           >
-            <Power className="w-3.5 h-3.5" />
+            <Power className="w-3.5 h-3.5" aria-hidden="true" />
             {overrideActive ? "Disable custom" : "Enable custom"}
           </button>
         )}
@@ -370,7 +370,7 @@ function ClauseEditorPanel({
             onClick={onReset}
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-[var(--color-ink)] bg-[var(--color-surface)] border border-[var(--color-surface-border)] hover:bg-[var(--color-surface-hover)] transition-all active:scale-95"
           >
-            <RotateCcw className="w-3.5 h-3.5" /> Reset
+            <RotateCcw className="w-3.5 h-3.5" aria-hidden="true" /> Reset
           </button>
         )}
 
@@ -379,7 +379,7 @@ function ClauseEditorPanel({
             onClick={onDelete}
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-rose-500 bg-rose-500/5 border border-rose-500/20 hover:bg-rose-500/10 transition-all active:scale-95"
           >
-            <Trash2 className="w-3.5 h-3.5" /> Delete
+            <Trash2 className="w-3.5 h-3.5" aria-hidden="true" /> Delete
           </button>
         )}
 
@@ -387,7 +387,7 @@ function ClauseEditorPanel({
           onClick={onClose}
           className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface)] transition-all ml-auto"
         >
-          <X className="w-3.5 h-3.5" /> Close
+          <X className="w-3.5 h-3.5" aria-hidden="true" /> Close
         </button>
       </div>
     </div>

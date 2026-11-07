@@ -3,9 +3,9 @@
 
 import { useState } from "react";
 import {
-  CreditCard, Smartphone, Building2, DollarSign, Plus,
-  CheckCircle2, XCircle, Loader2, Edit3, Trash2,
-} from "lucide-react";
+  CreditCard, DeviceMobile as Smartphone, Buildings as Building2, CurrencyDollar as DollarSign, Plus,
+  CheckCircle as CheckCircle2, XCircle, CircleNotch as Loader2, NotePencil as Edit3, Trash as Trash2,
+} from "@phosphor-icons/react/ssr";
 import type {
   PaymentGatewayConfig,
   PaymentGatewayPayload,
@@ -124,7 +124,7 @@ export function PaymentGatewaysSection({
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/30">
         <div className="flex items-center gap-3">
           <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-600">
-            <CreditCard size={16} />
+            <CreditCard size={16} aria-hidden="true" />
           </div>
           <div>
             <h2 className="text-sm font-semibold text-[var(--color-ink)]">Payment Gateways</h2>
@@ -137,12 +137,12 @@ export function PaymentGatewaysSection({
       <div className="p-5 flex-1 flex flex-col gap-4 overflow-y-auto custom-scrollbar">
         {isLoading ? (
           <div className="flex items-center justify-center py-8 text-[var(--color-ink-muted)] gap-2">
-            <Loader2 className="animate-spin text-indigo-600" size={16} />
+            <Loader2 className="animate-spin text-indigo-600" size={16} aria-hidden="true" />
             <span className="text-xs">Loading...</span>
           </div>
         ) : gateways.length === 0 ? (
           <div className="text-center py-6 flex-1 flex flex-col items-center justify-center">
-            <CreditCard className="mb-2 text-[var(--color-ink-subtle)] opacity-40" size={24} />
+            <CreditCard className="mb-2 text-[var(--color-ink-subtle)] opacity-40" size={24} aria-hidden="true" />
             <p className="text-xs font-medium text-[var(--color-ink)]">No gateways configured</p>
             <p className="text-[10px] text-[var(--color-ink-muted)] mt-0.5">Add a method below</p>
           </div>
@@ -159,7 +159,7 @@ export function PaymentGatewaysSection({
                 >
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-lg border ${colorClass}`}>
-                      <Icon size={16} />
+                      <Icon size={16} aria-hidden="true" />
                     </div>
                     <div>
                       <p className="text-xs font-semibold text-[var(--color-ink)] capitalize">
@@ -168,11 +168,11 @@ export function PaymentGatewaysSection({
                       <div className="flex items-center gap-1.5 mt-0.5">
                         {gateway.is_active ? (
                           <span className="inline-flex items-center gap-0.5 text-[10px] text-emerald-600 font-medium">
-                            <CheckCircle2 size={10} /> Active
+                            <CheckCircle2 size={10} aria-hidden="true" /> Active
                           </span>
                         ) : (
                           <span className="inline-flex items-center gap-0.5 text-[10px] text-slate-500 font-medium">
-                            <XCircle size={10} /> Inactive
+                            <XCircle size={10} aria-hidden="true" /> Inactive
                           </span>
                         )}
                         {gateway.environment && (
@@ -189,7 +189,7 @@ export function PaymentGatewaysSection({
                       className="p-1.5 rounded-md text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] transition-colors disabled:opacity-50"
                       title="Edit configuration"
                     >
-                      <Edit3 size={14} />
+                      <Edit3 size={14} aria-hidden="true" />
                     </button>
                     <button
                       onClick={() => handleDeleteGateway(gateway)}
@@ -197,7 +197,7 @@ export function PaymentGatewaysSection({
                       className="p-1.5 rounded-md text-rose-600 hover:bg-rose-50 transition-colors disabled:opacity-50"
                       title="Delete configuration"
                     >
-                      {isDeleting ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                      {isDeleting ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Trash2 size={14} aria-hidden="true" />}
                     </button>
                   </div>
                 </div>
@@ -222,13 +222,13 @@ export function PaymentGatewaysSection({
                     className="flex items-center gap-2.5 p-2.5 rounded-xl border border-dashed border-[var(--color-surface-border)] hover:border-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 transition-all text-left group"
                   >
                     <div className="p-1.5 rounded-lg bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] group-hover:bg-[var(--color-primary)]/10 group-hover:text-[var(--color-primary)] transition-colors">
-                      <Icon size={14} />
+                      <Icon size={14} aria-hidden="true" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-[11px] font-semibold text-[var(--color-ink)] truncate">{gateway.label}</p>
                       <p className="text-[9px] text-[var(--color-ink-muted)] truncate">{gateway.description}</p>
                     </div>
-                    <Plus size={14} className="text-[var(--color-ink-subtle)] group-hover:text-[var(--color-primary)] transition-colors flex-shrink-0" />
+                    <Plus size={14} className="text-[var(--color-ink-subtle)] group-hover:text-[var(--color-primary)] transition-colors flex-shrink-0" aria-hidden="true" />
                   </button>
                 );
               })}

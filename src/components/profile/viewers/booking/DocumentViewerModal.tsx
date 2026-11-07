@@ -1,7 +1,7 @@
 // src/components/ui/DocumentViewerModal.tsx
 "use client";
 
-import { X, Download, ExternalLink } from "lucide-react";
+import { X, Download, ArrowSquareOut as ExternalLink } from "@phosphor-icons/react/ssr";
 
 interface DocumentViewerModalProps {
   title: string;
@@ -34,7 +34,7 @@ export default function DocumentViewerModal({
               className="p-2 rounded-xl text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-primary)] transition-colors"
               title="Open in new tab"
             >
-              <ExternalLink size={16} />
+              <ExternalLink size={16} aria-hidden="true" />
             </a>
             
             {/* Download Button */}
@@ -44,7 +44,7 @@ export default function DocumentViewerModal({
               className="p-2 rounded-xl text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-primary)] transition-colors"
               title="Download file"
             >
-              <Download size={16} />
+              <Download size={16} aria-hidden="true" />
             </a>
             
             {/* Close Button */}
@@ -53,7 +53,7 @@ export default function DocumentViewerModal({
               className="p-2 rounded-xl text-[var(--color-ink-muted)] hover:bg-rose-500/5 hover:text-rose-500 transition-colors"
               title="Close preview"
             >
-              <X size={16} />
+              <X size={16} aria-hidden="true" />
             </button>
           </div>
         </div>

@@ -3,9 +3,9 @@
 
 import { useRef, useState } from "react";
 import {
-  Building2, Upload, Globe, Mail, Phone, MapPin, Hash, Shield,
-  FileText, User, Save, Loader2, CheckCircle2, Pencil, X, AlertCircle,
-} from "lucide-react";
+  Buildings as Building2, Upload, Globe, Envelope as Mail, Phone, MapPin, Hash, Shield,
+  FileText, User, FloppyDisk as Save, CircleNotch as Loader2, CheckCircle as CheckCircle2, PencilSimple as Pencil, X, WarningCircle as AlertCircle,
+} from "@phosphor-icons/react/ssr";
 import { useBusinessSettings } from "@/hooks/settings/useBusinessSettings";
 
 type SectionKey = "company" | "footer" | "admin";
@@ -44,7 +44,7 @@ export default function BusinessProfileSettings() {
   if (s.isLoading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" />
+        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" aria-hidden="true" />
       </div>
     );
   }
@@ -143,13 +143,13 @@ export default function BusinessProfileSettings() {
                     {s.logoPreview ? (
                       <img src={s.logoPreview} alt="Company Logo" className="w-full h-full object-cover" />
                     ) : (
-                      <Building2 className="w-7 h-7 text-[var(--color-ink-subtle)]" />
+                      <Building2 className="w-7 h-7 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                     )}
                   </div>
                   {editingSection === "company" ? (
                     <div className="space-y-2">
                       <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/15 border border-[var(--color-primary)]/20 cursor-pointer transition-all active:scale-95">
-                        <Upload className="w-3.5 h-3.5" /> Upload Logo
+                        <Upload className="w-3.5 h-3.5" aria-hidden="true" /> Upload Logo
                         <input
                           type="file"
                           accept="image/*"
@@ -190,7 +190,7 @@ export default function BusinessProfileSettings() {
                   />
                   {s.errors.footer_text && (
                     <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" /> {s.errors.footer_text.message}
+                      <AlertCircle className="w-3 h-3" aria-hidden="true" /> {s.errors.footer_text.message}
                     </p>
                   )}
                 </div>
@@ -294,7 +294,7 @@ function Section({
       {/* Header with inline pencil */}
       <div className="flex items-center gap-3 px-4 sm:px-5 py-3.5 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/30">
         <div className="w-9 h-9 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center shrink-0">
-          <Icon className="w-4 h-4" />
+          <Icon className="w-4 h-4" aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-bold text-[var(--color-ink)] truncate">{title}</h3>
@@ -307,7 +307,7 @@ function Section({
             className="p-2 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-primary)] transition-colors active:scale-95 shrink-0"
             aria-label={`Edit ${title}`}
           >
-            <Pencil className="w-4 h-4" />
+            <Pencil className="w-4 h-4" aria-hidden="true" />
           </button>
         )}
       </div>
@@ -322,7 +322,7 @@ function Section({
             onClick={onCancel}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-all active:scale-95"
           >
-            <X className="w-3.5 h-3.5" /> Cancel
+            <X className="w-3.5 h-3.5" aria-hidden="true" /> Cancel
           </button>
           <button
             type="submit"
@@ -331,11 +331,11 @@ function Section({
             className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm"
           >
             {isSaving ? (
-              <><Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving</>
+              <><Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" /> Saving</>
             ) : isDirty ? (
-              <><Save className="w-3.5 h-3.5" /> Save</>
+              <><Save className="w-3.5 h-3.5" aria-hidden="true" /> Save</>
             ) : (
-              <><CheckCircle2 className="w-3.5 h-3.5" /> Saved</>
+              <><CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" /> Saved</>
             )}
           </button>
         </div>
@@ -370,7 +370,7 @@ function Field({
       {editing ? (
         <>
           <div className="relative">
-            <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-ink-subtle)]" />
+            <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-ink-subtle)]" aria-hidden="true" />
             <input
               type={type}
               placeholder={placeholder}
@@ -380,13 +380,13 @@ function Field({
           </div>
           {error && (
             <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1">
-              <AlertCircle className="w-3 h-3" /> {error.message}
+              <AlertCircle className="w-3 h-3" aria-hidden="true" /> {error.message}
             </p>
           )}
         </>
       ) : (
         <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-[var(--color-surface-hover)]/50 border border-[var(--color-surface-border)] min-h-[44px]">
-          <Icon className="w-4 h-4 text-[var(--color-ink-subtle)] shrink-0" />
+          <Icon className="w-4 h-4 text-[var(--color-ink-subtle)] shrink-0" aria-hidden="true" />
           {display ? (
             link ? (
               <a

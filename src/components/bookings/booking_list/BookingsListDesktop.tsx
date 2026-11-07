@@ -2,7 +2,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { CalendarDays, Phone, Check } from "lucide-react";
+import { CalendarDots as CalendarDays, Phone, Check } from "@phosphor-icons/react/ssr";
 import DataTable from "@/components/ui/DataTable";
 import { getClientDisplayName } from "@/lib/client-name";
 import type { Booking, Client, Vehicle } from "@/lib/types";
@@ -42,7 +42,7 @@ export default function BookingsListDesktop({
         return (
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-9 h-9 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center text-[var(--color-ink-subtle)] flex-shrink-0">
-              <CalendarDays size={16} />
+              <CalendarDays size={16} aria-hidden="true" />
             </div>
             <div className="min-w-0">
               <button
@@ -69,7 +69,7 @@ export default function BookingsListDesktop({
             </p>
             {client?.phone ? (
               <p className="text-xs text-[var(--color-ink-muted)] flex items-center gap-1.5 truncate mt-0.5">
-                <Phone size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                <Phone size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                 <span className="truncate font-medium">{client.phone}</span>
               </p>
             ) : (
@@ -111,7 +111,7 @@ export default function BookingsListDesktop({
         const style = statusStyles[booking.status] || statusStyles.completed;
         return (
           <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${style.bg} ${style.text}`}>
-            {booking.status === "active" && <Check size={10} className="text-[var(--color-success)]" />}
+            {booking.status === "active" && <Check size={10} className="text-[var(--color-success)]" aria-hidden="true" />}
             {statusLabels[booking.status] || booking.status}
           </span>
         );

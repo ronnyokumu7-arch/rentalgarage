@@ -1,7 +1,7 @@
 // src/components/fleet/VehicleLeaseSidebar.tsx
 "use client";
 
-import { User, Banknote, Activity, TrendingUp } from "lucide-react";
+import { User, Money as Banknote, Pulse as Activity, TrendUp as TrendingUp } from "@phosphor-icons/react/ssr";
 import type { Vehicle } from "@/lib/types";
 import type { VehicleDerivedStats as Stats } from "@/hooks/fleet/useVehicleDetail";
 import { formatMoney } from "@/lib/fleet/constants";
@@ -22,7 +22,7 @@ export default function VehicleLeaseSidebar({ vehicle, stats, onEditLease }: Veh
       {isInvestorOwned && (
         <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] p-4 sm:p-5">
           <div className="flex items-center gap-2 mb-3">
-            <User size={16} className="text-purple-500" />
+            <User size={16} className="text-purple-500" aria-hidden="true" />
             <h2 className="text-sm font-bold text-[var(--color-ink)] tracking-tight">
               Lease Agreement
             </h2>
@@ -30,7 +30,7 @@ export default function VehicleLeaseSidebar({ vehicle, stats, onEditLease }: Veh
 
           <div className="flex items-center gap-2 mb-3">
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-purple-500/10 text-purple-600 dark:text-purple-400 border border-purple-500/20">
-              <User size={9} /> Investor
+              <User size={9} aria-hidden="true" /> Investor
             </span>
             {vehicle.lease_rate_locked && (
               <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] border border-[var(--color-surface-border)]">
@@ -57,7 +57,7 @@ export default function VehicleLeaseSidebar({ vehicle, stats, onEditLease }: Veh
             onClick={onEditLease}
             className="w-full h-8 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] text-[11px] font-bold text-[var(--color-ink)] transition-colors flex items-center justify-center gap-1.5"
           >
-            <Banknote size={11} /> Edit Lease Agreement
+            <Banknote size={11} aria-hidden="true" /> Edit Lease Agreement
           </button>
         </div>
       )}
@@ -65,24 +65,24 @@ export default function VehicleLeaseSidebar({ vehicle, stats, onEditLease }: Veh
       {/* Activity — always shown for all vehicles */}
       <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] p-4 sm:p-5">
         <div className="flex items-center gap-2 mb-3">
-          <Activity size={16} className="text-[var(--color-primary)]" />
+          <Activity size={16} className="text-[var(--color-primary)]" aria-hidden="true" />
           <h2 className="text-sm font-bold text-[var(--color-ink)] tracking-tight">Activity</h2>
         </div>
         <div className="space-y-2.5">
           <ActivityRow
-            icon={<TrendingUp size={11} />}
+            icon={<TrendingUp size={11} aria-hidden="true" />}
             label="Trips in last 30d"
             value={String(stats.last30dBookings)}
             tone="emerald"
           />
           <ActivityRow
-            icon={<Activity size={11} />}
+            icon={<Activity size={11} aria-hidden="true" />}
             label="Total trips"
             value={String(stats.totalBookings)}
             tone="blue"
           />
           <ActivityRow
-            icon={<TrendingUp size={11} />}
+            icon={<TrendingUp size={11} aria-hidden="true" />}
             label="Utilization"
             value={`${stats.utilizationPct}%`}
             tone="purple"

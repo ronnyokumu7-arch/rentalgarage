@@ -4,9 +4,9 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  Wrench, Clock, Car, Gauge, AlertTriangle,
-  ShieldCheck, Contact,
-} from "lucide-react";
+  Wrench, Clock, Car, Gauge, Warning as AlertTriangle,
+  ShieldCheck, AddressBook as Contact,
+} from "@phosphor-icons/react/ssr";
 import type {
   NeedsAttentionData,
   ServiceDueAlert,
@@ -125,7 +125,7 @@ function AlertTabSwitcher({
                 : "text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)]"
             }`}
           >
-            <Icon size={11} strokeWidth={2.5} />
+            <Icon size={11} weight="bold" aria-hidden="true" />
             <span className="truncate">{tab.label}</span>
             <span className={`tabular-nums ${isActive ? "opacity-100" : "opacity-70"}`}>
               {tab.count}
@@ -169,7 +169,7 @@ function OverdueList({ items }: { items: OverdueReturnAlert[] }) {
               </span>
             </div>
             <div className="flex items-center gap-1.5 text-[11px] text-ink-muted">
-              <Car size={11} className="flex-shrink-0 text-ink-subtle" />
+              <Car size={11} className="flex-shrink-0 text-ink-subtle" aria-hidden="true" />
               <span className="font-mono font-semibold text-ink truncate">
                 {b.vehicle_plate ?? "—"}
               </span>
@@ -178,7 +178,7 @@ function OverdueList({ items }: { items: OverdueReturnAlert[] }) {
               )}
             </div>
             <div className="pt-1 border-t border-surface-border/50 flex items-center gap-1.5">
-              <Clock size={11} className="text-rose-500 flex-shrink-0" />
+              <Clock size={11} className="text-rose-500 flex-shrink-0" aria-hidden="true" />
               <span className="text-[10px] font-bold text-rose-700 dark:text-rose-400 tabular-nums">
                 {label} overdue
               </span>
@@ -211,7 +211,7 @@ function ServiceList({ items }: { items: ServiceDueAlert[] }) {
               </span>
               {isOver ? (
                 <span className="flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-rose-500/10 border border-rose-500/25 text-rose-700 dark:text-rose-400 text-[9px] font-extrabold uppercase tracking-wider">
-                  <AlertTriangle size={9} />
+                  <AlertTriangle size={9} aria-hidden="true" />
                   Over
                 </span>
               ) : (
@@ -225,7 +225,7 @@ function ServiceList({ items }: { items: ServiceDueAlert[] }) {
             </p>
             <div className="pt-1 border-t border-surface-border/50 flex items-center justify-between gap-2">
               <div className="flex items-center gap-1.5 min-w-0">
-                <Gauge size={11} className="text-ink-subtle flex-shrink-0" />
+                <Gauge size={11} className="text-ink-subtle flex-shrink-0" aria-hidden="true" />
                 <span className="text-[11px] font-medium text-ink-muted tabular-nums truncate">
                   {v.current_mileage.toLocaleString()} km
                 </span>
@@ -303,7 +303,7 @@ function DocsList({
                 size={11}
                 className={`flex-shrink-0 ${
                   isExpired ? "text-rose-500" : "text-amber-500"
-                }`}
+                }`} aria-hidden="true"
               />
               <span
                 className={`text-[10px] font-bold tabular-nums ${

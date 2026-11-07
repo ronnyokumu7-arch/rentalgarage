@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Wallet, Landmark, Phone, Loader2, Save, Info } from "lucide-react";
+import { Wallet, Bank as Landmark, Phone, CircleNotch as Loader2, FloppyDisk as Save, Info } from "@phosphor-icons/react/ssr";
 import toast from "react-hot-toast";
 import { usePlatformSettings } from "@/hooks/usePlatformSettings";
 
@@ -68,7 +68,7 @@ export default function PlatformCommissionSettings() {
   if (loading) {
     return (
       <div className="flex justify-center items-center p-20">
-        <Loader2 className="animate-spin text-[var(--color-primary)]" size={32} />
+        <Loader2 className="animate-spin text-[var(--color-primary)]" size={32} aria-hidden="true" />
       </div>
     );
   }
@@ -78,7 +78,7 @@ export default function PlatformCommissionSettings() {
       {/* ── PAYG ENGINE ─────────────────────────────────────── */}
       <section className="p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm space-y-4">
         <h3 className="text-sm font-bold text-[var(--color-ink)] flex items-center gap-2">
-          <Wallet size={16} className="text-emerald-500" /> PAYG Commission Engine
+          <Wallet size={16} className="text-emerald-500" aria-hidden="true" /> PAYG Commission Engine
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -113,7 +113,7 @@ export default function PlatformCommissionSettings() {
       {/* ── M-PESA PAYBILL TRIPLE ───────────────────────────── */}
       <section className="p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm space-y-4">
         <h3 className="text-sm font-bold text-[var(--color-ink)] flex items-center gap-2">
-          <Landmark size={16} className="text-blue-500" /> M-Pesa Paybill — where tenants pay you
+          <Landmark size={16} className="text-blue-500" aria-hidden="true" /> M-Pesa Paybill — where tenants pay you
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -151,7 +151,7 @@ export default function PlatformCommissionSettings() {
           </div>
         </div>
         <div className="p-3 rounded-xl bg-blue-500/5 border border-blue-500/20 flex items-start gap-2">
-          <Info size={14} className="text-blue-500 shrink-0 mt-0.5" />
+          <Info size={14} className="text-blue-500 shrink-0 mt-0.5" aria-hidden="true" />
           <p className="text-[11px] text-[var(--color-ink-muted)]">
             Changes go live instantly on every Tenant&apos;s <span className="font-bold">/commission/pay</span> page.
             You reconcile payments by matching the M-Pesa confirmation codes in the Commission tab.
@@ -162,7 +162,7 @@ export default function PlatformCommissionSettings() {
       {/* ── RECORD KEEPING ──────────────────────────────────── */}
       <section className="p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
         <h3 className="text-sm font-bold text-[var(--color-ink)] flex items-center gap-2 mb-4">
-          <Phone size={16} className="text-amber-500" /> Record Keeping & Support Contacts
+          <Phone size={16} className="text-amber-500" aria-hidden="true" /> Record Keeping & Support Contacts
         </h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
@@ -198,7 +198,7 @@ export default function PlatformCommissionSettings() {
           disabled={saving}
           className="flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--color-primary)] text-white text-sm font-bold hover:opacity-90 transition-all disabled:opacity-50 shadow-lg shadow-[var(--color-primary)]/20"
         >
-          {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+          {saving ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Save size={16} aria-hidden="true" />}
           {saving ? "Saving..." : "Save Changes"}
         </button>
       </div>

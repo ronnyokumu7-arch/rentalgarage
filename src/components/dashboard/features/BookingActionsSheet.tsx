@@ -3,8 +3,8 @@
 
 import { useState } from "react";
 import {
-  Loader2
-} from "lucide-react";
+  CircleNotch as Loader2
+} from "@phosphor-icons/react/ssr";
 import Modal from "@/components/ui/Modal";
 
 export type SheetStatusTone = "success" | "warning" | "danger" | "info";
@@ -100,9 +100,9 @@ export default function BookingActionsSheet({
             }`}
           >
             {pending === action.label ? (
-              <Loader2 size={16} className="animate-spin" />
+              <Loader2 size={16} className="animate-spin" aria-hidden="true" />
             ) : action.icon ? (
-              <action.icon size={16} />
+              <action.icon size={16} aria-hidden="true" />
             ) : null}
             {action.label}
           </button>

@@ -4,18 +4,18 @@
 import React from "react";
 import {
   Car,
-  DollarSign,
+  CurrencyDollar as DollarSign,
   Shield,
   CheckCircle,
   FileText,
-  AlertCircle,
-  Loader2,
-  ChevronDown,
+  WarningCircle as AlertCircle,
+  CircleNotch as Loader2,
+  CaretDown as ChevronDown,
   Calendar,
   Gauge,
   Hash,
-  StickyNote,
-} from "lucide-react";
+  Note as StickyNote,
+} from "@phosphor-icons/react/ssr";
 import { CAR_DATA, YEARS } from "@/hooks/fleet/useNewVehicleForm";
 
 interface NewVehicleFormProps {
@@ -76,7 +76,7 @@ export default function NewVehicleForm({
       {file ? (
         <>
           <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[var(--color-success-bg)] text-[var(--color-success-text)] flex items-center justify-center mb-1 flex-shrink-0">
-            <CheckCircle size={12} />
+            <CheckCircle size={12} aria-hidden="true" />
           </div>
           <p className="text-[9px] font-bold text-[var(--color-ink)] truncate max-w-[60px] sm:max-w-[70px] text-center">
             {file.name}
@@ -85,7 +85,7 @@ export default function NewVehicleForm({
       ) : (
         <>
           <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] group-hover:text-[var(--color-primary)] flex items-center justify-center mb-1 flex-shrink-0">
-            <Icon size={12} />
+            <Icon size={12} aria-hidden="true" />
           </div>
           <p className="text-[9px] font-semibold text-[var(--color-ink-muted)] group-hover:text-[var(--color-ink)] text-center leading-tight">
             {label}
@@ -106,7 +106,7 @@ export default function NewVehicleForm({
         <section className={sectionClass}>
           <div className="flex items-center gap-2 mb-3">
             <div className="w-6 h-6 rounded-md bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center flex-shrink-0">
-              <Car size={14} />
+              <Car size={14} aria-hidden="true" />
             </div>
             <h3 className="text-sm font-bold text-[var(--color-ink)]">Vehicle Identity</h3>
           </div>
@@ -132,7 +132,7 @@ export default function NewVehicleForm({
                 </select>
                 <ChevronDown
                   size={14}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true"
                 />
               </div>
             </div>
@@ -159,7 +159,7 @@ export default function NewVehicleForm({
                 </select>
                 <ChevronDown
                   size={14}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true"
                 />
               </div>
             </div>
@@ -185,7 +185,7 @@ export default function NewVehicleForm({
                   </select>
                   <ChevronDown
                     size={14}
-                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true"
                   />
                 </div>
               </div>
@@ -197,7 +197,7 @@ export default function NewVehicleForm({
                 <div className="relative">
                   <Hash
                     size={13}
-                    className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                    className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true"
                   />
                   <input
                     type="text"
@@ -228,21 +228,21 @@ export default function NewVehicleForm({
         <section className={sectionClass}>
           <div className="flex items-center gap-2 mb-3">
             <div className="w-6 h-6 rounded-md bg-purple-500/10 text-purple-500 flex items-center justify-center flex-shrink-0">
-              <Shield size={14} />
+              <Shield size={14} aria-hidden="true" />
             </div>
             <h3 className="text-sm font-bold text-[var(--color-ink)]">Compliance</h3>
           </div>
 
           {hasInsurance ? (
             <div className="mb-3 p-2 bg-emerald-500/10 border border-emerald-500/20 rounded-lg flex items-center gap-2">
-              <CheckCircle size={13} className="text-emerald-500 flex-shrink-0" />
+              <CheckCircle size={13} className="text-emerald-500 flex-shrink-0" aria-hidden="true" />
               <p className="text-[10px] sm:text-xs text-emerald-400 font-medium">
                 Vehicle can be activated immediately after onboarding.
               </p>
             </div>
           ) : (
             <div className="mb-3 p-2 bg-amber-500/10 border border-amber-500/20 rounded-lg flex items-center gap-2">
-              <AlertCircle size={13} className="text-amber-500 flex-shrink-0" />
+              <AlertCircle size={13} className="text-amber-500 flex-shrink-0" aria-hidden="true" />
               <p className="text-[10px] sm:text-xs text-amber-400 font-medium">
                 Add insurance details to enable immediate activation.
               </p>
@@ -265,7 +265,7 @@ export default function NewVehicleForm({
               <div className="relative">
                 <Calendar
                   size={13}
-                  className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                  className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true"
                 />
                 <input
                   type="date"
@@ -309,7 +309,7 @@ export default function NewVehicleForm({
         <section className={sectionClass}>
           <div className="flex items-center gap-2 mb-3">
             <div className="w-6 h-6 rounded-md bg-emerald-500/10 text-emerald-500 flex items-center justify-center flex-shrink-0">
-              <DollarSign size={14} />
+              <DollarSign size={14} aria-hidden="true" />
             </div>
             <h3 className="text-sm font-bold text-[var(--color-ink)]">Financials & Usage</h3>
           </div>
@@ -335,7 +335,7 @@ export default function NewVehicleForm({
                 <div className="relative">
                   <Gauge
                     size={13}
-                    className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                    className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true"
                   />
                   <input
                     type="number"
@@ -366,7 +366,7 @@ export default function NewVehicleForm({
         <section className={sectionClass}>
           <div className="flex items-center gap-2 mb-3">
             <div className="w-6 h-6 rounded-md bg-amber-500/10 text-amber-500 flex items-center justify-center flex-shrink-0">
-              <StickyNote size={14} />
+              <StickyNote size={14} aria-hidden="true" />
             </div>
             <h3 className="text-sm font-bold text-[var(--color-ink)]">Internal Notes</h3>
           </div>
@@ -388,12 +388,12 @@ export default function NewVehicleForm({
           >
             {loading ? (
               <>
-                <Loader2 size={16} className="animate-spin" />
+                <Loader2 size={16} className="animate-spin" aria-hidden="true" />
                 Adding Vehicle...
               </>
             ) : (
               <>
-                <CheckCircle size={16} />
+                <CheckCircle size={16} aria-hidden="true" />
                 Add Vehicle to Fleet
               </>
             )}

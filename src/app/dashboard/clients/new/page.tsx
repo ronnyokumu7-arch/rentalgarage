@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "@phosphor-icons/react/ssr";
 import AddClientWorkspace from "@/components/client/AddClientWorkspace";
 
 export default function NewClientPage() {
@@ -27,7 +27,7 @@ export default function NewClientPage() {
                 className="p-2 rounded-lg hover:bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-all active:scale-95"
                 aria-label="Go back"
               >
-                <ArrowLeft size={20} />
+                <ArrowLeft size={20} aria-hidden="true" />
               </button>
               <div>
                 <h1 className="text-lg font-bold text-[var(--color-ink)]">New Client</h1>

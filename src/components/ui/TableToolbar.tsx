@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Download, ChevronDown, X, Filter } from "lucide-react";
+import { MagnifyingGlass as Search, Download, CaretDown as ChevronDown, X, Funnel as Filter } from "@phosphor-icons/react/ssr";
 import FilterDropdown, { FilterOption } from "./FilterDropdown";
 
 interface TableToolbarProps {
@@ -64,7 +64,7 @@ export default function TableToolbar({
         <div className="flex items-center gap-2 flex-1 sm:w-80">
           {/* Search Input */}
           <div className="relative flex-1">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true" />
             <input
               type="text"
               value={searchValue}
@@ -78,7 +78,7 @@ export default function TableToolbar({
                 onClick={() => onSearchChange("")}
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-md text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)] transition-all"
               >
-                <X size={13} />
+                <X size={13} aria-hidden="true" />
               </button>
             )}
           </div>
@@ -102,9 +102,9 @@ export default function TableToolbar({
               onClick={() => setShowExportMenu(!showExportMenu)}
               className="h-9 px-4 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm flex-shrink-0 cursor-pointer touch-manipulation active:scale-[0.98]"
             >
-              <Download size={14} />
+              <Download size={14} aria-hidden="true" />
               Export
-              <ChevronDown size={12} />
+              <ChevronDown size={12} aria-hidden="true" />
             </button>
             
             {showExportMenu && (

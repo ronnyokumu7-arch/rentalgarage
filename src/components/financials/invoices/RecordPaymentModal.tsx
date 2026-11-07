@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, Banknote, ReceiptText, User, Phone } from "lucide-react";
+import { CircleNotch as Loader2, Money as Banknote, Receipt as ReceiptText, User, Phone } from "@phosphor-icons/react/ssr";
 import Modal from "@/components/ui/Modal";
 import PremiumEntitySelector from "@/components/financials/shared/PremiumEntitySelector";
 import { invoicesApi } from "@/lib/api/invoices";
@@ -105,7 +105,7 @@ export default function RecordPaymentModal({
     return (
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/20 to-blue-500/5 border border-blue-500/20 flex items-center justify-center flex-shrink-0">
-          <ReceiptText size={16} className="text-blue-600 dark:text-blue-400" />
+          <ReceiptText size={16} className="text-blue-600 dark:text-blue-400" aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
@@ -118,14 +118,14 @@ export default function RecordPaymentModal({
           </div>
           <div className="flex items-center gap-2 mt-0.5">
             <span className="text-[10px] text-[var(--color-ink-muted)] flex items-center gap-1">
-              <User size={10} />
+              <User size={10} aria-hidden="true" />
               {clientName}
             </span>
             {clientPhone && (
               <>
                 <span className="text-[10px] text-[var(--color-ink-subtle)]">•</span>
                 <span className="text-[10px] text-[var(--color-ink-muted)] flex items-center gap-1">
-                  <Phone size={10} />
+                  <Phone size={10} aria-hidden="true" />
                   {clientPhone}
                 </span>
               </>
@@ -247,7 +247,7 @@ export default function RecordPaymentModal({
             Cancel
           </button>
           <button type="button" onClick={handleSubmit} disabled={loading || !selectedInvoice || !amount || !reference} className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-lg)] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-            {loading ? <Loader2 size={14} className="animate-spin" /> : <Banknote size={14} />}
+            {loading ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Banknote size={14} aria-hidden="true" />}
             {loading ? "Processing..." : "Record Payment"}
           </button>
         </div>

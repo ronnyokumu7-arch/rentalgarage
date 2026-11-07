@@ -3,7 +3,7 @@
 
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { TrendingUp, Clock, Wallet } from "lucide-react";
+import { TrendUp as TrendingUp, Clock, Wallet } from "@phosphor-icons/react/ssr";
 
 interface MobileEarningsStatsCarouselProps {
   thisMonth: string;
@@ -111,7 +111,7 @@ export default function MobileEarningsStatsCarousel({
                 <div
                   className={`w-8 h-8 rounded-lg bg-gradient-to-br ${item.gradient} flex items-center justify-center shrink-0 shadow-lg`}
                 >
-                  <item.icon size={14} className="text-white" />
+                  <item.icon size={14} className="text-white" aria-hidden="true" />
                 </div>
               </div>
 

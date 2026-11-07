@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { CheckCircle2, AlertCircle, Loader2, Clock, ShieldCheck } from "lucide-react";
+import { CheckCircle as CheckCircle2, WarningCircle as AlertCircle, CircleNotch as Loader2, Clock, ShieldCheck } from "@phosphor-icons/react/ssr";
 import toast from "react-hot-toast";
 import NewClientForm from "@/components/client/NewClientForm";
 import { env } from "@/lib/env";
@@ -168,7 +168,7 @@ export default function PublicInvitePage() {
     return (
       <div className="public-root min-h-screen flex items-center justify-center p-4">
         <div className="flex flex-col items-center gap-4 text-center">
-          <Loader2 className="h-10 w-10 animate-spin" style={{ color: "#6D28D9" }} />
+          <Loader2 className="h-10 w-10 animate-spin" style={{ color: "#6D28D9" }} aria-hidden="true" />
           <p className="font-medium text-sm" style={{ color: "#57534E" }}>
             Verifying your invite link...
           </p>
@@ -182,7 +182,7 @@ export default function PublicInvitePage() {
       <div className="public-root min-h-screen flex items-center justify-center p-4 sm:p-6">
         <div className="max-w-md w-full rounded-xl p-8 text-center bg-white shadow-lg border border-stone-200">
           <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-red-100">
-            <AlertCircle className="h-8 w-8 text-red-700" />
+            <AlertCircle className="h-8 w-8 text-red-700" aria-hidden="true" />
           </div>
           <h1 className="text-xl font-bold mb-2 text-stone-900">Invalid Invite Link</h1>
           <p className="text-sm text-stone-600">
@@ -198,7 +198,7 @@ export default function PublicInvitePage() {
       <div className="public-root min-h-screen flex items-center justify-center p-4 sm:p-6">
         <div className="max-w-md w-full rounded-xl p-8 text-center bg-white shadow-lg border border-stone-200">
           <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 bg-amber-100">
-            <Clock className="h-8 w-8 text-amber-700" />
+            <Clock className="h-8 w-8 text-amber-700" aria-hidden="true" />
           </div>
           <h1 className="text-xl font-bold mb-2 text-stone-900">Invite Expired or Used</h1>
           <p className="text-sm text-stone-600">
@@ -214,7 +214,7 @@ export default function PublicInvitePage() {
       <div className="public-root min-h-screen flex items-center justify-center p-4 sm:p-6">
         <div className="max-w-lg w-full rounded-2xl p-8 text-center bg-white shadow-xl border border-stone-200">
           <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5 bg-emerald-100">
-            <CheckCircle2 className="h-10 w-10 text-emerald-700" />
+            <CheckCircle2 className="h-10 w-10 text-emerald-700" aria-hidden="true" />
           </div>
           <h1 className="text-2xl font-extrabold mb-3 text-stone-900">
             Application Submitted!
@@ -229,7 +229,7 @@ export default function PublicInvitePage() {
           </p>
           <div className="rounded-xl p-4 text-left space-y-3 mb-6 bg-blue-50 border border-blue-200">
             <h3 className="text-sm font-bold flex items-center gap-2 text-blue-800">
-              <ShieldCheck size={16} /> What happens next?
+              <ShieldCheck size={16} aria-hidden="true" /> What happens next?
             </h3>
             <ul className="text-xs space-y-2 text-blue-800">
               <li className="flex items-start gap-2">

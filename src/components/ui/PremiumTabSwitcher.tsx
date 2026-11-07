@@ -57,7 +57,7 @@ export function PremiumTabSwitcher({
                       ? "text-[var(--color-primary)] drop-shadow-[0_0_8px_rgba(139,92,246,0.5)] scale-110" 
                       : "text-[var(--color-ink-muted)] group-hover:text-[var(--color-ink)] opacity-70 group-hover:opacity-100"
                     }
-                  `} 
+                  `} aria-hidden="true"
                 />
               )}
               

@@ -2,10 +2,10 @@
 
 import React, { useState } from "react";
 import { 
-  Share2, Copy, Check, DollarSign, 
-  Receipt, ArrowUpRight, ShieldCheck, Loader2,
-  Sparkles
-} from "lucide-react";
+  ShareNetwork as Share2, Copy, Check, CurrencyDollar as DollarSign,
+  Receipt, ArrowUpRight, ShieldCheck, CircleNotch as Loader2,
+  Sparkle as Sparkles
+} from "@phosphor-icons/react/ssr";
 import toast from "react-hot-toast";
 import { invoicesApi } from "@/lib/api/invoices";
 import type { Booking, Invoice } from "@/lib/types";
@@ -156,14 +156,14 @@ export function FinancialsWidget({
       <div className="flex items-center justify-between border-b border-[var(--color-surface-border)] pb-4">
         <div className="flex items-center gap-3">
           <div className="p-2.5 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 text-[var(--color-primary)] border border-[var(--color-primary)]/10 shadow-sm">
-            <Receipt size={18} />
+            <Receipt size={18} aria-hidden="true" />
           </div>
           <div>
             <div className="flex items-center gap-1.5">
               <span className="text-[10px] font-black uppercase tracking-widest text-[var(--color-ink-muted)]">
                 Billing & Settlement
               </span>
-              <Sparkles size={11} className="text-[var(--color-primary)] animate-pulse" />
+              <Sparkles size={11} className="text-[var(--color-primary)] animate-pulse" aria-hidden="true" />
             </div>
             <h3 className="text-base font-black text-[var(--color-ink)] leading-none mt-0.5 tracking-tight">
               Financial Overview
@@ -183,7 +183,7 @@ export function FinancialsWidget({
             Total Statement Balance
           </span>
           <div className="p-1.5 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
-            <DollarSign size={15} />
+            <DollarSign size={15} aria-hidden="true" />
           </div>
         </div>
 
@@ -203,7 +203,7 @@ export function FinancialsWidget({
           <div className="space-y-2.5">
             <div className="flex items-center justify-between text-xs font-bold text-[var(--color-ink)]">
               <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
-                <Check size={14} className="stroke-[3]" /> Official Share Link Active
+                <Check size={14} className="stroke-[3]" aria-hidden="true" /> Official Share Link Active
               </span>
               <span className="text-[10px] font-medium text-[var(--color-ink-muted)]">Valid for 30 days</span>
             </div>
@@ -220,7 +220,7 @@ export function FinancialsWidget({
                 onClick={copyToClipboard}
                 className="px-3 py-1.5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-surface-border)] text-[var(--color-ink)] hover:text-[var(--color-primary)] transition-all flex items-center gap-1.5 text-xs font-bold shrink-0 shadow-xs"
               >
-                {copied ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
+                {copied ? <Check size={13} className="text-emerald-500" aria-hidden="true" /> : <Copy size={13} aria-hidden="true" />}
                 <span>{copied ? "Copied" : "Copy"}</span>
               </button>
               <a
@@ -230,7 +230,7 @@ export function FinancialsWidget({
                 className="p-2 rounded-lg bg-[var(--color-primary)] text-white hover:opacity-90 transition-all shrink-0 shadow-xs"
                 title="Open Share Link"
               >
-                <ArrowUpRight size={14} />
+                <ArrowUpRight size={14} aria-hidden="true" />
               </a>
             </div>
           </div>
@@ -243,12 +243,12 @@ export function FinancialsWidget({
           >
             {loading ? (
               <>
-                <Loader2 size={16} className="animate-spin" />
+                <Loader2 size={16} className="animate-spin" aria-hidden="true" />
                 Generating Link...
               </>
             ) : (
               <>
-                <Share2 size={15} className="group-hover:scale-110 transition-transform" />
+                <Share2 size={15} className="group-hover:scale-110 transition-transform" aria-hidden="true" />
                 Generate Official Invoice Link
               </>
             )}
@@ -259,7 +259,7 @@ export function FinancialsWidget({
       {/* Security & Audit Footer Note */}
       <div className="pt-3 border-t border-[var(--color-surface-border)] flex items-center justify-between text-[11px] text-[var(--color-ink-muted)]">
         <span className="flex items-center gap-1.5 font-medium">
-          <ShieldCheck size={13} className="text-emerald-500" />
+          <ShieldCheck size={13} className="text-emerald-500" aria-hidden="true" />
           Encrypted Billing Protocol
         </span>
         <span className="font-mono text-[10px] font-bold tracking-wider opacity-80">VERIFIED</span>

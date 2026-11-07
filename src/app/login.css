@@ -1,7 +1,5 @@
 /* src/app/login.css - AUTH PAGES ONLY */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
-
 /* ══════════════════════════════════════════════════════════
    🔐 AUTH PAGES DESIGN SYSTEM
    Split-screen: Dark brand panel + Light form panel
@@ -11,7 +9,7 @@
 .auth-root {
   display: flex;
   min-height: 100vh;
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
@@ -25,7 +23,7 @@
 .auth-root h4,
 .auth-root h5,
 .auth-root h6 {
-  font-family: "Space Grotesk", "Inter", sans-serif !important;
+  font-family: var(--font-display), var(--font-sans), sans-serif !important;
   letter-spacing: -0.02em;
   font-weight: 700;
 }
@@ -39,7 +37,7 @@
 .auth-root .plate-number,
 .auth-root .id-number,
 .auth-root .reference-code {
-  font-family: "JetBrains Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-family: var(--font-mono), SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
   letter-spacing: 0.02em;
 }
 

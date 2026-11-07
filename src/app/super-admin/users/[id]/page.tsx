@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, User, Bell, CheckCircle2, Camera, Layers } from "lucide-react";
+import { ArrowLeft, User, Bell, CheckCircle as CheckCircle2, Camera, Stack as Layers } from "@phosphor-icons/react/ssr";
 import { useUserProfile } from "@/hooks/useUserProfile"; 
 
 // ✅ Import the modular components
@@ -88,7 +88,7 @@ export default function UserProfilePage() {
               {initials}
             </div>
             <div className="absolute inset-0 rounded-xl bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-              <Camera size={20} className="text-white" />
+              <Camera size={20} className="text-white" aria-hidden="true" />
             </div>
             <div className={`absolute bottom-1 right-1 w-4 h-4 rounded-full border-2 border-[var(--color-surface)] ${
               user.is_suspended ? 'bg-amber-500' : user.is_active ? 'bg-emerald-500' : 'bg-[var(--color-ink-subtle)]'
@@ -113,7 +113,7 @@ export default function UserProfilePage() {
       return (
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)]">
-            <Layers size={22} />
+            <Layers size={22} aria-hidden="true" />
           </div>
           <div>
             <h1 className="text-lg font-bold text-[var(--color-ink)]">Operations Command Center</h1>
@@ -125,7 +125,7 @@ export default function UserProfilePage() {
       return (
         <div className="flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-purple-500/10 border border-purple-500/20 flex items-center justify-center text-purple-500">
-            <Bell size={22} />
+            <Bell size={22} aria-hidden="true" />
           </div>
           <div>
             <h1 className="text-lg font-bold text-[var(--color-ink)]">Preferences</h1>
@@ -146,7 +146,7 @@ export default function UserProfilePage() {
         className="fixed bottom-10 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-[0_5px_10px_-5px_rgba(0,0,0,0.8)] hover:shadow-[0_5px_10px_-5px_rgba(0,0,0,0.95)] transition-all duration-300 group overflow-hidden min-w-[48px]"
         title="Back to Users"
       >
-        <ArrowLeft size={18} className="text-[var(--color-ink)] shrink-0 transition-transform group-hover:-translate-x-0.5" />
+        <ArrowLeft size={18} className="text-[var(--color-ink)] shrink-0 transition-transform group-hover:-translate-x-0.5" aria-hidden="true" />
         <span className="text-xs font-bold text-[var(--color-ink)] whitespace-nowrap opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto transition-all duration-300 overflow-hidden">
           Back to Users
         </span>
@@ -173,7 +173,7 @@ export default function UserProfilePage() {
                     : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"
                 }`}
               >
-                <Icon size={14} />
+                <Icon size={14} aria-hidden="true" />
                 {tab.label}
               </button>
             );

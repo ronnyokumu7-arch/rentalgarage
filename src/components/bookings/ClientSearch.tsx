@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { User, Phone, CreditCard, Car } from "lucide-react";
+import { User, Phone, CreditCard, Car } from "@phosphor-icons/react/ssr";
 import { getClientDisplayName } from "@/lib/client-name";
 import type { Client } from "@/lib/types";
 
@@ -37,7 +37,7 @@ export default function ClientSearch({
       
       {/* Search Input */}
       <div className="relative">
-        <User size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" />
+        <User size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" aria-hidden="true" />
         <input
           type="text"
           value={isOpen ? searchQuery : selectedClient ? `${getClientDisplayName(selectedClient.full_name)} (${selectedClient.phone})` : searchQuery}
@@ -94,18 +94,18 @@ export default function ClientSearch({
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-[10px] text-[var(--color-ink-muted)]">
                     <div className="flex items-center gap-1">
-                      <Phone size={10} />
+                      <Phone size={10} aria-hidden="true" />
                       <span>{client.phone}</span>
                     </div>
                     {client.id_number && (
                       <div className="flex items-center gap-1">
-                        <CreditCard size={10} />
+                        <CreditCard size={10} aria-hidden="true" />
                         <span>{client.id_number}</span>
                       </div>
                     )}
                     {client.dl_number && (
                       <div className="flex items-center gap-1 col-span-2">
-                        <Car size={10} />
+                        <Car size={10} aria-hidden="true" />
                         <span>{client.dl_number}</span>
                       </div>
                     )}

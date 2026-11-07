@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarDays, X, Check } from "lucide-react";
+import { CalendarDots as CalendarDays, X, Check } from "@phosphor-icons/react/ssr";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
 import { inputClass, labelClass } from "./constants";
@@ -136,7 +136,7 @@ export default function PremiumDateAndTimePicker({
       <div className="relative">
         <CalendarDays
           size={16}
-          className="absolute left-3 top-3 text-[var(--color-ink-subtle)] pointer-events-none z-10"
+          className="absolute left-3 top-3 text-[var(--color-ink-subtle)] pointer-events-none z-10" aria-hidden="true"
         />
         <button
           type="button"
@@ -158,7 +158,7 @@ export default function PremiumDateAndTimePicker({
                 onClick={cancelAndClose}
                 className="p-1.5 rounded-lg hover:bg-[var(--color-surface-hover)] transition-colors"
               >
-                <X size={18} />
+                <X size={18} aria-hidden="true" />
               </button>
             </div>
 
@@ -256,7 +256,7 @@ export default function PremiumDateAndTimePicker({
                 disabled={!draftDate}
                 className="flex items-center gap-2 px-5 py-2 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] shadow-lg shadow-[var(--color-primary)]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
               >
-                <Check size={16} />
+                <Check size={16} aria-hidden="true" />
                 Save
               </button>
             </div>

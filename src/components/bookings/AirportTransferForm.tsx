@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { MapPin, User, Plane, Loader2, CheckCircle } from 'lucide-react';
+import { MapPin, User, Airplane as Plane, CircleNotch as Loader2, CheckCircle } from "@phosphor-icons/react/ssr";
 import { useNewBooking } from '@/hooks/bookings/useNewBooking';
 import ClientSearch from './ClientSearch';
 import VehicleSearch from './VehicleSearch';
@@ -52,7 +52,7 @@ export default function AirportTransferForm({ formId, onClose }: AirportTransfer
       <section className={sectionClass}>
         <div className="flex items-center gap-2.5 mb-4">
           <div className="w-7 h-7 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
-            <User size={16} />
+            <User size={16} aria-hidden="true" />
           </div>
           <h3 className="text-sm font-bold text-[var(--color-ink)]">Client & Vehicle</h3>
         </div>
@@ -100,7 +100,7 @@ export default function AirportTransferForm({ formId, onClose }: AirportTransfer
       <section className={sectionClass}>
         <div className="flex items-center gap-2.5 mb-4">
           <div className="w-7 h-7 rounded-lg bg-sky-500/10 text-sky-500 flex items-center justify-center">
-            <Plane size={16} />
+            <Plane size={16} aria-hidden="true" />
           </div>
           <h3 className="text-sm font-bold text-[var(--color-ink)]">Pickup & Drop-off Schedule</h3>
         </div>
@@ -139,7 +139,7 @@ export default function AirportTransferForm({ formId, onClose }: AirportTransfer
       <section className={sectionClass}>
         <div className="flex items-center gap-2.5 mb-4">
           <div className="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center">
-            <MapPin size={16} />
+            <MapPin size={16} aria-hidden="true" />
           </div>
           <h3 className="text-sm font-bold text-[var(--color-ink)]">Locations</h3>
         </div>
@@ -189,9 +189,9 @@ export default function AirportTransferForm({ formId, onClose }: AirportTransfer
             className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] shadow-lg shadow-[var(--color-primary)]/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
           >
             {loading || quoteLoading ? (
-              <><Loader2 size={16} className="animate-spin" /> Creating booking...</>
+              <><Loader2 size={16} className="animate-spin" aria-hidden="true" /> Creating booking...</>
             ) : (
-              <><CheckCircle size={16} /> Create Booking</>
+              <><CheckCircle size={16} aria-hidden="true" /> Create Booking</>
             )}
           </button>
         )}

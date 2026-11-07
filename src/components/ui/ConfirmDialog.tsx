@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { AlertTriangle, Info, HelpCircle, LucideIcon } from "lucide-react";
+import { Warning as AlertTriangle, Info, Question as HelpCircle } from "@phosphor-icons/react/ssr";
+import type { Icon } from "@phosphor-icons/react";
 import Modal from "./Modal";
 
 type ConfirmVariant = "danger" | "warning" | "info" | "neutral" | "success";
@@ -16,12 +17,12 @@ interface ConfirmDialogProps {
   confirmLabel?: string;
   cancelLabel?: string;
   loading?: boolean;
-  icon?: LucideIcon;
+  icon?: Icon;
 }
 
 const variantConfig: Record<
   ConfirmVariant,
-  { icon: LucideIcon; iconBg: string; iconColor: string; confirmClass: string }
+  { icon: Icon; iconBg: string; iconColor: string; confirmClass: string }
 > = {
   danger: {
     icon: AlertTriangle,
@@ -81,7 +82,7 @@ export default function ConfirmDialog({
         <div
           className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 ${config.iconBg}`}
         >
-          <Icon size={28} strokeWidth={1.8} className={config.iconColor} />
+          <Icon size={28} weight="light" className={config.iconColor} aria-hidden="true" />
         </div>
 
         {/* Title */}

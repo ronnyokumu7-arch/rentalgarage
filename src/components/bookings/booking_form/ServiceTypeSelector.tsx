@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Car, UserCircle, Heart, Info, ChevronDown, Plane, Building2, Map } from 'lucide-react';
+import { Car, UserCircle, Heart, Info, CaretDown as ChevronDown, Airplane as Plane, Buildings as Building2, MapTrifold as Map } from "@phosphor-icons/react/ssr";
 import { labelClass } from "./constants";
 import type { ServiceType, ServiceDefinition } from '@/lib/types';
 
@@ -54,7 +54,7 @@ export default function ServiceTypeSelector({
               : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
           }`}
         >
-          <Car size={14} />
+          <Car size={14} aria-hidden="true" />
           Self Drive
         </button>
 
@@ -68,11 +68,11 @@ export default function ServiceTypeSelector({
               : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
           }`}
         >
-          <UserCircle size={14} />
+          <UserCircle size={14} aria-hidden="true" />
           {chauffeurShortLabel()}
           <ChevronDown
             size={12}
-            className={`transition-transform ${chauffeurOpen ? "rotate-180" : ""}`}
+            className={`transition-transform ${chauffeurOpen ? "rotate-180" : ""}`} aria-hidden="true"
           />
         </button>
       </div>
@@ -99,7 +99,7 @@ export default function ServiceTypeSelector({
               >
                 <Icon
                   size={16}
-                  className={`shrink-0 mt-0.5 ${active ? "text-[var(--color-primary)]" : "text-[var(--color-ink-muted)]"}`}
+                  className={`shrink-0 mt-0.5 ${active ? "text-[var(--color-primary)]" : "text-[var(--color-ink-muted)]"}`} aria-hidden="true"
                 />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 flex-wrap">
@@ -125,7 +125,7 @@ export default function ServiceTypeSelector({
       {/* Dynamic caption — one line, updates with selection */}
       {selectedService && (
         <p className="mt-2 flex items-start gap-1.5 text-[10px] text-[var(--color-ink-muted)]">
-          <Info size={11} className="text-[var(--color-primary)] shrink-0 mt-[1px]" />
+          <Info size={11} className="text-[var(--color-primary)] shrink-0 mt-[1px]" aria-hidden="true" />
           {selectedService.description}
         </p>
       )}

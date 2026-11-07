@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Loader2, Car, Wrench, AlertCircle, CheckCircle2 } from "lucide-react";
+import { CircleNotch as Loader2, Car, Wrench, WarningCircle as AlertCircle, CheckCircle as CheckCircle2 } from "@phosphor-icons/react/ssr";
 import Modal from "@/components/ui/Modal";
 import type { Vehicle } from "@/lib/types";
 
@@ -93,14 +93,14 @@ export default function QuickGarageModal({ vehicle, open, onClose, onSave }: Qui
     >
       {!vehicle ? (
         <div className="p-6 sm:p-8 flex flex-col items-center justify-center text-center">
-          <AlertCircle size={32} className="text-[var(--color-warning-text)] mb-3" />
+          <AlertCircle size={32} className="text-[var(--color-warning-text)] mb-3" aria-hidden="true" />
           <p className="text-sm text-[var(--color-ink-muted)]">No vehicle selected.</p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* ✅ COPY FIX: Neutral banner — accurate for ANY vehicle, not just "awaiting" ones */}
           <div className="p-3.5 sm:p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-start gap-2.5 sm:gap-3">
-            <Wrench size={18} className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" />
+            <Wrench size={18} className="text-amber-600 dark:text-amber-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
             <div>
               <p className="text-xs sm:text-sm font-semibold text-amber-700 dark:text-amber-300">
                 Garage Update
@@ -125,7 +125,7 @@ export default function QuickGarageModal({ vehicle, open, onClose, onSave }: Qui
               New Odometer Reading (KM) <span className="text-[var(--color-danger)]">*</span>
             </label>
             <div className="relative">
-              <Car size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
+              <Car size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true" />
               <input
                 type="number"
                 value={newMileage}
@@ -138,7 +138,7 @@ export default function QuickGarageModal({ vehicle, open, onClose, onSave }: Qui
             </div>
             {error && (
               <p className="mt-2 text-xs font-medium text-[var(--color-danger-text)] flex items-center gap-1.5">
-                <AlertCircle size={12} className="flex-shrink-0" /> <span>{error}</span>
+                <AlertCircle size={12} className="flex-shrink-0" aria-hidden="true" /> <span>{error}</span>
               </p>
             )}
           </div>
@@ -150,7 +150,7 @@ export default function QuickGarageModal({ vehicle, open, onClose, onSave }: Qui
               <span className="text-[var(--color-ink-subtle)] font-normal normal-case">(Optional)</span>
             </label>
             <div className="relative">
-              <CheckCircle2 size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
+              <CheckCircle2 size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true" />
               <input
                 type="number"
                 value={nextService}
@@ -176,7 +176,7 @@ export default function QuickGarageModal({ vehicle, open, onClose, onSave }: Qui
               disabled={isLoading}
               className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 rounded-xl text-xs sm:text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] shadow-[var(--shadow-md)] transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
             >
-              {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Wrench size={14} />}
+              {isLoading ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Wrench size={14} aria-hidden="true" />}
               <span>{isLoading ? "Processing..." : "Update & Release to Fleet"}</span>
             </button>
           </div>

@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import {
-  Calendar, CalendarDays, Clock, Car, MapPin, ChevronRight,
-  Loader2, MoreVertical, Play, XCircle, Eye, CheckCircle2
-} from "lucide-react";
+  Calendar, CalendarDots as CalendarDays, Clock, Car, MapPin, CaretRight as ChevronRight,
+  CircleNotch as Loader2, DotsThreeVertical as MoreVertical, Play, XCircle, Eye, CheckCircle as CheckCircle2
+} from "@phosphor-icons/react/ssr";
 import { useBookingsTab } from "@/hooks/dashboard/features/useBookingsTab";
 import { bookingsApi } from "@/lib/api/bookings";
 import BookingActionsSheet, { SheetAction } from "./BookingActionsSheet";
@@ -57,7 +57,7 @@ export default function BookingsTabContent() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-[var(--color-ink-muted)]">
-        <Loader2 size={24} className="animate-spin mb-3 text-[var(--color-primary)]" />
+        <Loader2 size={24} className="animate-spin mb-3 text-[var(--color-primary)]" aria-hidden="true" />
         <p className="text-sm font-medium">Loading rentals...</p>
       </div>
     );
@@ -67,7 +67,7 @@ export default function BookingsTabContent() {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-center">
         <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3">
-          <Calendar size={24} />
+          <Calendar size={24} aria-hidden="true" />
         </div>
         <p className="text-sm font-bold text-[var(--color-ink)]">No upcoming rentals</p>
         <p className="text-xs text-[var(--color-ink-muted)] mt-1">Scheduled rentals will appear here.</p>
@@ -124,7 +124,7 @@ export default function BookingsTabContent() {
                       )}
                     </div>
                     <div className="flex items-center gap-1.5 mt-0.5">
-                      <Car size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                      <Car size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                       <span className="text-xs font-medium text-[var(--color-ink-muted)] truncate">{vehicleLabel}</span>
                       {plate && (
                         <>
@@ -161,7 +161,7 @@ export default function BookingsTabContent() {
               {/* Row 2: Clean Stats Grid */}
               <div className="grid grid-cols-3 gap-2 mt-3">
                 <div className="flex items-center gap-1.5">
-                  <CalendarDays size={13} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                  <CalendarDays size={13} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                   <div>
                     <p className="text-sm font-semibold text-[var(--color-ink)] leading-tight">{days || 0}d</p>
                     <p className="text-[10px] text-[var(--color-ink-muted)] leading-tight">Duration</p>
@@ -169,7 +169,7 @@ export default function BookingsTabContent() {
                 </div>
 
                 <div className="flex items-center gap-1.5">
-                  <Clock size={13} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                  <Clock size={13} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                   <div>
                     <p className="text-sm font-semibold text-[var(--color-ink)] leading-tight truncate">
                       {formatDateShort(isActive ? booking.end_date : booking.start_date)}
@@ -194,7 +194,7 @@ export default function BookingsTabContent() {
                 <div className="flex items-center gap-1 min-w-0 flex-1">
                   {destination ? (
                     <>
-                      <MapPin size={11} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                      <MapPin size={11} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                       <span className="text-[11px] font-medium text-[var(--color-ink-muted)] truncate">{destination}</span>
                     </>
                   ) : (
@@ -205,7 +205,7 @@ export default function BookingsTabContent() {
                   onClick={() => router.push(`/dashboard/bookings/${booking.id}`)}
                   className="inline-flex items-center gap-0.5 text-[10px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity flex-shrink-0"
                 >
-                  Details <ChevronRight size={12} />
+                  Details <ChevronRight size={12} aria-hidden="true" />
                 </button>
               </div>
             </div>
@@ -299,7 +299,7 @@ function BookingMenu({ bookingId, isActive, isConfirmed, isPending, statusLabel,
         onClick={() => setOpen(true)}
         className="p-1.5 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all active:scale-95"
       >
-        <MoreVertical size={15} />
+        <MoreVertical size={15} aria-hidden="true" />
       </button>
 
       <BookingActionsSheet

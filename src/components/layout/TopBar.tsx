@@ -5,12 +5,12 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  Search, User, Bell,
-  LogOut, ChevronRight, Command,
-  Sparkles, HelpCircle,
-  CreditCard, Users, CalendarDays, Car, ChevronDown,
-  Building2,
-} from "lucide-react";
+  MagnifyingGlass as Search, User, Bell,
+  SignOut as LogOut, CaretRight as ChevronRight, Command,
+  Sparkle as Sparkles, Question as HelpCircle,
+  CreditCard, Users, CalendarDots as CalendarDays, Car, CaretDown as ChevronDown,
+  Buildings as Building2,
+} from "@phosphor-icons/react/ssr";
 import { useAuth } from "@/context/auth-context";
 import MobileSearchModal from "@/components/search/MobileSearchModal";
 import DesktopSearchDropdown from "@/components/search/DesktopSearchDropdown";
@@ -174,7 +174,7 @@ export default function Topbar({
       <div
         className={`${dims[size]} rounded-full flex items-center justify-center bg-gradient-to-br from-blue-600 to-indigo-600 shadow-md shadow-blue-500/20 ring-2 ring-surface`}
       >
-        <User size={iconSizes[size]} className="text-white" strokeWidth={2} />
+        <User size={iconSizes[size]} className="text-white" weight="regular" aria-hidden="true" />
       </div>
     );
 
@@ -209,9 +209,9 @@ export default function Topbar({
     }
     if (scope.icon) {
       const Icon = scope.icon;
-      return <Icon size={size} strokeWidth={2.25} className="flex-shrink-0 text-primary" />;
+      return <Icon size={size} weight="regular" className="flex-shrink-0 text-primary" aria-hidden="true" />;
     }
-    return <Sparkles size={size} strokeWidth={2.25} className="flex-shrink-0 text-primary" />;
+    return <Sparkles size={size} weight="regular" className="flex-shrink-0 text-primary" aria-hidden="true" />;
   };
 
   const hasPageHeader = Boolean(pageTitle && pageDescription);
@@ -247,7 +247,7 @@ export default function Topbar({
                   className="relative flex w-9 h-9 rounded-xl items-center justify-center text-ink-muted hover:bg-surface-hover hover:text-ink transition-all duration-200 active:scale-95"
                   aria-label="Notifications"
                 >
-                  <Bell size={17} strokeWidth={1.8} />
+                  <Bell size={17} weight="light" aria-hidden="true" />
                   <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
                 </button>
                 <button
@@ -255,7 +255,7 @@ export default function Topbar({
                   className="flex items-center justify-center w-9 h-9 rounded-xl text-ink-muted hover:bg-surface-hover hover:text-ink transition-all duration-200 active:scale-95"
                   aria-label="Search"
                 >
-                  <Search size={17} strokeWidth={1.8} />
+                  <Search size={17} weight="light" aria-hidden="true" />
                 </button>
               </div>
             </div>
@@ -316,7 +316,7 @@ export default function Topbar({
                       aria-expanded={showScopeMenu}
                     >
                       {renderScopeMark(activeScope, 12)}
-                      <ChevronDown size={12} strokeWidth={2.5} className="text-ink-muted flex-shrink-0" />
+                      <ChevronDown size={12} weight="bold" className="text-ink-muted flex-shrink-0" aria-hidden="true" />
                     </button>
 
                     {showScopeMenu && (
@@ -349,7 +349,7 @@ export default function Topbar({
                                   {renderScopeMark(scope, 12)}
                                 </span>
                                 <span className="flex-1 text-left">{scope.label}</span>
-                                {isActive && <ChevronRight size={12} />}
+                                {isActive && <ChevronRight size={12} aria-hidden="true" />}
                               </button>
                             );
                           })}
@@ -380,7 +380,7 @@ export default function Topbar({
 
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <kbd className="flex items-center justify-center w-5 h-5 rounded-md text-[10px] font-semibold text-ink-subtle border border-surface-border bg-surface-hover">
-                      <Command size={9} strokeWidth={2.5} />
+                      <Command size={9} weight="bold" aria-hidden="true" />
                     </kbd>
                     <kbd className="flex items-center justify-center px-1.5 h-5 rounded-md text-[10px] font-semibold text-ink-subtle border border-surface-border bg-surface-hover">
                       K
@@ -411,7 +411,7 @@ export default function Topbar({
                 className="relative flex w-9 h-9 rounded-xl items-center justify-center text-ink-muted hover:bg-surface-hover hover:text-ink transition-all duration-200 active:scale-95"
                 aria-label="Notifications"
               >
-                <Bell size={17} strokeWidth={1.8} />
+                <Bell size={17} weight="light" aria-hidden="true" />
                 <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
               </button>
 
@@ -456,9 +456,9 @@ export default function Topbar({
                         }
                         className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-ink hover:bg-surface-hover transition-all duration-150 group"
                       >
-                        <User size={16} strokeWidth={1.8} className="text-ink-muted group-hover:text-primary transition-colors" />
+                        <User size={16} weight="light" className="text-ink-muted group-hover:text-primary transition-colors" aria-hidden="true" />
                         <span className="flex-1 font-medium">User Profile</span>
-                        <ChevronRight size={14} className="text-ink-subtle opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <ChevronRight size={14} className="text-ink-subtle opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
                       </Link>
 
                       <Link
@@ -469,27 +469,27 @@ export default function Topbar({
                         }
                         className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-ink hover:bg-surface-hover transition-all duration-150 group"
                       >
-                        <Building2 size={16} strokeWidth={1.8} className="text-ink-muted group-hover:text-primary transition-colors" />
+                        <Building2 size={16} weight="light" className="text-ink-muted group-hover:text-primary transition-colors" aria-hidden="true" />
                         <span className="flex-1 font-medium">Business Profile</span>
-                        <ChevronRight size={14} className="text-ink-subtle opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <ChevronRight size={14} className="text-ink-subtle opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
                       </Link>
 
                       <Link
                         href="/dashboard/financials?tab=invoices"
                         className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-ink hover:bg-surface-hover transition-all duration-150 group"
                       >
-                        <CreditCard size={16} strokeWidth={1.8} className="text-ink-muted group-hover:text-primary transition-colors" />
+                        <CreditCard size={16} weight="light" className="text-ink-muted group-hover:text-primary transition-colors" aria-hidden="true" />
                         <span className="flex-1 font-medium">Billing & Invoices</span>
-                        <ChevronRight size={14} className="text-ink-subtle opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <ChevronRight size={14} className="text-ink-subtle opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
                       </Link>
 
                       <Link
                         href="/help"
                         className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] text-ink hover:bg-surface-hover transition-all duration-150 group"
                       >
-                        <HelpCircle size={16} strokeWidth={1.8} className="text-ink-muted group-hover:text-primary transition-colors" />
+                        <HelpCircle size={16} weight="light" className="text-ink-muted group-hover:text-primary transition-colors" aria-hidden="true" />
                         <span className="flex-1 font-medium">Help Center</span>
-                        <ChevronRight size={14} className="text-ink-subtle opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <ChevronRight size={14} className="text-ink-subtle opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
                       </Link>
                     </div>
 
@@ -500,7 +500,7 @@ export default function Topbar({
                         onClick={logout}
                         className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium text-danger-text hover:bg-danger-bg dark:hover:bg-rose-500/10 transition-all duration-150 group"
                       >
-                        <LogOut size={16} strokeWidth={1.8} className="text-danger-text" />
+                        <LogOut size={16} weight="light" className="text-danger-text" aria-hidden="true" />
                         <span className="flex-1 text-left">Sign out</span>
                       </button>
                     </div>
@@ -513,7 +513,7 @@ export default function Topbar({
                 className="sm:hidden flex items-center justify-center w-9 h-9 rounded-xl text-ink-muted hover:bg-surface-hover hover:text-ink transition-all duration-200 active:scale-95"
                 aria-label="Search"
               >
-                <Search size={17} strokeWidth={1.8} />
+                <Search size={17} weight="light" aria-hidden="true" />
               </button>
             </div>
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, CheckCircle2, Send, PenLine, TrendingUp } from "lucide-react";
+import { FileText, CheckCircle as CheckCircle2, PaperPlaneTilt as Send, PencilLine as PenLine, TrendUp as TrendingUp } from "@phosphor-icons/react/ssr";
 import { useRouter } from "next/navigation"; // ✅ NEW
 import type { ContractHealth } from "@/hooks/financials/useFinancialOverview";
 
@@ -48,7 +48,7 @@ export default function ContractHealthWidget({ data }: Props) {
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2.5 min-w-0">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-emerald-500/20 to-emerald-500/5 border border-emerald-500/20 flex items-center justify-center text-emerald-600 dark:text-emerald-400 flex-shrink-0">
-              <FileText size={16} />
+              <FileText size={16} aria-hidden="true" />
             </div>
             <div className="min-w-0">
               <h3 className="text-sm font-bold text-[var(--color-ink)] truncate">Contract Health</h3>
@@ -140,7 +140,7 @@ export default function ContractHealthWidget({ data }: Props) {
             >
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-7 h-7 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 flex-shrink-0">
-                  <CheckCircle2 size={14} />
+                  <CheckCircle2 size={14} aria-hidden="true" />
                 </div>
                 <span className="text-xs font-semibold text-[var(--color-ink)]">Signed</span>
               </div>
@@ -157,7 +157,7 @@ export default function ContractHealthWidget({ data }: Props) {
             >
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-7 h-7 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 flex-shrink-0">
-                  <PenLine size={14} />
+                  <PenLine size={14} aria-hidden="true" />
                 </div>
                 <span className="text-xs font-semibold text-[var(--color-ink)]">Draft</span>
               </div>
@@ -174,7 +174,7 @@ export default function ContractHealthWidget({ data }: Props) {
             >
               <div className="flex items-center gap-2.5 min-w-0">
                 <div className="w-7 h-7 rounded-lg bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400 flex-shrink-0">
-                  <Send size={14} />
+                  <Send size={14} aria-hidden="true" />
                 </div>
                 <span className="text-xs font-semibold text-[var(--color-ink)]">Sent</span>
               </div>
@@ -189,7 +189,7 @@ export default function ContractHealthWidget({ data }: Props) {
         {/* Health Trend Indicator - Responsive */}
         <div className="mt-4 pt-3 border-t border-[var(--color-surface-border)] flex items-center justify-between">
           <div className="flex items-center gap-2 min-w-0">
-            <TrendingUp size={14} className="text-emerald-500 flex-shrink-0" />
+            <TrendingUp size={14} className="text-emerald-500 flex-shrink-0" aria-hidden="true" />
             <span className="text-[10px] font-medium text-[var(--color-ink-muted)] truncate">
               {data.signed_percentage >= 50 ? "Healthy contract pipeline" : "Improve contract closure"}
             </span>

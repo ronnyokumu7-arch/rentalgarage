@@ -3,7 +3,7 @@ import { confirmAction } from "@/lib/utils/confirmAction";
 
 import { useState } from "react";
 import { format, parseISO, differenceInDays } from "date-fns";
-import { Flame, GripVertical, Calendar, Clock, Eye, Trash2 } from "lucide-react";
+import { Flame, DotsSixVertical as GripVertical, Calendar, Clock, Eye, Trash as Trash2 } from "@phosphor-icons/react/ssr";
 import { ScheduledTask } from "@/hooks/scheduler/useTaskSchedulerTimeline";
 
 interface TaskTimelineBarProps {
@@ -90,7 +90,7 @@ export default function TaskTimelineBar({
       case "urgent":
         return (
           <span className="px-1.5 py-0.5 rounded-sm bg-rose-500/20 text-rose-600 dark:text-rose-400 font-extrabold text-[9px] uppercase tracking-wider flex items-center gap-1 shrink-0">
-            <Flame size={10} /> Urgent
+            <Flame size={10} aria-hidden="true" /> Urgent
           </span>
         );
       case "high":
@@ -133,7 +133,7 @@ export default function TaskTimelineBar({
         {/* Top Header Row */}
         <div className="flex items-center justify-between gap-1.5 min-w-0">
           <span className="text-[11px] font-extrabold truncate tracking-tight flex items-center gap-1">
-            <GripVertical size={11} className="opacity-40 shrink-0" />
+            <GripVertical size={11} className="opacity-40 shrink-0" aria-hidden="true" />
             <span className="truncate">{task.title}</span>
           </span>
           <div className="shrink-0 flex items-center gap-1">
@@ -150,7 +150,7 @@ export default function TaskTimelineBar({
         <div className="space-y-1 mt-1">
           <div className="flex items-center justify-between text-[9px] font-bold opacity-90">
             <span className="font-mono tracking-tight opacity-80 flex items-center gap-1">
-              <Calendar size={8} />
+              <Calendar size={8} aria-hidden="true" />
               {format(parseISO(task.startDate), "MMM d")} - {format(parseISO(task.dueDate), "MMM d")}
             </span>
             <span className="font-mono text-[9px] font-black">
@@ -193,7 +193,7 @@ export default function TaskTimelineBar({
               }}
               className="w-full flex items-center gap-2 px-3 py-2 text-xs text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors"
             >
-              <Eye size={14} className="text-[var(--color-ink-muted)]" />
+              <Eye size={14} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
               <span>View User Tasks</span>
             </button>
             
@@ -207,7 +207,7 @@ export default function TaskTimelineBar({
                   }}
                   className="w-full flex items-center gap-2 px-3 py-2 text-xs text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors"
                 >
-                  <Clock size={14} className="text-blue-500" />
+                  <Clock size={14} className="text-blue-500" aria-hidden="true" />
                   <span>Mark In Progress</span>
                 </button>
                 <button
@@ -217,7 +217,7 @@ export default function TaskTimelineBar({
                   }}
                   className="w-full flex items-center gap-2 px-3 py-2 text-xs text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors"
                 >
-                  <Clock size={14} className="text-emerald-500" />
+                  <Clock size={14} className="text-emerald-500" aria-hidden="true" />
                   <span>Mark Completed</span>
                 </button>
               </>
@@ -235,7 +235,7 @@ export default function TaskTimelineBar({
                 }}
                 className="w-full flex items-center gap-2 px-3 py-2 text-xs text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-500/10 transition-colors"
               >
-                <Trash2 size={14} />
+                <Trash2 size={14} aria-hidden="true" />
                 <span>Delete Task</span>
               </button>
             )}

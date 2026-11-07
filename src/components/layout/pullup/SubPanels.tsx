@@ -5,11 +5,11 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/auth-context"; // ✅ Added for profile routing
 import {
-  ChevronLeft, ChevronRight, SlidersHorizontal, UserCog,
-  Landmark as LandmarkIcon, ServerCog, ShieldHalf, LayoutDashboard,
-  FileText, FileSignature, Users, Building2, Palette, Bell, ScrollText, DollarSign,
+  CaretLeft as ChevronLeft, CaretRight as ChevronRight, SlidersHorizontal, UserGear as UserCog,
+  Bank as LandmarkIcon, HardDrives as ServerCog, Shield as ShieldHalf, SquaresFour as LayoutDashboard,
+  FileText, Signature as FileSignature, Users, Buildings as Building2, Palette, Bell, Scroll as ScrollText, CurrencyDollar as DollarSign,
   User, // ✅ Added for Profile Settings icon
-} from "lucide-react";
+} from "@phosphor-icons/react/ssr";
 
 export function ParentPanel({
   title, children, onBack,
@@ -23,7 +23,7 @@ export function ParentPanel({
           onClick={onBack}
           className="w-8 h-8 rounded-full bg-[var(--color-surface-hover)] flex items-center justify-center text-[var(--color-ink)] hover:bg-[var(--color-surface-active)] transition-colors"
         >
-          <ChevronLeft size={18} />
+          <ChevronLeft size={18} aria-hidden="true" />
         </button>
         <h3 className="text-lg font-bold text-[var(--color-ink)]">{title}</h3>
       </div>
@@ -47,12 +47,12 @@ export function SubPanelItem({
           : "hover:bg-[var(--color-surface-hover)] text-[var(--color-ink)]"
       }`}
     >
-      <Icon size={18} className={active ? "text-[var(--color-primary)]" : "text-[var(--color-ink-muted)]"} />
+      <Icon size={18} className={active ? "text-[var(--color-primary)]" : "text-[var(--color-ink-muted)]"} aria-hidden="true" />
       <div className="flex-1 min-w-0">
         <p className="text-sm font-bold">{title}</p>
         {description && <p className="text-[10px] text-[var(--color-ink-muted)] truncate">{description}</p>}
       </div>
-      <ChevronRight size={14} className="text-[var(--color-ink-subtle)]" />
+      <ChevronRight size={14} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
     </button>
   );
 }

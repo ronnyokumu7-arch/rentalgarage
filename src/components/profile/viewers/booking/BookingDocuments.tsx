@@ -1,7 +1,8 @@
 "use client";
 
 import type { ComponentType } from "react";
-import { FileText, FileSignature, CheckCircle, Clock, AlertCircle, Eye, Link, Download, type LucideProps } from "lucide-react";
+import { FileText, Signature as FileSignature, CheckCircle, Clock, WarningCircle as AlertCircle, Eye, Link, Download } from "@phosphor-icons/react/ssr";
+import type { IconProps } from "@phosphor-icons/react";
 
 interface BookingDocumentsProps {
   contractStatus: string;
@@ -20,7 +21,7 @@ interface DocumentTileProps {
   onView: () => void;
   onCopy: () => void;
   onDownload: () => void;
-  Icon: ComponentType<LucideProps>;
+  Icon: ComponentType<IconProps>;
 }
 
 // ✅ Simple, safe status config matching existing patterns
@@ -43,12 +44,12 @@ function DocumentTile({ title, status, onView, onCopy, onDownload, Icon }: Docum
     <div className={`relative group rounded-xl sm:rounded-2xl border p-3.5 sm:p-5 transition-all ${isReady ? 'border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/30 hover:border-[var(--color-primary)]/30' : 'border-dashed border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/10'}`}>
       <div className="flex items-center sm:items-start gap-3 sm:gap-4 mb-3 sm:mb-4 min-w-0">
         <div className={`p-2.5 sm:p-3 rounded-lg sm:rounded-xl border shrink-0 ${config.bg}`}>
-          <Icon size={18} className={`sm:w-5 sm:h-5 ${config.color}`} />
+          <Icon size={18} className={`sm:w-5 sm:h-5 ${config.color}`} aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">
           <h5 className="text-xs sm:text-sm font-bold text-[var(--color-ink)] truncate">{title}</h5>
           <div className={`inline-flex items-center gap-1 sm:gap-1.5 mt-1 px-1.5 sm:px-2 py-0.5 rounded-md text-[8px] sm:text-[9px] font-bold uppercase tracking-wider border ${config.bg} ${config.color}`}>
-            <config.icon size={10} className="shrink-0" />
+            <config.icon size={10} className="shrink-0" aria-hidden="true" />
             <span>{config.label}</span>
           </div>
         </div>
@@ -61,7 +62,7 @@ function DocumentTile({ title, status, onView, onCopy, onDownload, Icon }: Docum
             onClick={onView} 
             className="flex items-center justify-center gap-1 py-1.5 sm:py-2 px-1 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[var(--color-primary)] bg-[var(--color-primary)]/5 hover:bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/10 active:scale-95 transition-all"
           >
-            <Eye size={12} className="sm:w-3.5 sm:h-3.5 shrink-0" /> 
+            <Eye size={12} className="sm:w-3.5 sm:h-3.5 shrink-0" aria-hidden="true" />
             <span className="truncate">View</span>
           </button>
           <button 
@@ -69,7 +70,7 @@ function DocumentTile({ title, status, onView, onCopy, onDownload, Icon }: Docum
             onClick={onCopy} 
             className="flex items-center justify-center gap-1 py-1.5 sm:py-2 px-1 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] border border-transparent hover:border-[var(--color-surface-border)] active:scale-95 transition-all"
           >
-            <Link size={12} className="sm:w-3.5 sm:h-3.5 shrink-0" /> 
+            <Link size={12} className="sm:w-3.5 sm:h-3.5 shrink-0" aria-hidden="true" />
             <span className="truncate">Copy</span>
           </button>
           <button 
@@ -77,7 +78,7 @@ function DocumentTile({ title, status, onView, onCopy, onDownload, Icon }: Docum
             onClick={onDownload} 
             className="flex items-center justify-center gap-1 py-1.5 sm:py-2 px-1 rounded-lg sm:rounded-xl text-[9px] sm:text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] border border-transparent hover:border-[var(--color-surface-border)] active:scale-95 transition-all"
           >
-            <Download size={12} className="sm:w-3.5 sm:h-3.5 shrink-0" /> 
+            <Download size={12} className="sm:w-3.5 sm:h-3.5 shrink-0" aria-hidden="true" />
             <span className="truncate">Save</span>
           </button>
         </div>

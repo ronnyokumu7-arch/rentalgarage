@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import toast from "react-hot-toast";
 import {
-  Car, Clock, Loader2, MoreVertical,
-  CheckCircle2, XCircle, Eye, User
-} from "lucide-react";
+  Car, Clock, CircleNotch as Loader2, DotsThreeVertical as MoreVertical,
+  CheckCircle as CheckCircle2, XCircle, Eye, User
+} from "@phosphor-icons/react/ssr";
 import { useReturningTodayTab } from "@/hooks/dashboard/features/useReturningTodayTab";
 import { bookingsApi } from "@/lib/api/bookings";
 import BookingActionsSheet, { SheetAction } from "./BookingActionsSheet";
@@ -78,7 +78,7 @@ export default function ReturningTodayTabContent() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-[var(--color-ink-muted)]">
-        <Loader2 size={24} className="animate-spin mb-3 text-[var(--color-primary)]" />
+        <Loader2 size={24} className="animate-spin mb-3 text-[var(--color-primary)]" aria-hidden="true" />
         <p className="text-sm font-medium">Loading returns...</p>
       </div>
     );
@@ -88,7 +88,7 @@ export default function ReturningTodayTabContent() {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-center">
         <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3">
-          <CheckCircle2 size={24} />
+          <CheckCircle2 size={24} aria-hidden="true" />
         </div>
         <p className="text-sm font-bold text-[var(--color-ink)]">No vehicles returning</p>
         <p className="text-xs text-[var(--color-ink-muted)] mt-1">
@@ -123,7 +123,7 @@ export default function ReturningTodayTabContent() {
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-sm flex-shrink-0 ${
                     overdue ? "bg-rose-500/10 text-rose-500" : "bg-[var(--color-primary)]/10 text-[var(--color-primary)]"
                   }`}>
-                    <Car size={18} />
+                    <Car size={18} aria-hidden="true" />
                   </div>
 
                   <div className="min-w-0 flex-1">
@@ -136,7 +136,7 @@ export default function ReturningTodayTabContent() {
                       </span>
                       <span className="text-[8px] text-[var(--color-ink-subtle)]">•</span>
                       <span className="text-[10px] font-medium text-[var(--color-ink-muted)] truncate flex items-center gap-1">
-                        <User size={10} className="text-[var(--color-ink-subtle)]" />
+                        <User size={10} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
                         {clientName} ({clientInitials})
                       </span>
                     </div>
@@ -157,7 +157,7 @@ export default function ReturningTodayTabContent() {
               {/* Row 2: Return Time & Status */}
               <div className={`mt-3 pt-3 border-t border-[var(--color-surface-border)]/40 flex items-center justify-between gap-3`}>
                 <div className="flex items-center gap-2">
-                  <Clock size={14} className={overdue ? "text-rose-500" : "text-emerald-500"} />
+                  <Clock size={14} className={overdue ? "text-rose-500" : "text-emerald-500"} aria-hidden="true" />
                   <div>
                     <p className={`text-xs font-bold ${overdue ? "text-rose-600 dark:text-rose-400" : "text-emerald-600 dark:text-emerald-400"}`}>
                       {returnRelative(returnAt, overdue)}
@@ -267,7 +267,7 @@ function ReturningRentalMenu({ bookingId, isOverdue, onAction, onView }: Returni
         className="p-1.5 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all active:scale-95"
         aria-label="Return actions"
       >
-        <MoreVertical size={15} />
+        <MoreVertical size={15} aria-hidden="true" />
       </button>
 
       <BookingActionsSheet

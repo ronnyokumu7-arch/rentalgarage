@@ -3,13 +3,13 @@
 
 import { useRouter } from "next/navigation";
 import {
-  Search as SearchIcon,
-  Loader2,
+  MagnifyingGlass as SearchIcon,
+  CircleNotch as Loader2,
   Users,
-  CalendarDays,
+  CalendarDots as CalendarDays,
   Car,
-  ChevronRight,
-} from "lucide-react";
+  CaretRight as ChevronRight,
+} from "@phosphor-icons/react/ssr";
 import { useGlobalSearch, type SearchScope } from "@/hooks/useGlobalSearch";
 import type {
   PageResult,
@@ -121,13 +121,13 @@ export default function DesktopSearchDropdown({
         aria-label={`Search everywhere for "${query}"`}
         className="w-full flex items-center gap-3 px-4 py-3 bg-[var(--color-primary-subtle)] hover:bg-[var(--color-primary-muted)] active:bg-[var(--color-primary-muted)] transition-colors border-b border-surface-border"
       >
-        <SearchIcon size={16} className="text-primary flex-shrink-0" strokeWidth={2.25} />
+        <SearchIcon size={16} className="text-primary flex-shrink-0" weight="regular" aria-hidden="true" />
         <span className="text-sm font-semibold text-ink truncate">{query}</span>
         <span className="text-xs text-ink-muted flex-shrink-0">
           · Search everywhere
         </span>
         {loading ? (
-          <Loader2 size={14} className="animate-spin text-primary flex-shrink-0 ml-auto" />
+          <Loader2 size={14} className="animate-spin text-primary flex-shrink-0 ml-auto" aria-hidden="true" />
         ) : (
           <span className="ml-auto text-[10px] font-bold text-ink-subtle flex-shrink-0">
             ↵
@@ -241,7 +241,7 @@ function PageRow({ result, onClick }: { result: PageResult; onClick: () => void 
   const Icon = result.icon;
   return (
     <button type="button" onClick={onClick} className={ROW_CLASS}>
-      <Icon size={16} strokeWidth={1.8} className="text-ink-muted flex-shrink-0" />
+      <Icon size={16} weight="light" className="text-ink-muted flex-shrink-0" aria-hidden="true" />
       <div className="min-w-0 flex-1">
         <p className="text-sm font-semibold text-ink truncate">{result.label}</p>
         {result.description && (
@@ -250,7 +250,7 @@ function PageRow({ result, onClick }: { result: PageResult; onClick: () => void 
           </p>
         )}
       </div>
-      <ChevronRight size={14} className="text-ink-subtle flex-shrink-0" />
+      <ChevronRight size={14} className="text-ink-subtle flex-shrink-0" aria-hidden="true" />
     </button>
   );
 }
@@ -268,7 +268,7 @@ function BookingRow({ result, onClick }: { result: BookingResult; onClick: () =>
 
   return (
     <button type="button" onClick={onClick} className={ROW_CLASS}>
-      <CalendarDays size={16} strokeWidth={1.8} className="text-blue-500 flex-shrink-0" />
+      <CalendarDays size={16} weight="light" className="text-blue-500 flex-shrink-0" aria-hidden="true" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
           <span className="text-sm font-semibold text-ink truncate">
@@ -282,7 +282,7 @@ function BookingRow({ result, onClick }: { result: BookingResult; onClick: () =>
         </div>
         {meta && <p className="text-xs text-ink-muted truncate mt-0.5">{meta}</p>}
       </div>
-      <ChevronRight size={14} className="text-ink-subtle flex-shrink-0" />
+      <ChevronRight size={14} className="text-ink-subtle flex-shrink-0" aria-hidden="true" />
     </button>
   );
 }
@@ -295,7 +295,7 @@ function ClientRow({ result, onClick }: { result: ClientResult; onClick: () => v
 
   return (
     <button type="button" onClick={onClick} className={ROW_CLASS}>
-      <Users size={16} strokeWidth={1.8} className="text-primary flex-shrink-0" />
+      <Users size={16} weight="light" className="text-primary flex-shrink-0" aria-hidden="true" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
           <span className="text-sm font-semibold text-ink truncate">
@@ -309,7 +309,7 @@ function ClientRow({ result, onClick }: { result: ClientResult; onClick: () => v
         </div>
         {meta && <p className="text-xs text-ink-muted truncate mt-0.5">{meta}</p>}
       </div>
-      <ChevronRight size={14} className="text-ink-subtle flex-shrink-0" />
+      <ChevronRight size={14} className="text-ink-subtle flex-shrink-0" aria-hidden="true" />
     </button>
   );
 }
@@ -318,7 +318,7 @@ function VehicleRow({ result, onClick }: { result: VehicleResult; onClick: () =>
   const statusColor = VEHICLE_STATUS[result.status] ?? "text-gray-500";
   return (
     <button type="button" onClick={onClick} className={ROW_CLASS}>
-      <Car size={16} strokeWidth={1.8} className="text-purple-500 flex-shrink-0" />
+      <Car size={16} weight="light" className="text-purple-500 flex-shrink-0" aria-hidden="true" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5">
           <span className="text-sm font-semibold text-ink truncate">
@@ -334,7 +334,7 @@ function VehicleRow({ result, onClick }: { result: VehicleResult; onClick: () =>
           {result.plate_number} · {result.current_mileage.toLocaleString()} km
         </p>
       </div>
-      <ChevronRight size={14} className="text-ink-subtle flex-shrink-0" />
+      <ChevronRight size={14} className="text-ink-subtle flex-shrink-0" aria-hidden="true" />
     </button>
   );
 }

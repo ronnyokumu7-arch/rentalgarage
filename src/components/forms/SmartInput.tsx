@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useRef, useEffect } from "react";
-import { Search, Check } from "lucide-react";
+import { MagnifyingGlass as Search, Check } from "@phosphor-icons/react/ssr";
 
 interface SmartInputProps {
   value: string;
@@ -65,7 +65,7 @@ export default function SmartInput({
       <div className="relative">
         <Search
           size={16}
-          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-subtle pointer-events-none"
+          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-ink-subtle pointer-events-none" aria-hidden="true"
         />
         <input
           type="text"
@@ -98,7 +98,7 @@ export default function SmartInput({
                 `}
               >
                 <span>{option}</span>
-                {value === option && <Check size={14} className="text-accent-dark" />}
+                {value === option && <Check size={14} className="text-accent-dark" aria-hidden="true" />}
               </button>
             ))}
           </div>

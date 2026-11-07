@@ -1,7 +1,7 @@
 // src/components/fleet/VehicleStatusStrip.tsx
 "use client";
 
-import { Gauge, Wrench, TrendingUp, Activity } from "lucide-react";
+import { Gauge, Wrench, TrendUp as TrendingUp, Pulse as Activity } from "@phosphor-icons/react/ssr";
 import type { VehicleDerivedStats } from "@/hooks/fleet/useVehicleDetail";
 import type { Vehicle } from "@/lib/types";
 
@@ -80,7 +80,7 @@ export default function VehicleStatusStrip({ vehicle, stats }: VehicleStatusStri
                     {tile.label}
                   </span>
                   <div className={`w-6 h-6 rounded-lg bg-gradient-to-br ${tile.color} flex items-center justify-center`}>
-                    <Icon size={12} className="text-white" />
+                    <Icon size={12} className="text-white" aria-hidden="true" />
                   </div>
                 </div>
                 <p className="text-base font-bold text-[var(--color-ink)] tabular-nums truncate leading-tight">
@@ -109,7 +109,7 @@ export default function VehicleStatusStrip({ vehicle, stats }: VehicleStatusStri
                   {tile.label}
                 </span>
                 <div className={`w-6 h-6 sm:w-7 sm:h-7 rounded-lg bg-gradient-to-br ${tile.color} flex items-center justify-center`}>
-                  <Icon size={12} className="text-white" />
+                  <Icon size={12} className="text-white" aria-hidden="true" />
                 </div>
               </div>
               <p className="text-sm sm:text-base font-bold text-[var(--color-ink)] tabular-nums truncate">

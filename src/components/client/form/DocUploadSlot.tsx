@@ -1,7 +1,7 @@
 // src/components/client/form/DocUploadSlot.tsx
 "use client";
 
-import { CheckCircle, Eye } from "lucide-react";
+import { CheckCircle, Eye } from "@phosphor-icons/react/ssr";
 import type { DocSlotProps } from "./types";
 
 export default function DocUploadSlot({
@@ -47,7 +47,7 @@ export default function DocUploadSlot({
         {hasNewFile ? (
           <>
             <div className="w-8 h-8 rounded-full bg-[var(--color-success-bg)] text-[var(--color-success-text)] flex items-center justify-center mb-1.5">
-              <CheckCircle size={16} />
+              <CheckCircle size={16} aria-hidden="true" />
             </div>
             <p className="text-xs font-bold text-[var(--color-ink)] truncate w-full text-center px-1">
               {file!.name}
@@ -56,7 +56,7 @@ export default function DocUploadSlot({
         ) : (
           <>
             <div className="w-8 h-8 rounded-full bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] group-hover:text-[var(--color-primary)] flex items-center justify-center mb-1.5">
-              <Icon size={16} />
+              <Icon size={16} aria-hidden="true" />
             </div>
             <p className="text-xs font-semibold text-[var(--color-ink-muted)] group-hover:text-[var(--color-ink)] text-center leading-tight">
               {label}{" "}
@@ -85,7 +85,7 @@ export default function DocUploadSlot({
           }}
           className="flex items-center justify-center gap-1.5 py-2 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-xs font-semibold hover:bg-[var(--color-primary)]/20 transition-colors w-full active:scale-[0.98]"
         >
-          <Eye size={12} />
+          <Eye size={12} aria-hidden="true" />
           View Document
         </button>
       )}

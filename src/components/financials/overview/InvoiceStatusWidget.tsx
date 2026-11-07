@@ -1,5 +1,5 @@
 // src/components/financials/overview/InvoiceStatusWidget.tsx
-import { CheckCircle2, Clock, AlertTriangle, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { CheckCircle as CheckCircle2, Clock, Warning as AlertTriangle, TrendUp as TrendingUp, TrendDown as TrendingDown, Minus } from "@phosphor-icons/react/ssr";
 import type { InvoiceStatusSummary } from "@/hooks/financials/useFinancialOverview";
 
 interface Props {
@@ -9,9 +9,9 @@ interface Props {
 export default function InvoiceStatusWidget({ data }: Props) {
   // Calculate if collection rate is trending
   const getTrendIcon = (rate: number) => {
-    if (rate >= 70) return <TrendingUp size={14} className="text-emerald-500" />;
-    if (rate >= 40) return <Minus size={14} className="text-amber-500" />;
-    return <TrendingDown size={14} className="text-rose-500" />;
+    if (rate >= 70) return <TrendingUp size={14} className="text-emerald-500" aria-hidden="true" />;
+    if (rate >= 40) return <Minus size={14} className="text-amber-500" aria-hidden="true" />;
+    return <TrendingDown size={14} className="text-rose-500" aria-hidden="true" />;
   };
 
   const getTrendLabel = (rate: number) => {
@@ -92,7 +92,7 @@ export default function InvoiceStatusWidget({ data }: Props) {
               className={`relative group ${status.bg} border ${status.border} rounded-xl p-3.5 flex flex-col items-center text-center transition-all duration-200 ${status.hoverBg} hover:border-opacity-40 hover:shadow-sm cursor-default`}
             >
               <div className={`${status.color} mb-1.5 transition-transform group-hover:scale-110 duration-200`}>
-                <Icon size={17} strokeWidth={2} />
+                <Icon size={17} weight="regular" aria-hidden="true" />
               </div>
               <p className="text-xl font-bold text-[var(--color-ink)] tabular-nums leading-none">
                 {status.count}

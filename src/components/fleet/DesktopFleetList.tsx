@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import {
   Car, Archive, Shield,
-  Search, Filter, Ban, Wrench, Plus,
-  User, Banknote,
-} from "lucide-react";
+  MagnifyingGlass as Search, Funnel as Filter, Prohibit as Ban, Wrench, Plus,
+  User, Money as Banknote,
+} from "@phosphor-icons/react/ssr";
 import FilterDropdown from "@/components/ui/FilterDropdown";
 import DataTable, { RowAction } from "@/components/ui/DataTable";
 import type { Vehicle, VehicleStatus, Booking } from "@/lib/types";
@@ -237,7 +237,7 @@ export default function DesktopFleetList({
             <div className="relative flex-1">
               <Search
                 size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true"
               />
               <input
                 type="text"
@@ -264,7 +264,7 @@ export default function DesktopFleetList({
             onClick={onAddVehicle}
             className="h-9 px-4 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm flex-shrink-0"
           >
-            <Plus size={14} strokeWidth={2.5} />
+            <Plus size={14} weight="bold" aria-hidden="true" />
             Add Vehicle
           </button>
         </div>
@@ -273,7 +273,7 @@ export default function DesktopFleetList({
       {filteredVehicles.length === 0 ? (
         <div className="p-12 text-center">
           <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
-            <Car size={24} className="text-[var(--color-ink-subtle)]" />
+            <Car size={24} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
           </div>
           <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No vehicles found</h3>
           <p className="text-sm text-[var(--color-ink-muted)] mb-4">
@@ -294,7 +294,7 @@ export default function DesktopFleetList({
                 return (
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-9 h-9 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center text-[var(--color-ink-subtle)] shrink-0">
-                      <Car size={16} />
+                      <Car size={16} aria-hidden="true" />
                     </div>
                     <div className="min-w-0 flex flex-col">
                       <div className="flex items-center gap-2">
@@ -310,7 +310,7 @@ export default function DesktopFleetList({
                         </button>
                         {v.owner_id && (
                           <span className="text-[9px] font-bold uppercase tracking-wider text-purple-600 bg-purple-500/10 px-1.5 py-0.5 rounded-md border border-purple-500/20 flex items-center gap-1 whitespace-nowrap">
-                            <User size={8} /> Investor
+                            <User size={8} aria-hidden="true" /> Investor
                           </span>
                         )}
                       </div>

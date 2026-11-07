@@ -1,5 +1,5 @@
 // src/components/tenants/health/ActivityPulseWidget.tsx
-import { MousePointerClick, Clock, CalendarDays, Zap } from 'lucide-react';
+import { CursorClick as MousePointerClick, Clock, CalendarDots as CalendarDays, Lightning as Zap } from "@phosphor-icons/react/ssr";
 import type { ActivityPulse } from '@/lib/types';
 
 interface ActivityPulseWidgetProps {
@@ -32,7 +32,7 @@ export function ActivityPulseWidget({ data }: ActivityPulseWidgetProps) {
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/30">
         <div className="flex items-center gap-3">
           <div className="p-1.5 rounded-lg bg-cyan-500/10 text-cyan-400">
-            <MousePointerClick size={16} />
+            <MousePointerClick size={16} aria-hidden="true" />
           </div>
           <div>
             <h2 className="text-sm font-semibold text-[var(--color-ink)]">Activity Pulse</h2>
@@ -63,7 +63,7 @@ export function ActivityPulseWidget({ data }: ActivityPulseWidgetProps) {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold text-[var(--color-ink-muted)] uppercase tracking-widest flex items-center gap-1.5">
-              <CalendarDays size={11} className="opacity-50" /> Active Days
+              <CalendarDays size={11} className="opacity-50" aria-hidden="true" /> Active Days
             </label>
             <p className="text-lg font-bold text-[var(--color-ink)]">
               {data.activeDaysThisMonth}
@@ -73,7 +73,7 @@ export function ActivityPulseWidget({ data }: ActivityPulseWidgetProps) {
 
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold text-[var(--color-ink-muted)] uppercase tracking-widest flex items-center gap-1.5">
-              <Clock size={11} className="opacity-50" /> Avg Session
+              <Clock size={11} className="opacity-50" aria-hidden="true" /> Avg Session
             </label>
             <p className="text-lg font-bold text-[var(--color-ink)]">
               {data.avgSessionDurationMinutes}
@@ -89,7 +89,7 @@ export function ActivityPulseWidget({ data }: ActivityPulseWidgetProps) {
           Last Active
         </span>
         <div className="flex items-center gap-1.5">
-          <Zap size={12} className={isActiveRecently ? "text-emerald-400" : "text-slate-500"} />
+          <Zap size={12} className={isActiveRecently ? "text-emerald-400" : "text-slate-500"} aria-hidden="true" />
           <span className={`text-xs font-semibold ${isActiveRecently ? "text-emerald-400" : "text-slate-500"}`}>
             {formatLastActive(data.lastActiveAt)}
           </span>

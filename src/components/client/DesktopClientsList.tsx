@@ -4,23 +4,23 @@
 import { useRouter } from "next/navigation";
 import {
   Users,
-  Mail,
+  Envelope as Mail,
   Phone,
   User as UserIcon,
   Archive,
-  Filter,
+  Funnel as Filter,
   Shield,
-  ShieldAlert,
-  Loader2,
-  Search,
+  ShieldWarning as ShieldAlert,
+  CircleNotch as Loader2,
+  MagnifyingGlass as Search,
   ArrowRight,
   Car,
   Clock,
-  MessageCircle,
+  ChatCircle as MessageCircle,
   PhoneCall,
   Check,
   Shield as ShieldIcon,
-} from "lucide-react";
+} from "@phosphor-icons/react/ssr";
 import DataTable, { RowAction } from "@/components/ui/DataTable";
 import FilterDropdown from "@/components/ui/FilterDropdown";
 import AddClientButton from "@/components/client/AddClientButton";
@@ -203,7 +203,7 @@ export default function DesktopClientsList({
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full lg:w-auto">
             <div className="flex items-center gap-2 flex-1 sm:w-80">
               <div className="relative flex-1">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true" />
                 <input
                   type="text"
                   value={search}
@@ -233,16 +233,16 @@ export default function DesktopClientsList({
             onClick={() => setStatusFilter("pending")}
             className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-amber-500/10 border-b border-amber-500/20 text-amber-700 dark:text-amber-400 hover:bg-amber-500/15 transition-colors text-sm font-semibold"
           >
-            <ShieldAlert size={16} />
+            <ShieldAlert size={16} aria-hidden="true" />
             {pendingClients} {pendingClients === 1 ? "client" : "clients"} awaiting your review
-            <ArrowRight size={14} className="opacity-70" />
+            <ArrowRight size={14} className="opacity-70" aria-hidden="true" />
           </button>
         )}
 
         {!loading && statusFilter === "pending" && (
           <div className="w-full flex items-center justify-between px-4 py-3 bg-blue-500/10 border-b border-blue-500/20 text-blue-700 dark:text-blue-400 text-sm font-semibold">
             <span className="flex items-center gap-2">
-              <Filter size={14} />
+              <Filter size={14} aria-hidden="true" />
               Viewing {filteredClients.length} pending {filteredClients.length === 1 ? "client" : "clients"}
             </span>
             <button
@@ -257,12 +257,12 @@ export default function DesktopClientsList({
 
         {loading ? (
           <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2">
-            <Loader2 className="w-5 h-5 animate-spin" /> Loading clients...
+            <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> Loading clients...
           </div>
         ) : filteredClients.length === 0 ? (
           <div className="p-12 text-center">
             <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
-              <Users size={24} className="text-[var(--color-ink-subtle)]" />
+              <Users size={24} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
             </div>
             <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No clients found</h3>
             <p className="text-sm text-[var(--color-ink-muted)] mb-4">
@@ -285,7 +285,7 @@ export default function DesktopClientsList({
                           src={client.avatar_image}
                           alt={client.full_name}
                           className="w-full h-full object-cover"
-                          fallback={<UserIcon size={16} />}
+                          fallback={<UserIcon size={16} aria-hidden="true" />}
                         />
                       </div>
                       <div className="min-w-0 flex flex-col">
@@ -307,11 +307,11 @@ export default function DesktopClientsList({
                               title="Verified client"
                             >
                               <span className="relative inline-flex text-blue-600 dark:text-blue-500">
-                                <ShieldIcon size={16} strokeWidth={1.5} fill="currentColor" />
+                                <ShieldIcon size={16} weight="light" fill="currentColor" aria-hidden="true" />
                                 <Check
                                   size={9}
-                                  strokeWidth={3}
-                                  className="absolute left-[3.5px] top-[3px] text-white"
+                                  weight="bold"
+                                  className="absolute left-[3.5px] top-[3px] text-white" aria-hidden="true"
                                 />
                               </span>
                             </span>
@@ -323,7 +323,7 @@ export default function DesktopClientsList({
                             onClick={(e) => e.stopPropagation()}
                             className="flex items-center gap-1.5 text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-primary)] transition-colors truncate mt-0.5"
                           >
-                            <Mail size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                            <Mail size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                             <span className="truncate">{client.email}</span>
                           </a>
                         ) : (
@@ -339,7 +339,7 @@ export default function DesktopClientsList({
                 accessorKey: "phone",
                 cell: ({ row }) => (
                   <div className="flex items-center gap-2 text-sm text-[var(--color-ink)]">
-                    <Phone size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                    <Phone size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                     <span className="font-medium">{row.original.phone}</span>
                   </div>
                 ),
@@ -364,7 +364,7 @@ export default function DesktopClientsList({
                   const arr = client.driving_arrangement || "self_drive";
                   return (
                     <div className="flex items-center gap-1.5 text-sm text-[var(--color-ink)]">
-                      <Car size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                      <Car size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                       <span className="font-medium">{ARRANGEMENT_LABELS[arr] || arr}</span>
                     </div>
                   );

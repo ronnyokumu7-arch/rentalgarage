@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { User, Wallet, Shield, Save, Loader2, Smartphone, Building2, CreditCard, Lock } from "lucide-react";
+import { User, Wallet, Shield, FloppyDisk as Save, CircleNotch as Loader2, DeviceMobile as Smartphone, Buildings as Building2, CreditCard, Lock } from "@phosphor-icons/react/ssr";
 import { useAuth } from "@/context/auth-context";
 import apiClient from "@/lib/api-client";
 import toast from "react-hot-toast";
@@ -115,7 +115,7 @@ export default function InvestorSettingsPage() {
       <section className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] p-6">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
-            <User size={20} />
+            <User size={20} aria-hidden="true" />
           </div>
           <div>
             <h2 className="text-base font-bold text-[var(--color-ink)]">Profile Information</h2>
@@ -145,7 +145,7 @@ export default function InvestorSettingsPage() {
           </div>
           <div className="pt-2">
             <button type="submit" disabled={loading} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-              {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+              {loading ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Save size={16} aria-hidden="true" />}
               Save Profile
             </button>
           </div>
@@ -156,7 +156,7 @@ export default function InvestorSettingsPage() {
       <section className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] p-6">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-            <Wallet size={20} />
+            <Wallet size={20} aria-hidden="true" />
           </div>
           <div>
             <h2 className="text-base font-bold text-[var(--color-ink)]">Payout Preferences</h2>
@@ -175,7 +175,7 @@ export default function InvestorSettingsPage() {
             <div className="md:col-span-2">
               <label className={labelClass}>M-Pesa Phone Number</label>
               <div className="relative">
-                <Smartphone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" />
+                <Smartphone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                 <input type="tel" value={mpesaPhone} onChange={(e) => setMpesaPhone(e.target.value)} className={`${inputClass} pl-10`} placeholder="254712345678" />
               </div>
             </div>
@@ -191,28 +191,28 @@ export default function InvestorSettingsPage() {
             <div>
               <label className={labelClass}>Bank Name</label>
               <div className="relative">
-                <Building2 size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" />
+                <Building2 size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                 <input type="text" value={bankName} onChange={(e) => setBankName(e.target.value)} className={`${inputClass} pl-10`} placeholder="e.g. KCB, Equity" />
               </div>
             </div>
             <div>
               <label className={labelClass}>Account Name</label>
               <div className="relative">
-                <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" />
+                <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                 <input type="text" value={bankAccountName} onChange={(e) => setBankAccountName(e.target.value)} className={`${inputClass} pl-10`} placeholder="Account Holder Name" />
               </div>
             </div>
             <div className="md:col-span-2">
               <label className={labelClass}>Account Number</label>
               <div className="relative">
-                <CreditCard size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" />
+                <CreditCard size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                 <input type="text" value={bankAccountNumber} onChange={(e) => setBankAccountNumber(e.target.value)} className={`${inputClass} pl-10`} placeholder="1234567890" />
               </div>
             </div>
           </div>
           <div className="pt-2">
             <button type="submit" disabled={loading} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-              {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
+              {loading ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Save size={16} aria-hidden="true" />}
               Save Payout Details
             </button>
           </div>
@@ -223,7 +223,7 @@ export default function InvestorSettingsPage() {
       <section className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] p-6">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-600 flex items-center justify-center">
-            <Shield size={20} />
+            <Shield size={20} aria-hidden="true" />
           </div>
           <div>
             <h2 className="text-base font-bold text-[var(--color-ink)]">Security</h2>
@@ -235,14 +235,14 @@ export default function InvestorSettingsPage() {
           <div>
             <label className={labelClass}>New Password</label>
             <div className="relative">
-              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" />
+              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true" />
               <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} className={`${inputClass} pl-10`} required minLength={8} />
             </div>
           </div>
           <div>
             <label className={labelClass}>Confirm New Password</label>
             <div className="relative">
-              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" />
+              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true" />
               <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} className={`${inputClass} pl-10`} required minLength={8} />
             </div>
             {confirmPassword && newPassword !== confirmPassword && (
@@ -251,7 +251,7 @@ export default function InvestorSettingsPage() {
           </div>
           <div className="pt-2">
             <button type="submit" disabled={loading || newPassword !== confirmPassword} className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-              {loading ? <Loader2 size={16} className="animate-spin" /> : <Shield size={16} />}
+              {loading ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Shield size={16} aria-hidden="true" />}
               Update Password
             </button>
           </div>

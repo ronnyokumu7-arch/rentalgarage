@@ -1,6 +1,6 @@
 // src/components/public-docs/PublicDocHeader.tsx
 import React from "react";
-import { BadgeCheck, FileText, Receipt, FileSignature } from "lucide-react";
+import { SealCheck as BadgeCheck, FileText, Receipt, Signature as FileSignature } from "@phosphor-icons/react/ssr";
 
 type DocType = "quotation" | "invoice" | "contract";
 type StatusVariant = "pending" | "accepted" | "paid" | "signed" | "expired" | "void";
@@ -46,9 +46,9 @@ const statusStyles: Record<StatusVariant, React.CSSProperties> = {
 };
 
 const docIcons: Record<DocType, React.ReactNode> = {
-  quotation: <FileText className="w-5 h-5" style={{ color: '#6D28D9' }} />,
-  invoice: <Receipt className="w-5 h-5" style={{ color: '#047857' }} />,
-  contract: <FileSignature className="w-5 h-5" style={{ color: '#7C3AED' }} />,
+  quotation: <FileText className="w-5 h-5" style={{ color: '#6D28D9' }} aria-hidden="true" />,
+  invoice: <Receipt className="w-5 h-5" style={{ color: '#047857' }} aria-hidden="true" />,
+  contract: <FileSignature className="w-5 h-5" style={{ color: '#7C3AED' }} aria-hidden="true" />,
 };
 
 const docAccentColors: Record<DocType, string> = {
@@ -104,7 +104,7 @@ export default function PublicDocHeader({ companyName, documentNumber, docType, 
           className="px-3 py-1.5 rounded-full text-xs font-semibold border flex items-center gap-1.5"
           style={statusStyles[status]}
         >
-          <BadgeCheck className="w-3.5 h-3.5" />
+          <BadgeCheck className="w-3.5 h-3.5" aria-hidden="true" />
           {status ? status.toUpperCase() : 'PENDING'}
         </div>
       </div>

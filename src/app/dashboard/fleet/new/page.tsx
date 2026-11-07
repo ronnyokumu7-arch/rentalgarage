@@ -1,7 +1,7 @@
 // src/app/dashboard/fleet/new/page.tsx
 "use client";
 
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "@phosphor-icons/react/ssr";
 import { useRouter } from "next/navigation";
 import { useNewVehicleForm } from "@/hooks/fleet/useNewVehicleForm";
 import NewVehicleForm from "@/components/fleet/NewVehicleForm";
@@ -19,7 +19,7 @@ export default function NewVehiclePage() {
             onClick={() => router.push("/dashboard/fleet")} 
             className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-medium text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors flex-shrink-0"
           >
-            <ArrowLeft size={16} />
+            <ArrowLeft size={16} aria-hidden="true" />
             <span className="sm:hidden">Back</span>
             <span className="hidden sm:inline">Back to Fleet</span>
           </button>

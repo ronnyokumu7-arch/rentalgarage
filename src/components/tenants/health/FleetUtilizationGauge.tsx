@@ -1,5 +1,5 @@
 // src/components/tenants/health/FleetUtilizationGauge.tsx
-import { Car } from 'lucide-react';
+import { Car } from "@phosphor-icons/react/ssr";
 import type { FleetUtilization } from '@/lib/types';
 
 interface FleetUtilizationGaugeProps {
@@ -27,7 +27,7 @@ export function FleetUtilizationGauge({ data }: FleetUtilizationGaugeProps) {
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/30 shrink-0">
         <div className="flex items-center gap-3">
           <div className={`p-1.5 rounded-lg ${colors.bg} ${colors.text}`}>
-            <Car size={16} />
+            <Car size={16} aria-hidden="true" />
           </div>
           <div>
             <h2 className="text-sm font-semibold text-[var(--color-ink)]">Fleet Utilization</h2>
@@ -96,7 +96,7 @@ export function FleetUtilizationGauge({ data }: FleetUtilizationGaugeProps) {
 
           {/* Total Fleet Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] text-[var(--color-ink-muted)] w-full justify-center">
-            <Car size={12} />
+            <Car size={12} aria-hidden="true" />
             Total Fleet: {data.totalVehicles} vehicles
           </div>
         </div>

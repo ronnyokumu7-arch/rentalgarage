@@ -2,9 +2,9 @@
 
 import { useState, useRef, useEffect } from "react";
 import { 
-  X, Save, User, Car, Calendar,
-  ChevronDown, Loader2, Tag, Clock, CalendarDays, UserPlus, Check, Building2, Link
-} from "lucide-react";
+  X, FloppyDisk as Save, User, Car, Calendar,
+  CaretDown as ChevronDown, CircleNotch as Loader2, Tag, Clock, CalendarDots as CalendarDays, UserPlus, Check, Buildings as Building2, Link
+} from "@phosphor-icons/react/ssr";
 import { useTaskForm } from "@/hooks/tasks/useTaskForm";
 import type { Task } from "@/lib/types";
 
@@ -37,19 +37,19 @@ function RelationChips({ department, category, relationOption }: { department: s
     <div className="flex flex-wrap gap-2 mt-3 animate-in fade-in slide-in-from-top-2 duration-200">
       {department && (
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 text-[var(--color-primary)]">
-          <Building2 size={10} />
+          <Building2 size={10} aria-hidden="true" />
           <span className="capitalize">{department}</span>
         </div>
       )}
       {category && (
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 text-[var(--color-primary)]">
-          <category.icon size={10} />
+          <category.icon size={10} aria-hidden="true" />
           <span>{category.label}</span>
         </div>
       )}
       {relationOption && (
         <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-semibold bg-[var(--color-success)]/5 border border-[var(--color-success)]/20 text-[var(--color-success)]">
-          <Link size={10} />
+          <Link size={10} aria-hidden="true" />
           <span className="truncate max-w-[150px]">{relationOption.label}</span>
         </div>
       )}
@@ -147,7 +147,7 @@ export default function TaskProfileModal({ open, onClose, editingTask, onSaveSuc
             </p>
           </div>
           <button onClick={onClose} className="p-2 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors">
-            <X size={18} />
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
 
@@ -174,14 +174,14 @@ export default function TaskProfileModal({ open, onClose, editingTask, onSaveSuc
               {/* ✅ 1. Department Filter (Moved to First Position) */}
               <div className="relative" ref={departmentRef}>
                 <button type="button" onClick={() => openDropdown("department")} title="Filter by department" className={`h-9 w-9 flex items-center justify-center rounded-xl border transition-all ${form.department ? "border-[var(--color-primary)] bg-[var(--color-primary)]/5 text-[var(--color-primary)]" : "border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"}`}>
-                  <Building2 size={14} />
+                  <Building2 size={14} aria-hidden="true" />
                 </button>
               </div>
 
               {/* ✅ 2. Category Filter (Moved to Second Position) */}
               <div className="relative" ref={categoryRef}>
                 <button type="button" onClick={() => openDropdown("category")} title="Select category" className={`h-9 w-9 flex items-center justify-center rounded-xl border transition-all ${form.category ? "border-[var(--color-primary)] bg-[var(--color-primary)]/5 text-[var(--color-primary)]" : "border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"}`}>
-                  {selectedCategory ? <selectedCategory.icon size={14} /> : <Tag size={14} />}
+                  {selectedCategory ? <selectedCategory.icon size={14} aria-hidden="true" /> : <Tag size={14} aria-hidden="true" />}
                 </button>
               </div>
 
@@ -189,7 +189,7 @@ export default function TaskProfileModal({ open, onClose, editingTask, onSaveSuc
               {form.targetType && (
                 <div className="relative" ref={linkRef}>
                   <button type="button" onClick={() => openDropdown("link")} title="Link to operation" className={`h-9 w-9 flex items-center justify-center rounded-xl border transition-all ${form.targetId ? "border-[var(--color-success)] bg-[var(--color-success)]/5 text-[var(--color-success)]" : "border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] animate-in fade-in zoom-in-95"}`}>
-                    <Link size={14} />
+                    <Link size={14} aria-hidden="true" />
                   </button>
                 </div>
               )}
@@ -217,27 +217,27 @@ export default function TaskProfileModal({ open, onClose, editingTask, onSaveSuc
           {/* Section 3: Timeline & Assignment */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2 border-t border-[var(--color-surface-border)]">
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)] mb-1.5 flex items-center gap-1.5"><CalendarDays size={10} /> Start Date</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)] mb-1.5 flex items-center gap-1.5"><CalendarDays size={10} aria-hidden="true" /> Start Date</label>
               <input type="date" value={form.startDate} onChange={(e) => form.setStartDate(e.target.value)} className="w-full px-3 py-2 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink)] text-sm focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" />
             </div>
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)] mb-1.5 flex items-center gap-1.5"><Clock size={10} /> Due Date</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)] mb-1.5 flex items-center gap-1.5"><Clock size={10} aria-hidden="true" /> Due Date</label>
               <input type="date" value={form.dueDate} onChange={(e) => form.setDueDate(e.target.value)} className="w-full px-3 py-2 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink)] text-sm focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" />
             </div>
             
             {/* Premium Assignee Dropdown (Renders UPWARDS) */}
             <div>
-              <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)] mb-1.5 flex items-center gap-1.5"><UserPlus size={10} /> Assignee</label>
+              <label className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)] mb-1.5 flex items-center gap-1.5"><UserPlus size={10} aria-hidden="true" /> Assignee</label>
               <button ref={assigneeBtnRef} type="button" onClick={() => openDropdown("assignee")} className={`w-full h-[38px] px-3 flex items-center justify-between gap-2 rounded-xl border transition-all text-left ${form.userId ? "border-[var(--color-primary)] bg-[var(--color-primary)]/5 text-[var(--color-primary)]" : "border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"}`}>
                 <div className="flex items-center gap-2 min-w-0">
                   {selectedUser ? (
                     <div className="w-5 h-5 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center text-[9px] font-bold text-[var(--color-primary)] flex-shrink-0">{selectedUser.full_name?.split(" ").map((n: string) => n[0]).join("").substring(0, 2)}</div>
                   ) : (
-                    <div className="w-5 h-5 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center flex-shrink-0"><UserPlus size={10} className="text-[var(--color-ink-muted)]" /></div>
+                    <div className="w-5 h-5 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center flex-shrink-0"><UserPlus size={10} className="text-[var(--color-ink-muted)]" aria-hidden="true" /></div>
                   )}
                   <span className="text-xs font-semibold truncate">{selectedUser ? selectedUser.full_name : "Unassigned"}</span>
                 </div>
-                <ChevronDown size={12} className={`text-[var(--color-ink-subtle)] transition-transform flex-shrink-0 ${isAssigneeOpen ? "rotate-180" : ""}`} />
+                <ChevronDown size={12} className={`text-[var(--color-ink-subtle)] transition-transform flex-shrink-0 ${isAssigneeOpen ? "rotate-180" : ""}`} aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -247,7 +247,7 @@ export default function TaskProfileModal({ open, onClose, editingTask, onSaveSuc
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50">
           <button onClick={onClose} className="px-4 py-2 rounded-xl text-xs font-bold text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all">Cancel</button>
           <button onClick={handleSave} disabled={!form.isValid || form.isSubmitting} className="flex items-center gap-2 px-5 py-2 rounded-xl text-xs font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed">
-            {form.isSubmitting ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+            {form.isSubmitting ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Save size={14} aria-hidden="true" />}
             {editingTask ? "Save Changes" : "Create Task"}
           </button>
         </div>
@@ -261,7 +261,7 @@ export default function TaskProfileModal({ open, onClose, editingTask, onSaveSuc
               const Icon = c.icon;
               return (
                 <button key={c.id} type="button" onClick={() => { form.setCategory(c.id); setIsCategoryOpen(false); setCategoryPos(null); }} className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors ${form.category === c.id ? "bg-[var(--color-primary)]/5 text-[var(--color-primary)]" : "text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"}`}>
-                  <Icon size={14} /><span className="font-medium">{c.label}</span>
+                  <Icon size={14} aria-hidden="true" /><span className="font-medium">{c.label}</span>
                 </button>
               );
             })}
@@ -278,7 +278,7 @@ export default function TaskProfileModal({ open, onClose, editingTask, onSaveSuc
             ) : (
               form.availableDepartments.map((dept) => (
                 <button key={dept} type="button" onClick={() => { form.setDepartment(dept); setIsDepartmentOpen(false); setDepartmentPos(null); }} className={`w-full flex items-center gap-3 px-3 py-2 rounded-lg text-xs transition-colors ${form.department === dept ? "bg-[var(--color-primary)]/5 text-[var(--color-primary)]" : "text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"}`}>
-                  <Building2 size={14} /><span className="font-medium capitalize">{dept}</span>
+                  <Building2 size={14} aria-hidden="true" /><span className="font-medium capitalize">{dept}</span>
                 </button>
               ))
             )}
@@ -290,7 +290,7 @@ export default function TaskProfileModal({ open, onClose, editingTask, onSaveSuc
       {isLinkOpen && linkPos && (
         <div ref={linkDropdownRef} className="fixed z-[9999] w-64 bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-xl shadow-[var(--shadow-xl)] overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200 max-h-60 overflow-y-auto custom-scrollbar" style={{ top: linkPos.top, left: linkPos.left }}>
           {form.loadingRelations ? (
-            <div className="p-4 flex items-center justify-center gap-2 text-xs text-[var(--color-ink-muted)]"><Loader2 size={12} className="animate-spin" /> Loading...</div>
+            <div className="p-4 flex items-center justify-center gap-2 text-xs text-[var(--color-ink-muted)]"><Loader2 size={12} className="animate-spin" aria-hidden="true" /> Loading...</div>
           ) : form.relationOptions.length === 0 ? (
             <div className="p-4 text-center text-xs text-[var(--color-ink-muted)]">No options found.</div>
           ) : (
@@ -313,15 +313,15 @@ export default function TaskProfileModal({ open, onClose, editingTask, onSaveSuc
             ) : (
               <>
                 <button type="button" onClick={() => { form.setUserId(null); setIsAssigneeOpen(false); setAssigneePos(null); }} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs transition-colors ${!form.userId ? "bg-[var(--color-primary)]/5 text-[var(--color-primary)]" : "text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"}`}>
-                  <div className="w-6 h-6 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center flex-shrink-0"><UserPlus size={12} className="text-[var(--color-ink-muted)]" /></div>
+                  <div className="w-6 h-6 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center flex-shrink-0"><UserPlus size={12} className="text-[var(--color-ink-muted)]" aria-hidden="true" /></div>
                   <span className="font-medium flex-1 text-left">Unassigned</span>
-                  {!form.userId && <Check size={12} className="text-[var(--color-primary)]" />}
+                  {!form.userId && <Check size={12} className="text-[var(--color-primary)]" aria-hidden="true" />}
                 </button>
                 {form.users.map((u) => (
                   <button key={u.id} type="button" onClick={() => { form.setUserId(u.id); setIsAssigneeOpen(false); setAssigneePos(null); }} className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-xs transition-colors ${form.userId === u.id ? "bg-[var(--color-primary)]/5 text-[var(--color-primary)]" : "text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"}`}>
                     <div className="w-6 h-6 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center text-[10px] font-bold text-[var(--color-primary)] flex-shrink-0">{u.full_name?.split(" ").map((n: string) => n[0]).join("").substring(0, 2)}</div>
                     <span className="font-medium flex-1 text-left truncate">{u.full_name}</span>
-                    {form.userId === u.id && <Check size={12} className="text-[var(--color-primary)]" />}
+                    {form.userId === u.id && <Check size={12} className="text-[var(--color-primary)]" aria-hidden="true" />}
                   </button>
                 ))}
               </>

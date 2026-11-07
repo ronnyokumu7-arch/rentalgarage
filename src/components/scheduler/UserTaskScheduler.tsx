@@ -3,7 +3,7 @@
 
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { format, addDays, parseISO } from "date-fns";
-import { Loader2 } from "lucide-react";
+import { CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
 
 import {
   useTaskSchedulerTimeline,
@@ -283,7 +283,7 @@ const handleSaveUserSettings = useCallback(async (updatedUser: TeamMember, _perm
   if (isLoading) {
     return (
       <div className="flex flex-col w-full h-96 items-center justify-center bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)]">
-        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)] mb-4" />
+        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)] mb-4" aria-hidden="true" />
         <p className="text-sm font-medium text-[var(--color-ink-muted)]">Loading Scheduler...</p>
       </div>
     );

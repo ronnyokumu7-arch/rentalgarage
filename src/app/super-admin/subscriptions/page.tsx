@@ -5,12 +5,12 @@ import React, { useState, useEffect } from "react";
 import { 
   CheckCircle, 
   XCircle, 
-  Smartphone, 
-  Building2, 
-  Loader2, 
-  RefreshCw, 
+  DeviceMobile as Smartphone,
+  Buildings as Building2,
+  CircleNotch as Loader2,
+  ArrowsClockwise as RefreshCw,
   ShieldCheck 
-} from "lucide-react";
+} from "@phosphor-icons/react/ssr";
 import toast from "react-hot-toast";
 // ✅ Import the type AND the API client from the same source of truth
 import { SubscriptionRequest, subscriptionsApi } from "@/lib/api/subscriptions";
@@ -89,7 +89,7 @@ export default function TenantSubscriptionVerification() {
   if (loading) {
     return (
       <div className="flex justify-center items-center p-20">
-        <Loader2 className="animate-spin text-[var(--color-primary)]" size={32} />
+        <Loader2 className="animate-spin text-[var(--color-primary)]" size={32} aria-hidden="true" />
       </div>
     );
   }
@@ -100,7 +100,7 @@ export default function TenantSubscriptionVerification() {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="p-2.5 bg-amber-500/10 text-amber-600 rounded-xl">
-            <ShieldCheck size={22} />
+            <ShieldCheck size={22} aria-hidden="true" />
           </div>
           <div>
             <h2 className="text-lg font-bold text-[var(--color-ink)]">Subscription Approvals</h2>
@@ -111,7 +111,7 @@ export default function TenantSubscriptionVerification() {
           onClick={fetchRequests}
           className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] transition-all"
         >
-          <RefreshCw size={14} /> Refresh
+          <RefreshCw size={14} aria-hidden="true" /> Refresh
         </button>
       </div>
 
@@ -120,7 +120,7 @@ export default function TenantSubscriptionVerification() {
         {requests.length === 0 ? (
           <div className="flex flex-col items-center justify-center p-16 text-center">
             <div className="w-16 h-16 rounded-2xl bg-emerald-500/5 border border-emerald-500/10 flex items-center justify-center mb-4">
-              <CheckCircle size={28} className="text-emerald-500" />
+              <CheckCircle size={28} className="text-emerald-500" aria-hidden="true" />
             </div>
             <h3 className="text-sm font-bold text-[var(--color-ink)] mb-1">All Caught Up!</h3>
             <p className="text-xs text-[var(--color-ink-muted)] max-w-[240px]">
@@ -163,7 +163,7 @@ export default function TenantSubscriptionVerification() {
                             ? "bg-emerald-500/10 text-emerald-600" 
                             : "bg-blue-500/10 text-blue-600"
                         }`}>
-                          {req.payment_method === "mpesa" ? <Smartphone size={14} /> : <Building2 size={14} />}
+                          {req.payment_method === "mpesa" ? <Smartphone size={14} aria-hidden="true" /> : <Building2 size={14} aria-hidden="true" />}
                         </div>
                         <span className="font-mono font-bold text-[var(--color-ink)] bg-[var(--color-surface-hover)] px-2 py-1 rounded border border-[var(--color-surface-border)]">
                           {req.reference_code}
@@ -197,14 +197,14 @@ export default function TenantSubscriptionVerification() {
                               className="p-2 rounded-xl bg-rose-600 text-white hover:bg-rose-700 disabled:opacity-50 transition-all"
                               title="Confirm Reject"
                             >
-                              {processingId === req.id ? <Loader2 className="animate-spin" size={16} /> : <CheckCircle size={16} />}
+                              {processingId === req.id ? <Loader2 className="animate-spin" size={16} aria-hidden="true" /> : <CheckCircle size={16} aria-hidden="true" />}
                             </button>
                             <button
                               onClick={() => { setRejectingId(null); setRejectionReason(""); }}
                               className="p-2 rounded-xl bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-all"
                               title="Cancel"
                             >
-                              <XCircle size={16} />
+                              <XCircle size={16} aria-hidden="true" />
                             </button>
                           </div>
                         ) : (
@@ -215,7 +215,7 @@ export default function TenantSubscriptionVerification() {
                               disabled={processingId === req.id}
                               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 disabled:opacity-50 transition-all font-bold text-[11px]"
                             >
-                              {processingId === req.id ? <Loader2 className="animate-spin" size={14} /> : <CheckCircle size={14} />}
+                              {processingId === req.id ? <Loader2 className="animate-spin" size={14} aria-hidden="true" /> : <CheckCircle size={14} aria-hidden="true" />}
                               Approve
                             </button>
                             <button
@@ -223,7 +223,7 @@ export default function TenantSubscriptionVerification() {
                               disabled={processingId === req.id}
                               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 disabled:opacity-50 transition-all font-bold text-[11px]"
                             >
-                              <XCircle size={14} />
+                              <XCircle size={14} aria-hidden="true" />
                               Reject
                             </button>
                           </>

@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { 
-  Shield, CreditCard, CheckCircle2, AlertCircle, 
-  Clock, Loader2, Ban, UserCheck 
-} from "lucide-react";
+  Shield, CreditCard, CheckCircle as CheckCircle2, WarningCircle as AlertCircle,
+  Clock, CircleNotch as Loader2, Prohibit as Ban, UserCheck
+} from "@phosphor-icons/react/ssr";
 import SectionCard from "@/components/ui/SectionCard";
 import type { Client } from "@/lib/types";
 
@@ -80,7 +80,7 @@ export default function ClientStatusCard({
       {/* Header Bar */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-surface-border bg-surface-hover/30">
         <div className="flex items-center gap-2.5">
-          <Shield size={16} className="text-primary" />
+          <Shield size={16} className="text-primary" aria-hidden="true" />
           <h3 className="text-ink font-semibold tracking-tight">
             Status & Compliance
           </h3>
@@ -113,9 +113,9 @@ export default function ClientStatusCard({
               className={`badge before:content-none ${actionConfig.badgeClass} cursor-pointer transition-all hover:opacity-80 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {isActionLoading ? (
-                <Loader2 size={12} className="animate-spin" />
+                <Loader2 size={12} className="animate-spin" aria-hidden="true" />
               ) : actionConfig.icon ? (
-                <actionConfig.icon size={12} />
+                <actionConfig.icon size={12} aria-hidden="true" />
               ) : null}
               <span>{isActionLoading ? "Processing..." : actionConfig.label}</span>
             </button>
@@ -130,7 +130,7 @@ export default function ClientStatusCard({
           <div>
             <span className="label mb-1">Driving License Expiry</span>
             <div className="flex items-center gap-2">
-              <CreditCard size={14} className="text-ink-subtle" />
+              <CreditCard size={14} className="text-ink-subtle" aria-hidden="true" />
               <span className="text-ink font-medium">
                 {client.dl_expiry 
                   ? new Date(client.dl_expiry).toLocaleDateString("en-GB") 
@@ -146,7 +146,7 @@ export default function ClientStatusCard({
             dlHealth.variant === 'danger' ? 'badge-danger' :
             'badge-neutral'
           }`}>
-            <dlHealth.icon size={12} /> 
+            <dlHealth.icon size={12} aria-hidden="true" />
             <span>{dlHealth.label}</span>
           </div>
         </div>

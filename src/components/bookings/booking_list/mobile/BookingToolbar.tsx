@@ -1,7 +1,7 @@
 // src/components/bookings/booking_list/mobile/BookingToolbar.tsx
 "use client";
 
-import { Search, X, SlidersHorizontal } from "lucide-react";
+import { MagnifyingGlass as Search, X, SlidersHorizontal } from "@phosphor-icons/react/ssr";
 
 interface BookingToolbarProps {
   search: string;
@@ -42,7 +42,7 @@ export default function BookingToolbar({
             <div className="relative flex-1 h-full">
               <Search
                 size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true"
               />
               <input
                 type="text"
@@ -61,7 +61,7 @@ export default function BookingToolbar({
                   className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[var(--color-surface-hover)] flex items-center justify-center hover:bg-[var(--color-surface-border)] transition-colors"
                   aria-label="Clear search"
                 >
-                  <X size={12} className="text-[var(--color-ink-muted)]" />
+                  <X size={12} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
                 </button>
               )}
             </div>
@@ -83,7 +83,7 @@ export default function BookingToolbar({
                       : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
                 }`}
               >
-                <SlidersHorizontal size={14} />
+                <SlidersHorizontal size={14} aria-hidden="true" />
                 {hasActiveFilter && !filtersOpen && (
                   <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]" />
                 )}

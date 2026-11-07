@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Smartphone, Store, Wallet, Send, Landmark, CreditCard, Info } from "lucide-react";
+import { DeviceMobile as Smartphone, Storefront as Store, Wallet, PaperPlaneTilt as Send, Bank as Landmark, CreditCard, Info } from "@phosphor-icons/react/ssr";
 import type { PublicInvoiceView } from "@/lib/types";
 
 interface PublicInvoicePaymentChannelsProps {
@@ -109,7 +109,7 @@ export default function PublicInvoicePaymentChannels({ invoice }: PublicInvoiceP
   return (
     <div style={containerStyle}>
       <h4 className="flex items-center gap-2" style={sectionTitleStyle}>
-        <CreditCard size={16} style={{ color: '#57534E' }} /> How to Complete Payment
+        <CreditCard size={16} style={{ color: '#57534E' }} aria-hidden="true" /> How to Complete Payment
       </h4>
       <p style={sectionSubtitleStyle}>
         {availableChannels.length > 0
@@ -127,7 +127,7 @@ export default function PublicInvoicePaymentChannels({ invoice }: PublicInvoiceP
             borderRadius: '0.5rem',
           }}
         >
-          <Info size={16} style={{ color: '#B45309', flexShrink: 0, marginTop: '0.125rem' }} />
+          <Info size={16} style={{ color: '#B45309', flexShrink: 0, marginTop: '0.125rem' }} aria-hidden="true" />
           <div style={{ fontSize: '0.75rem', color: '#B45309' }}>
             <p style={{ fontWeight: 700, marginBottom: '0.25rem' }}>Contact the agency to arrange payment</p>
             <p>
@@ -150,7 +150,7 @@ export default function PublicInvoicePaymentChannels({ invoice }: PublicInvoiceP
                   className="px-3 py-2 rounded-lg border text-xs font-bold flex items-center gap-1.5 transition-colors"
                   style={isActive ? activeTabStyle : inactiveTabStyle}
                 >
-                  <Icon size={13} /> {ch.label}
+                  <Icon size={13} aria-hidden="true" /> {ch.label}
                 </button>
               );
             })}
@@ -159,7 +159,7 @@ export default function PublicInvoicePaymentChannels({ invoice }: PublicInvoiceP
           {activeChannel === "paybill" && (
             <div style={{ ...instructionBoxStyle, ...channelColors.emerald }}>
               <p style={{ fontWeight: 700, marginBottom: '0.5rem', color: channelColors.emerald.heading }}>M-Pesa PayBill Instructions:</p>
-              <p>1. Go to M-Pesa → Lipa na M-Pesa → <span style={{ fontWeight: 700 }}>PayBill</span></p>
+              <p>1. Lipa na M-Pesa → <span style={{ fontWeight: 700 }}>PayBill</span></p>
               <p>2. Business Number: <span style={{ fontWeight: 700 }}>{pd?.business_shortcode}</span></p>
               <p>3. Account Number: <span style={{ fontWeight: 700 }}>{pd?.account_number || invoice.invoice_number}</span></p>
               <p>4. Enter the amount and your M-Pesa PIN, then send.</p>

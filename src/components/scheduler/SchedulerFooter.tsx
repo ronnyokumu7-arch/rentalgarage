@@ -1,7 +1,7 @@
 // src/components/scheduler/SchedulerFooter.tsx
 "use client";
 
-import { BarChart2, Activity, AlertTriangle, TrendingUp } from "lucide-react";
+import { ChartBar as BarChart2, Pulse as Activity, Warning as AlertTriangle, TrendUp as TrendingUp } from "@phosphor-icons/react/ssr";
 
 interface SchedulerFooterProps {
   activeCount: number;
@@ -29,7 +29,7 @@ export default function SchedulerFooter({
           {/* Active Tasks */}
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-[var(--color-primary)]/10 flex items-center justify-center shrink-0">
-              <BarChart2 size={15} className="text-[var(--color-primary)]" />
+              <BarChart2 size={15} className="text-[var(--color-primary)]" aria-hidden="true" />
             </div>
             <div>
               <p className="text-[9px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)] leading-none">Active</p>
@@ -44,7 +44,7 @@ export default function SchedulerFooter({
             }`}>
               <AlertTriangle 
                 size={15} 
-                className={overdueCount > 0 ? "text-rose-500" : "text-emerald-500"} 
+                className={overdueCount > 0 ? "text-rose-500" : "text-emerald-500"} aria-hidden="true"
               />
             </div>
             <div>
@@ -60,7 +60,7 @@ export default function SchedulerFooter({
           {/* Completion Rate */}
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
-              <TrendingUp size={15} className="text-blue-500" />
+              <TrendingUp size={15} className="text-blue-500" aria-hidden="true" />
             </div>
             <div>
               <p className="text-[9px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)] leading-none">Completion</p>
@@ -71,7 +71,7 @@ export default function SchedulerFooter({
           {/* Capacity */}
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-[var(--color-primary)]/10 flex items-center justify-center shrink-0">
-              <Activity size={15} className="text-[var(--color-primary)]" />
+              <Activity size={15} className="text-[var(--color-primary)]" aria-hidden="true" />
             </div>
             <div className="w-40">
               <div className="flex items-center justify-between mb-1">
@@ -97,13 +97,13 @@ export default function SchedulerFooter({
           <div className="flex items-center gap-2 pl-4 border-l border-[var(--color-surface-border)]">
             {burnoutRiskUsers > 0 && (
               <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20">
-                <AlertTriangle size={12} className="shrink-0" />
+                <AlertTriangle size={12} className="shrink-0" aria-hidden="true" />
                 <span className="text-[10px] font-bold">{burnoutRiskUsers} at burnout risk</span>
               </div>
             )}
             {avgTasksPerUser > 5 && (
               <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                <Activity size={12} className="shrink-0" />
+                <Activity size={12} className="shrink-0" aria-hidden="true" />
                 <span className="text-[10px] font-bold">Avg {avgTasksPerUser.toFixed(1)} tasks/user</span>
               </div>
             )}

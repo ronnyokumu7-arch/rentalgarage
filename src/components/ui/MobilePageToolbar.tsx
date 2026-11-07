@@ -1,7 +1,7 @@
 // src/components/ui/MobilePageToolbar.tsx
 "use client";
 
-import { Search, X } from "lucide-react";
+import { MagnifyingGlass as Search, X } from "@phosphor-icons/react/ssr";
 import FilterDropdown, { FilterOption } from "@/components/ui/FilterDropdown";
 
 /* ──────────────────────────────────────────────────────────────────────
@@ -115,7 +115,7 @@ export default function MobilePageToolbar({
         <div className="relative flex-1 min-w-0">
           <Search
             size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true"
           />
           <input
             type="text"
@@ -131,7 +131,7 @@ export default function MobilePageToolbar({
               className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-md text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)] transition-all"
               aria-label="Clear search"
             >
-              <X size={13} />
+              <X size={13} aria-hidden="true" />
             </button>
           )}
         </div>
@@ -215,7 +215,7 @@ function ToggleSegmentButton({
       aria-label={label}
       className="w-9 h-9 rounded-xl flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-ink)] active:bg-[var(--color-primary)]/15 transition-all flex-shrink-0"
     >
-      <Icon size={15} />
+      <Icon size={15} aria-hidden="true" />
     </button>
   );
 }

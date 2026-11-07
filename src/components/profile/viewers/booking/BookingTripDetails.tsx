@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CalendarDays, MapPin, CheckCircle, Clock, FileText, Send, Compass, ShieldCheck } from "lucide-react";
+import { CalendarDots as CalendarDays, MapPin, CheckCircle, Clock, FileText, PaperPlaneTilt as Send, Compass, ShieldCheck } from "@phosphor-icons/react/ssr";
 
 interface BookingTripDetailsProps {
   isEditing: boolean;
@@ -67,7 +67,7 @@ const ContractLifecycleTracker = ({ status }: { status?: string }) => {
                     ? 'bg-[var(--color-primary)]/5 border-[var(--color-primary)]/20 text-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/10' 
                     : 'bg-[var(--color-surface-hover)] border-[var(--color-surface-border)] text-[var(--color-ink-subtle)]'}
               `}>
-                <Icon size={16} className="sm:w-[18px] sm:h-[18px]" />
+                <Icon size={16} className="sm:w-[18px] sm:h-[18px]" aria-hidden="true" />
               </div>
 
               {/* Stage Info */}
@@ -126,7 +126,7 @@ export default function BookingTripDetails({
               : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
           }`}
         >
-          <Compass size={14} className={activeTab === "trip" ? "text-[var(--color-primary)]" : "text-[var(--color-ink-subtle)]"} />
+          <Compass size={14} className={activeTab === "trip" ? "text-[var(--color-primary)]" : "text-[var(--color-ink-subtle)]"} aria-hidden="true" />
           <span>Trip Details</span>
         </button>
 
@@ -139,7 +139,7 @@ export default function BookingTripDetails({
               : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
           }`}
         >
-          <ShieldCheck size={14} className={activeTab === "contract" ? "text-[var(--color-primary)]" : "text-[var(--color-ink-subtle)]"} />
+          <ShieldCheck size={14} className={activeTab === "contract" ? "text-[var(--color-primary)]" : "text-[var(--color-ink-subtle)]"} aria-hidden="true" />
           <span>Contract Lifecycle</span>
         </button>
       </div>
@@ -160,7 +160,7 @@ export default function BookingTripDetails({
                   />
                 ) : (
                   <div className={valueClass}>
-                    <field.icon size={14} className="shrink-0 text-[var(--color-ink-subtle)]" />
+                    <field.icon size={14} className="shrink-0 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                     <span className="truncate">
                       {field.type === 'date' && formData[field.key] 
                         ? new Date(formData[field.key]).toLocaleDateString() 

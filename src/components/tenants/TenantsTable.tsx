@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Building2, Mail, User, Phone, CreditCard, Archive, RotateCcw, ShieldAlert, Eye, Calendar, Clock, X } from "lucide-react";
+import { Buildings as Building2, Envelope as Mail, User, Phone, CreditCard, Archive, ArrowCounterClockwise as RotateCcw, ShieldWarning as ShieldAlert, Eye, Calendar, Clock, X } from "@phosphor-icons/react/ssr";
 import type { Tenant } from "@/lib/types";
 import TenantCardGrid from "@/components/tenants/TenantCardGrid";
 import DataTable, { RowAction } from "@/components/ui/DataTable";
@@ -224,7 +224,7 @@ export function TenantsTable({
             disabled={loading || bulkExtendLoading}
             className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold shadow-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
           >
-            <Calendar size={14} />
+            <Calendar size={14} aria-hidden="true" />
             <span className="hidden sm:inline">Extend All Trials</span>
             <span className="sm:hidden">+N Days</span>
           </button>
@@ -236,7 +236,7 @@ export function TenantsTable({
         {isEmptyVault ? (
           <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-12 flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mb-4">
-              <Archive size={32} className="text-[var(--color-ink-subtle)]" />
+              <Archive size={32} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
             </div>
             <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">Vault is Empty</h3>
             <p className="text-sm text-[var(--color-ink-muted)] max-w-md">
@@ -256,12 +256,12 @@ export function TenantsTable({
               <div className="flex items-center justify-between w-full">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   <div className="w-10 h-10 bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] flex-shrink-0">
-                    <Building2 size={18} />
+                    <Building2 size={18} aria-hidden="true" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="font-semibold text-[var(--color-ink)] truncate">{item.name}</div>
                     <div className="flex items-center gap-1.5 text-xs text-[var(--color-ink-muted)] mt-0.5 truncate">
-                      <Mail size={12} className="flex-shrink-0" />
+                      <Mail size={12} className="flex-shrink-0" aria-hidden="true" />
                       <span className="truncate">{item.email}</span>
                     </div>
                     {item.profile?.tax_number && (
@@ -278,17 +278,17 @@ export function TenantsTable({
               <div className="mt-3 pt-3 border-t border-[var(--color-surface-border)]/60 flex items-center justify-between gap-2 text-xs text-[var(--color-ink-muted)]">
                 <div className="space-y-1 min-w-0">
                   <div className="flex items-center gap-1.5 truncate">
-                    <User size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                    <User size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                     <span className="truncate">{item.admin_name || "Not Set"}</span>
                   </div>
                   <div className="flex items-center gap-1.5 truncate">
-                    <Phone size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                    <Phone size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                     <span className="truncate">{item.admin_phone || "—"}</span>
                   </div>
                 </div>
                 <div className="flex-shrink-0">
                   <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] border border-[var(--color-surface-border)]">
-                    <CreditCard size={12} />
+                    <CreditCard size={12} aria-hidden="true" />
                     {item.plan || "Starter"}
                   </span>
                 </div>
@@ -313,12 +313,12 @@ export function TenantsTable({
                 return (
                   <div className="flex items-start gap-3">
                     <div className="w-10 h-10 bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] flex-shrink-0 mt-0.5">
-                      <Building2 size={18} />
+                      <Building2 size={18} aria-hidden="true" />
                     </div>
                     <div>
                       <div className="font-semibold text-[var(--color-ink)]">{tenant.name}</div>
                       <div className="flex items-center gap-1.5 text-xs text-[var(--color-ink-muted)] mt-0.5">
-                        <Mail size={12} /> {tenant.email}
+                        <Mail size={12} aria-hidden="true" /> {tenant.email}
                       </div>
                       {tenant.profile?.tax_number && (
                         <div className="text-[10px] text-[var(--color-ink-subtle)] font-mono mt-0.5">PIN: {tenant.profile.tax_number}</div>
@@ -334,11 +334,11 @@ export function TenantsTable({
               cell: ({ row }) => (
                 <div className="space-y-1.5 text-xs text-[var(--color-ink-muted)]">
                   <div className="flex items-center gap-1.5">
-                    <User size={12} className="text-[var(--color-ink-subtle)]" />
+                    <User size={12} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
                     <span>{row.original.admin_name || "Not Set"}</span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <Phone size={12} className="text-[var(--color-ink-subtle)]" />
+                    <Phone size={12} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
                     <span>{row.original.admin_phone || "—"}</span>
                   </div>
                 </div>
@@ -349,7 +349,7 @@ export function TenantsTable({
               accessorKey: "plan",
               cell: ({ row }) => (
                 <span className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] border border-[var(--color-surface-border)]">
-                  <CreditCard size={12} />
+                  <CreditCard size={12} aria-hidden="true" />
                   {row.original.plan || "Starter"}
                 </span>
               ),
@@ -379,7 +379,7 @@ export function TenantsTable({
                 onClick={() => setExtendModalOpen(false)}
                 className="p-2 rounded-lg hover:bg-[var(--color-surface-hover)] transition-colors"
               >
-                <X size={16} className="text-[var(--color-ink-muted)]" />
+                <X size={16} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
               </button>
             </div>
             <div className="p-5 space-y-4">
@@ -433,7 +433,7 @@ export function TenantsTable({
                 onClick={() => setBulkExtendOpen(false)}
                 className="p-2 rounded-lg hover:bg-[var(--color-surface-hover)] transition-colors"
               >
-                <X size={16} className="text-[var(--color-ink-muted)]" />
+                <X size={16} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
               </button>
             </div>
             <div className="p-5 space-y-4">

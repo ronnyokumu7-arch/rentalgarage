@@ -3,8 +3,8 @@
 
 import { useState, useMemo, useEffect } from "react";
 import {
-  Search, FileText, Filter, Upload, Calendar, X, SlidersHorizontal,
-} from "lucide-react";
+  MagnifyingGlass as Search, FileText, Funnel as Filter, Upload, Calendar, X, SlidersHorizontal,
+} from "@phosphor-icons/react/ssr";
 import axios from "axios";
 import toast from "react-hot-toast";
 import FilterDropdown from "@/components/ui/FilterDropdown";
@@ -239,7 +239,7 @@ export default function PaymentsTab() {
                 <div className="relative flex-1 h-full">
                   <Search
                     size={16}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true"
                   />
                   <input
                     type="text"
@@ -256,7 +256,7 @@ export default function PaymentsTab() {
                       className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[var(--color-surface-hover)] flex items-center justify-center hover:bg-[var(--color-surface-border)] transition-colors"
                       aria-label="Clear search"
                     >
-                      <X size={12} className="text-[var(--color-ink-muted)]" />
+                      <X size={12} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
                     </button>
                   )}
                 </div>
@@ -278,7 +278,7 @@ export default function PaymentsTab() {
                           : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
                     }`}
                   >
-                    <SlidersHorizontal size={14} />
+                    <SlidersHorizontal size={14} aria-hidden="true" />
                     {hasActiveFilter && !filtersOpen && (
                       <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]" />
                     )}
@@ -334,7 +334,7 @@ export default function PaymentsTab() {
                           onClick={clearAllFilters}
                           className="flex-shrink-0 h-8 px-3 rounded-full text-[11px] font-bold flex items-center gap-1 text-[var(--color-primary)] border border-[var(--color-primary)]/40 bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/15 transition-colors active:scale-95"
                         >
-                          <X size={11} strokeWidth={3} />
+                          <X size={11} weight="bold" aria-hidden="true" />
                           Clear
                         </button>
                       )}
@@ -355,7 +355,7 @@ export default function PaymentsTab() {
                 disabled={displayedPayments.length === 0}
                 className="w-full h-10 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
               >
-                <Upload size={14} />
+                <Upload size={14} aria-hidden="true" />
                 Export CSV
               </button>
             </div>
@@ -372,7 +372,7 @@ export default function PaymentsTab() {
           ) : displayedPayments.length === 0 ? (
             <div className="p-12 text-center">
               <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
-                <FileText size={24} className="text-[var(--color-ink-subtle)]" />
+                <FileText size={24} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
               </div>
               <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No payments found</h3>
               <p className="text-sm text-[var(--color-ink-muted)] mb-4">
@@ -435,7 +435,7 @@ export default function PaymentsTab() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <div className="flex items-center gap-2 flex-1 sm:w-80">
               <div className="relative flex-1">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true" />
                 <input
                   type="text"
                   value={search}
@@ -470,7 +470,7 @@ export default function PaymentsTab() {
               className="h-9 px-4 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm flex-shrink-0 cursor-pointer touch-manipulation active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
               title="Export All to CSV"
             >
-              <Upload size={14} />
+              <Upload size={14} aria-hidden="true" />
               Export CSV
             </button>
           </div>
@@ -485,7 +485,7 @@ export default function PaymentsTab() {
         ) : displayedPayments.length === 0 ? (
           <div className="p-12 text-center">
             <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
-              <FileText size={24} className="text-[var(--color-ink-subtle)]" />
+              <FileText size={24} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
             </div>
             <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No payments found</h3>
             <p className="text-sm text-[var(--color-ink-muted)] mb-4">

@@ -1,5 +1,5 @@
 // src/components/tenants/health/RevenueVelocitySparkline.tsx
-import { TrendingUp, TrendingDown, Minus, BarChart3 } from 'lucide-react';
+import { TrendUp as TrendingUp, TrendDown as TrendingDown, Minus, ChartBar as BarChart3 } from "@phosphor-icons/react/ssr";
 import type { RevenueVelocity } from '@/lib/types';
 
 interface RevenueVelocitySparklineProps {
@@ -44,7 +44,7 @@ export function RevenueVelocitySparkline({ data }: RevenueVelocitySparklineProps
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/30">
         <div className="flex items-center gap-3">
           <div className="p-1.5 rounded-lg bg-violet-500/10 text-violet-400">
-            <BarChart3 size={16} />
+            <BarChart3 size={16} aria-hidden="true" />
           </div>
           <div>
             <h2 className="text-sm font-semibold text-[var(--color-ink)]">Revenue Velocity</h2>
@@ -54,7 +54,7 @@ export function RevenueVelocitySparkline({ data }: RevenueVelocitySparklineProps
         
         {/* Trend Badge */}
         <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${trend.bg} ${trend.color} ${trend.border}`}>
-          <TrendIcon size={12} />
+          <TrendIcon size={12} aria-hidden="true" />
           {data.trend === 'up' ? 'Growing' : data.trend === 'down' ? 'Declining' : 'Stable'}
         </div>
       </div>

@@ -6,9 +6,9 @@ import {
   FileText,
   Upload,
   Eye,
-  ZoomIn,
+  MagnifyingGlassPlus as ZoomIn,
   ShieldCheck,
-} from "lucide-react";
+} from "@phosphor-icons/react/ssr";
 import SectionCard from "@/components/ui/SectionCard";
 import SecureImage from "@/components/ui/SecureImage";
 import type { Client } from "@/lib/types";
@@ -103,7 +103,7 @@ export default function ComplianceDocumentsSection({
       {isEmpty ? (
         <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
           <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-dashed border-[var(--color-surface-border)] flex items-center justify-center mb-4">
-            <FileText size={24} className="text-[var(--color-ink-subtle)]" />
+            <FileText size={24} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
           </div>
           <h3 className="text-sm font-bold text-[var(--color-ink)] mb-1">
             No Documents Uploaded
@@ -117,7 +117,7 @@ export default function ComplianceDocumentsSection({
               onClick={onManageVerification}
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/5 hover:bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 transition-all"
             >
-              <ShieldCheck size={14} /> Send Verification Link
+              <ShieldCheck size={14} aria-hidden="true" /> Send Verification Link
             </button>
           )}
         </div>
@@ -138,14 +138,14 @@ export default function ComplianceDocumentsSection({
                   />
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-3 backdrop-blur-[2px]">
                     <span className="px-3 py-1.5 rounded-lg bg-white/20 text-white text-xs font-bold flex items-center gap-1.5">
-                      <ZoomIn size={14} /> Click to Zoom
+                      <ZoomIn size={14} aria-hidden="true" /> Click to Zoom
                     </span>
                     {activeDoc.id !== "selfie" && (
                       <label
                         onClick={(e) => e.stopPropagation()}
                         className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold transition-all cursor-pointer shadow-lg"
                       >
-                        <Upload size={14} /> Replace Document
+                        <Upload size={14} aria-hidden="true" /> Replace Document
                         <input
                           type="file"
                           accept="image/*"
@@ -161,7 +161,7 @@ export default function ComplianceDocumentsSection({
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-center text-[var(--color-ink-subtle)] border-2 border-dashed border-[var(--color-surface-border)] rounded-xl bg-[var(--color-surface-hover)]/30">
                   <div className="w-12 h-12 rounded-full bg-[var(--color-surface-hover)] flex items-center justify-center mb-3">
-                    <Upload size={20} className="text-[var(--color-ink-muted)]" />
+                    <Upload size={20} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
                   </div>
                   <span className="text-sm font-semibold text-[var(--color-ink)] mb-1">
                     Not Uploaded
@@ -171,7 +171,7 @@ export default function ComplianceDocumentsSection({
                   </span>
                   {activeDoc.id !== "selfie" && (
                     <label className="flex items-center gap-2 px-4 py-2 rounded-xl bg-[var(--color-primary)] text-white text-xs font-bold cursor-pointer shadow-sm hover:bg-[var(--color-primary-hover)] transition-all active:scale-95">
-                      <Upload size={14} /> Upload Now
+                      <Upload size={14} aria-hidden="true" /> Upload Now
                       <input
                         type="file"
                         accept="image/*"
@@ -217,7 +217,7 @@ export default function ComplianceDocumentsSection({
                       <div className="w-full h-full flex flex-col items-center justify-center bg-[var(--color-surface-hover)]">
                         <FileText
                           size={14}
-                          className="text-[var(--color-ink-subtle)] mb-0.5"
+                          className="text-[var(--color-ink-subtle)] mb-0.5" aria-hidden="true"
                         />
                         <span className="text-[8px] font-bold text-[var(--color-ink-subtle)] uppercase">
                           Empty
@@ -253,7 +253,7 @@ export default function ComplianceDocumentsSection({
                       />
                     ) : (
                       <div className="w-full h-full flex flex-col items-center justify-center text-[var(--color-ink-subtle)] border-2 border-dashed border-[var(--color-surface-border)] m-1 rounded-lg">
-                        <Upload size={20} className="mb-1" />
+                        <Upload size={20} className="mb-1" aria-hidden="true" />
                         <span className="text-[10px] font-medium text-[var(--color-ink-muted)]">
                           Not Uploaded
                         </span>
@@ -266,12 +266,12 @@ export default function ComplianceDocumentsSection({
                           onClick={() => onPreview(src, doc.label)}
                           className="w-9 h-9 rounded-full bg-black/60 backdrop-blur-sm text-white flex items-center justify-center shadow-lg active:scale-95"
                         >
-                          <Eye size={16} />
+                          <Eye size={16} aria-hidden="true" />
                         </button>
                       )}
                       {doc.id !== "selfie" && (
                         <label className="w-9 h-9 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center shadow-lg cursor-pointer active:scale-95">
-                          <Upload size={16} />
+                          <Upload size={16} aria-hidden="true" />
                           <input
                             type="file"
                             accept="image/*"

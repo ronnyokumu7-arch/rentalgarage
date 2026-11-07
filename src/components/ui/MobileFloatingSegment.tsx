@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { CarFront } from "lucide-react";
+import { CarProfile as CarFront } from "@phosphor-icons/react/ssr";
 
 /* ──────────────────────────────────────────────────────────────────────
    Types
@@ -118,7 +118,7 @@ export default function MobileFloatingSegment({
           aria-expanded={isToggle ? undefined : isOpen}
           className="w-12 h-12 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-[0_8px_24px_-8px_rgba(0,0,0,0.35)] hover:shadow-[0_10px_28px_-8px_rgba(0,0,0,0.45)] active:scale-95 transition-all duration-200 flex items-center justify-center"
         >
-          <TriggerIcon size={20} className="text-[var(--color-primary)]" />
+          <TriggerIcon size={20} className="text-[var(--color-primary)]" aria-hidden="true" />
         </button>
 
         {/* Popover — only in non-toggle mode */}
@@ -152,7 +152,7 @@ export default function MobileFloatingSegment({
                       {Icon && (
                         <Icon
                           size={15}
-                          className="text-[var(--color-primary)] flex-shrink-0"
+                          className="text-[var(--color-primary)] flex-shrink-0" aria-hidden="true"
                         />
                       )}
                       <span className="flex-1 text-left">{segment.label}</span>

@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, ExternalLink, Loader2, AlertTriangle, RefreshCw, FileText } from "lucide-react";
+import { X, ArrowSquareOut as ExternalLink, CircleNotch as Loader2, Warning as AlertTriangle, ArrowsClockwise as RefreshCw, FileText } from "@phosphor-icons/react/ssr";
 import { fetchSignedUrl } from "@/components/ui/SecureImage";
 
 interface SecureLightboxProps {
@@ -81,7 +81,7 @@ export default function SecureLightbox({ url, title = "Document", onClose }: Sec
                 title="Open in new tab"
                 className="p-1.5 rounded-lg text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors"
               >
-                <ExternalLink size={15} />
+                <ExternalLink size={15} aria-hidden="true" />
               </button>
             )}
             <button
@@ -90,7 +90,7 @@ export default function SecureLightbox({ url, title = "Document", onClose }: Sec
               title="Close"
               className="p-1.5 rounded-lg text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors"
             >
-              <X size={16} />
+              <X size={16} aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -99,7 +99,7 @@ export default function SecureLightbox({ url, title = "Document", onClose }: Sec
         <div className="flex-1 overflow-auto bg-black/40 flex items-center justify-center min-h-[300px]">
           {failed ? (
             <div className="p-8 text-center">
-              <AlertTriangle size={28} className="text-amber-500 mx-auto mb-2" />
+              <AlertTriangle size={28} className="text-amber-500 mx-auto mb-2" aria-hidden="true" />
               <p className="text-xs text-[var(--color-ink-muted)] mb-4">
                 Unable to load this document. Check your connection and retry.
               </p>
@@ -109,25 +109,25 @@ export default function SecureLightbox({ url, title = "Document", onClose }: Sec
                   onClick={retry}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-[var(--color-primary)] text-white text-xs font-semibold hover:opacity-90 transition-opacity active:scale-95"
                 >
-                  <RefreshCw size={12} /> Retry
+                  <RefreshCw size={12} aria-hidden="true" /> Retry
                 </button>
                 <button
                   type="button"
                   onClick={() => window.open(signedUrl || url, "_blank")}
                   className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-[var(--color-surface-border)] text-[var(--color-ink)] text-xs font-semibold hover:bg-[var(--color-surface-hover)] transition-colors active:scale-95"
                 >
-                  <ExternalLink size={12} /> Open in browser
+                  <ExternalLink size={12} aria-hidden="true" /> Open in browser
                 </button>
               </div>
             </div>
           ) : !signedUrl ? (
-            <Loader2 size={24} className="animate-spin text-[var(--color-ink-muted)]" />
+            <Loader2 size={24} className="animate-spin text-[var(--color-ink-muted)]" aria-hidden="true" />
           ) : isPdf ? (
             isIOS ? (
               // ✅ iOS Safari cannot render PDFs in iframes — open-card instead
               <div className="p-8 text-center">
                 <div className="w-14 h-14 rounded-2xl bg-[var(--color-surface-hover)] flex items-center justify-center mx-auto mb-3">
-                  <FileText size={24} className="text-[var(--color-ink-muted)]" />
+                  <FileText size={24} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
                 </div>
                 <p className="text-xs text-[var(--color-ink-muted)] mb-4">
                   PDF preview is not supported on this device.
@@ -137,7 +137,7 @@ export default function SecureLightbox({ url, title = "Document", onClose }: Sec
                   onClick={() => window.open(signedUrl, "_blank")}
                   className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-[var(--color-primary)] text-white text-xs font-semibold hover:opacity-90 transition-opacity active:scale-95"
                 >
-                  <ExternalLink size={12} /> Open PDF
+                  <ExternalLink size={12} aria-hidden="true" /> Open PDF
                 </button>
               </div>
             ) : (

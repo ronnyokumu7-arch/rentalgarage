@@ -3,10 +3,10 @@
 
 import { useRouter } from "next/navigation";
 import {
-  Calendar, Tag, Clock, Ban, CheckCircle2,
-  Users, UserX, Wrench, Building2, Briefcase, DollarSign, Shield, Car, Archive,
-  Search, Flag, ChevronRight
-} from "lucide-react";
+  Calendar, Tag, Clock, Prohibit as Ban, CheckCircle as CheckCircle2,
+  Users, UserMinus as UserX, Wrench, Buildings as Building2, Briefcase, CurrencyDollar as DollarSign, Shield, Car, Archive,
+  MagnifyingGlass as Search, Flag, CaretRight as ChevronRight
+} from "@phosphor-icons/react/ssr";
 import FilterDropdown from "@/components/ui/FilterDropdown";
 import DataTable, { RowAction } from "@/components/ui/DataTable";
 import CardGrid from "@/components/ui/CardGrid";
@@ -151,7 +151,7 @@ export default function AssignedToTab({
   if (loading) {
     return (
       <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2">
-        <Clock className="w-5 h-5 animate-spin" /> Loading tasks...
+        <Clock className="w-5 h-5 animate-spin" aria-hidden="true" /> Loading tasks...
       </div>
     );
   }
@@ -184,7 +184,7 @@ export default function AssignedToTab({
           <div className="flex items-center gap-2 flex-1 sm:w-80">
             {/* Search Input */}
             <div className="relative flex-1">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true" />
               <input
                 type="text"
                 value={search}
@@ -241,7 +241,7 @@ export default function AssignedToTab({
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <div className="relative flex-shrink-0">
                       <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center">
-                        <CategoryIcon size={14} className="text-[var(--color-primary)]" />
+                        <CategoryIcon size={14} className="text-[var(--color-primary)]" aria-hidden="true" />
                       </div>
                       <div className="absolute -top-0.5 -right-0.5">
                         <div className={`w-2 h-2 rounded-full ${priorityColor} ring-1 ring-[var(--color-surface)]`} />
@@ -266,7 +266,7 @@ export default function AssignedToTab({
                     </div>
                   </div>
                   
-                  <ChevronRight size={14} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
+                  <ChevronRight size={14} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" aria-hidden="true" />
                 </div>
               );
             }}
@@ -310,7 +310,7 @@ export default function AssignedToTab({
 
                     {/* Due Date */}
                     <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                      <Calendar size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                      <Calendar size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                       <div className="min-w-0">
                         <p className={`text-[11px] font-semibold truncate leading-tight ${
                           dateInfo.isOverdue && !isCompleted ? 'text-rose-500' : 'text-[var(--color-ink)]'
@@ -327,8 +327,8 @@ export default function AssignedToTab({
                   {/* Status + Actions */}
                   <div className="mt-1.5 pt-1.5 border-t border-[var(--color-surface-border)]/50 flex items-center justify-between">
                     <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-bold uppercase ${style.bg} ${style.text}`}>
-                      {item.status === 'in_progress' && <Clock size={8} />}
-                      {item.status === 'blocked' && <Ban size={8} />}
+                      {item.status === 'in_progress' && <Clock size={8} aria-hidden="true" />}
+                      {item.status === 'blocked' && <Ban size={8} aria-hidden="true" />}
                       {STATUS_LABELS[item.status] || item.status}
                     </span>
                     
@@ -340,7 +340,7 @@ export default function AssignedToTab({
                         }}
                         className="text-[10px] font-semibold text-emerald-600 hover:underline flex items-center gap-1"
                       >
-                        <CheckCircle2 size={11} />
+                        <CheckCircle2 size={11} aria-hidden="true" />
                         Complete
                       </button>
                     ) : (
@@ -351,7 +351,7 @@ export default function AssignedToTab({
                         }}
                         className="text-[10px] font-semibold text-rose-600 hover:underline flex items-center gap-1"
                       >
-                        <Archive size={11} />
+                        <Archive size={11} aria-hidden="true" />
                         Archive
                       </button>
                     )}
@@ -378,7 +378,7 @@ export default function AssignedToTab({
                   return (
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-9 h-9 rounded-lg bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center text-[var(--color-ink-subtle)] flex-shrink-0">
-                        <CategoryIcon size={16} />
+                        <CategoryIcon size={16} aria-hidden="true" />
                       </div>
                       <div className="min-w-0">
                         <button
@@ -392,7 +392,7 @@ export default function AssignedToTab({
                           {task.title}
                         </button>
                         <p className="text-xs text-[var(--color-ink-muted)] truncate capitalize flex items-center gap-1 mt-0.5">
-                          <Tag size={10} /> {task.category}
+                          <Tag size={10} aria-hidden="true" /> {task.category}
                         </p>
                       </div>
                     </div>
@@ -409,7 +409,7 @@ export default function AssignedToTab({
                   
                   return isUnassigned ? (
                     <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold uppercase bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] border border-[var(--color-surface-border)]">
-                      <UserX size={10} /> Unassigned
+                      <UserX size={10} aria-hidden="true" /> Unassigned
                     </span>
                   ) : (
                     <div className="flex items-center gap-2 text-sm text-[var(--color-ink)]">
@@ -439,8 +439,8 @@ export default function AssignedToTab({
                   const style = STATUS_STYLES[task.status] || STATUS_STYLES.pending;
                   return (
                     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${style.bg} ${style.text}`}>
-                      {task.status === 'in_progress' && <Clock size={10} />}
-                      {task.status === 'blocked' && <Ban size={10} />}
+                      {task.status === 'in_progress' && <Clock size={10} aria-hidden="true" />}
+                      {task.status === 'blocked' && <Ban size={10} aria-hidden="true" />}
                       {STATUS_LABELS[task.status] || task.status}
                     </span>
                   );
@@ -453,7 +453,7 @@ export default function AssignedToTab({
                   const dateInfo = formatDate(row.original.due_date);
                   return (
                     <div className="flex items-center gap-2">
-                      <Calendar size={12} className="text-[var(--color-ink-subtle)]" />
+                      <Calendar size={12} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
                       <span className={`text-xs font-medium ${dateInfo.isOverdue && row.original.status !== 'completed' ? "text-rose-500 font-bold" : "text-[var(--color-ink)]"}`}>
                         {dateInfo.text}
                       </span>

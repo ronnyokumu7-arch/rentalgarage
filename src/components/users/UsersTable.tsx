@@ -3,10 +3,10 @@
 
 import { useRouter } from "next/navigation";
 import { 
-  Users, User as UserIcon, Mail, Phone, Building2, Shield, ShieldAlert, 
-  Briefcase, KeyRound, Loader2, CheckCircle, Trash2, Send, Star,
-  ChevronRight
-} from "lucide-react";
+  Users, User as UserIcon, Envelope as Mail, Phone, Buildings as Building2, Shield, ShieldWarning as ShieldAlert,
+  Briefcase, Key as KeyRound, CircleNotch as Loader2, CheckCircle, Trash as Trash2, PaperPlaneTilt as Send, Star,
+  CaretRight as ChevronRight
+} from "@phosphor-icons/react/ssr";
 import DataTable, { RowAction } from "@/components/ui/DataTable";
 import CardGrid from "@/components/ui/CardGrid";
 import type { User } from "@/lib/types";
@@ -130,7 +130,7 @@ export default function UsersTable({
   if (loading) {
     return (
       <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2">
-        <Loader2 className="w-5 h-5 animate-spin" /> Loading team...
+        <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> Loading team...
       </div>
     );
   }
@@ -139,7 +139,7 @@ export default function UsersTable({
     return (
       <div className="p-12 text-center">
         <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
-          <Users size={24} className="text-[var(--color-ink-subtle)]" />
+          <Users size={24} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
         </div>
         <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">
           No team members found
@@ -176,12 +176,12 @@ export default function UsersTable({
                 <div className="flex items-center gap-2 min-w-0 flex-1">
                   <div className="relative flex-shrink-0">
                     <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center">
-                      <UserIcon size={14} className="text-[var(--color-primary)]" />
+                      <UserIcon size={14} className="text-[var(--color-primary)]" aria-hidden="true" />
                     </div>
                     <div className="absolute -top-0.5 -right-0.5">
                       {isAgencyOwner ? (
                         <div className="w-3 h-3 rounded-full bg-amber-500/20 flex items-center justify-center ring-1 ring-[var(--color-surface)]">
-                          <Star size={8} className="text-amber-500 fill-amber-500" />
+                          <Star size={8} className="text-amber-500 fill-amber-500" aria-hidden="true" />
                         </div>
                       ) : bothVerified ? (
                         <div className="w-2 h-2 rounded-full bg-emerald-500 ring-1 ring-[var(--color-surface)]" />
@@ -200,7 +200,7 @@ export default function UsersTable({
                       </span>
                     </div>
                     <div className="flex items-center gap-0.5 mt-0.5">
-                      <Building2 size={9} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                      <Building2 size={9} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                       <span className="text-[9px] text-[var(--color-ink-muted)] truncate">
                         {item.department || "Unassigned"}
                       </span>
@@ -208,7 +208,7 @@ export default function UsersTable({
                   </div>
                 </div>
                 
-                <ChevronRight size={14} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
+                <ChevronRight size={14} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" aria-hidden="true" />
               </div>
             );
           }}
@@ -257,7 +257,7 @@ export default function UsersTable({
                 <div className="flex items-center gap-2">
                   {/* Email */}
                   <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                    <Mail size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                    <Mail size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                     <div className="min-w-0">
                       <p className="text-[11px] font-semibold text-[var(--color-ink)] truncate leading-tight">
                         {item.email}
@@ -270,7 +270,7 @@ export default function UsersTable({
 
                   {/* Phone */}
                   <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                    <Phone size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                    <Phone size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                     <div className="min-w-0">
                       <p className="text-[11px] font-semibold text-[var(--color-ink)] truncate leading-tight">
                         {item.phone_number || "No phone"}
@@ -285,7 +285,7 @@ export default function UsersTable({
                 {/* Status + Actions */}
                 <div className="mt-1.5 pt-1.5 border-t border-[var(--color-surface-border)]/50 flex items-center justify-between">
                   <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-bold uppercase ${statusBg} ${statusText}`}>
-                    <StatusIcon size={8} className="flex-shrink-0" />
+                    <StatusIcon size={8} className="flex-shrink-0" aria-hidden="true" />
                     {statusLabel}
                   </span>
                   
@@ -302,7 +302,7 @@ export default function UsersTable({
                           : "text-amber-600"
                       }`}
                     >
-                      {actionLoadingId === item.id ? <Loader2 size={11} className="animate-spin" /> : <ShieldAlert size={11} />}
+                      {actionLoadingId === item.id ? <Loader2 size={11} className="animate-spin" aria-hidden="true" /> : <ShieldAlert size={11} aria-hidden="true" />}
                       {isSuspended ? "Reactivate" : "Suspend"}
                     </button>
                   )}
@@ -330,14 +330,14 @@ export default function UsersTable({
                 return (
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-9 h-9 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center text-[var(--color-ink-subtle)] flex-shrink-0">
-                      <UserIcon size={16} />
+                      <UserIcon size={16} aria-hidden="true" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-[var(--color-ink)] truncate">{user.full_name}</p>
                       <a href={`mailto:${user.email}`} onClick={(e) => e.stopPropagation()} className="flex items-center gap-1.5 text-xs text-[var(--color-ink-muted)] hover:text-[var(--color-primary)] transition-colors truncate">
-                        <Mail size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                        <Mail size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                         <span className="truncate">{user.email}</span>
-                        {emailVerified && <CheckCircle size={12} className="text-[var(--color-success-text)] flex-shrink-0" />}
+                        {emailVerified && <CheckCircle size={12} className="text-[var(--color-success-text)] flex-shrink-0" aria-hidden="true" />}
                       </a>
                     </div>
                   </div>
@@ -354,7 +354,7 @@ export default function UsersTable({
                 
                 return (
                   <div className={`flex items-center gap-2 text-sm font-medium ${color}`}>
-                    <Icon size={16} strokeWidth={2} />
+                    <Icon size={16} weight="regular" aria-hidden="true" />
                     <span>{displayRole}</span>
                   </div>
                 );
@@ -367,7 +367,7 @@ export default function UsersTable({
                 const user = row.original;
                 return user.department ? (
                   <div className="flex items-center gap-2 text-sm text-[var(--color-ink)]">
-                    <Building2 size={14} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                    <Building2 size={14} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                     <span className="font-medium truncate">{user.department}</span>
                   </div>
                 ) : (
@@ -384,9 +384,9 @@ export default function UsersTable({
                 
                 return user.phone_number ? (
                   <div className="flex items-center gap-2 text-sm text-[var(--color-ink)]">
-                    <Phone size={12} className="text-[var(--color-ink-subtle)]" />
+                    <Phone size={12} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
                     <span className="font-medium">{user.phone_number}</span>
-                    {phoneVerified && <CheckCircle size={12} className="text-[var(--color-success-text)] flex-shrink-0" />}
+                    {phoneVerified && <CheckCircle size={12} className="text-[var(--color-success-text)] flex-shrink-0" aria-hidden="true" />}
                   </div>
                 ) : (
                   <span className="text-sm text-[var(--color-ink-subtle)] italic">Not provided</span>
@@ -443,7 +443,7 @@ export default function UsersTable({
                     className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${statusBg} ${statusText}`}
                     title={statusTooltip}
                   >
-                    <StatusIcon size={10} />
+                    <StatusIcon size={10} aria-hidden="true" />
                     {statusLabel}
                   </span>
                 );

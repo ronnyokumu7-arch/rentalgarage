@@ -2,7 +2,7 @@
 "use client";
 
 import {
-  Pencil,
+  PencilSimple as Pencil,
   UserCheck,
   User as UserIcon,
   Phone,
@@ -10,8 +10,8 @@ import {
   Car,
   Calendar,
   Eye,
-  AlertCircle,
-} from "lucide-react";
+  WarningCircle as AlertCircle,
+} from "@phosphor-icons/react/ssr";
 import SectionCard from "@/components/ui/SectionCard";
 import { ProfileField } from "@/components/profile/ProfileLayout";
 import SecureImage from "@/components/ui/SecureImage";
@@ -37,7 +37,7 @@ export default function ClientDriverSection({
       {!driver ? (
         <div className="flex flex-col items-center justify-center py-8 px-4 text-center">
           <div className="w-12 h-12 rounded-xl bg-[var(--color-surface-hover)] border border-dashed border-[var(--color-surface-border)] flex items-center justify-center mb-3">
-            <UserCheck size={20} className="text-[var(--color-ink-subtle)]" />
+            <UserCheck size={20} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
           </div>
           <p className="text-sm font-bold text-[var(--color-ink)] mb-1">
             No driver details yet
@@ -49,7 +49,7 @@ export default function ClientDriverSection({
             onClick={onEdit}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/5 hover:bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 transition-all"
           >
-            <Pencil size={12} /> Add Driver Details
+            <Pencil size={12} aria-hidden="true" /> Add Driver Details
           </button>
         </div>
       ) : (
@@ -97,7 +97,7 @@ export default function ClientDriverSection({
             </div>
           ) : (
             <div className="mt-3 p-3 rounded-xl bg-amber-500/5 border border-amber-500/20 flex items-start gap-2">
-              <AlertCircle size={14} className="text-amber-500 shrink-0 mt-0.5" />
+              <AlertCircle size={14} className="text-amber-500 shrink-0 mt-0.5" aria-hidden="true" />
               <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
                 Driver identity and license documents have not been uploaded yet.
               </p>
@@ -109,7 +109,7 @@ export default function ClientDriverSection({
               onClick={onEdit}
               className="text-xs font-bold text-[var(--color-primary)] hover:underline flex items-center gap-1"
             >
-              <Pencil size={12} /> Edit Driver
+              <Pencil size={12} aria-hidden="true" /> Edit Driver
             </button>
           </div>
         </div>
@@ -136,7 +136,7 @@ function DriverDocThumb({
     >
       <SecureImage src={src} alt={label} className="w-full h-full object-cover" />
       <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-        <Eye size={16} className="text-white" />
+        <Eye size={16} className="text-white" aria-hidden="true" />
       </div>
     </button>
   );

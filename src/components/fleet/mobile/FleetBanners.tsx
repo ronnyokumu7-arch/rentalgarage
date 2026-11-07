@@ -1,7 +1,7 @@
 // src/components/fleet/mobile/FleetBanners.tsx
 "use client";
 
-import { Shield, Wrench } from "lucide-react";
+import { Shield, Wrench } from "@phosphor-icons/react/ssr";
 import type { Vehicle, VehicleStatus } from "@/lib/types";
 
 interface FleetBannersProps {
@@ -31,7 +31,7 @@ export default function FleetBanners({
           onClick={() => setStatusFilter("pending_activation")}
           className="w-full flex items-center justify-start gap-2 py-3 px-1 text-amber-600 dark:text-amber-400 hover:opacity-80 transition-opacity text-xs font-semibold"
         >
-          <Shield size={14} />
+          <Shield size={14} aria-hidden="true" />
           {pendingCount} {pendingCount === 1 ? "vehicle" : "vehicles"} awaiting activation
           <span className="opacity-70">→</span>
         </button>
@@ -40,7 +40,7 @@ export default function FleetBanners({
       {!loading && statusFilter === "pending_activation" && (
         <div className="w-full flex items-center justify-between py-3 px-1 text-blue-600 dark:text-blue-400 text-xs font-semibold">
           <span className="flex items-center gap-2">
-            <Shield size={14} />
+            <Shield size={14} aria-hidden="true" />
             Viewing {filteredVehicles.length} pending{" "}
             {filteredVehicles.length === 1 ? "vehicle" : "vehicles"}
           </span>
@@ -60,7 +60,7 @@ export default function FleetBanners({
           onClick={() => setStatusFilter("mileage_due" as any)}
           className="w-full flex items-center justify-start gap-2 py-3 px-1 text-amber-600 dark:text-amber-400 hover:opacity-80 transition-opacity text-xs font-semibold"
         >
-          <Wrench size={14} />
+          <Wrench size={14} aria-hidden="true" />
           {mileageDueVehicles.length}{" "}
           {mileageDueVehicles.length === 1 ? "vehicle" : "vehicles"} awaiting mileage
           <span className="opacity-70">→</span>
@@ -70,7 +70,7 @@ export default function FleetBanners({
       {!loading && (statusFilter as any) === "mileage_due" && (
         <div className="w-full flex items-center justify-between py-3 px-1 text-blue-600 dark:text-blue-400 text-xs font-semibold">
           <span className="flex items-center gap-2">
-            <Wrench size={14} />
+            <Wrench size={14} aria-hidden="true" />
             Viewing {mileageDueVehicles.length} awaiting mileage
           </span>
           <button

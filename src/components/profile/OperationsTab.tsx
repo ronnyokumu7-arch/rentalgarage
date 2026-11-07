@@ -3,7 +3,7 @@
 import { useOperations } from "@/hooks/profile/useOperations";
 import ActionCenterList from "./ActionCenterList";
 import SmartProfileViewer from "./SmartProfileViewer";
-import { Layers, MousePointerClick, ArrowLeft } from "lucide-react";
+import { Stack as Layers, CursorClick as MousePointerClick, ArrowLeft } from "@phosphor-icons/react/ssr";
 
 interface OperationsTabProps {
   userId: number;
@@ -31,7 +31,7 @@ export default function OperationsTab({
       {!hideHeader && (
         <div className="flex items-center gap-3 sm:gap-4 px-1 sm:px-2 mb-3 sm:mb-6">
           <div className="hidden sm:flex w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/10 items-center justify-center shrink-0">
-            <Layers size={22} className="text-[var(--color-primary)]" />
+            <Layers size={22} className="text-[var(--color-primary)]" aria-hidden="true" />
           </div>
           <div className="min-w-0">
             <h2 className="text-sm sm:text-lg font-bold text-[var(--color-ink)] truncate">
@@ -80,7 +80,7 @@ export default function OperationsTab({
                 onClick={() => setSelectedTask(null)}
                 className="lg:hidden flex items-center gap-2 px-3.5 py-2.5 text-xs font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/5 border-b border-[var(--color-surface-border)] active:bg-[var(--color-primary)]/10 transition-colors w-full"
               >
-                <ArrowLeft size={14} className="shrink-0" /> Back to task list
+                <ArrowLeft size={14} className="shrink-0" aria-hidden="true" /> Back to task list
               </button>
               
               <SmartProfileViewer task={selectedTask} />
@@ -89,7 +89,7 @@ export default function OperationsTab({
             /* Desktop Empty State */
             <div className="flex flex-col items-center justify-center min-h-[320px] lg:min-h-[420px] text-center p-6">
               <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl sm:rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mb-3 sm:mb-4">
-                <MousePointerClick size={24} className="text-[var(--color-ink-subtle)] sm:w-7 sm:h-7" />
+                <MousePointerClick size={24} className="text-[var(--color-ink-subtle)] sm:w-7 sm:h-7" aria-hidden="true" />
               </div>
               <h3 className="text-xs sm:text-sm font-bold text-[var(--color-ink)] mb-1">
                 Select a Task

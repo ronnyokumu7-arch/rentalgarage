@@ -1,7 +1,7 @@
 "use client";
 
 import { useRoleTemplates } from "@/hooks/role_template/useRoleTemplates";
-import { MoreHorizontal } from "lucide-react";
+import { DotsThree as MoreHorizontal } from "@phosphor-icons/react/ssr";
 
 export default function RoleTemplateList() {
   const { roles } = useRoleTemplates();
@@ -29,7 +29,7 @@ export default function RoleTemplateList() {
               <td className="p-4 text-[var(--color-ink-muted)]">{role.description}</td>
               <td className="p-4 text-right">
                 <button className="text-[var(--color-ink-subtle)] hover:text-[var(--color-primary)]">
-                  <MoreHorizontal size={16} />
+                  <MoreHorizontal size={16} aria-hidden="true" />
                 </button>
               </td>
             </tr>

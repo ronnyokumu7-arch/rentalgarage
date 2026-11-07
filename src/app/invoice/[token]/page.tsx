@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useParams } from "next/navigation";
 import { invoicesApi } from "@/lib/api/invoices";
-import { Loader2, AlertCircle, FileText, CheckCircle2, Download, XCircle, Send } from "lucide-react";
+import { CircleNotch as Loader2, WarningCircle as AlertCircle, FileText, CheckCircle as CheckCircle2, Download, XCircle, PaperPlaneTilt as Send } from "@phosphor-icons/react/ssr";
 import toast from "react-hot-toast";
 import { usePublicInvoice } from "@/hooks/public-docs/usePublicInvoice";
 import { brand } from "@/lib/brand";
@@ -57,7 +57,7 @@ export default function PublicInvoicePage() {
         style={{ backgroundColor: brand.colors.light.bg }}
       >
         <div className="flex flex-col items-center gap-4 text-center">
-          <Loader2 className="h-10 w-10 animate-spin" style={{ color: brand.colors.primary }} />
+          <Loader2 className="h-10 w-10 animate-spin" style={{ color: brand.colors.primary }} aria-hidden="true" />
           <p className="font-medium text-sm sm:text-base" style={{ color: brand.colors.ink.muted }}>
             Loading details...
           </p>
@@ -84,7 +84,7 @@ export default function PublicInvoicePage() {
             className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-4"
             style={{ backgroundColor: brand.colors.danger.bg }}
           >
-            <AlertCircle className="h-7 w-7 sm:h-8 sm:w-8" style={{ color: brand.colors.danger.main }} />
+            <AlertCircle className="h-7 w-7 sm:h-8 sm:w-8" style={{ color: brand.colors.danger.main }} aria-hidden="true" />
           </div>
           <h1 
             className="text-lg sm:text-xl font-bold mb-2" 
@@ -119,7 +119,7 @@ export default function PublicInvoicePage() {
       return {
         bg: brand.colors.danger.bg,
         iconBg: brand.colors.danger.bg,
-        icon: <XCircle className="h-5 w-5 shrink-0" style={{ color: brand.colors.danger.main }} />,
+        icon: <XCircle className="h-5 w-5 shrink-0" style={{ color: brand.colors.danger.main }} aria-hidden="true" />,
         title: isQuotation ? "Quotation Cancelled" : "Invoice Voided",
         subtitle: "This document has been cancelled. Please contact the agency for a new one.",
         textColor: brand.colors.danger.text,
@@ -129,7 +129,7 @@ export default function PublicInvoicePage() {
       return {
         bg: brand.colors.primaryMuted,
         iconBg: brand.colors.primaryMuted,
-        icon: <Send className="h-5 w-5 shrink-0" style={{ color: brand.colors.primary }} />,
+        icon: <Send className="h-5 w-5 shrink-0" style={{ color: brand.colors.primary }} aria-hidden="true" />,
         title: "Quotation Ready",
         subtitle: "Review the details below and accept to confirm your booking.",
         textColor: brand.colors.primary,
@@ -139,7 +139,7 @@ export default function PublicInvoicePage() {
       return {
         bg: brand.colors.success.bg,
         iconBg: brand.colors.success.bg,
-        icon: <CheckCircle2 className="h-5 w-5 shrink-0" style={{ color: brand.colors.success.main }} />,
+        icon: <CheckCircle2 className="h-5 w-5 shrink-0" style={{ color: brand.colors.success.main }} aria-hidden="true" />,
         title: "Invoice Fully Paid",
         subtitle: "Thank you for your payment.",
         textColor: brand.colors.success.text,
@@ -149,7 +149,7 @@ export default function PublicInvoicePage() {
       return {
         bg: brand.colors.warning.bg,
         iconBg: brand.colors.warning.bg,
-        icon: <CheckCircle2 className="h-5 w-5 shrink-0" style={{ color: brand.colors.warning.main }} />,
+        icon: <CheckCircle2 className="h-5 w-5 shrink-0" style={{ color: brand.colors.warning.main }} aria-hidden="true" />,
         title: "Payment Reported",
         subtitle: "The agency will update your invoice after confirming receipt.",
         textColor: brand.colors.warning.text,
@@ -158,7 +158,7 @@ export default function PublicInvoicePage() {
     return {
       bg: brand.colors.info.bg,
       iconBg: brand.colors.info.bg,
-      icon: <FileText className="h-5 w-5 shrink-0" style={{ color: brand.colors.info.main }} />,
+      icon: <FileText className="h-5 w-5 shrink-0" style={{ color: brand.colors.info.main }} aria-hidden="true" />,
       title: "Pending Payment",
       subtitle: "Please review the details below and arrange payment.",
       textColor: brand.colors.info.text,
@@ -244,11 +244,11 @@ export default function PublicInvoicePage() {
             >
               {isDownloadingPdf ? (
                 <>
-                  <Loader2 size={14} className="animate-spin" /> Generating PDF...
+                  <Loader2 size={14} className="animate-spin" aria-hidden="true" /> Generating PDF...
                 </>
               ) : (
                 <>
-                  <Download size={14} /> Download PDF
+                  <Download size={14} aria-hidden="true" /> Download PDF
                 </>
               )}
             </button>

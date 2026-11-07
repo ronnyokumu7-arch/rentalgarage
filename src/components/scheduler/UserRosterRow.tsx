@@ -1,7 +1,7 @@
 // src/components/scheduler/UserRosterRow.tsx
 "use client";
 
-import { MoreVertical } from "lucide-react";
+import { DotsThreeVertical as MoreVertical } from "@phosphor-icons/react/ssr";
 import { TeamMember } from "@/hooks/scheduler/useTaskSchedulerTimeline";
 
 interface UserRosterRowProps {
@@ -76,7 +76,7 @@ export default function UserRosterRow({
           className="w-7 h-7 rounded-lg hover:bg-[var(--color-surface-hover)] border border-transparent hover:border-[var(--color-surface-border)] flex items-center justify-center text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)] transition-all"
           aria-label="Open user actions"
         >
-          <MoreVertical size={14} />
+          <MoreVertical size={14} aria-hidden="true" />
         </button>
       </div>
     </div>

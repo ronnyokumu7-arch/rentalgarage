@@ -1,7 +1,7 @@
 // src/components/client/[id]/DrivingEditModal.tsx
 "use client";
 
-import { ChevronDown, Upload, X, UserCheck, AlertTriangle } from "lucide-react";
+import { CaretDown as ChevronDown, Upload, X, UserCheck, Warning as AlertTriangle } from "@phosphor-icons/react/ssr";
 import Modal from "@/components/ui/Modal";
 import type { Client } from "@/lib/types";
 import type { ClientProfileFormData } from "@/hooks/clients/useClientProfile";
@@ -100,7 +100,7 @@ export default function DrivingEditModal({
               </select>
               <ChevronDown
                 size={16}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true"
               />
             </div>
           </div>
@@ -146,7 +146,7 @@ export default function DrivingEditModal({
           {isOwnDriver && (
             <div className="sm:col-span-2 p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 space-y-4">
               <div className="flex items-center gap-2">
-                <UserCheck size={14} className="text-blue-500" />
+                <UserCheck size={14} className="text-blue-500" aria-hidden="true" />
                 <h4 className="text-xs font-bold text-[var(--color-ink)]">
                   Driver Details
                 </h4>
@@ -213,7 +213,7 @@ export default function DrivingEditModal({
                 <div className="flex items-start gap-2 p-2.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
                   <AlertTriangle
                     size={14}
-                    className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5"
+                    className="text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" aria-hidden="true"
                   />
                   <p className="text-[11px] text-amber-800 dark:text-amber-300 leading-relaxed">
                     Changing the driver's ID or license number will remove the
@@ -261,7 +261,7 @@ export default function DrivingEditModal({
                               needsReupload
                                 ? "text-amber-500"
                                 : "text-[var(--color-ink-muted)]"
-                            }`}
+                            }`} aria-hidden="true"
                           />
                         )}
                         <p className="text-[10px] font-semibold text-[var(--color-ink-muted)] text-center">
@@ -274,7 +274,7 @@ export default function DrivingEditModal({
                           onClick={() => slot.setFile(null)}
                           className="flex items-center gap-1 text-[10px] text-rose-500 font-semibold"
                         >
-                          <X size={10} /> Clear
+                          <X size={10} aria-hidden="true" /> Clear
                         </button>
                       )}
                     </div>

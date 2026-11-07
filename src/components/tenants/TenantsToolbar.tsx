@@ -1,5 +1,5 @@
 // src/components/tenants/TenantsToolbar.tsx
-import { Search, Filter, Archive, X, Download, ChevronDown, Plus } from "lucide-react";
+import { MagnifyingGlass as Search, Funnel as Filter, Archive, X, Download, CaretDown as ChevronDown, Plus } from "@phosphor-icons/react/ssr";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import FilterDropdown, { FilterOption } from "@/components/ui/FilterDropdown";
@@ -58,7 +58,7 @@ export function TenantsToolbar({
               : "hover:bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)]"
           }`}
         >
-          <Archive size={14} />
+          <Archive size={14} aria-hidden="true" />
           <span className="text-xs font-medium">Vault</span>
         </button>
       </div>
@@ -67,7 +67,7 @@ export function TenantsToolbar({
       <div className="flex flex-row items-center gap-2 w-full">
         {/* Search Input - Takes remaining space */}
         <div className="relative flex-1 min-w-0">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true" />
           <input
             type="text"
             value={searchQuery}
@@ -81,7 +81,7 @@ export function TenantsToolbar({
               onClick={() => setSearchQuery("")}
               className="absolute right-3 top-1/2 -translate-y-1/2 p-0.5 rounded-md text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)] transition-all"
             >
-              <X size={13} />
+              <X size={13} aria-hidden="true" />
             </button>
           )}
         </div>
@@ -105,7 +105,7 @@ export function TenantsToolbar({
           onClick={() => router.push("/super-admin/agencies/new")} 
           className="flex-1 w-full h-9 px-4 rounded-xl bg-[var(--color-primary)] text-white text-xs font-bold hover:bg-[var(--color-primary-hover)] transition-all shadow-sm cursor-pointer touch-manipulation active:scale-[0.98] flex items-center justify-center gap-1.5"
         >
-          <Plus size={14} /> Onboard New
+          <Plus size={14} aria-hidden="true" /> Onboard New
         </button>
 
         {/* Export - Compact on mobile */}
@@ -116,9 +116,9 @@ export function TenantsToolbar({
               onClick={() => setShowExportMenu(!showExportMenu)}
               className="h-9 px-3 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center justify-center gap-1 transition-all shadow-sm flex-shrink-0 cursor-pointer touch-manipulation active:scale-[0.98]"
             >
-              <Download size={14} />
+              <Download size={14} aria-hidden="true" />
               <span className="hidden sm:inline">Export</span>
-              <ChevronDown size={12} className="hidden sm:inline" />
+              <ChevronDown size={12} className="hidden sm:inline" aria-hidden="true" />
             </button>
             
             {showExportMenu && (

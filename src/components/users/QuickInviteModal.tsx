@@ -1,6 +1,6 @@
 // src/components/users/QuickInviteModal.tsx
 import { useState, useEffect } from "react";
-import { UserPlus, Loader2, Check, Copy, Mail, MessageSquare, Phone, Shield, Briefcase } from "lucide-react";
+import { UserPlus, CircleNotch as Loader2, Check, Copy, Envelope as Mail, Chat as MessageSquare, Phone, Shield, Briefcase } from "@phosphor-icons/react/ssr";
 
 const ADMIN_TITLES = ["Director", "Manager", "HR"];
 const STAFF_DEPARTMENTS: Record<string, string[]> = {
@@ -112,7 +112,7 @@ export default function QuickInviteModal({
             {/* Header */}
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
-                <UserPlus size={20} />
+                <UserPlus size={20} aria-hidden="true" />
               </div>
               <div>
                 <h3 className="text-lg font-bold text-[var(--color-ink)]">Add Member Manually</h3>
@@ -135,7 +135,7 @@ export default function QuickInviteModal({
                       : "border-[var(--color-surface-border)] bg-[var(--color-surface-hover)] hover:border-[var(--color-surface-border-strong)]"
                   }`}
                 >
-                  <Shield className={`mb-1.5 ${roleType === "admin" ? "text-[var(--color-primary)]" : "text-[var(--color-ink-subtle)]"}`} size={18} />
+                  <Shield className={`mb-1.5 ${roleType === "admin" ? "text-[var(--color-primary)]" : "text-[var(--color-ink-subtle)]"}`} size={18} aria-hidden="true" />
                   <p className="text-sm font-bold text-[var(--color-ink)]">Admin</p>
                   <p className="text-[10px] text-[var(--color-ink-muted)] mt-0.5">Leadership & management</p>
                 </button>
@@ -149,7 +149,7 @@ export default function QuickInviteModal({
                       : "border-[var(--color-surface-border)] bg-[var(--color-surface-hover)] hover:border-[var(--color-surface-border-strong)]"
                   }`}
                 >
-                  <Briefcase className={`mb-1.5 ${roleType === "staff" ? "text-[var(--color-primary)]" : "text-[var(--color-ink-subtle)]"}`} size={18} />
+                  <Briefcase className={`mb-1.5 ${roleType === "staff" ? "text-[var(--color-primary)]" : "text-[var(--color-ink-subtle)]"}`} size={18} aria-hidden="true" />
                   <p className="text-sm font-bold text-[var(--color-ink)]">Operational Staff</p>
                   <p className="text-[10px] text-[var(--color-ink-muted)] mt-0.5">Day-to-day operations</p>
                 </button>
@@ -277,7 +277,7 @@ export default function QuickInviteModal({
                 disabled={loading || !isFormValid} 
                 className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? <Loader2 size={16} className="animate-spin" /> : <UserPlus size={16} />}
+                {loading ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <UserPlus size={16} aria-hidden="true" />}
                 {loading ? "Creating..." : "Create Account"}
               </button>
             </div>
@@ -285,7 +285,7 @@ export default function QuickInviteModal({
         ) : (
           <div className="p-6 space-y-4 text-center">
             <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto text-emerald-600 dark:text-emerald-400">
-              <Check size={32} />
+              <Check size={32} aria-hidden="true" />
             </div>
             <h3 className="text-lg font-bold text-[var(--color-ink)]">Account Created!</h3>
             <p className="text-sm text-[var(--color-ink-muted)]">{successMessage}</p>
@@ -296,7 +296,7 @@ export default function QuickInviteModal({
                 onClick={handleCopyCredentials}
                 className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-[var(--color-ink)] bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-hover)]/80 transition-all"
               >
-                {copied ? <Check size={16} className="text-emerald-600" /> : <Copy size={16} />}
+                {copied ? <Check size={16} className="text-emerald-600" aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
                 {copied ? "Copied!" : "Copy Credentials"}
               </button>
               <div className="grid grid-cols-3 gap-2">
@@ -304,21 +304,21 @@ export default function QuickInviteModal({
                   onClick={handleShareWhatsApp}
                   className="flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs font-bold text-[var(--color-ink)] bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-hover)]/80 transition-all"
                 >
-                  <MessageSquare size={14} />
+                  <MessageSquare size={14} aria-hidden="true" />
                   WhatsApp
                 </button>
                 <button 
                   onClick={handleShareSMS}
                   className="flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs font-bold text-[var(--color-ink)] bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-hover)]/80 transition-all"
                 >
-                  <Phone size={14} />
+                  <Phone size={14} aria-hidden="true" />
                   SMS
                 </button>
                 <button 
                   onClick={handleShareEmail}
                   className="flex items-center justify-center gap-1 px-3 py-2 rounded-xl text-xs font-bold text-[var(--color-ink)] bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-hover)]/80 transition-all"
                 >
-                  <Mail size={14} />
+                  <Mail size={14} aria-hidden="true" />
                   Email
                 </button>
               </div>

@@ -1,7 +1,7 @@
 // src/components/bookings/booking_list/mobile/BookingBanner.tsx
 "use client";
 
-import { AlertCircle, ArrowRight } from "lucide-react";
+import { WarningCircle as AlertCircle, ArrowRight } from "@phosphor-icons/react/ssr";
 
 interface BookingBannerProps {
   search: string;
@@ -32,16 +32,16 @@ export default function BookingBanner({
           onClick={() => setStatusFilter("pending")}
           className="w-full flex items-center justify-start gap-2 py-3 px-1 text-amber-600 dark:text-amber-400 hover:opacity-80 transition-opacity text-xs font-semibold"
         >
-          <AlertCircle size={14} />
+          <AlertCircle size={14} aria-hidden="true" />
           {pendingCount} {pendingCount === 1 ? "booking" : "bookings"} pending your review
-          <ArrowRight size={12} className="opacity-70" />
+          <ArrowRight size={12} className="opacity-70" aria-hidden="true" />
         </button>
       )}
 
       {!search && statusFilter === "pending" && visibleCount > 0 && (
         <div className="w-full flex items-center justify-between py-3 px-1 text-blue-600 dark:text-blue-400 text-xs font-semibold">
           <span className="flex items-center gap-2">
-            <AlertCircle size={14} />
+            <AlertCircle size={14} aria-hidden="true" />
             Viewing {visibleCount} pending {visibleCount === 1 ? "booking" : "bookings"}
           </span>
           <button
@@ -57,7 +57,7 @@ export default function BookingBanner({
       {!search && hasActiveFilter && statusFilter !== "pending" && visibleCount > 0 && (
         <div className="w-full flex items-center justify-between py-3 px-1 text-blue-600 dark:text-blue-400 text-xs font-semibold">
           <span className="flex items-center gap-2">
-            <AlertCircle size={14} />
+            <AlertCircle size={14} aria-hidden="true" />
             Viewing {visibleCount} {statusFilter} {visibleCount === 1 ? "booking" : "bookings"}
           </span>
           <button

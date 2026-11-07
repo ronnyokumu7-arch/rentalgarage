@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, FileText, AlertCircle, Link2, CheckCircle2, RotateCcw, CalendarDays, FileSignature, User, Car } from "lucide-react";
+import { CircleNotch as Loader2, FileText, WarningCircle as AlertCircle, LinkSimple as Link2, CheckCircle as CheckCircle2, ArrowCounterClockwise as RotateCcw, CalendarDots as CalendarDays, Signature as FileSignature, User, Car } from "@phosphor-icons/react/ssr";
 import Modal from "@/components/ui/Modal";
 import PremiumEntitySelector from "@/components/financials/shared/PremiumEntitySelector";
 import { bookingsApi } from "@/lib/api/bookings";
@@ -128,7 +128,7 @@ export default function GenerateContractModal({ open, onClose, onGenerated }: Ge
     return (
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500/20 to-violet-500/5 border border-violet-500/20 flex items-center justify-center flex-shrink-0">
-          <FileSignature size={16} className="text-violet-600 dark:text-violet-400" />
+          <FileSignature size={16} className="text-violet-600 dark:text-violet-400" aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
@@ -141,18 +141,18 @@ export default function GenerateContractModal({ open, onClose, onGenerated }: Ge
           </div>
           <div className="flex items-center gap-2 mt-0.5">
             <span className="text-[10px] text-[var(--color-ink-muted)] flex items-center gap-1">
-              <User size={10} />
+              <User size={10} aria-hidden="true" />
               {clientName}
             </span>
             <span className="text-[10px] text-[var(--color-ink-subtle)]">•</span>
             <span className="text-[10px] font-mono text-[var(--color-ink-muted)] flex items-center gap-1">
-              <Car size={10} />
+              <Car size={10} aria-hidden="true" />
               {vehiclePlate}
             </span>
           </div>
           <div className="flex items-center gap-2 mt-0.5">
             <span className="text-[10px] text-[var(--color-ink-muted)] flex items-center gap-1">
-              <CalendarDays size={10} />
+              <CalendarDays size={10} aria-hidden="true" />
               {new Date(booking.start_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })} → {new Date(booking.end_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
             </span>
             <span className="text-[10px] text-[var(--color-ink-subtle)]">•</span>
@@ -190,7 +190,7 @@ export default function GenerateContractModal({ open, onClose, onGenerated }: Ge
         {selectedBooking && (
           <div className="p-5 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)]">
             <div className="flex items-center gap-2 mb-4">
-              <FileText size={16} className="text-[var(--color-primary)]" />
+              <FileText size={16} className="text-[var(--color-primary)]" aria-hidden="true" />
               <span className="text-[10px] font-bold text-[var(--color-ink-muted)] uppercase tracking-wider">Booking Details</span>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -224,9 +224,9 @@ export default function GenerateContractModal({ open, onClose, onGenerated }: Ge
               }`}>
                 <div className="flex items-center gap-2">
                   {isVoidContract ? (
-                    <AlertCircle size={16} className="text-[var(--color-danger-text)]" />
+                    <AlertCircle size={16} className="text-[var(--color-danger-text)]" aria-hidden="true" />
                   ) : (
-                    <CheckCircle2 size={16} className="text-[var(--color-success-text)]" />
+                    <CheckCircle2 size={16} className="text-[var(--color-success-text)]" aria-hidden="true" />
                   )}
                   <span className={`text-xs font-bold ${
                     isVoidContract ? "text-[var(--color-danger-text)]" : "text-[var(--color-success-text)]"
@@ -259,13 +259,13 @@ export default function GenerateContractModal({ open, onClose, onGenerated }: Ge
             className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-lg)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? (
-              <Loader2 size={14} className="animate-spin" />
+              <Loader2 size={14} className="animate-spin" aria-hidden="true" />
             ) : isVoidContract ? (
-              <RotateCcw size={14} />
+              <RotateCcw size={14} aria-hidden="true" />
             ) : existingContract ? (
-              <Link2 size={14} />
+              <Link2 size={14} aria-hidden="true" />
             ) : (
-              <FileText size={14} />
+              <FileText size={14} aria-hidden="true" />
             )}
             {loading 
               ? "Processing..." 

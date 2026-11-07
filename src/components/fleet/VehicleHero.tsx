@@ -3,8 +3,8 @@
 
 import { useRouter } from "next/navigation";
 import {
-  Car, MoreVertical, User, ArrowLeft,
-} from "lucide-react";
+  Car, DotsThreeVertical as MoreVertical, User, ArrowLeft,
+} from "@phosphor-icons/react/ssr";
 import type { Vehicle } from "@/lib/types";
 import {
   STATUS_LABELS, STATUS_TONE, formatPlate, formatMoney,
@@ -33,14 +33,14 @@ export default function VehicleHero({
         className="inline-flex items-center gap-1.5 h-8 px-2.5 rounded-lg text-[11px] font-bold text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors group"
         aria-label="Back to Fleet"
       >
-        <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
+        <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" aria-hidden="true" />
         Back to Fleet
       </button>
 
       <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-4 sm:p-6">
         <div className="flex items-start sm:items-center gap-3 sm:gap-5">
           <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center flex-shrink-0">
-            <Car size={24} className="text-[var(--color-primary)]" />
+            <Car size={24} className="text-[var(--color-primary)]" aria-hidden="true" />
           </div>
 
           <div className="min-w-0 flex-1">
@@ -66,7 +66,7 @@ export default function VehicleHero({
               <span className="flex items-center gap-1 text-[11px] font-medium text-[var(--color-ink-muted)]">
                 {vehicle.owner_id ? (
                   <>
-                    <User size={11} className="text-[var(--color-ink-subtle)]" />
+                    <User size={11} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
                     Investor Owned
                   </>
                 ) : (
@@ -81,7 +81,7 @@ export default function VehicleHero({
             className="w-9 h-9 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] flex items-center justify-center transition-colors flex-shrink-0"
             aria-label="More actions"
           >
-            <MoreVertical size={16} className="text-[var(--color-ink-muted)]" />
+            <MoreVertical size={16} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
           </button>
         </div>
       </div>

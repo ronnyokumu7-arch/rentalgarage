@@ -1,5 +1,5 @@
 import React, { forwardRef } from "react";
-import { ChevronDown } from "lucide-react";
+import { CaretDown as ChevronDown } from "@phosphor-icons/react/ssr";
 
 interface SelectOption {
   value: string;
@@ -47,7 +47,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         </select>
         <ChevronDown
           size={16}
-          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-ink-subtle pointer-events-none"
+          className="absolute right-3.5 top-1/2 -translate-y-1/2 text-ink-subtle pointer-events-none" aria-hidden="true"
         />
       </div>
     );

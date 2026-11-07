@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Loader2, AlertCircle, ChevronDown } from "lucide-react";
+import { MagnifyingGlass as Search, CircleNotch as Loader2, WarningCircle as AlertCircle, CaretDown as ChevronDown } from "@phosphor-icons/react/ssr";
 import { useEntitySelector } from "@/hooks/financials/useEntitySelector";
 
 interface PremiumEntitySelectorProps<T> {
@@ -67,7 +67,7 @@ export default function PremiumEntitySelector<T>({
         )}
         <ChevronDown
           size={16}
-          className={`flex-shrink-0 text-[var(--color-ink-subtle)] transition-transform ${isOpen ? "rotate-180" : ""}`}
+          className={`flex-shrink-0 text-[var(--color-ink-subtle)] transition-transform ${isOpen ? "rotate-180" : ""}`} aria-hidden="true"
         />
       </button>
 
@@ -87,7 +87,7 @@ export default function PremiumEntitySelector<T>({
           {/* Search Input */}
           <div className="p-3 border-b border-[var(--color-surface-border)] flex-shrink-0">
             <div className="relative">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" />
+              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true" />
               <input
                 type="text"
                 value={search}
@@ -103,12 +103,12 @@ export default function PremiumEntitySelector<T>({
           <div className="flex-1 overflow-y-auto custom-scrollbar p-2 space-y-1">
             {loading ? (
               <div className="flex items-center justify-center py-6 text-[var(--color-ink-muted)]">
-                <Loader2 size={20} className="animate-spin mr-2" />
+                <Loader2 size={20} className="animate-spin mr-2" aria-hidden="true" />
                 <span className="text-sm">Loading...</span>
               </div>
             ) : filteredData.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-6 text-center">
-                <AlertCircle size={20} className="text-[var(--color-ink-subtle)] mb-2" />
+                <AlertCircle size={20} className="text-[var(--color-ink-subtle)] mb-2" aria-hidden="true" />
                 <p className="text-sm text-[var(--color-ink-muted)]">{emptyMessage}</p>
               </div>
             ) : (

@@ -5,8 +5,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft, ArrowRight, User, Shield, Phone, CheckCircle,
-  Mail, CreditCard, Briefcase, Lock, Loader2
-} from "lucide-react";
+  Envelope as Mail, CreditCard, Briefcase, Lock, CircleNotch as Loader2
+} from "@phosphor-icons/react/ssr";
 import toast from "react-hot-toast";
 import { usersApi, type UserCreatePayload } from "@/lib/api/users";
 
@@ -138,7 +138,7 @@ export default function NewUserPage() {
             onClick={() => router.push("/dashboard/users")}
             className="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
           >
-            <ArrowLeft size={16} /> Back to Team
+            <ArrowLeft size={16} aria-hidden="true" /> Back to Team
           </button>
           <h1 className="text-xl font-bold text-[var(--color-ink)] hidden sm:block">Add Team Member</h1>
           <div className="w-24" /> {/* Spacer for balance */}
@@ -164,7 +164,7 @@ export default function NewUserPage() {
                             ? "bg-[var(--color-success)] text-white" 
                             : "bg-[var(--color-surface)] border-2 border-[var(--color-surface-border)] text-[var(--color-ink-subtle)]"
                       }`}>
-                        {isCompleted ? <CheckCircle size={18} /> : <Icon size={18} />}
+                        {isCompleted ? <CheckCircle size={18} aria-hidden="true" /> : <Icon size={18} aria-hidden="true" />}
                       </div>
                       <span className={`mt-2 text-xs font-bold uppercase tracking-wider ${
                         isActive ? "text-[var(--color-primary)]" : isCompleted ? "text-[var(--color-success-text)]" : "text-[var(--color-ink-subtle)]"
@@ -205,7 +205,7 @@ export default function NewUserPage() {
                         : "border-[var(--color-surface-border)] bg-[var(--color-surface-hover)] hover:border-[var(--color-surface-border-strong)]"
                     }`}
                   >
-                    <Shield className={`mb-3 ${roleType === "admin" ? "text-[var(--color-primary)]" : "text-[var(--color-ink-subtle)]"}`} size={24} />
+                    <Shield className={`mb-3 ${roleType === "admin" ? "text-[var(--color-primary)]" : "text-[var(--color-ink-subtle)]"}`} size={24} aria-hidden="true" />
                     <p className="font-bold text-[var(--color-ink)]">Admin</p>
                     <p className="text-xs text-[var(--color-ink-muted)] mt-1">Leadership, HR, and full agency management access.</p>
                   </button>
@@ -220,7 +220,7 @@ export default function NewUserPage() {
                         : "border-[var(--color-surface-border)] bg-[var(--color-surface-hover)] hover:border-[var(--color-surface-border-strong)]"
                     }`}
                   >
-                    <Briefcase className={`mb-3 ${roleType === "staff" ? "text-[var(--color-primary)]" : "text-[var(--color-ink-subtle)]"}`} size={24} />
+                    <Briefcase className={`mb-3 ${roleType === "staff" ? "text-[var(--color-primary)]" : "text-[var(--color-ink-subtle)]"}`} size={24} aria-hidden="true" />
                     <p className="font-bold text-[var(--color-ink)]">Operational Staff</p>
                     <p className="text-xs text-[var(--color-ink-muted)] mt-1">Day-to-day operations, drivers, finance, and support.</p>
                   </button>
@@ -288,7 +288,7 @@ export default function NewUserPage() {
                   <div className="md:col-span-2">
                     <label className={labelClass}>Full Name <span className="text-[var(--color-danger)]">*</span></label>
                     <div className="relative">
-                      <User className="absolute left-4 top-3.5 h-4 w-4 text-[var(--color-ink-subtle)]" />
+                      <User className="absolute left-4 top-3.5 h-4 w-4 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                       <input
                         type="text"
                         value={formData.full_name}
@@ -302,7 +302,7 @@ export default function NewUserPage() {
                   <div>
                     <label className={labelClass}>Email Address <span className="text-[var(--color-danger)]">*</span></label>
                     <div className="relative">
-                      <Mail className="absolute left-4 top-3.5 h-4 w-4 text-[var(--color-ink-subtle)]" />
+                      <Mail className="absolute left-4 top-3.5 h-4 w-4 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                       <input
                         type="email"
                         value={formData.email}
@@ -316,7 +316,7 @@ export default function NewUserPage() {
                   <div>
                     <label className={labelClass}>Phone Number</label>
                     <div className="relative">
-                      <Phone className="absolute left-4 top-3.5 h-4 w-4 text-[var(--color-ink-subtle)]" />
+                      <Phone className="absolute left-4 top-3.5 h-4 w-4 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                       <input
                         type="tel"
                         value={formData.phone_number}
@@ -329,7 +329,7 @@ export default function NewUserPage() {
                   <div className="md:col-span-2">
                     <label className={labelClass}>Temporary Password <span className="text-[var(--color-danger)]">*</span></label>
                     <div className="relative">
-                      <Lock className="absolute left-4 top-3.5 h-4 w-4 text-[var(--color-ink-subtle)]" />
+                      <Lock className="absolute left-4 top-3.5 h-4 w-4 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                       <input
                         type="password"
                         value={formData.password}
@@ -358,7 +358,7 @@ export default function NewUserPage() {
                   <div className="md:col-span-2">
                     <label className={labelClass}>National ID Number {roleType === "staff" && <span className="text-[var(--color-danger)]">*</span>}</label>
                     <div className="relative">
-                      <CreditCard className="absolute left-4 top-3.5 h-4 w-4 text-[var(--color-ink-subtle)]" />
+                      <CreditCard className="absolute left-4 top-3.5 h-4 w-4 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                       <input
                         type="text"
                         value={formData.id_number}
@@ -374,7 +374,7 @@ export default function NewUserPage() {
                       <div>
                         <label className={labelClass}>Driver's License Number {jobTitle === "Driver" && <span className="text-[var(--color-danger)]">*</span>}</label>
                         <div className="relative">
-                          <Briefcase className="absolute left-4 top-3.5 h-4 w-4 text-[var(--color-ink-subtle)]" />
+                          <Briefcase className="absolute left-4 top-3.5 h-4 w-4 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                           <input
                             type="text"
                             value={formData.dl_number}
@@ -411,7 +411,7 @@ export default function NewUserPage() {
                   {/* Role Section */}
                   <div className="md:col-span-2 p-6 rounded-2xl bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/20">
                     <h3 className="text-xs font-bold text-[var(--color-primary)] uppercase tracking-wider mb-4 flex items-center gap-2">
-                      <Shield size={14} /> Role & Access
+                      <Shield size={14} aria-hidden="true" /> Role & Access
                     </h3>
                     <div className="flex items-center gap-3">
                       <span className="text-lg font-bold text-[var(--color-ink)]">{getRoleDisplay()}</span>
@@ -454,7 +454,7 @@ export default function NewUserPage() {
                 disabled={currentStep === 1}
                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                <ArrowLeft size={16} /> Previous
+                <ArrowLeft size={16} aria-hidden="true" /> Previous
               </button>
               
               {currentStep < 4 ? (
@@ -463,7 +463,7 @@ export default function NewUserPage() {
                   onClick={nextStep}
                   className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-lg)] hover:-translate-y-0.5 transition-all"
                 >
-                  Next Step <ArrowRight size={16} />
+                  Next Step <ArrowRight size={16} aria-hidden="true" />
                 </button>
               ) : (
                 <button
@@ -471,7 +471,7 @@ export default function NewUserPage() {
                   disabled={loading}
                   className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-success)] hover:bg-[var(--color-success)]/90 shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-lg)] hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {loading ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />} 
+                  {loading ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <CheckCircle size={16} aria-hidden="true" />}
                   {loading ? "Creating Account..." : "Create Team Member"}
                 </button>
               )}

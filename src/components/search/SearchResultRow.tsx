@@ -4,13 +4,13 @@
 import Link from "next/link";
 import {
   User as UserIcon,
-  CalendarDays,
+  CalendarDots as CalendarDays,
   Car,
   Phone,
-  Mail,
-  ChevronRight,
+  Envelope as Mail,
+  CaretRight as ChevronRight,
   ArrowRight,
-} from "lucide-react";
+} from "@phosphor-icons/react/ssr";
 import type {
   ClientResult,
   BookingResult,
@@ -79,7 +79,7 @@ export function PageResultRow({ result }: { result: PageResult }) {
       <div
         className={`${ICON_TILE_CLASS} bg-[var(--color-primary-subtle)] border-[var(--color-primary-muted)]`}
       >
-        <Icon size={14} className="text-[var(--color-primary)]" />
+        <Icon size={14} className="text-[var(--color-primary)]" aria-hidden="true" />
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-sm font-semibold text-[var(--color-ink)] truncate">
@@ -91,7 +91,7 @@ export function PageResultRow({ result }: { result: PageResult }) {
           </p>
         )}
       </div>
-      <ArrowRight size={14} className={CHEVRON_CLASS} />
+      <ArrowRight size={14} className={CHEVRON_CLASS} aria-hidden="true" />
     </Link>
   );
 }
@@ -107,7 +107,7 @@ export function ClientResultRow({ result }: { result: ClientResult }) {
       <div
         className={`${ICON_TILE_CLASS} bg-[var(--color-primary-subtle)] border-[var(--color-primary-muted)]`}
       >
-        <UserIcon size={14} className="text-[var(--color-primary)]" />
+        <UserIcon size={14} className="text-[var(--color-primary)]" aria-hidden="true" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -123,13 +123,13 @@ export function ClientResultRow({ result }: { result: ClientResult }) {
         <div className="flex items-center gap-2 mt-0.5 flex-wrap text-xs text-[var(--color-ink-muted)]">
           {result.phone && (
             <span className="flex items-center gap-1">
-              <Phone size={10} />
+              <Phone size={10} aria-hidden="true" />
               <span className="truncate">{result.phone}</span>
             </span>
           )}
           {result.email && (
             <span className="flex items-center gap-1">
-              <Mail size={10} />
+              <Mail size={10} aria-hidden="true" />
               <span className="truncate">{result.email}</span>
             </span>
           )}
@@ -138,7 +138,7 @@ export function ClientResultRow({ result }: { result: ClientResult }) {
           )}
         </div>
       </div>
-      <ChevronRight size={14} className={CHEVRON_CLASS} />
+      <ChevronRight size={14} className={CHEVRON_CLASS} aria-hidden="true" />
     </Link>
   );
 }
@@ -152,7 +152,7 @@ export function BookingResultRow({ result }: { result: BookingResult }) {
   return (
     <Link href={`/dashboard/bookings/${result.id}`} className={ROW_CLASS}>
       <div className={`${ICON_TILE_CLASS} bg-blue-500/10 border-blue-500/20`}>
-        <CalendarDays size={14} className="text-blue-500" />
+        <CalendarDays size={14} className="text-blue-500" aria-hidden="true" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -182,7 +182,7 @@ export function BookingResultRow({ result }: { result: BookingResult }) {
           </span>
         </div>
       </div>
-      <ChevronRight size={14} className={CHEVRON_CLASS} />
+      <ChevronRight size={14} className={CHEVRON_CLASS} aria-hidden="true" />
     </Link>
   );
 }
@@ -196,7 +196,7 @@ export function VehicleResultRow({ result }: { result: VehicleResult }) {
   return (
     <Link href={`/dashboard/fleet/${result.id}`} className={ROW_CLASS}>
       <div className={`${ICON_TILE_CLASS} bg-purple-500/10 border-purple-500/20`}>
-        <Car size={14} className="text-purple-500" />
+        <Car size={14} className="text-purple-500" aria-hidden="true" />
       </div>
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -218,7 +218,7 @@ export function VehicleResultRow({ result }: { result: VehicleResult }) {
           </span>
         </div>
       </div>
-      <ChevronRight size={14} className={CHEVRON_CLASS} />
+      <ChevronRight size={14} className={CHEVRON_CLASS} aria-hidden="true" />
     </Link>
   );
 }

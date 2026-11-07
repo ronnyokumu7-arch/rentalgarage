@@ -1,9 +1,9 @@
 // src/components/tenants/SubscriptionStatusCard.tsx
 import { useState } from 'react';
 import { 
-  CreditCard, Calendar, AlertTriangle, CheckCircle2, XCircle, 
-  Clock, Loader2, Zap, Shield, Plus, Ban
-} from 'lucide-react';
+  CreditCard, Calendar, Warning as AlertTriangle, CheckCircle as CheckCircle2, XCircle,
+  Clock, CircleNotch as Loader2, Lightning as Zap, Shield, Plus, Prohibit as Ban
+} from "@phosphor-icons/react/ssr";
 import toast from 'react-hot-toast';
 import { tenantsApi } from '@/lib/api/tenants';
 import type { Tenant } from '@/lib/types';
@@ -106,7 +106,7 @@ export function SubscriptionStatusCard({ tenant, onUpdated }: SubscriptionStatus
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/30">
         <div className="flex items-center gap-3">
           <div className="p-1.5 rounded-lg bg-purple-500/10 text-purple-400">
-            <CreditCard size={16} />
+            <CreditCard size={16} aria-hidden="true" />
           </div>
           <div>
             <h2 className="text-sm font-semibold text-[var(--color-ink)]">Subscription & Billing</h2>
@@ -116,7 +116,7 @@ export function SubscriptionStatusCard({ tenant, onUpdated }: SubscriptionStatus
 
         {/* Status Badge */}
         <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${statusBadge.color}`}>
-          <StatusIcon size={12} />
+          <StatusIcon size={12} aria-hidden="true" />
           {statusBadge.label}
         </div>
       </div>
@@ -127,7 +127,7 @@ export function SubscriptionStatusCard({ tenant, onUpdated }: SubscriptionStatus
         {/* Current Plan - Fixed Layout */}
         <div className="space-y-2">
           <div className="flex items-center gap-1.5 text-[10px] font-bold text-[var(--color-ink-muted)] uppercase tracking-widest">
-            <Zap size={12} /> Current Plan
+            <Zap size={12} aria-hidden="true" /> Current Plan
           </div>
           <div className="flex items-baseline gap-2">
             <p className="text-xl font-bold text-[var(--color-ink)] capitalize truncate">
@@ -146,7 +146,7 @@ export function SubscriptionStatusCard({ tenant, onUpdated }: SubscriptionStatus
           {tenant.trial_ends_at && (
             <div className="flex items-center justify-between group">
               <div className="flex items-center gap-2 text-xs text-[var(--color-ink-muted)]">
-                <Calendar size={14} className="opacity-50" />
+                <Calendar size={14} className="opacity-50" aria-hidden="true" />
                 <span>Trial Ends</span>
               </div>
               <span className={`text-xs font-semibold ${
@@ -160,7 +160,7 @@ export function SubscriptionStatusCard({ tenant, onUpdated }: SubscriptionStatus
           {tenant.subscription_ends_at && (
             <div className="flex items-center justify-between group">
               <div className="flex items-center gap-2 text-xs text-[var(--color-ink-muted)]">
-                <Calendar size={14} className="opacity-50" />
+                <Calendar size={14} className="opacity-50" aria-hidden="true" />
                 <span>Sub Ends</span>
               </div>
               <span className="text-xs font-semibold text-[var(--color-ink)]">
@@ -173,7 +173,7 @@ export function SubscriptionStatusCard({ tenant, onUpdated }: SubscriptionStatus
         {/* Grace Period Warning */}
         {tenant.grace_period_ends_at && tenant.subscription_status === 'past_due' && (
           <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
-            <AlertTriangle size={14} className="text-amber-400 flex-shrink-0 mt-0.5" />
+            <AlertTriangle size={14} className="text-amber-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
             <p className="text-[10px] text-amber-400/80 leading-relaxed">
               Suspends on {formatDate(tenant.grace_period_ends_at)} if unpaid.
             </p>
@@ -193,7 +193,7 @@ export function SubscriptionStatusCard({ tenant, onUpdated }: SubscriptionStatus
                 title="Add 14 days to current trial period"
                 className="group relative flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold text-purple-400 bg-purple-500/5 hover:bg-purple-500/10 border border-purple-500/20 hover:border-purple-500/40 transition-all disabled:opacity-50"
               >
-                {isExtending ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />}
+                {isExtending ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Plus size={14} aria-hidden="true" />}
                 Extend
               </button>
             )}
@@ -211,11 +211,11 @@ export function SubscriptionStatusCard({ tenant, onUpdated }: SubscriptionStatus
                 `}
               >
                 {isTogglingStatus ? (
-                  <Loader2 size={14} className="animate-spin" />
+                  <Loader2 size={14} className="animate-spin" aria-hidden="true" />
                 ) : tenant.is_active ? (
-                  <Ban size={14} />
+                  <Ban size={14} aria-hidden="true" />
                 ) : (
-                  <CheckCircle2 size={14} />
+                  <CheckCircle2 size={14} aria-hidden="true" />
                 )}
                 {tenant.is_active ? 'Suspend' : 'Activate'}
               </button>
@@ -225,7 +225,7 @@ export function SubscriptionStatusCard({ tenant, onUpdated }: SubscriptionStatus
           {/* Default Payment Method Indicator */}
           {tenant.default_payment_method && (
             <div className="flex items-center justify-center gap-1.5 text-[10px] text-[var(--color-ink-subtle)]">
-              <Shield size={10} />
+              <Shield size={10} aria-hidden="true" />
               <span>Default: {tenant.default_payment_method.replace('_', ' ')}</span>
             </div>
           )}

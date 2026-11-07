@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Calendar, Clock, Car, User, AlertCircle } from "lucide-react";
+import { Calendar, Clock, Car, User, WarningCircle as AlertCircle } from "@phosphor-icons/react/ssr";
 import Badge from "./Badge";
 
 interface Booking {
@@ -69,7 +69,7 @@ export default function UpcomingBookings({ bookings, onViewAll }: UpcomingBookin
 
       {bookings.length === 0 ? (
         <div className="py-8 text-center">
-          <Calendar size={32} className="mx-auto text-ink-subtle mb-2" />
+          <Calendar size={32} className="mx-auto text-ink-subtle mb-2" aria-hidden="true" />
           <p className="text-sm text-ink-muted">No bookings</p>
         </div>
       ) : (
@@ -85,7 +85,7 @@ export default function UpcomingBookings({ bookings, onViewAll }: UpcomingBookin
                 <div className="flex items-start justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${config.iconColor} bg-surface-hover`}>
-                      <Car size={16} />
+                      <Car size={16} aria-hidden="true" />
                     </div>
                     <div>
                       <p className="text-sm font-semibold text-ink group-hover:text-accent-dark transition-colors">
@@ -101,14 +101,14 @@ export default function UpcomingBookings({ bookings, onViewAll }: UpcomingBookin
 
                 <div className="flex items-center gap-3 mb-2">
                   <div className="flex items-center gap-1.5 text-xs text-ink-muted">
-                    <User size={12} />
+                    <User size={12} aria-hidden="true" />
                     <span className="truncate">{booking.clientName}</span>
                   </div>
                 </div>
 
                 <div className="flex items-center justify-between pt-2 border-t border-surface-border">
                   <div className="flex items-center gap-1.5 text-xs text-ink-subtle">
-                    <Calendar size={12} />
+                    <Calendar size={12} aria-hidden="true" />
                     <span>{formatDate(booking.startDate)} - {formatDate(booking.endDate)}</span>
                   </div>
                   {booking.daysUntilStart !== undefined && booking.status === "upcoming" && (

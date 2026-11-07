@@ -1,5 +1,5 @@
 // src/components/tenants/AdminSnapshotSection.tsx
-import { User, Mail, Phone, Shield, AlertCircle, Edit3 } from 'lucide-react';
+import { User, Envelope as Mail, Phone, Shield, WarningCircle as AlertCircle, NotePencil as Edit3 } from "@phosphor-icons/react/ssr";
 import type { Tenant } from '@/lib/types';
 
 interface AdminSnapshotSectionProps {
@@ -40,7 +40,7 @@ export function AdminSnapshotSection({ tenant, onChangeEmailClick }: AdminSnapsh
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/30">
         <div className="flex items-center gap-3">
           <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-500">
-            <Shield size={16} />
+            <Shield size={16} aria-hidden="true" />
           </div>
           <div>
             <h2 className="text-sm font-semibold text-[var(--color-ink)]">Administrator Account</h2>
@@ -53,7 +53,7 @@ export function AdminSnapshotSection({ tenant, onChangeEmailClick }: AdminSnapsh
           onClick={onChangeEmailClick}
           className="group flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold text-amber-500 bg-amber-500/5 hover:bg-amber-500/10 border border-amber-500/20 hover:border-amber-500/40 transition-all"
         >
-          <Edit3 size={14} className="group-hover:rotate-12 transition-transform" /> 
+          <Edit3 size={14} className="group-hover:rotate-12 transition-transform" aria-hidden="true" />
           Update Email
         </button>
       </div>
@@ -66,7 +66,7 @@ export function AdminSnapshotSection({ tenant, onChangeEmailClick }: AdminSnapsh
           {/* Name */}
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold text-[var(--color-ink-muted)] uppercase tracking-widest flex items-center gap-1.5">
-              <User size={12} /> Full Name
+              <User size={12} aria-hidden="true" /> Full Name
             </label>
             <p className="text-sm font-semibold text-[var(--color-ink)] truncate">
               {displayName}
@@ -76,7 +76,7 @@ export function AdminSnapshotSection({ tenant, onChangeEmailClick }: AdminSnapsh
           {/* Email */}
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold text-[var(--color-ink-muted)] uppercase tracking-widest flex items-center gap-1.5">
-              <Mail size={12} /> Email Address
+              <Mail size={12} aria-hidden="true" /> Email Address
             </label>
             <p className="text-sm font-semibold text-[var(--color-ink)] break-all">
               {displayEmail}
@@ -86,7 +86,7 @@ export function AdminSnapshotSection({ tenant, onChangeEmailClick }: AdminSnapsh
           {/* Phone */}
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold text-[var(--color-ink-muted)] uppercase tracking-widest flex items-center gap-1.5">
-              <Phone size={12} /> Phone Number
+              <Phone size={12} aria-hidden="true" /> Phone Number
             </label>
             <p className="text-sm font-semibold text-[var(--color-ink)]">
               {displayPhone}
@@ -101,7 +101,7 @@ export function AdminSnapshotSection({ tenant, onChangeEmailClick }: AdminSnapsh
         {emailChangeInfo && (
           <div className="pt-4 border-t border-[var(--color-surface-border)]">
             <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10">
-              <AlertCircle size={14} className="text-amber-500 flex-shrink-0 mt-0.5" />
+              <AlertCircle size={14} className="text-amber-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
               <div className="space-y-0.5">
                 <p className="text-[10px] font-bold text-amber-500/90">
                   Last changed: {emailChangeInfo.date} ({emailChangeInfo.daysSince}d ago)

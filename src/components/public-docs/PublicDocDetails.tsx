@@ -1,11 +1,11 @@
 // src/components/public-docs/PublicDocDetails.tsx
 import React from "react";
-import { LucideIcon } from "lucide-react";
+import type { Icon } from "@phosphor-icons/react";
 
 interface DetailItem {
   label: string;
   value: string | React.ReactNode;
-  icon: LucideIcon;
+  icon: Icon;
 }
 
 interface PublicDocDetailsProps {
@@ -44,7 +44,7 @@ export default function PublicDocDetails({ title, items }: PublicDocDetailsProps
             >
               <item.icon 
                 className="w-4 h-4"
-                style={{ color: '#57534E' }}
+                style={{ color: '#57534E' }} aria-hidden="true"
               />
             </div>
             <div>

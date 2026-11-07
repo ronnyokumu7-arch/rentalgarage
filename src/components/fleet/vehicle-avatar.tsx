@@ -1,7 +1,7 @@
 // src/components/fleet/vehicle-avatar.tsx
 "use client";
 
-import { Car, Truck, Van, Motorcycle, CarProfile } from "@phosphor-icons/react";
+import { Car, Truck, Van, Motorcycle, CarProfile } from "@phosphor-icons/react/ssr";
 import brands from "car-brand-logos/brands.json";
 import type { Vehicle } from "@/lib/types";
 

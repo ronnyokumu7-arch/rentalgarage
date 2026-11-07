@@ -2,8 +2,8 @@
 
 import { useState, useEffect } from "react";
 import {
-  LayoutDashboard, Activity, CarFront, Wallet, Landmark, TrendingUp, Gauge, CalendarRange, ArrowUpRight
-} from "lucide-react";
+  SquaresFour as LayoutDashboard, Pulse as Activity, CarProfile as CarFront, Wallet, Bank as Landmark, TrendUp as TrendingUp, Gauge, CalendarDots as CalendarRange, ArrowUpRight
+} from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -80,12 +80,12 @@ export default function InvestorDashboardPage() {
     overview: {
       title: "Investor Dashboard",
       description: "Real-time overview of your fleet performance and earnings",
-      icon: <Gauge size={28} strokeWidth={1.5} className="text-primary hidden sm:block" />
+      icon: <Gauge size={28} weight="light" className="text-primary hidden sm:block" aria-hidden="true" />
     },
     activity: {
       title: "Fleet Calendar",
       description: "Visual overview of your vehicles' booking schedules",
-      icon: <CalendarRange size={28} strokeWidth={1.5} className="text-primary hidden sm:block" />
+      icon: <CalendarRange size={28} weight="light" className="text-primary hidden sm:block" aria-hidden="true" />
     },
   }[activeTab as "overview" | "activity"];
 
@@ -202,7 +202,7 @@ export default function InvestorDashboardPage() {
                         <div className="flex items-center gap-2">
                           <CarFront
                             size={14}
-                            className="text-ink-muted"
+                            className="text-ink-muted" aria-hidden="true"
                           />
                           <span className="font-medium text-ink">
                             {v.plate}
@@ -234,7 +234,7 @@ export default function InvestorDashboardPage() {
                     <div className="p-4 border-b border-surface-border flex items-center justify-between">
                       <h3 className="text-sm font-bold text-ink">Recent Earnings & Deductions</h3>
                       <Link href="/investor/earnings" className="text-xs font-semibold text-primary hover:underline flex items-center gap-1">
-                        View Ledger <ArrowUpRight size={14} />
+                        View Ledger <ArrowUpRight size={14} aria-hidden="true" />
                       </Link>
                     </div>
                     <div className="overflow-x-auto">
@@ -277,7 +277,7 @@ export default function InvestorDashboardPage() {
                       <div className="space-y-2">
                         <Link href="/investor/fleet?add=true" className="flex items-center gap-3 p-3 rounded-xl bg-surface-hover hover:bg-primary/5 hover:border-primary/20 border border-transparent transition-all group">
                           <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <CarFront size={16} />
+                            <CarFront size={16} aria-hidden="true" />
                           </div>
                           <div>
                             <p className="text-xs font-bold text-ink">Add New Vehicle</p>
@@ -286,7 +286,7 @@ export default function InvestorDashboardPage() {
                         </Link>
                         <Link href="/investor/settings" className="flex items-center gap-3 p-3 rounded-xl bg-surface-hover hover:bg-primary/5 hover:border-primary/20 border border-transparent transition-all group">
                           <div className="w-8 h-8 rounded-lg bg-status-confirmed text-status-confirmed flex items-center justify-center group-hover:scale-110 transition-transform">
-                            <Wallet size={16} />
+                            <Wallet size={16} aria-hidden="true" />
                           </div>
                           <div>
                             <p className="text-xs font-bold text-ink">Update Payout Details</p>
@@ -305,7 +305,7 @@ export default function InvestorDashboardPage() {
                         {fleetStatus.map((v) => (
                           <div key={v.id} className="flex items-center justify-between text-xs">
                             <div className="flex items-center gap-2">
-                              <CarFront size={14} className="text-ink-muted" />
+                              <CarFront size={14} className="text-ink-muted" aria-hidden="true" />
                               <div>
                                 <p className="font-medium text-ink">{v.plate}</p>
                                 <p className="text-[10px] text-ink-muted">{v.model}</p>
@@ -331,7 +331,7 @@ export default function InvestorDashboardPage() {
           <motion.div key="activity" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
             <div className="bg-surface border border-surface-border shadow-sm rounded-2xl p-8 sm:p-12 flex flex-col items-center justify-center text-center">
               <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
-                <CalendarRange size={32} className="text-primary" />
+                <CalendarRange size={32} className="text-primary" aria-hidden="true" />
               </div>
               <h3 className="text-lg font-bold text-ink font-display mb-2">Fleet Calendar</h3>
               <p className="text-sm text-ink-muted max-w-md">

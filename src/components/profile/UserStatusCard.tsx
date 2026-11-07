@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { 
-  Shield, Key, Clock, Loader2, AlertTriangle, CheckCircle2, Ban 
-} from "lucide-react";
+  Shield, Key, Clock, CircleNotch as Loader2, Warning as AlertTriangle, CheckCircle as CheckCircle2, Prohibit as Ban
+} from "@phosphor-icons/react/ssr";
 import SectionCard from "@/components/ui/SectionCard";
 import Modal from "@/components/ui/Modal";
 import type { User } from "@/lib/types";
@@ -66,7 +66,7 @@ export default function UserStatusCard({
         {/* Header */}
         <div className="flex items-center justify-between px-3.5 sm:px-4 py-2.5 sm:py-3 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/10 shrink-0">
           <div className="flex items-center gap-2">
-            <Shield size={14} className="text-[var(--color-primary)] shrink-0 sm:w-3.5 sm:h-3.5" />
+            <Shield size={14} className="text-[var(--color-primary)] shrink-0 sm:w-3.5 sm:h-3.5" aria-hidden="true" />
             <h3 className="text-[10px] font-bold text-[var(--color-ink)] uppercase tracking-wider">
               Status & Security
             </h3>
@@ -107,11 +107,11 @@ export default function UserStatusCard({
                   }`}
                 >
                   {isActionLoading ? (
-                    <Loader2 size={12} className="animate-spin sm:w-2.5 sm:h-2.5" /> 
+                    <Loader2 size={12} className="animate-spin sm:w-2.5 sm:h-2.5" aria-hidden="true" />
                   ) : isSuspended ? (
-                    <CheckCircle2 size={12} className="sm:w-2.5 sm:h-2.5" />
+                    <CheckCircle2 size={12} className="sm:w-2.5 sm:h-2.5" aria-hidden="true" />
                   ) : (
-                    <Ban size={12} className="sm:w-2.5 sm:h-2.5" />
+                    <Ban size={12} className="sm:w-2.5 sm:h-2.5" aria-hidden="true" />
                   )}
                   <span>{isSuspended ? "Reactivate" : "Suspend"}</span>
                 </button>
@@ -130,7 +130,7 @@ export default function UserStatusCard({
               <div className="pt-1 animate-in fade-in duration-150">
                 <div className="p-3 sm:p-2.5 rounded-lg bg-rose-500/5 border border-rose-500/20 space-y-2">
                   <div className="flex items-start gap-1.5">
-                    <AlertTriangle size={14} className="text-rose-500 mt-0.5 shrink-0 sm:w-3 sm:h-3" />
+                    <AlertTriangle size={14} className="text-rose-500 mt-0.5 shrink-0 sm:w-3 sm:h-3" aria-hidden="true" />
                     <p className="text-xs sm:text-[11px] text-rose-600/90 dark:text-rose-400/90 leading-tight">
                       Specify audit reason for account suspension:
                     </p>
@@ -155,7 +155,7 @@ export default function UserStatusCard({
                       disabled={isActionLoading || !reason.trim()} 
                       className="min-h-[36px] sm:min-h-0 px-3.5 py-1.5 sm:py-0.5 rounded text-xs sm:text-[11px] font-bold text-white bg-rose-600 hover:bg-rose-700 disabled:opacity-50 transition-all flex items-center justify-center gap-1.5"
                     >
-                      {isActionLoading ? <Loader2 size={12} className="animate-spin" /> : "Confirm Suspend"}
+                      {isActionLoading ? <Loader2 size={12} className="animate-spin" aria-hidden="true" /> : "Confirm Suspend"}
                     </button>
                   </div>
                 </div>
@@ -168,7 +168,7 @@ export default function UserStatusCard({
             <div className="min-w-0">
               <span className={labelClass}>Two-Factor Security</span>
               <div className="flex items-center gap-1.5 mt-0.5">
-                <Key size={13} className={user.two_factor_enabled ? "text-emerald-500 shrink-0" : "text-[var(--color-ink-subtle)] shrink-0"} />
+                <Key size={13} className={user.two_factor_enabled ? "text-emerald-500 shrink-0" : "text-[var(--color-ink-subtle)] shrink-0"} aria-hidden="true" />
                 <span className={`text-xs font-semibold truncate ${
                   user.two_factor_enabled ? "text-emerald-600 dark:text-emerald-400" : "text-[var(--color-ink-muted)]"
                 }`}>
@@ -198,7 +198,7 @@ export default function UserStatusCard({
               </span>
             </div>
             <div className="flex items-center gap-1 text-[var(--color-ink-subtle)] shrink-0">
-              <Clock size={13} />
+              <Clock size={13} aria-hidden="true" />
             </div>
           </div>
 
@@ -216,7 +216,7 @@ export default function UserStatusCard({
         <div className="space-y-4">
           <div className="p-5 sm:p-6 rounded-xl bg-[var(--color-surface-hover)]/30 border border-[var(--color-surface-border)] flex flex-col items-center justify-center text-center">
             <div className="w-12 h-12 rounded-xl bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 flex items-center justify-center mb-3">
-              <Key size={22} className="text-[var(--color-primary)]" />
+              <Key size={22} className="text-[var(--color-primary)]" aria-hidden="true" />
             </div>
             <p className="text-xs font-bold text-[var(--color-ink)]">
               {user.two_factor_enabled ? "Turn off authentication?" : "Scan Key / QR Code"}
@@ -245,7 +245,7 @@ export default function UserStatusCard({
                   : "bg-[var(--color-primary)] hover:bg-[var(--color-primary)]/90"
               }`}
             >
-              {is2FALoading ? <Loader2 size={13} className="animate-spin" /> : <Shield size={13} />}
+              {is2FALoading ? <Loader2 size={13} className="animate-spin" aria-hidden="true" /> : <Shield size={13} aria-hidden="true" />}
               <span>{is2FALoading ? "Processing..." : user.two_factor_enabled ? "Disable 2FA" : "Enable 2FA"}</span>
             </button>
           </div>

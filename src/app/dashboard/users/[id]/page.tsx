@@ -5,16 +5,16 @@ import { useState, useEffect, useRef } from "react";
 import {
   User as UserIcon,
   Phone,
-  MessageCircle,
-  MoreVertical,
+  ChatCircle as MessageCircle,
+  DotsThreeVertical as MoreVertical,
   Check,
-  Ban,
+  Prohibit as Ban,
   Key,
   Shield,
-  LayoutGrid,
-  CheckCircle2,
-  Mail,
-} from "lucide-react";
+  SquaresFour as LayoutGrid,
+  CheckCircle as CheckCircle2,
+  Envelope as Mail,
+} from "@phosphor-icons/react/ssr";
 import toast from "react-hot-toast";
 
 import ProfileLayout, { ProfileField } from "@/components/profile/ProfileLayout";
@@ -67,7 +67,7 @@ function ProfileActionGroup({
           : "text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)]";
         return (
           <a key={btn.label} href={btn.href} target={btn.href.startsWith("http") ? "_blank" : undefined} rel={btn.href.startsWith("http") ? "noopener noreferrer" : undefined} title={btn.label} aria-label={btn.label} className={`w-10 h-10 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] flex items-center justify-center transition-all active:scale-95 ${toneClass}`}>
-            <Icon size={18} />
+            <Icon size={18} aria-hidden="true" />
           </a>
         );
       })}
@@ -75,7 +75,7 @@ function ProfileActionGroup({
       {visibleActions.length > 0 && (
         <div ref={ref} className="relative">
           <button type="button" onClick={() => setOpen((v) => !v)} title="More actions" aria-label="More actions" aria-haspopup="menu" aria-expanded={open} className="w-10 h-10 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all active:scale-95">
-            <MoreVertical size={18} />
+            <MoreVertical size={18} aria-hidden="true" />
           </button>
 
           {open && (
@@ -93,7 +93,7 @@ function ProfileActionGroup({
                     <div key={action.label}>
                       {separator && <div className="h-px bg-[var(--color-surface-border)] my-1" />}
                       <button type="button" role="menuitem" onClick={() => { setOpen(false); action.onClick(); }} disabled={action.disabled} className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${toneClass}`}>
-                        <Icon size={14} className="shrink-0" />
+                        <Icon size={14} className="shrink-0" aria-hidden="true" />
                         <span className="flex-1 text-left">{action.label}</span>
                       </button>
                     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { FileText, FileSignature, Copy, Download } from "lucide-react";
+import { FileText, Signature as FileSignature, Copy, Download } from "@phosphor-icons/react/ssr";
 import SectionCard from "@/components/ui/SectionCard"; // ✅ Reverted to default import
 import type { Invoice, Contract } from "@/lib/types";
 
@@ -42,7 +42,7 @@ export default function FinancialOverviewCard({
       {/* Header Bar with Premium Colored Toggle Switch */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/20">
         <div className="flex items-center gap-2.5">
-          <FileText size={16} className="text-[var(--color-primary)]" />
+          <FileText size={16} className="text-[var(--color-primary)]" aria-hidden="true" />
           <h3 className="text-[var(--color-ink)] font-semibold text-base tracking-tight">Financials & Docs</h3>
         </div>
 
@@ -56,7 +56,7 @@ export default function FinancialOverviewCard({
                 : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"
             }`}
           >
-            <FileText size={14} />
+            <FileText size={14} aria-hidden="true" />
             <span>Invoices</span>
             <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md ${
               activeTab === "invoices" ? "bg-white/20 text-white" : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)]"
@@ -73,7 +73,7 @@ export default function FinancialOverviewCard({
                 : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"
             }`}
           >
-            <FileSignature size={14} />
+            <FileSignature size={14} aria-hidden="true" />
             <span>Contracts</span>
             <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-md ${
               activeTab === "contracts" ? "bg-white/20 text-white" : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)]"
@@ -109,7 +109,7 @@ export default function FinancialOverviewCard({
                   {/* Invoice Ref */}
                   <div className="col-span-3 flex items-center gap-3 min-w-0">
                     <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] shrink-0">
-                      <FileText size={14} />
+                      <FileText size={14} aria-hidden="true" />
                     </div>
                     <span className="font-mono font-medium text-[var(--color-ink)] truncate">
                       {inv.invoice_number}
@@ -141,14 +141,14 @@ export default function FinancialOverviewCard({
                       className="btn btn-sm btn-ghost text-[var(--color-ink-muted)] hover:text-[var(--color-primary)]"
                       title="Copy Share Link"
                     >
-                      <Copy size={14} />
+                      <Copy size={14} aria-hidden="true" />
                     </button>
                     <button
                       onClick={() => onAction("invoice", "download", inv.id)}
                       className="btn btn-sm btn-ghost text-[var(--color-ink-muted)] hover:text-emerald-500"
                       title="Download PDF"
                     >
-                      <Download size={14} />
+                      <Download size={14} aria-hidden="true" />
                     </button>
                   </div>
                 </div>
@@ -185,7 +185,7 @@ export default function FinancialOverviewCard({
                   {/* Booking Ref */}
                   <div className="col-span-4 flex items-center gap-3 min-w-0">
                     <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center shrink-0">
-                      <FileSignature size={14} />
+                      <FileSignature size={14} aria-hidden="true" />
                     </div>
                     <span className="font-mono font-medium text-[var(--color-ink)] truncate">
                       {contract.booking_number || `BK-${contract.booking_id}`}
@@ -211,14 +211,14 @@ export default function FinancialOverviewCard({
                       className="btn btn-sm btn-ghost text-[var(--color-ink-muted)] hover:text-[var(--color-primary)]"
                       title="Copy Share Link"
                     >
-                      <Copy size={14} />
+                      <Copy size={14} aria-hidden="true" />
                     </button>
                     <button
                       onClick={() => onAction("contract", "download", contract.id)}
                       className="btn btn-sm btn-ghost text-[var(--color-ink-muted)] hover:text-emerald-500"
                       title="Download PDF"
                     >
-                      <Download size={14} />
+                      <Download size={14} aria-hidden="true" />
                     </button>
                   </div>
                 </div>

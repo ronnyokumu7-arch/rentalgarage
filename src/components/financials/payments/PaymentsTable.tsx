@@ -2,7 +2,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Receipt, CreditCard, Banknote, Upload, FileText, RotateCcw, ExternalLink, Download, CalendarDays, User, ChevronRight, CheckCircle2, Car, UserRound } from "lucide-react";
+import { Receipt, CreditCard, Money as Banknote, Upload, FileText, ArrowCounterClockwise as RotateCcw, ArrowSquareOut as ExternalLink, Download, CalendarDots as CalendarDays, User, CaretRight as ChevronRight, CheckCircle as CheckCircle2, Car, User as UserRound } from "@phosphor-icons/react/ssr";
 import DataTable, { RowAction } from "@/components/ui/DataTable";
 import CardGrid from "@/components/ui/CardGrid";
 import type { Payment, PaymentMethod, PaymentStatus } from "@/lib/types";
@@ -164,7 +164,7 @@ export default function PaymentsTable({
                   <div className="flex items-center gap-3 min-w-0 flex-1">
                     <div className="relative flex-shrink-0">
                       <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center shadow-sm">
-                        <Receipt size={16} className="text-[var(--color-primary)]" />
+                        <Receipt size={16} className="text-[var(--color-primary)]" aria-hidden="true" />
                       </div>
                       <div className="absolute -top-0.5 -right-0.5">
                         <div className={`w-3 h-3 rounded-full ${dotColor} ring-2 ring-[var(--color-surface)] shadow-sm`} />
@@ -178,7 +178,7 @@ export default function PaymentsTable({
                         </span>
                       </div>
                       <div className="flex items-center gap-1 mt-0.5">
-                        <User size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                        <User size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                         <span className="text-[10px] text-[var(--color-ink-muted)] truncate">
                           {clientName}
                         </span>
@@ -186,7 +186,7 @@ export default function PaymentsTable({
                     </div>
                   </div>
                   
-                  <ChevronRight size={16} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
+                  <ChevronRight size={16} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" aria-hidden="true" />
                 </div>
 
                 {/* Body Section */}
@@ -202,7 +202,7 @@ export default function PaymentsTable({
 
                   <div className="flex flex-col items-end gap-1.5">
                     <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wide ${methodStyle.bg} ${methodStyle.text} shadow-sm`}>
-                      <MethodIcon size={10} className="flex-shrink-0 opacity-90" />
+                      <MethodIcon size={10} className="flex-shrink-0 opacity-90" aria-hidden="true" />
                       {item.method}
                     </span>
                     {item.reference && (
@@ -216,7 +216,7 @@ export default function PaymentsTable({
                 {/* Date & Status Row */}
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-1.5">
-                    <CalendarDays size={11} className="text-[var(--color-ink-subtle)]" />
+                    <CalendarDays size={11} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
                     <span className="text-[10px] font-medium text-[var(--color-ink-muted)]">
                       {formatDate(date)}
                     </span>
@@ -273,7 +273,7 @@ export default function PaymentsTable({
                 return (
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-9 h-9 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center flex-shrink-0">
-                      <FileText size={16} className="text-[var(--color-ink-subtle)]" />
+                      <FileText size={16} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
                     </div>
                     <div className="min-w-0">
                       {bookingId ? (
@@ -286,7 +286,7 @@ export default function PaymentsTable({
                           title="View Booking Profile"
                         >
                           {invoiceRef}
-                          <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
                         </button>
                       ) : (
                         <span className="text-sm font-bold text-[var(--color-ink)]">{invoiceRef}</span>
@@ -312,7 +312,7 @@ export default function PaymentsTable({
                 
                 return (
                   <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${methodStyle.bg} ${methodStyle.text}`}>
-                    <MethodIcon size={14} />
+                    <MethodIcon size={14} aria-hidden="true" />
                     {payment.method}
                   </span>
                 );
@@ -345,7 +345,7 @@ export default function PaymentsTable({
                     title="View Client Profile"
                   >
                     {clientName}
-                    <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
                   </button>
                 ) : (
                   <span className="text-sm text-[var(--color-ink-muted)] italic">{clientName}</span>

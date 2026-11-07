@@ -3,9 +3,9 @@
 
 import { useState } from "react";
 import {
-  CreditCard, Smartphone, Building2, DollarSign, X, Loader2,
-  CheckCircle2, AlertTriangle, Eye, EyeOff, Zap, ShieldCheck, Hash, Globe, User, Phone, Info,
-} from "lucide-react";
+  CreditCard, DeviceMobile as Smartphone, Buildings as Building2, CurrencyDollar as DollarSign, X, CircleNotch as Loader2,
+  CheckCircle as CheckCircle2, Warning as AlertTriangle, Eye, EyeSlash as EyeOff, Lightning as Zap, ShieldCheck, Hash, Globe, User, Phone, Info,
+} from "@phosphor-icons/react/ssr";
 import type {
   PaymentGatewayConfig,
   PaymentGatewayPayload,
@@ -214,12 +214,12 @@ export function GatewayConfigModal({
         {/* Hero Section - Pinned at top */}
         <div className={`relative p-4 sm:p-6 border-b ${meta.bg} transition-colors duration-300 shrink-0`}>
           <button onClick={onClose} className="absolute top-3 right-3 sm:top-4 sm:right-4 p-2 sm:p-1.5 rounded-lg text-[var(--color-ink-muted)] hover:bg-black/10 transition-colors">
-            <X size={20} />
+            <X size={20} aria-hidden="true" />
           </button>
           
           <div className="flex items-start gap-3 sm:gap-5 pr-10">
             <div className={`p-2.5 sm:p-3 rounded-xl bg-[var(--color-surface)] shadow-sm border border-[var(--color-surface-border)] ${meta.color} shrink-0`}>
-              <meta.icon size={24} />
+              <meta.icon size={24} aria-hidden="true" />
             </div>
             <div className="flex-1 pt-1 min-w-0">
               <h3 className="text-base sm:text-lg font-bold text-[var(--color-ink)] mb-1 truncate">
@@ -232,7 +232,7 @@ export function GatewayConfigModal({
               <div className="flex flex-wrap gap-1.5 sm:gap-2">
                 {meta.requirements.slice(0, 2).map((req, i) => (
                   <span key={i} className="inline-flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-md bg-[var(--color-surface)]/80 border border-[var(--color-surface-border)] text-[9px] sm:text-[10px] font-medium text-[var(--color-ink-subtle)]">
-                    <ShieldCheck size={10} /> <span className="truncate max-w-[120px] sm:max-w-none">{req}</span>
+                    <ShieldCheck size={10} aria-hidden="true" /> <span className="truncate max-w-[120px] sm:max-w-none">{req}</span>
                   </span>
                 ))}
                 {meta.requirements.length > 2 && (
@@ -299,7 +299,7 @@ export function GatewayConfigModal({
                         : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"}
                     `}
                   >
-                    {env === "production" && <Zap size={12} className={environment === env ? "text-amber-500" : ""} />}
+                    {env === "production" && <Zap size={12} className={environment === env ? "text-amber-500" : ""} aria-hidden="true" />}
                     {env}
                   </button>
                 ))}
@@ -329,7 +329,7 @@ export function GatewayConfigModal({
                     />
                     {FieldIcon && (
                       <div className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none">
-                        <FieldIcon size={16} />
+                        <FieldIcon size={16} aria-hidden="true" />
                       </div>
                     )}
                     {isPassword && (
@@ -338,7 +338,7 @@ export function GatewayConfigModal({
                         onClick={() => togglePasswordVisibility(field.key)}
                         className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)] transition-colors p-1.5 sm:p-1"
                       >
-                        {isVisible ? <EyeOff size={16} /> : <Eye size={16} />}
+                        {isVisible ? <EyeOff size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}
                       </button>
                     )}
                   </div>
@@ -351,7 +351,7 @@ export function GatewayConfigModal({
           {activeType === "mpesa" ? (
             // ✅ Manual M-Pesa: no API to test — show a helpful note instead
             <div className="flex items-start gap-2 p-3 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
-              <Info size={14} className="text-emerald-500 flex-shrink-0 mt-0.5" />
+              <Info size={14} className="text-emerald-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
               <p className="text-[10px] text-emerald-600/80 leading-relaxed">
                 These details are shown to your clients on invoices with step-by-step payment instructions. No API connection is required.
               </p>
@@ -364,12 +364,12 @@ export function GatewayConfigModal({
                 disabled={isTesting || isSaving}
                 className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/5 hover:bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 transition-colors disabled:opacity-50"
               >
-                {isTesting ? <Loader2 size={14} className="animate-spin" /> : <Zap size={14} />}
+                {isTesting ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Zap size={14} aria-hidden="true" />}
                 {isTesting ? "Testing Connection..." : "Test Connection"}
               </button>
               
               <div className="flex items-start gap-2 p-3 rounded-xl bg-amber-500/5 border border-amber-500/10 flex-1">
-                <AlertTriangle size={14} className="text-amber-500 flex-shrink-0 mt-0.5" />
+                <AlertTriangle size={14} className="text-amber-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
                 <p className="text-[10px] text-amber-600/80 leading-relaxed">
                   Credentials are encrypted at rest. Use Sandbox mode for testing before switching to Production.
                 </p>
@@ -394,7 +394,7 @@ export function GatewayConfigModal({
             disabled={isSaving}
             className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 sm:px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary)]/90 transition-all disabled:opacity-50 shadow-lg shadow-[var(--color-primary)]/20"
           >
-            {isSaving ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+            {isSaving ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <CheckCircle2 size={16} aria-hidden="true" />}
             {isSaving ? "Saving..." : existingConfig ? "Update Configuration" : "Save & Update"}
           </button>
         </div>

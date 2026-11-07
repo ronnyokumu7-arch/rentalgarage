@@ -1,6 +1,6 @@
 // src/components/tenants/ChangeAdminEmailModal.tsx
 import { useState } from 'react';
-import { Shield, Mail, Phone, UserCheck, Loader2, AlertTriangle, X, Eye, EyeOff } from 'lucide-react';
+import { Shield, Envelope as Mail, Phone, UserCheck, CircleNotch as Loader2, Warning as AlertTriangle, X, Eye, EyeSlash as EyeOff } from "@phosphor-icons/react/ssr";
 import toast from 'react-hot-toast';
 import { tenantsApi } from '@/lib/api/tenants';
 import type { ChangeAdminEmailPayload } from '@/lib/api/tenants';
@@ -68,12 +68,12 @@ export function ChangeAdminEmailModal({
         {/* Premium Security Header */}
         <div className="relative px-6 py-4 border-b border-indigo-500/10 bg-gradient-to-br from-indigo-500/5 via-transparent to-transparent shrink-0">
           <button onClick={onClose} className="absolute top-3 right-3 p-1.5 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] transition-colors">
-            <X size={18} />
+            <X size={18} aria-hidden="true" />
           </button>
           
           <div className="flex items-start gap-4">
             <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shadow-sm shrink-0">
-              <Shield size={20} />
+              <Shield size={20} aria-hidden="true" />
             </div>
             <div className="flex-1 pt-0.5">
               <h3 className="text-base font-bold text-[var(--color-ink)] mb-0.5">Change Admin Email</h3>
@@ -137,7 +137,7 @@ export function ChangeAdminEmailModal({
                           : 'border-[var(--color-surface-border)] text-[var(--color-ink-muted)] hover:border-[var(--color-ink-subtle)] hover:bg-[var(--color-surface-hover)]'}
                     `}
                   >
-                    <Icon size={16} />
+                    <Icon size={16} aria-hidden="true" />
                     {opt.label}
                   </button>
                 );
@@ -166,7 +166,7 @@ export function ChangeAdminEmailModal({
                   onClick={() => setShowOtp(!showOtp)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)] transition-colors"
                 >
-                  {showOtp ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showOtp ? <EyeOff size={16} aria-hidden="true" /> : <Eye size={16} aria-hidden="true" />}
                 </button>
               </div>
               <p className="text-[9px] text-[var(--color-ink-subtle)] mt-1">
@@ -193,7 +193,7 @@ export function ChangeAdminEmailModal({
 
           {/* Security Warning */}
           <div className="flex items-start gap-2 p-2.5 rounded-xl bg-rose-500/5 border border-rose-500/10">
-            <AlertTriangle size={14} className="text-rose-400 flex-shrink-0 mt-0.5" />
+            <AlertTriangle size={14} className="text-rose-400 flex-shrink-0 mt-0.5" aria-hidden="true" />
             <p className="text-[9px] text-rose-400/80 leading-relaxed">
               This action will immediately change the primary login email. A notification will be sent to the old contact channel. A 24-hour cooldown will be enforced.
             </p>
@@ -216,7 +216,7 @@ export function ChangeAdminEmailModal({
             disabled={!canSubmit}
             className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/20"
           >
-            {isLoading ? <Loader2 size={16} className="animate-spin" /> : <Shield size={16} />}
+            {isLoading ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Shield size={16} aria-hidden="true" />}
             {isLoading ? 'Processing...' : 'Confirm Change'}
           </button>
         </div>

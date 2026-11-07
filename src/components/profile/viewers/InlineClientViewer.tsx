@@ -1,9 +1,9 @@
 "use client";
 
 import {
-  Save, Loader2, Mail, Phone, Shield, Calendar, Upload,
-  FileText, Pencil, X, UserCheck, UserX, RotateCcw, ZoomIn
-} from "lucide-react";
+  FloppyDisk as Save, CircleNotch as Loader2, Envelope as Mail, Phone, Shield, Calendar, Upload,
+  FileText, PencilSimple as Pencil, X, UserCheck, UserMinus as UserX, ArrowCounterClockwise as RotateCcw, MagnifyingGlassPlus as ZoomIn
+} from "@phosphor-icons/react/ssr";
 import { useInlineClient } from "@/hooks/profile/useInlineClient";
 import type { Client, Task } from "@/lib/types";
 import TaskContextBar from "../TaskContextBar";
@@ -40,7 +40,7 @@ export default function InlineClientViewer({ client, taskId, task, onRefresh:_on
               onClick={() => setViewingImage(null)} 
               className="absolute top-2 right-2 sm:-top-12 sm:right-0 p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors z-10"
             >
-              <X size={20} className="sm:w-6 sm:h-6" />
+              <X size={20} className="sm:w-6 sm:h-6" aria-hidden="true" />
             </button>
             <img 
               src={viewingImage} 
@@ -83,14 +83,14 @@ export default function InlineClientViewer({ client, taskId, task, onRefresh:_on
                   onClick={() => setIsEditing(false)} 
                   className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] transition-colors"
                 >
-                  <X size={16} />
+                  <X size={16} aria-hidden="true" />
                 </button>
                 <button 
                   onClick={handleSave} 
                   disabled={isSaving} 
                   className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary)]/90 transition-colors disabled:opacity-50 shadow-xs active:scale-95"
                 >
-                  {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                  {isSaving ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Save size={14} aria-hidden="true" />}
                   <span>Save</span>
                 </button>
               </>
@@ -100,7 +100,7 @@ export default function InlineClientViewer({ client, taskId, task, onRefresh:_on
                   onClick={() => setIsEditing(true)} 
                   className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-[var(--color-ink-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 transition-all"
                 >
-                  <Pencil size={16} />
+                  <Pencil size={16} aria-hidden="true" />
                 </button>
                 
                 {client.status !== 'active' && (
@@ -110,7 +110,7 @@ export default function InlineClientViewer({ client, taskId, task, onRefresh:_on
                     className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/5 transition-colors disabled:opacity-50" 
                     title="Activate Client"
                   >
-                    {isActionLoading ? <Loader2 size={16} className="animate-spin" /> : <UserCheck size={16} />}
+                    {isActionLoading ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <UserCheck size={16} aria-hidden="true" />}
                   </button>
                 )}
                 {client.status === 'active' && (
@@ -120,7 +120,7 @@ export default function InlineClientViewer({ client, taskId, task, onRefresh:_on
                     className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-amber-600 dark:text-amber-400 hover:bg-amber-500/5 transition-colors disabled:opacity-50" 
                     title="Suspend Client"
                   >
-                    <UserX size={16} />
+                    <UserX size={16} aria-hidden="true" />
                   </button>
                 )}
                 {client.status === 'suspended' && (
@@ -130,7 +130,7 @@ export default function InlineClientViewer({ client, taskId, task, onRefresh:_on
                     className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-blue-600 dark:text-blue-400 hover:bg-blue-500/5 transition-colors disabled:opacity-50" 
                     title="Reactivate Client"
                   >
-                    {isActionLoading ? <Loader2 size={16} className="animate-spin" /> : <RotateCcw size={16} />}
+                    {isActionLoading ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <RotateCcw size={16} aria-hidden="true" />}
                   </button>
                 )}
               </>
@@ -169,7 +169,7 @@ export default function InlineClientViewer({ client, taskId, task, onRefresh:_on
                 <div key={i} className="min-w-0">
                   <label className={labelClass}>{field.label}</label>
                   <div className={`${valueClass} ${field.isWarning ? 'text-rose-600 dark:text-rose-400' : ''}`}>
-                    <field.icon size={14} className={`shrink-0 ${field.isWarning ? 'text-rose-500' : 'text-[var(--color-ink-subtle)]'}`} />
+                    <field.icon size={14} className={`shrink-0 ${field.isWarning ? 'text-rose-500' : 'text-[var(--color-ink-subtle)]'}`} aria-hidden="true" />
                     <span className="truncate">{field.value}</span>
                     {field.warningText && <span className="text-[9px] font-bold uppercase ml-1 shrink-0">{field.warningText}</span>}
                   </div>
@@ -249,7 +249,7 @@ function DocumentCard({ title, imageUrl, isUploading, onUpload, onView }: {
         <img src={imageUrl} alt={title} className="w-full h-full object-cover" />
       ) : (
         <div className="flex-1 flex flex-col items-center justify-center text-[var(--color-ink-subtle)]">
-          <FileText size={20} className="sm:w-6 sm:h-6 mb-1.5 sm:mb-2 opacity-50" />
+          <FileText size={20} className="sm:w-6 sm:h-6 mb-1.5 sm:mb-2 opacity-50" aria-hidden="true" />
           <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider">No Document</span>
         </div>
       )}
@@ -262,7 +262,7 @@ function DocumentCard({ title, imageUrl, isUploading, onUpload, onView }: {
             className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-white/20 hover:bg-white/40 text-white transition-colors" 
             title="View Image"
           >
-            <ZoomIn size={16} className="sm:w-[18px] sm:h-[18px]" />
+            <ZoomIn size={16} className="sm:w-[18px] sm:h-[18px]" aria-hidden="true" />
           </button>
         )}
         <button 
@@ -271,7 +271,7 @@ function DocumentCard({ title, imageUrl, isUploading, onUpload, onView }: {
           className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-white/20 hover:bg-white/40 text-white transition-colors disabled:opacity-50" 
           title="Upload New"
         >
-          {isUploading ? <Loader2 size={16} className="animate-spin sm:w-[18px] sm:h-[18px]" /> : <Upload size={16} className="sm:w-[18px] sm:h-[18px]" />}
+          {isUploading ? <Loader2 size={16} className="animate-spin sm:w-[18px] sm:h-[18px]" aria-hidden="true" /> : <Upload size={16} className="sm:w-[18px] sm:h-[18px]" aria-hidden="true" />}
         </button>
       </div>
       

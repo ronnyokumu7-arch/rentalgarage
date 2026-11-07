@@ -2,7 +2,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowUpRight, Landmark } from "lucide-react";
+import { ArrowUpRight, Bank as Landmark } from "@phosphor-icons/react/ssr";
 
 /* ──────────────────────────────────────────────────────────────────────
    Mobile Hero Earnings — hero number, label, subtitle, trend.
@@ -34,7 +34,7 @@ export function MobileHeroEarnings({
     >
       <div className="flex items-center gap-2 mb-0.5">
         <div className="w-6 h-6 rounded-lg bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/20">
-          <Landmark size={13} className="text-white" />
+          <Landmark size={13} className="text-white" aria-hidden="true" />
         </div>
         <p className="text-[10px] font-medium text-ink-muted uppercase tracking-wider">
           {label}
@@ -54,7 +54,7 @@ export function MobileHeroEarnings({
               change.positive ? "text-success" : "text-danger"
             }`}
           >
-            <ArrowUpRight size={12} />
+            <ArrowUpRight size={12} aria-hidden="true" />
             {change.value}
             <span className="text-ink-muted font-normal">{changeLabel}</span>
           </div>

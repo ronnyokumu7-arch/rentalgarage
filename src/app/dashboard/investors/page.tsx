@@ -9,15 +9,15 @@ import {
   Phone,
   CheckCircle,
   Clock,
-  Filter,
-  Loader2,
-  Search,
+  Funnel as Filter,
+  CircleNotch as Loader2,
+  MagnifyingGlass as Search,
   User as UserIcon,
   Archive,
-  ChevronRight,
-  Mail,
-  CalendarDays,
-} from "lucide-react";
+  CaretRight as ChevronRight,
+  Envelope as Mail,
+  CalendarDots as CalendarDays,
+} from "@phosphor-icons/react/ssr";
 import DataTable, { type RowAction } from "@/components/ui/DataTable";
 import FilterDropdown from "@/components/ui/FilterDropdown";
 import CardGrid from "@/components/ui/CardGrid";
@@ -173,8 +173,8 @@ export default function AgencyInvestorsPage() {
             <span className="hidden sm:inline-flex">
               <Users
                 size={28}
-                strokeWidth={1.5}
-                className="text-[var(--color-primary)]"
+                weight="light"
+                className="text-[var(--color-primary)]" aria-hidden="true"
               />
             </span>
 
@@ -229,7 +229,7 @@ export default function AgencyInvestorsPage() {
               <div className="relative flex-1">
                 <Search
                   size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true"
                 />
                 <input
                   type="text"
@@ -262,7 +262,7 @@ export default function AgencyInvestorsPage() {
               onClick={() => setIsModalOpen(true)}
               className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-bold transition-all shadow-sm"
             >
-              <UserPlus size={16} />
+              <UserPlus size={16} aria-hidden="true" />
               Invite Investor
             </button>
           </div>
@@ -271,13 +271,13 @@ export default function AgencyInvestorsPage() {
         {/* Body */}
         {loading ? (
           <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2">
-            <Loader2 className="w-5 h-5 animate-spin" />
+            <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" />
             Loading investors...
           </div>
         ) : filteredInvestors.length === 0 ? (
           <div className="p-12 text-center">
             <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
-              <Users size={24} className="text-[var(--color-ink-subtle)]" />
+              <Users size={24} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
             </div>
             <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">
               {investors.length === 0
@@ -295,7 +295,7 @@ export default function AgencyInvestorsPage() {
                 onClick={() => setIsModalOpen(true)}
                 className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-bold transition-all"
               >
-                <UserPlus size={16} />
+                <UserPlus size={16} aria-hidden="true" />
                 Invite Your First Investor
               </button>
             )}
@@ -343,7 +343,7 @@ export default function AgencyInvestorsPage() {
                           <div className="flex items-center gap-1 mt-0.5">
                             <Mail
                               size={10}
-                              className="text-[var(--color-ink-subtle)] flex-shrink-0"
+                              className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true"
                             />
                             <span className="text-[10px] text-[var(--color-ink-muted)] truncate">
                               {item.email ?? "No email"}
@@ -354,7 +354,7 @@ export default function AgencyInvestorsPage() {
 
                       <ChevronRight
                         size={16}
-                        className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1"
+                        className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" aria-hidden="true"
                       />
                     </div>
                   );
@@ -370,7 +370,7 @@ export default function AgencyInvestorsPage() {
                           <div className="w-7 h-7 rounded-lg bg-[var(--color-surface-hover)]/80 flex items-center justify-center flex-shrink-0">
                             <Phone
                               size={12}
-                              className="text-[var(--color-ink-subtle)]"
+                              className="text-[var(--color-ink-subtle)]" aria-hidden="true"
                             />
                           </div>
                           <div className="min-w-0">
@@ -403,7 +403,7 @@ export default function AgencyInvestorsPage() {
                           <div className="w-7 h-7 rounded-lg bg-[var(--color-surface-hover)]/80 flex items-center justify-center flex-shrink-0">
                             <CalendarDays
                               size={12}
-                              className="text-[var(--color-ink-subtle)]"
+                              className="text-[var(--color-ink-subtle)]" aria-hidden="true"
                             />
                           </div>
                         </div>
@@ -481,7 +481,7 @@ export default function AgencyInvestorsPage() {
                               >
                                 <Mail
                                   size={12}
-                                  className="text-[var(--color-ink-subtle)] flex-shrink-0"
+                                  className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true"
                                 />
                                 <span className="truncate">
                                   {investor.email}
@@ -500,7 +500,7 @@ export default function AgencyInvestorsPage() {
                       <div className="flex items-center gap-2 text-sm text-[var(--color-ink)]">
                         <Phone
                           size={14}
-                          className="text-[var(--color-ink-subtle)]"
+                          className="text-[var(--color-ink-subtle)]" aria-hidden="true"
                         />
                         <span className="font-medium">
                           {row.original.phone_number || "—"}
@@ -520,11 +520,11 @@ export default function AgencyInvestorsPage() {
                         >
                           {status === "active" ? (
                             <>
-                              <CheckCircle size={12} /> {style.label}
+                              <CheckCircle size={12} aria-hidden="true" /> {style.label}
                             </>
                           ) : (
                             <>
-                              <Clock size={12} /> {style.label}
+                              <Clock size={12} aria-hidden="true" /> {style.label}
                             </>
                           )}
                         </span>

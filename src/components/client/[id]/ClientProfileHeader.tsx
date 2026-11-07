@@ -3,16 +3,16 @@
 
 import { useState, useEffect, useRef } from "react";
 import {
-  Pencil,
+  PencilSimple as Pencil,
   Check,
   Phone,
-  MessageCircle,
+  ChatCircle as MessageCircle,
   ShieldCheck,
   Car,
-  MoreVertical,
+  DotsThreeVertical as MoreVertical,
   Archive,
-  Ban,
-} from "lucide-react";
+  Prohibit as Ban,
+} from "@phosphor-icons/react/ssr";
 import type { Client } from "@/lib/types";
 
 /* ──────────────────────────────────────────────────────────────────────
@@ -80,7 +80,7 @@ function ProfileActionGroup({
             aria-label={btn.label}
             className={`w-10 h-10 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] flex items-center justify-center transition-all active:scale-95 ${toneClass}`}
           >
-            <Icon size={18} />
+            <Icon size={18} aria-hidden="true" />
           </a>
         );
       })}
@@ -96,7 +96,7 @@ function ProfileActionGroup({
             aria-expanded={open}
             className="w-10 h-10 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all active:scale-95"
           >
-            <MoreVertical size={18} />
+            <MoreVertical size={18} aria-hidden="true" />
           </button>
 
           {open && (
@@ -131,7 +131,7 @@ function ProfileActionGroup({
                         disabled={action.disabled}
                         className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${toneClass}`}
                       >
-                        <Icon size={14} className="shrink-0" />
+                        <Icon size={14} className="shrink-0" aria-hidden="true" />
                         <span className="flex-1 text-left">{action.label}</span>
                       </button>
                     </div>

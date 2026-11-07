@@ -1,7 +1,7 @@
 // src/components/ui/FilterBar.tsx
 "use client";
 
-import { Filter as FilterIcon } from "lucide-react";
+import { Funnel as FilterIcon } from "@phosphor-icons/react/ssr";
 import FilterDropdown, { FilterOption } from "./FilterDropdown";
 
 export interface FilterConfig {
@@ -24,7 +24,7 @@ export default function FilterBar({ filters, onClearAll }: FilterBarProps) {
   return (
     <div className="flex items-center gap-2 flex-wrap">
       <div className="flex items-center gap-1.5 text-[var(--color-ink-muted)]">
-        <FilterIcon size={16} strokeWidth={1.8} />
+        <FilterIcon size={16} weight="light" aria-hidden="true" />
         <span className="text-sm font-medium">Filters:</span>
       </div>
 

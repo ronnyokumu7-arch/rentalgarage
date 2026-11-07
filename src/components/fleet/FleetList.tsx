@@ -4,10 +4,10 @@
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import {
-  Car, Archive, Shield, Loader2,
-  Search, Filter, Ban, Wrench, Plus, Gauge, RectangleHorizontal,
-  User, Banknote,
-} from "lucide-react";
+  Car, Archive, Shield, CircleNotch as Loader2,
+  MagnifyingGlass as Search, Funnel as Filter, Prohibit as Ban, Wrench, Plus, Gauge, Rectangle as RectangleHorizontal,
+  User, Money as Banknote,
+} from "@phosphor-icons/react/ssr";
 import FilterDropdown from "@/components/ui/FilterDropdown";
 import DataTable, { RowAction } from "@/components/ui/DataTable";
 import CardGrid from "@/components/ui/CardGrid";
@@ -280,7 +280,7 @@ export default function FleetList({
   if (loading) {
     return (
       <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2">
-        <Loader2 className="w-5 h-5 animate-spin" /> Loading vehicles...
+        <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> Loading vehicles...
       </div>
     );
   }
@@ -320,7 +320,7 @@ export default function FleetList({
             <div className="relative flex-1">
               <Search
                 size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true"
               />
               <input
                 type="text"
@@ -348,7 +348,7 @@ export default function FleetList({
             onClick={() => router.push("/dashboard/fleet/new")}
             className="h-9 px-4 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm flex-shrink-0"
           >
-            <Plus size={14} strokeWidth={2.5} />
+            <Plus size={14} weight="bold" aria-hidden="true" />
             Add Vehicle
           </button>
         </div>
@@ -357,7 +357,7 @@ export default function FleetList({
       {filteredVehicles.length === 0 ? (
         <div className="p-12 text-center">
           <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
-            <Car size={24} className="text-[var(--color-ink-subtle)]" />
+            <Car size={24} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
           </div>
           <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No vehicles found</h3>
           <p className="text-sm text-[var(--color-ink-muted)] mb-4">
@@ -392,14 +392,14 @@ export default function FleetList({
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className="relative flex-shrink-0">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center shadow-md">
-                          <Car size={16} className="text-[var(--color-primary)]" />
+                          <Car size={16} className="text-[var(--color-primary)]" aria-hidden="true" />
                         </div>
 
                         {/* Status dot — top-right corner of the icon tile */}
                         <div className="absolute -top-1 -right-1">
                           {showWrench ? (
                             <div className="w-4 h-4 rounded-full bg-amber-500 flex items-center justify-center shadow-md">
-                              <Wrench size={9} className="text-white" strokeWidth={2.5} />
+                              <Wrench size={9} className="text-white" weight="bold" aria-hidden="true" />
                             </div>
                           ) : showOnTrip ? (
                             <div className="w-4 h-4 rounded-full bg-emerald-500 flex items-center justify-center shadow-md">
@@ -423,7 +423,7 @@ export default function FleetList({
                           </span>
                           {item.owner_id && (
                             <div className="w-4 h-4 rounded-full bg-purple-500/10 flex items-center justify-center border border-purple-500/20 flex-shrink-0" title="Investor Owned">
-                              <User size={9} className="text-purple-600" strokeWidth={2.5} />
+                              <User size={9} className="text-purple-600" weight="bold" aria-hidden="true" />
                             </div>
                           )}
                         </div>
@@ -431,14 +431,14 @@ export default function FleetList({
                         {/* Line 2: Plate + Mileage */}
                         <div className="flex items-center gap-2 mt-1">
                           <div className="flex items-center gap-1">
-                            <RectangleHorizontal size={10} className="text-[var(--color-ink-subtle)]" />
+                            <RectangleHorizontal size={10} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
                             <span className="text-[10px] text-[var(--color-ink-muted)] font-mono font-semibold truncate">
                               {formatPlate(item.plate_number)}
                             </span>
                           </div>
                           <span className="text-[8px] text-[var(--color-ink-subtle)]">•</span>
                           <div className="flex items-center gap-1">
-                            <Gauge size={10} className="text-[var(--color-ink-subtle)]" />
+                            <Gauge size={10} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
                             <span className="text-[10px] text-[var(--color-ink-muted)] font-mono font-semibold">
                               {item.current_mileage.toLocaleString()} KM
                             </span>
@@ -448,7 +448,7 @@ export default function FleetList({
                         {/* ✅ Line 3: Price left, mileage/next-service right */}
                         <div className="flex items-center justify-between gap-2 mt-1">
                           <div className="flex items-center gap-1">
-                            <Banknote size={11} className="text-[var(--color-primary)] shrink-0" />
+                            <Banknote size={11} className="text-[var(--color-primary)] shrink-0" aria-hidden="true" />
                             <span className="text-[11px] font-bold text-[var(--color-ink)] tabular-nums">
                               {Number(item.daily_rate).toLocaleString()}
                               <span className="text-[9px] font-medium text-[var(--color-ink-muted)]">/day</span>
@@ -463,7 +463,7 @@ export default function FleetList({
                                 isDueForService
                                   ? "text-amber-500"
                                   : "text-[var(--color-ink-subtle)]"
-                              }
+                              } aria-hidden="true"
                             />
                             <span
                               className={`text-[10px] font-mono font-semibold ${
@@ -584,7 +584,7 @@ export default function FleetList({
                     return (
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-9 h-9 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center text-[var(--color-ink-subtle)] shrink-0">
-                          <Car size={16} />
+                          <Car size={16} aria-hidden="true" />
                         </div>
                         <div className="min-w-0 flex flex-col">
                           <div className="flex items-center gap-2">
@@ -600,7 +600,7 @@ export default function FleetList({
                             </button>
                             {v.owner_id && (
                               <span className="text-[9px] font-bold uppercase tracking-wider text-purple-600 bg-purple-500/10 px-1.5 py-0.5 rounded-md border border-purple-500/20 flex items-center gap-1 whitespace-nowrap">
-                                <User size={8} /> Investor
+                                <User size={8} aria-hidden="true" /> Investor
                               </span>
                             )}
                           </div>

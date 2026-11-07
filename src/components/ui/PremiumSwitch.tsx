@@ -77,7 +77,7 @@ export default function PremiumSwitch({ tabs, activeTab, onChange, className = "
                 }
               `}
             >
-              {Icon && <Icon size={isActive ? 16 : 14} className="transition-all duration-300" />}
+              {Icon && <Icon size={isActive ? 16 : 14} className="transition-all duration-300" aria-hidden="true" />}
               <span>{tab.label}</span>
             </button>
           );

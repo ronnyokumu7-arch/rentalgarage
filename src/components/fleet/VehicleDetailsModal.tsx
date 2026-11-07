@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import { X, Loader2 } from "lucide-react";
+import { X, CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
 import { vehiclesApi } from "@/lib/api/vehicles";
 import type { Vehicle } from "@/lib/types";
 
@@ -167,7 +167,7 @@ export default function VehicleDetailsModal({
             className="p-2 rounded-full hover:bg-[var(--color-surface-hover)] transition-colors"
             aria-label="Close"
           >
-            <X size={18} className="text-[var(--color-ink-muted)]" />
+            <X size={18} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
           </button>
         </div>
 
@@ -372,7 +372,7 @@ export default function VehicleDetailsModal({
           >
             {loading ? (
               <>
-                <Loader2 size={14} className="animate-spin" /> Saving…
+                <Loader2 size={14} className="animate-spin" aria-hidden="true" /> Saving…
               </>
             ) : (
               "Save Changes"

@@ -14,7 +14,7 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: [
       '@phosphor-icons/react',
-      'lucide-react', // Add this too if you still use it elsewhere
+      '@phosphor-icons/react/ssr',
     ],
   },
   

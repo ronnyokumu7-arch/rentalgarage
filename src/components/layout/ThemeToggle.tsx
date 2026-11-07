@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
-import { Sun, Moon, Monitor } from "lucide-react";
+import { Sun, Moon, Monitor } from "@phosphor-icons/react/ssr";
 
 export default function ThemeToggle() {
   const { theme, setTheme, resolvedTheme } = useTheme();
@@ -38,7 +38,7 @@ export default function ThemeToggle() {
       }
       title={`Theme: ${theme}`}
     >
-      <Icon size={17} strokeWidth={1.8} />
+      <Icon size={17} weight="light" aria-hidden="true" />
     </button>
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Download, Eye, Upload, X } from "lucide-react";
+import { Download, Eye, Upload, X } from "@phosphor-icons/react/ssr";
 import Badge from "./Badge";
 
 interface DocumentCardProps {
@@ -43,7 +43,7 @@ export default function DocumentCard({
               onClick={onRemove}
               className="absolute top-2 right-2 w-8 h-8 rounded-full bg-ink/40 backdrop-blur-sm text-white flex items-center justify-center hover:bg-ink/60 transition-colors"
             >
-              <X size={16} />
+              <X size={16} aria-hidden="true" />
             </button>
           )}
         </div>
@@ -79,25 +79,25 @@ export default function DocumentCard({
         <div className="flex items-center gap-2">
           {onView && (
             <button onClick={onView} className="btn btn-ghost btn-sm">
-              <Eye size={14} strokeWidth={2} />
+              <Eye size={14} weight="regular" aria-hidden="true" />
               View
             </button>
           )}
           {onDownload && (
             <button onClick={onDownload} className="btn btn-secondary btn-sm">
-              <Download size={14} strokeWidth={2} />
+              <Download size={14} weight="regular" aria-hidden="true" />
               Download
             </button>
           )}
           {onUpload && !imageUrl && (
             <button onClick={onUpload} className="btn btn-primary btn-sm">
-              <Upload size={14} strokeWidth={2} />
+              <Upload size={14} weight="regular" aria-hidden="true" />
               Upload
             </button>
           )}
           {onUpload && imageUrl && (
             <button onClick={onUpload} className="btn btn-ghost btn-sm">
-              <Upload size={14} strokeWidth={2} />
+              <Upload size={14} weight="regular" aria-hidden="true" />
               Replace
             </button>
           )}

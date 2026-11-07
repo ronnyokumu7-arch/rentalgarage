@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { Filter } from "lucide-react";
+import { Funnel as Filter } from "@phosphor-icons/react/ssr";
 // Import your existing SearchInput component
 import SearchInput from "./SearchInput"; 
 
@@ -86,7 +86,7 @@ export default function ListToolbar({
 
         {/* Right Side: Filter Dropdown */}
         <div className="relative w-full sm:w-48 flex-shrink-0">
-          <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-subtle pointer-events-none" />
+          <Filter size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-subtle pointer-events-none" aria-hidden="true" />
           <select
             value={filterValue || ""}
             onChange={(e) => onFilterChange(e.target.value || null)}

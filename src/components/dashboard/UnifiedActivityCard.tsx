@@ -3,11 +3,11 @@
 
 import { useRouter } from "next/navigation";
 import {
-  Banknote, CheckCircle2, AlertTriangle, Handshake, Calendar,
-  Truck, UserPlus, Receipt, Car, ChevronRight, Phone, User,
-  Clock, ShieldAlert, Gauge, FileWarning
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+  Money as Banknote, CheckCircle as CheckCircle2, Warning as AlertTriangle, Handshake, Calendar,
+  Truck, UserPlus, Receipt, Car, CaretRight as ChevronRight, Phone, User,
+  Clock, ShieldWarning as ShieldAlert, Gauge, FileX as FileWarning
+} from "@phosphor-icons/react/ssr";
+import type { Icon } from "@phosphor-icons/react";
 
 export interface ActivityData {
   id: number | string;
@@ -81,7 +81,7 @@ const getActivityColor = (type: string, priority?: number) => {
 };
 
 // ✅ Expanded icon mapping for all action types
-const getActivityIcon = (type: string): LucideIcon => {
+const getActivityIcon = (type: string): Icon => {
   switch (type) {
     case "payment_received": return Banknote;
     case "invoice_paid": return Banknote;
@@ -168,7 +168,7 @@ export default function UnifiedActivityCard({ activity, onCardClick }: UnifiedAc
           <div className={`flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center ${colorClass} border ${
             isCritical ? "animate-pulse" : ""
           }`}>
-            <Icon size={15} strokeWidth={2} />
+            <Icon size={15} weight="regular" aria-hidden="true" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5 flex-wrap">
@@ -177,7 +177,7 @@ export default function UnifiedActivityCard({ activity, onCardClick }: UnifiedAc
               </span>
               {/* ✅ Premium Checkmark for success events — hidden on mobile to save space */}
               {(activity.type === "payment_received" || activity.type === "invoice_paid" || activity.type === "booking_confirmed") && (
-                <CheckCircle2 size={14} className="text-emerald-500 flex-shrink-0 hidden md:inline-flex" />
+                <CheckCircle2 size={14} className="text-emerald-500 flex-shrink-0 hidden md:inline-flex" aria-hidden="true" />
               )}
               {/* ✅ Priority badge for high/critical */}
               {isCritical && (
@@ -219,7 +219,7 @@ export default function UnifiedActivityCard({ activity, onCardClick }: UnifiedAc
         
         {/* ✅ Timestamp: Top Right Corner */}
         <span className="flex-shrink-0 flex items-center gap-1 text-[10px] font-medium text-[var(--color-ink-muted)]">
-          <Clock size={10} />
+          <Clock size={10} aria-hidden="true" />
           {formatTimeAgo(activity.timestamp)}
         </span>
       </div>
@@ -230,7 +230,7 @@ export default function UnifiedActivityCard({ activity, onCardClick }: UnifiedAc
           {/* Client Info */}
           {activity.client_name && (
             <div className="flex items-center gap-1.5 min-w-0">
-              <User size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+              <User size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
               <span className="text-xs font-semibold text-[var(--color-ink)] truncate max-w-[100px]">
                 {activity.client_name}
               </span>
@@ -239,7 +239,7 @@ export default function UnifiedActivityCard({ activity, onCardClick }: UnifiedAc
           {/* Phone Info */}
           {activity.client_phone && (
             <div className="flex items-center gap-1.5 min-w-0">
-              <Phone size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+              <Phone size={12} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
               <span className="text-xs font-medium text-[var(--color-ink-muted)] truncate max-w-[120px]">
                 {activity.client_phone}
               </span>
@@ -256,7 +256,7 @@ export default function UnifiedActivityCard({ activity, onCardClick }: UnifiedAc
           className="flex-shrink-0 inline-flex items-center gap-0.5 text-[11px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity group/btn"
         >
           View
-          <ChevronRight size={12} className="group-hover/btn:translate-x-0.5 transition-transform" />
+          <ChevronRight size={12} className="group-hover/btn:translate-x-0.5 transition-transform" aria-hidden="true" />
         </button>
       </div>
     </div>

@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AlertTriangle, Info, ExternalLink, X } from "lucide-react";
+import { Warning as AlertTriangle, Info, ArrowSquareOut as ExternalLink, X } from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 
 interface SoftLockBannerProps {
@@ -68,11 +68,11 @@ export default function SoftLockBanner({
           className="absolute top-3 right-3 p-1 rounded-lg hover:bg-black/5 transition-colors"
           title="Dismiss for 24 hours"
         >
-          <X className="w-4 h-4" />
+          <X className="w-4 h-4" aria-hidden="true" />
         </button>
 
         <div className="flex items-start gap-3">
-          <Info className="w-5 h-5 flex-shrink-0 mt-0.5 text-sky-600" />
+          <Info className="w-5 h-5 flex-shrink-0 mt-0.5 text-sky-600" aria-hidden="true" />
           <div className="flex-1">
             <h3 className="text-sm font-bold mb-1">Outstanding Balance from Previous Period</h3>
             <p className="text-xs leading-relaxed mb-3">
@@ -85,7 +85,7 @@ export default function SoftLockBanner({
                 href="/commission/pay"
                 className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white border border-current text-xs font-bold hover:shadow-md transition-all"
               >
-                Settle Now <ExternalLink size={12} />
+                Settle Now <ExternalLink size={12} aria-hidden="true" />
               </Link>
               <button
                 onClick={handleSnooze}
@@ -118,7 +118,7 @@ export default function SoftLockBanner({
           className="absolute top-3 right-3 p-1 rounded-lg hover:bg-black/5 transition-colors"
           title="Dismiss for 24 hours"
         >
-          <X className="w-4 h-4" />
+          <X className="w-4 h-4" aria-hidden="true" />
         </button>
       )}
 
@@ -126,7 +126,7 @@ export default function SoftLockBanner({
         <AlertTriangle
           className={`w-5 h-5 flex-shrink-0 mt-0.5 ${
             urgency === "urgent" ? "text-rose-600" : "text-amber-600"
-          }`}
+          }`} aria-hidden="true"
         />
         <div className="flex-1">
           <h3 className="text-sm font-bold mb-1">
@@ -148,7 +148,7 @@ export default function SoftLockBanner({
               href="/commission/pay"
               className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white border border-current text-xs font-bold hover:shadow-md transition-all"
             >
-              Pay Now <ExternalLink size={12} />
+              Pay Now <ExternalLink size={12} aria-hidden="true" />
             </Link>
             {/* ✅ "Remind me later" link (only for warning state) */}
             {!isLocked && (

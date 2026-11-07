@@ -1,6 +1,6 @@
 // src/components/public-docs/PublicDocParties.tsx
 import React from "react";
-import { Building2, User } from "lucide-react";
+import { Buildings as Building2, User } from "@phosphor-icons/react/ssr";
 
 interface PublicDocPartiesProps {
   issuerName: string;
@@ -36,7 +36,7 @@ export default function PublicDocParties({ issuerName, recipientName, recipientD
       {/* Issuer */}
       <div style={cardStyle}>
         <div className="flex items-center gap-2 mb-3">
-          <Building2 className="w-4 h-4" style={{ color: '#78716C' }} />
+          <Building2 className="w-4 h-4" style={{ color: '#78716C' }} aria-hidden="true" />
           <span style={labelStyle}>Issued By</span>
         </div>
         <p style={nameStyle}>{issuerName}</p>
@@ -45,7 +45,7 @@ export default function PublicDocParties({ issuerName, recipientName, recipientD
       {/* Recipient */}
       <div style={cardStyle}>
         <div className="flex items-center gap-2 mb-3">
-          <User className="w-4 h-4" style={{ color: '#78716C' }} />
+          <User className="w-4 h-4" style={{ color: '#78716C' }} aria-hidden="true" />
           <span style={labelStyle}>Billed To</span>
         </div>
         <p style={{ ...nameStyle, marginBottom: '0.25rem' }}>{recipientName}</p>

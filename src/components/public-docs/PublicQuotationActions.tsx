@@ -1,7 +1,7 @@
 // src/components/public-docs/PublicQuotationActions.tsx
 "use client";
 
-import { CheckCircle2, RotateCw, XCircle, Loader2 } from "lucide-react";
+import { CheckCircle as CheckCircle2, ArrowClockwise as RotateCw, XCircle, CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
 import type { PublicInvoiceView } from "@/lib/types";
 
 interface PublicQuotationActionsProps {
@@ -34,7 +34,7 @@ export default function PublicQuotationActions({
             background: 'rgba(109, 40, 217, 0.10)',
           }}
         >
-          <CheckCircle2 size={18} style={{ color: '#6D28D9' }} />
+          <CheckCircle2 size={18} style={{ color: '#6D28D9' }} aria-hidden="true" />
         </div>
         <div>
           <h4 className="text-sm font-bold" style={{ color: '#1C1917' }}>Review & Confirm</h4>
@@ -87,9 +87,9 @@ export default function PublicQuotationActions({
             }}
           >
             {isAccepting ? (
-              <><Loader2 className="h-4 w-4 animate-spin" /> Confirming...</>
+              <><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Confirming...</>
             ) : (
-              <><CheckCircle2 size={16} /> Accept & Confirm Booking</>
+              <><CheckCircle2 size={16} aria-hidden="true" /> Accept & Confirm Booking</>
             )}
           </button>
 
@@ -115,7 +115,7 @@ export default function PublicQuotationActions({
                 e.currentTarget.style.background = '#FFFFFF';
               }}
             >
-              <RotateCw size={14} /> Reschedule
+              <RotateCw size={14} aria-hidden="true" /> Reschedule
             </button>
             <button
               type="button"
@@ -139,9 +139,9 @@ export default function PublicQuotationActions({
               }}
             >
               {isCancelling ? (
-                <><Loader2 className="h-4 w-4 animate-spin" /> Cancelling...</>
+                <><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Cancelling...</>
               ) : (
-                <><XCircle size={14} /> Cancel Booking</>
+                <><XCircle size={14} aria-hidden="true" /> Cancel Booking</>
               )}
             </button>
           </div>

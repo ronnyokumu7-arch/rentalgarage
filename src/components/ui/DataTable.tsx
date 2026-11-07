@@ -10,7 +10,7 @@ import {
   ColumnDef,
   SortingState,
 } from "@tanstack/react-table";
-import { ArrowUpDown, ArrowUp, ArrowDown, Inbox, MoreVertical } from "lucide-react";
+import { ArrowsDownUp as ArrowUpDown, ArrowUp, ArrowDown, Tray as Inbox, DotsThreeVertical as MoreVertical } from "@phosphor-icons/react/ssr";
 import { createPortal } from "react-dom";
 import Pagination from "./Pagination";
 
@@ -160,7 +160,7 @@ export default function DataTable<T>({
                       title="More actions"
                       aria-label="More actions"
                     >
-                      <MoreVertical size={14} />
+                      <MoreVertical size={14} aria-hidden="true" />
                     </button>
                   </div>
                 </div>
@@ -193,7 +193,7 @@ export default function DataTable<T>({
     return (
       <div className="border border-[var(--color-surface-border)] rounded-xl bg-[var(--color-surface)] p-12 flex flex-col items-center justify-center text-center">
         <div className="w-12 h-12 rounded-full bg-[var(--color-surface-hover)] flex items-center justify-center mb-4">
-          <Inbox size={20} className="text-[var(--color-ink-subtle)]" />
+          <Inbox size={20} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
         </div>
         <p className="text-sm font-semibold text-[var(--color-ink)] mb-1">{emptyMessage}</p>
         <p className="text-xs text-[var(--color-ink-muted)]">Try adjusting your filters</p>
@@ -224,7 +224,7 @@ export default function DataTable<T>({
                           {flexRender(header.column.columnDef.header, header.getContext())}
                           {canSort && (
                             <span className="text-[var(--color-ink-subtle)]">
-                              {sorted === "asc" ? <ArrowUp size={14} /> : sorted === "desc" ? <ArrowDown size={14} /> : <ArrowUpDown size={14} />}
+                              {sorted === "asc" ? <ArrowUp size={14} aria-hidden="true" /> : sorted === "desc" ? <ArrowDown size={14} aria-hidden="true" /> : <ArrowUpDown size={14} aria-hidden="true" />}
                             </span>
                           )}
                         </div>
@@ -315,7 +315,7 @@ export default function DataTable<T>({
                         : "text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"
                     }`}
                   >
-                    {action.icon && <action.icon size={14} />}
+                    {action.icon && <action.icon size={14} aria-hidden="true" />}
                     {action.label}
                   </button>
                 </Fragment>

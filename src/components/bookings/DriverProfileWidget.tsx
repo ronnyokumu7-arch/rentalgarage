@@ -1,6 +1,6 @@
 "use client";
 
-import { UserCircle, Phone, CreditCard, Car, CheckCircle, AlertCircle } from "lucide-react";
+import { UserCircle, Phone, CreditCard, Car, CheckCircle, WarningCircle as AlertCircle } from "@phosphor-icons/react/ssr";
 import type { Booking } from "@/lib/types";
 
 interface DriverProfileWidgetProps {
@@ -30,7 +30,7 @@ export default function DriverProfileWidget({ booking }: DriverProfileWidgetProp
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center text-[var(--color-ink-muted)]">
-              <UserCircle size={20} />
+              <UserCircle size={20} aria-hidden="true" />
             </div>
             <div>
               <h3 className="text-sm font-bold text-[var(--color-ink)]">Driver</h3>
@@ -54,7 +54,7 @@ export default function DriverProfileWidget({ booking }: DriverProfileWidgetProp
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-md bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
-            <UserCircle size={14} />
+            <UserCircle size={14} aria-hidden="true" />
           </div>
           <h3 className="text-sm font-bold text-[var(--color-ink)]">Assigned Driver</h3>
         </div>
@@ -71,7 +71,7 @@ export default function DriverProfileWidget({ booking }: DriverProfileWidgetProp
           <p className="text-sm font-semibold text-[var(--color-ink)]">{driver.full_name}</p>
           {driver.phone && (
             <div className="flex items-center gap-1.5 text-xs text-[var(--color-ink-muted)] mt-1">
-              <Phone size={11} className="text-[var(--color-ink-subtle)]" />
+              <Phone size={11} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
               <span>{driver.phone}</span>
             </div>
           )}
@@ -83,13 +83,13 @@ export default function DriverProfileWidget({ booking }: DriverProfileWidgetProp
           <div className="space-y-1">
             {driver.id_number && (
               <div className="flex items-center gap-1.5 text-xs">
-                <CreditCard size={11} className="text-[var(--color-ink-subtle)]" />
+                <CreditCard size={11} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
                 <span className="font-mono text-[var(--color-ink)]">ID {driver.id_number}</span>
               </div>
             )}
             {driver.dl_number && (
               <div className="flex items-center gap-1.5 text-xs">
-                <Car size={11} className="text-[var(--color-ink-subtle)]" />
+                <Car size={11} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
                 <span className="font-mono text-[var(--color-ink)]">DL {driver.dl_number}</span>
               </div>
             )}
@@ -104,7 +104,7 @@ export default function DriverProfileWidget({ booking }: DriverProfileWidgetProp
         const Icon = health.icon;
         return (
           <div className={`flex items-center gap-1.5 mt-3 pt-3 border-t border-[var(--color-surface-border)] ${health.cls}`}>
-            <Icon size={12} />
+            <Icon size={12} aria-hidden="true" />
             <span className="text-[11px] font-semibold">License {health.label}</span>
           </div>
         );

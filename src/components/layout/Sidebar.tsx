@@ -6,10 +6,11 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { 
-  ChevronRight, LogOut, Settings, X, type LucideIcon,
-  Sparkles, Shield, LayoutDashboard, Users, Car,
-  Calendar, FileText, HelpCircle, BarChart3
-} from "lucide-react";
+  CaretRight as ChevronRight, SignOut as LogOut, Gear as Settings, X,
+  Sparkle as Sparkles, Shield, SquaresFour as LayoutDashboard, Users, Car,
+  Calendar, FileText, Question as HelpCircle, ChartBar as BarChart3
+} from "@phosphor-icons/react/ssr";
+import type { Icon } from "@phosphor-icons/react";
 import { useAuth } from "@/context/auth-context";
 import SecureImage from "@/components/ui/SecureImage";
 import type { NavItem } from "@/lib/nav-config";
@@ -21,7 +22,7 @@ interface SidebarProps {
 }
 
 // ── Icon mapping ──────────────────────────
-const iconMap: Record<string, LucideIcon> = {
+const iconMap: Record<string, Icon> = {
   dashboard: LayoutDashboard,
   users: Users,
   clients: Users,
@@ -35,7 +36,7 @@ const iconMap: Record<string, LucideIcon> = {
   shield: Shield,
 };
 
-function getIcon(iconName?: string): LucideIcon | null {
+function getIcon(iconName?: string): Icon | null {
   if (!iconName) return null;
   return iconMap[iconName] || null;
 }
@@ -178,7 +179,7 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
               aria-label="Close menu"
               className="flex items-center justify-center w-9 h-9 rounded-xl text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-all active:scale-95 flex-shrink-0"
             >
-              <X size={18} strokeWidth={2} />
+              <X size={18} weight="regular" aria-hidden="true" />
             </button>
           )}
         </div>
@@ -189,11 +190,11 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
             const active = isActive(item.href, item.children);
             const isGroupOpen = openGroup === item.label;
             
-            let Icon: LucideIcon | null = null;
+            let Icon: Icon | null = null;
             if (typeof item.icon === 'string') {
               Icon = getIcon(item.icon);
             } else if (item.icon) {
-              Icon = item.icon as LucideIcon;
+              Icon = item.icon as Icon;
             }
 
             // Removed the active background. Only text/icon color changes.
@@ -224,10 +225,10 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
                     {Icon && (
                       <Icon
                         size={20}
-                        strokeWidth={active ? 2 : 1.8}
+                        weight={active ? "regular" : "light"}
                         className={`transition-all duration-200 ${
                           isMobile ? 'flex-shrink-0' : ''
-                        } ${active ? 'text-[var(--color-primary)]' : ''}`}
+                        } ${active ? 'text-[var(--color-primary)]' : ''}`} aria-hidden="true"
                       />
                     )}
                     {isMobile && (
@@ -265,10 +266,10 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
                     {Icon && (
                       <Icon
                         size={20}
-                        strokeWidth={isGroupOpen || active ? 2 : 1.8}
+                        weight={isGroupOpen || active ? "regular" : "light"}
                         className={`transition-all duration-200 ${
                           isMobile ? 'flex-shrink-0' : ''
-                        } ${isGroupOpen || active ? 'text-[var(--color-primary)]' : ''}`}
+                        } ${isGroupOpen || active ? 'text-[var(--color-primary)]' : ''}`} aria-hidden="true"
                       />
                     )}
                     {isMobile && (
@@ -280,7 +281,7 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
                         </span>
                         <ChevronRight size={16} className={`ml-auto ${
                           isGroupOpen || active ? 'text-[var(--color-primary)]' : 'text-[var(--color-ink-subtle)]'
-                        }`} />
+                        }`} aria-hidden="true" />
                       </>
                     )}
                     {!isMobile && (
@@ -322,10 +323,10 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
             >
               <Settings
                 size={18}
-                strokeWidth={isActive(settingsItem.href) ? 2 : 1.8}
+                weight={isActive(settingsItem.href) ? "regular" : "light"}
                 className={`transition-all duration-500 ${
                   isActive(settingsItem.href) ? 'text-[var(--color-primary)]' : ''
-                } ${!isMobile && 'group-hover/btn:rotate-[180deg] group-hover/btn:scale-110'}`}
+                } ${!isMobile && 'group-hover/btn:rotate-[180deg] group-hover/btn:scale-110'}`} aria-hidden="true"
               />
               {isMobile && (
                 <span className={`text-sm font-medium ${
@@ -346,10 +347,10 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
           >
             <LogOut 
               size={18} 
-              strokeWidth={1.8} 
+              weight="light"
               className={`relative z-10 transition-transform duration-300 ${
                 !isMobile && 'group-hover/logout:translate-x-0.5'
-              }`}
+              }`} aria-hidden="true"
             />
             {isMobile && <span className="text-sm font-medium">Sign out</span>}
             {!isMobile && (
@@ -394,29 +395,29 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
               <div className="flex items-center gap-3 mb-4 pb-3 border-b border-[var(--color-surface-border)]">
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 bg-[var(--color-primary-muted)] border border-[var(--color-primary)]/20">
                   {openGroupItem.icon && (() => {
-                    let Icon: LucideIcon | null = null;
+                    let Icon: Icon | null = null;
                     if (typeof openGroupItem.icon === 'string') {
                       Icon = getIcon(openGroupItem.icon);
                     } else {
-                      Icon = openGroupItem.icon as LucideIcon;
+                      Icon = openGroupItem.icon as Icon;
                     }
-                    return Icon ? <Icon size={16} strokeWidth={1.5} className="text-[var(--color-primary)]" /> : null;
+                    return Icon ? <Icon size={16} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" /> : null;
                   })()}
                 </div>
                 <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-[var(--color-primary)]">
                   {openGroupItem.label}
                 </p>
-                <Sparkles size={12} className="text-[var(--color-primary)] ml-auto opacity-40" />
+                <Sparkles size={12} className="text-[var(--color-primary)] ml-auto opacity-40" aria-hidden="true" />
               </div>
 
               <div className="space-y-1">
                 {openGroupItem.children.map((child) => {
                   const childActive = pathname === child.href || pathname.startsWith(child.href + "/");
-                  let ChildIcon: LucideIcon | null = null;
+                  let ChildIcon: Icon | null = null;
                   if (typeof (child as any).icon === 'string') {
                     ChildIcon = getIcon((child as any).icon);
                   } else if ((child as any).icon) {
-                    ChildIcon = (child as any).icon as LucideIcon;
+                    ChildIcon = (child as any).icon as Icon;
                   }
                   
                   return (
@@ -432,15 +433,15 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
                       {ChildIcon && (
                         <ChildIcon
                           size={16}
-                          strokeWidth={1.5}
+                          weight="light"
                           className={`flex-shrink-0 ${
                             childActive ? "text-[var(--color-primary)]" : "text-[var(--color-ink-subtle)]"
-                          }`}
+                          }`} aria-hidden="true"
                         />
                       )}
                       <span className="flex-1">{child.label}</span>
                       {childActive && (
-                        <ChevronRight size={14} strokeWidth={2.5} className="text-[var(--color-primary)]" />
+                        <ChevronRight size={14} weight="bold" className="text-[var(--color-primary)]" aria-hidden="true" />
                       )}
                     </Link>
                   );

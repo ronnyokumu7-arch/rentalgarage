@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Car, Loader2, X, DollarSign, StickyNote, Clock, FileText, Copy, Check, PenLine } from "lucide-react";
+import { Car, CircleNotch as Loader2, X, CurrencyDollar as DollarSign, Note as StickyNote, Clock, FileText, Copy, Check, PencilLine as PenLine } from "@phosphor-icons/react/ssr";
 import apiClient from "@/lib/api-client";
 import { investorContractsApi } from "@/lib/api/investorContracts";
 import InvestorContractSignModal from "@/components/investor/InvestorContractSignModal";
@@ -122,7 +122,7 @@ export default function InvestorVehiclePricingModal({
         <div className="flex items-center justify-between p-6 border-b border-[var(--color-surface-border)]">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
-              {step === 'pricing' ? <DollarSign size={20} /> : <FileText size={20} />}
+              {step === 'pricing' ? <DollarSign size={20} aria-hidden="true" /> : <FileText size={20} aria-hidden="true" />}
             </div>
             <div>
               <h3 className="text-lg font-bold text-[var(--color-ink)]">
@@ -132,7 +132,7 @@ export default function InvestorVehiclePricingModal({
             </div>
           </div>
           <button onClick={onClose} className="p-2 rounded-lg hover:bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] transition-colors">
-            <X size={20} />
+            <X size={20} aria-hidden="true" />
           </button>
         </div>
 
@@ -148,7 +148,7 @@ export default function InvestorVehiclePricingModal({
             <div>
               <label className={labelClass}>Client Daily Rate (KES) <span className="text-[var(--color-danger)]">*</span></label>
               <div className="relative">
-                <DollarSign size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" />
+                <DollarSign size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                 <input 
                   type="number" required min="1" step="0.01" className={`${inputClass} pl-10`}
                   value={formData.client_daily_rate} 
@@ -165,7 +165,7 @@ export default function InvestorVehiclePricingModal({
               <div className="col-span-2">
                 <label className={labelClass}>Investor Lease Rate (KES) <span className="text-[var(--color-danger)]">*</span></label>
                 <div className="relative">
-                  <DollarSign size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" />
+                  <DollarSign size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                   <input 
                     type="number" required min="1" step="0.01" className={`${inputClass} pl-10`}
                     value={formData.investor_lease_rate} 
@@ -185,7 +185,7 @@ onChange={e => setFormData({...formData, lease_rate_type: e.target.value as "dai
                     <option value="daily">Daily</option>
                     <option value="monthly">Monthly</option>
                   </select>
-                  <Clock size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
+                  <Clock size={14} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true" />
                 </div>
               </div>
             </div>
@@ -194,7 +194,7 @@ onChange={e => setFormData({...formData, lease_rate_type: e.target.value as "dai
             <div>
               <label className={labelClass}>Internal Notes (Optional)</label>
               <div className="relative">
-                <StickyNote size={16} className="absolute left-3 top-3 text-[var(--color-ink-subtle)]" />
+                <StickyNote size={16} className="absolute left-3 top-3 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                 <textarea 
                   className={`${inputClass} pl-10 resize-none`} rows={2}
                   value={formData.notes} 
@@ -212,7 +212,7 @@ onChange={e => setFormData({...formData, lease_rate_type: e.target.value as "dai
                 type="submit" disabled={loading} 
                 className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? <Loader2 size={16} className="animate-spin" /> : <Car size={16} />}
+                {loading ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Car size={16} aria-hidden="true" />}
                 {loading ? "Processing..." : (vehicle.lease_rate_locked ? "Update & Lock Rate" : "Activate & Lock Rate")}
               </button>
             </div>
@@ -262,7 +262,7 @@ onChange={e => setFormData({...formData, lease_rate_type: e.target.value as "dai
                 disabled={loading}
                 className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
+                {loading ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <FileText size={16} aria-hidden="true" />}
                 {loading ? "Generating..." : "Generate Contract"}
               </button>
             </div>
@@ -273,7 +273,7 @@ onChange={e => setFormData({...formData, lease_rate_type: e.target.value as "dai
         {step === 'contract' && generatedContract && (
           <div className="p-6 space-y-4">
             <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-center">
-              <FileText size={32} className="mx-auto text-emerald-500 mb-2" />
+              <FileText size={32} className="mx-auto text-emerald-500 mb-2" aria-hidden="true" />
               <h4 className="text-sm font-bold text-emerald-600 dark:text-emerald-400">Contract Generated!</h4>
               <p className="text-xs text-emerald-600/80 dark:text-emerald-400/80 mt-1">
                 Contract #{generatedContract.contract_number}
@@ -287,7 +287,7 @@ onChange={e => setFormData({...formData, lease_rate_type: e.target.value as "dai
                 onClick={() => setIsSignModalOpen(true)}
                 className="w-full px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition-all flex items-center justify-center gap-2"
               >
-                <PenLine size={16} />
+                <PenLine size={16} aria-hidden="true" />
                 Sign as Agency Representative
               </button>
               
@@ -314,7 +314,7 @@ onChange={e => setFormData({...formData, lease_rate_type: e.target.value as "dai
                     className="px-3 py-2.5 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] hover:bg-[var(--color-primary)]/10 hover:border-[var(--color-primary)]/30 transition-all text-[var(--color-ink)] flex-shrink-0"
                     title="Copy link"
                   >
-                    {copied ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} />}
+                    {copied ? <Check size={16} className="text-emerald-500" aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
                   </button>
                 </div>
                 <p className="text-[10px] text-[var(--color-ink-subtle)] mt-1">

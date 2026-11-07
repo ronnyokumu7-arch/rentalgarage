@@ -1,6 +1,6 @@
 // src/components/users/AddMemberChoiceModal.tsx
 import { useRouter } from "next/navigation";
-import { X, UserPlus, Link } from "lucide-react";
+import { X, UserPlus, Link } from "@phosphor-icons/react/ssr";
 
 interface AddMemberChoiceModalProps {
   isOpen: boolean;
@@ -20,7 +20,7 @@ export default function AddMemberChoiceModal({ isOpen, onClose, onInvite }: AddM
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-bold text-[var(--color-ink)]">Add New Member</h3>
             <button onClick={onClose} className="text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors">
-              <X size={20} />
+              <X size={20} aria-hidden="true" />
             </button>
           </div>
           
@@ -34,7 +34,7 @@ export default function AddMemberChoiceModal({ isOpen, onClose, onInvite }: AddM
               className="w-full flex items-center gap-4 p-4 rounded-xl border border-[var(--color-surface-border)] hover:bg-[var(--color-surface-hover)] hover:border-[var(--color-primary)]/30 transition-all text-left group"
             >
               <div className="w-10 h-10 rounded-lg bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] group-hover:scale-110 transition-transform">
-                <UserPlus size={20} />
+                <UserPlus size={20} aria-hidden="true" />
               </div>
               <div>
                 <p className="text-sm font-bold text-[var(--color-ink)]">Manual Entry</p>
@@ -47,7 +47,7 @@ export default function AddMemberChoiceModal({ isOpen, onClose, onInvite }: AddM
               className="w-full flex items-center gap-4 p-4 rounded-xl border border-[var(--color-surface-border)] hover:bg-[var(--color-surface-hover)] hover:border-[var(--color-primary)]/30 transition-all text-left group"
             >
               <div className="w-10 h-10 rounded-lg bg-[var(--color-success-bg)] flex items-center justify-center text-[var(--color-success-text)] group-hover:scale-110 transition-transform">
-                <Link size={20} />
+                <Link size={20} aria-hidden="true" />
               </div>
               <div>
                 <p className="text-sm font-bold text-[var(--color-ink)]">Send Invite Link</p>

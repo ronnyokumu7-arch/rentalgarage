@@ -4,8 +4,8 @@
 import { useEffect, useState } from "react";
 import { confirmAction } from "@/lib/utils/confirmAction";
 import {
-  ShieldCheck, Loader2, Save, CheckCircle2, Plus, Sparkles,
-} from "lucide-react";
+  ShieldCheck, CircleNotch as Loader2, FloppyDisk as Save, CheckCircle as CheckCircle2, Plus, Sparkle as Sparkles,
+} from "@phosphor-icons/react/ssr";
 import toast from "react-hot-toast";
 import { roleTemplatesApi, type RoleTemplate, type PermissionMatrix } from "@/lib/api/role-templates";
 
@@ -103,7 +103,7 @@ export default function TeamRolesSettings() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-96">
-        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" />
+        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" aria-hidden="true" />
       </div>
     );
   }
@@ -120,7 +120,7 @@ export default function TeamRolesSettings() {
           
           <div className="px-4 py-3 lg:px-5 lg:py-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex items-center justify-between">
             <h3 className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)] flex items-center gap-2">
-              <Sparkles size={12} className="text-[var(--color-primary)]" /> Team Roles
+              <Sparkles size={12} className="text-[var(--color-primary)]" aria-hidden="true" /> Team Roles
             </h3>
             <span className="text-[10px] font-bold text-[var(--color-ink-muted)] lg:hidden bg-[var(--color-surface)] px-2 py-0.5 rounded-full">
               {templates.length}
@@ -141,7 +141,7 @@ export default function TeamRolesSettings() {
                       : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] border border-transparent hover:border-[var(--color-surface-border)]"
                   }`}
                 >
-                  <ShieldCheck size={14} className={isActive ? "text-white" : "text-[var(--color-ink-subtle)]"} />
+                  <ShieldCheck size={14} className={isActive ? "text-white" : "text-[var(--color-ink-subtle)]"} aria-hidden="true" />
                   {template.job_title}
                 </button>
               );
@@ -166,7 +166,7 @@ export default function TeamRolesSettings() {
                             : "text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] border border-transparent"
                         }`}
                       >
-                        <ShieldCheck size={16} className={isActive ? "text-[var(--color-primary)]" : "text-[var(--color-ink-muted)]"} />
+                        <ShieldCheck size={16} className={isActive ? "text-[var(--color-primary)]" : "text-[var(--color-ink-muted)]"} aria-hidden="true" />
                         <span className="text-sm font-medium truncate">{template.job_title}</span>
                       </button>
                     </li>
@@ -178,7 +178,7 @@ export default function TeamRolesSettings() {
 
           <div className="p-3 border-t border-[var(--color-surface-border)]">
             <button className="w-full flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/5 hover:bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 transition-all active:scale-95">
-              <Plus size={14} /> Add New Role
+              <Plus size={14} aria-hidden="true" /> Add New Role
             </button>
           </div>
         </div>
@@ -203,7 +203,7 @@ export default function TeamRolesSettings() {
                 disabled={!hasChanges || saving}
                 className="flex-shrink-0 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs lg:text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 shadow-[var(--shadow-md)]"
               >
-                {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : hasChanges ? <Save className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
+                {saving ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : hasChanges ? <Save className="w-4 h-4" aria-hidden="true" /> : <CheckCircle2 className="w-4 h-4" aria-hidden="true" />}
                 {saving ? "Saving..." : hasChanges ? "Save Changes" : "All Saved"}
               </button>
             </div>
@@ -271,7 +271,7 @@ export default function TeamRolesSettings() {
           </>
         ) : (
           <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-2xl shadow-[var(--shadow-card)] p-12 text-center">
-            <ShieldCheck className="w-12 h-12 text-[var(--color-ink-subtle)] mx-auto mb-4" />
+            <ShieldCheck className="w-12 h-12 text-[var(--color-ink-subtle)] mx-auto mb-4" aria-hidden="true" />
             <h3 className="text-lg font-bold text-[var(--color-ink)] mb-2">No Role Selected</h3>
             <p className="text-sm text-[var(--color-ink-muted)]">Select a role to edit its permissions.</p>
           </div>

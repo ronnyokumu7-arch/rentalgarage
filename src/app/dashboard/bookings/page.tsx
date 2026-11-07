@@ -2,7 +2,7 @@
 "use client";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
-import { LayoutList, CalendarDays } from "lucide-react";
+import { Rows as LayoutList, CalendarDots as CalendarDays } from "@phosphor-icons/react/ssr";
 import BookingsList from "@/components/bookings/BookingsList";
 import ExtendBookingModal from "@/components/bookings/ExtendBookingModal";
 import FleetTimelineCalendar from "@/components/bookings/FleetTimelineCalendar";
@@ -60,13 +60,13 @@ export default function BookingsPage() {
           title: "Manage Bookings",
           mobileTitle: "Bookings",
           description: "Create new reservations, manage bookings, and handle extensions.",
-          icon: <LayoutList size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+          icon: <LayoutList size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
         }
       : {
           title: "Fleet Timeline Calendar",
           mobileTitle: "Calendar",
           description: "Real-time look at vehicle distribution, active reservations, and scheduling blocks.",
-          icon: <CalendarDays size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+          icon: <CalendarDays size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
         };
   }, [activeTab]);
 

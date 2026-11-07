@@ -1,6 +1,6 @@
 "use client";
 
-import { User, UserCircle, Car, CalendarDays, DollarSign, Phone, Loader2, CreditCard } from 'lucide-react';
+import { User, UserCircle, Car, CalendarDots as CalendarDays, CurrencyDollar as DollarSign, Phone, CircleNotch as Loader2, CreditCard } from "@phosphor-icons/react/ssr";
 import { getClientDisplayName } from '@/lib/client-name';
 import type { Client, Vehicle, DriverListItem, ServiceType, PricingResult } from '@/lib/types';
 
@@ -96,14 +96,14 @@ export default function BookingSummary({
       {/* Client Info */}
       <div className="mb-3 pb-3 border-b border-[var(--color-surface-border)]">
         <div className="flex items-center gap-2 mb-2">
-          <User size={14} className="text-[var(--color-primary)]" />
+          <User size={14} className="text-[var(--color-primary)]" aria-hidden="true" />
           <span className="text-xs font-semibold text-[var(--color-ink)]">Client</span>
         </div>
         {client ? (
           <div>
             <div className="text-sm font-medium text-[var(--color-ink)] mb-1">{getClientDisplayName(client.full_name)}</div>
             <div className="flex items-center gap-1 text-xs text-[var(--color-ink-muted)]">
-              <Phone size={10} />
+              <Phone size={10} aria-hidden="true" />
               <span>{client.phone}</span>
             </div>
           </div>
@@ -115,7 +115,7 @@ export default function BookingSummary({
       {/* Vehicle Info */}
       <div className="mb-3 pb-3 border-b border-[var(--color-surface-border)]">
         <div className="flex items-center gap-2 mb-2">
-          <Car size={14} className="text-[var(--color-primary)]" />
+          <Car size={14} className="text-[var(--color-primary)]" aria-hidden="true" />
           <span className="text-xs font-semibold text-[var(--color-ink)]">Vehicle</span>
         </div>
         {vehicle ? (
@@ -133,7 +133,7 @@ export default function BookingSummary({
         <div className="mb-3 pb-3 border-b border-[var(--color-surface-border)]">
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center gap-2">
-              <UserCircle size={14} className="text-[var(--color-primary)]" />
+              <UserCircle size={14} className="text-[var(--color-primary)]" aria-hidden="true" />
               <span className="text-xs font-semibold text-[var(--color-ink)]">Driver</span>
             </div>
             {driverStatusStyle && (
@@ -145,12 +145,12 @@ export default function BookingSummary({
           <div className="text-sm font-medium text-[var(--color-ink)] mb-1">{driver.full_name}</div>
           <div className="flex items-center gap-3 text-xs text-[var(--color-ink-muted)] flex-wrap">
             <div className="flex items-center gap-1">
-              <Phone size={10} />
+              <Phone size={10} aria-hidden="true" />
               <span>{driver.phone}</span>
             </div>
             {driver.id_number_masked && (
               <div className="flex items-center gap-1">
-                <CreditCard size={10} />
+                <CreditCard size={10} aria-hidden="true" />
                 <span className="font-mono">{driver.id_number_masked}</span>
               </div>
             )}
@@ -167,7 +167,7 @@ export default function BookingSummary({
       {/* Dates + Times */}
       <div className="mb-3 pb-3 border-b border-[var(--color-surface-border)]">
         <div className="flex items-center gap-2 mb-2">
-          <CalendarDays size={14} className="text-[var(--color-primary)]" />
+          <CalendarDays size={14} className="text-[var(--color-primary)]" aria-hidden="true" />
           <span className="text-xs font-semibold text-[var(--color-ink)]">Period</span>
         </div>
         {startDate && endDate ? (
@@ -196,9 +196,9 @@ export default function BookingSummary({
       {quote && quote.lines.length > 0 && (
         <div className="mb-3 pb-3 border-b border-[var(--color-surface-border)]">
           <div className="flex items-center gap-2 mb-2">
-            <DollarSign size={14} className="text-[var(--color-primary)]" />
+            <DollarSign size={14} className="text-[var(--color-primary)]" aria-hidden="true" />
             <span className="text-xs font-semibold text-[var(--color-ink)]">Pricing Breakdown</span>
-            {quoteLoading && <Loader2 size={10} className="animate-spin text-[var(--color-ink-muted)]" />}
+            {quoteLoading && <Loader2 size={10} className="animate-spin text-[var(--color-ink-muted)]" aria-hidden="true" />}
           </div>
           <div className="space-y-1.5">
             {quote.lines.map((line, i) => {
@@ -237,7 +237,7 @@ export default function BookingSummary({
       <div className="pt-2">
         <div className="flex items-center justify-between mb-2">
           <span className="text-xs text-[var(--color-ink-muted)]">Total Amount</span>
-          {quoteLoading && <Loader2 size={12} className="animate-spin text-[var(--color-ink-muted)]" />}
+          {quoteLoading && <Loader2 size={12} className="animate-spin text-[var(--color-ink-muted)]" aria-hidden="true" />}
         </div>
         <div className="text-2xl font-bold text-[var(--color-ink)]">
           KES {totalAmount.toLocaleString()}

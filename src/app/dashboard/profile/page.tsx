@@ -1,7 +1,7 @@
 // src/app/dashboard/profile/page.tsx
 "use client";
 
-import { User, MapPin, Shield, Bell, Key } from "lucide-react";
+import { User, MapPin, Shield, Bell, Key } from "@phosphor-icons/react/ssr";
 import PageHeader from "@/components/ui/PageHeader";
 import SectionCard from "@/components/ui/SectionCard";
 
@@ -69,13 +69,13 @@ export default function ProfilePage() {
             <div className="space-y-3">
               <button className="w-full flex items-center justify-between p-3 rounded-lg border border-surface-border hover:bg-surface-hover transition-colors">
                 <div className="flex items-center gap-3">
-                  <Key size={16} className="text-ink-muted" />
+                  <Key size={16} className="text-ink-muted" aria-hidden="true" />
                   <span className="text-sm font-semibold text-ink">Change Password</span>
                 </div>
               </button>
               <button className="w-full flex items-center justify-between p-3 rounded-lg border border-surface-border hover:bg-surface-hover transition-colors">
                 <div className="flex items-center gap-3">
-                  <Shield size={16} className="text-ink-muted" />
+                  <Shield size={16} className="text-ink-muted" aria-hidden="true" />
                   <span className="text-sm font-semibold text-ink">Two-Factor Auth</span>
                 </div>
                 <span className="text-xs font-bold text-success-text bg-success-bg px-2 py-0.5 rounded-full">Enabled</span>

@@ -3,13 +3,13 @@
 
 import {
   User as UserIcon,
-  Pencil,
+  PencilSimple as Pencil,
   UserCircle,
   Phone,
-  Mail,
+  Envelope as Mail,
   CreditCard,
   ShieldCheck,
-} from "lucide-react";
+} from "@phosphor-icons/react/ssr";
 import SectionCard from "@/components/ui/SectionCard";
 import { ProfileField } from "@/components/profile/ProfileLayout";
 import type { Client } from "@/lib/types";
@@ -48,7 +48,7 @@ export default function IdentitySection({ client, onEdit }: IdentitySectionProps
             onClick={onEdit}
             className="text-xs font-bold text-[var(--color-primary)] hover:underline flex items-center gap-1"
           >
-            <Pencil size={12} /> Edit Identity
+            <Pencil size={12} aria-hidden="true" /> Edit Identity
           </button>
         </div>
       </div>

@@ -3,9 +3,9 @@
 
 import { useState } from "react";
 import {
-  Calendar, Wrench, ShieldCheck, AlertCircle, Activity, TrendingUp, Banknote,
-  CheckCircle2, Clock, Gauge,
-} from "lucide-react";
+  Calendar, Wrench, ShieldCheck, WarningCircle as AlertCircle, Pulse as Activity, TrendUp as TrendingUp, Money as Banknote,
+  CheckCircle as CheckCircle2, Clock, Gauge,
+} from "@phosphor-icons/react/ssr";
 import type { Vehicle } from "@/lib/types";
 import type { VehicleDerivedStats } from "@/hooks/fleet/useVehicleDetail";
 import { formatMoney } from "@/lib/fleet/constants";
@@ -102,7 +102,7 @@ export default function VehicleSpecsPanel({
       {/* Specs card — always visible above the tabbed content */}
       <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] p-4 sm:p-5">
         <div className="flex items-center gap-2 mb-4">
-          <Calendar size={16} className="text-[var(--color-primary)]" />
+          <Calendar size={16} className="text-[var(--color-primary)]" aria-hidden="true" />
           <h2 className="text-sm font-bold text-[var(--color-ink)] tracking-tight">Vehicle Specs</h2>
         </div>
         <dl className="grid grid-cols-2 sm:grid-cols-3 gap-3">
@@ -154,26 +154,26 @@ export default function VehicleSpecsPanel({
           {activeTab === "activity" && (
             <div className="space-y-2.5">
               <ActivityRow
-                icon={<TrendingUp size={12} />}
+                icon={<TrendingUp size={12} aria-hidden="true" />}
                 label="Trips in last 30d"
                 value={String(stats.last30dBookings)}
                 tone="emerald"
               />
               <ActivityRow
-                icon={<Activity size={12} />}
+                icon={<Activity size={12} aria-hidden="true" />}
                 label="Total trips"
                 value={String(stats.totalBookings)}
                 tone="blue"
               />
               <ActivityRow
-                icon={<TrendingUp size={12} />}
+                icon={<TrendingUp size={12} aria-hidden="true" />}
                 label="Utilization"
                 value={`${stats.utilizationPct}%`}
                 tone="purple"
               />
               {stats.activeTrip && (
                 <ActivityRow
-                  icon={<Clock size={12} />}
+                  icon={<Clock size={12} aria-hidden="true" />}
                   label="Active Trip"
                   value={stats.activeTrip.booking_number || `#${stats.activeTrip.id}`}
                   tone="amber"
@@ -202,7 +202,7 @@ export default function VehicleSpecsPanel({
                         : "bg-rose-500/10 text-rose-500"
                     }`}
                   >
-                    {doc.hasFile ? <ShieldCheck size={14} /> : <AlertCircle size={14} />}
+                    {doc.hasFile ? <ShieldCheck size={14} aria-hidden="true" /> : <AlertCircle size={14} aria-hidden="true" />}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-bold text-[var(--color-ink)]">{doc.label}</p>
@@ -235,7 +235,7 @@ export default function VehicleSpecsPanel({
                             : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)]"
                     }`}
                   >
-                    <Wrench size={14} />
+                    <Wrench size={14} aria-hidden="true" />
                   </div>
                   <div>
                     <p className="text-xs font-bold text-[var(--color-ink)]">
@@ -293,12 +293,12 @@ export default function VehicleSpecsPanel({
               {/* Metadata rows */}
               <div className="pt-2 border-t border-[var(--color-surface-border)]/50 space-y-2">
                 <ServiceMetaRow
-                  icon={<Gauge size={11} />}
+                  icon={<Gauge size={11} aria-hidden="true" />}
                   label="Current odometer"
                   value={`${vehicle.current_mileage.toLocaleString()} km`}
                 />
                 <ServiceMetaRow
-                  icon={<CheckCircle2 size={11} />}
+                  icon={<CheckCircle2 size={11} aria-hidden="true" />}
                   label="Last updated"
                   value={new Date(vehicle.updated_at).toLocaleDateString("en-US", {
                     month: "short",
@@ -308,7 +308,7 @@ export default function VehicleSpecsPanel({
                 />
                 {vehicle.mileage_due && (
                   <ServiceMetaRow
-                    icon={<AlertCircle size={11} />}
+                    icon={<AlertCircle size={11} aria-hidden="true" />}
                     label="Mileage status"
                     value="Awaiting return log"
                     tone="amber"
@@ -346,7 +346,7 @@ export default function VehicleSpecsPanel({
                 onClick={onEditLease}
                 className="w-full h-8 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] text-[11px] font-bold text-[var(--color-ink)] transition-colors flex items-center justify-center gap-1.5"
               >
-                <Banknote size={11} /> Edit Lease Agreement
+                <Banknote size={11} aria-hidden="true" /> Edit Lease Agreement
               </button>
             </div>
           )}

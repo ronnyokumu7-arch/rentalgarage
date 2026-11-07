@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, AlertCircle, Clock, Calendar, CalendarDays, Rocket, Zap } from "lucide-react";
+import { CircleNotch as Loader2, WarningCircle as AlertCircle, Clock, Calendar, CalendarDots as CalendarDays, RocketLaunch as Rocket, Lightning as Zap } from "@phosphor-icons/react/ssr";
 import { useFinancialOverview } from "@/hooks/financials/useFinancialOverview";
 
 import RevenueOverviewWidget from "./overview/RevenueOverviewWidget";
@@ -31,7 +31,7 @@ export default function OverviewTab() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center h-96 text-[var(--color-ink-muted)]">
-        <Loader2 className="w-8 h-8 animate-spin mb-4 text-[var(--color-primary)]" />
+        <Loader2 className="w-8 h-8 animate-spin mb-4 text-[var(--color-primary)]" aria-hidden="true" />
         <p className="text-sm font-medium">Loading financial cockpit...</p>
       </div>
     );
@@ -40,7 +40,7 @@ export default function OverviewTab() {
   if (error || !data) {
     return (
       <div className="flex flex-col items-center justify-center h-96 text-[var(--color-danger-text)]">
-        <AlertCircle className="w-8 h-8 mb-4" />
+        <AlertCircle className="w-8 h-8 mb-4" aria-hidden="true" />
         <p className="text-sm font-medium mb-2">Failed to load dashboard data</p>
         <button 
           onClick={refetch}
@@ -103,7 +103,7 @@ export default function OverviewTab() {
           <div className="p-5 border-b border-[var(--color-surface-border)] flex items-center justify-between">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)]">
-                <Rocket size={16} />
+                <Rocket size={16} aria-hidden="true" />
               </div>
               <div>
                 <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)]">Recent Activity</p>
@@ -120,7 +120,7 @@ export default function OverviewTab() {
                 }`}
                 title="Today"
               >
-                <Clock size={14} />
+                <Clock size={14} aria-hidden="true" />
               </button>
               <button
                 onClick={() => setTimeFilter("week")}
@@ -131,7 +131,7 @@ export default function OverviewTab() {
                 }`}
                 title="This Week"
               >
-                <Calendar size={14} />
+                <Calendar size={14} aria-hidden="true" />
               </button>
               <button
                 onClick={() => setTimeFilter("month")}
@@ -142,7 +142,7 @@ export default function OverviewTab() {
                 }`}
                 title="This Month"
               >
-                <CalendarDays size={14} />
+                <CalendarDays size={14} aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -155,7 +155,7 @@ export default function OverviewTab() {
         <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden p-5">
           <div className="flex items-center gap-2.5 mb-4">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/10 border border-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400">
-              <Zap size={16} />
+              <Zap size={16} aria-hidden="true" />
             </div>
             <div>
               <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)]">Quick Actions</p>

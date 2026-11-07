@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { ShieldCheck, CheckCircle2, Lock, Building2 } from "lucide-react";
+import { ShieldCheck, CheckCircle as CheckCircle2, Lock, Buildings as Building2 } from "@phosphor-icons/react/ssr";
 
 // =============================================================================
 // BACKEND SYNCED TYPESPEC (Matches FastAPI Schemas)
@@ -165,7 +165,7 @@ export default function ContractTemplatePreview({ data }: ContractTemplatePrevie
                   <img src={tenant.logo_url} alt="Logo" className="w-full h-full object-contain" />
                 ) : (
                   <div className="flex items-center gap-1">
-                    <Building2 size={18} />
+                    <Building2 size={18} aria-hidden="true" />
                     <span className="truncate max-w-[80px]">{tenant?.name?.substring(0, 8) || "AGENCY"}</span>
                   </div>
                 )}
@@ -189,7 +189,7 @@ export default function ContractTemplatePreview({ data }: ContractTemplatePrevie
                   ? "bg-emerald-50 text-emerald-800 border-emerald-300" 
                   : "bg-amber-50 text-amber-800 border-amber-300"
               }`}>
-                <CheckCircle2 size={12} /> {c.signed_by_client ? "EXECUTED / SIGNED" : "PENDING SIGNATURE"}
+                <CheckCircle2 size={12} aria-hidden="true" /> {c.signed_by_client ? "EXECUTED / SIGNED" : "PENDING SIGNATURE"}
               </span>
               <p className="text-[10px] text-slate-400 font-mono pt-1">
                 SECURED BY Rental Garage
@@ -382,10 +382,10 @@ export default function ContractTemplatePreview({ data }: ContractTemplatePrevie
             <div className="mt-4 p-4 bg-slate-900 text-slate-100 rounded space-y-2 border border-slate-800">
               <div className="flex items-center justify-between border-b border-slate-800 pb-2">
                 <div className="flex items-center gap-2 font-bold uppercase text-[10px] tracking-wider text-emerald-400">
-                  <ShieldCheck size={14} /> Cryptographic Non-Repudiation Audit Stamp
+                  <ShieldCheck size={14} aria-hidden="true" /> Cryptographic Non-Repudiation Audit Stamp
                 </div>
                 <div className="flex items-center gap-1 text-[9px] font-mono text-slate-400">
-                  <Lock size={10} /> LOCK-SEALED
+                  <Lock size={10} aria-hidden="true" /> LOCK-SEALED
                 </div>
               </div>
               

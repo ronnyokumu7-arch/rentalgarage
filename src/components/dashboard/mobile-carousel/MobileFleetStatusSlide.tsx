@@ -3,7 +3,7 @@
 
 import { useState, useRef } from "react";
 import Link from "next/link";
-import { Car, Wrench, TrendingUp } from "lucide-react";
+import { Car, Wrench, TrendUp as TrendingUp } from "@phosphor-icons/react/ssr";
 import { motion } from "framer-motion";
 
 export interface CarouselVehicle {
@@ -142,7 +142,7 @@ export default function MobileFleetStatusSlide({
                 <div
                   className={`w-10 h-10 rounded-lg bg-gradient-to-br ${tile.gradient} flex items-center justify-center flex-shrink-0 shadow-sm group-hover:scale-105 transition-transform`}
                 >
-                  <Icon size={18} className="text-white" strokeWidth={2.5} />
+                  <Icon size={18} className="text-white" weight="bold" aria-hidden="true" />
                 </div>
                 <div className="min-w-0 flex flex-col justify-center">
                   <p className={`text-lg font-black tracking-tight font-display tabular-nums leading-none mb-0.5 ${tile.textColor}`}>

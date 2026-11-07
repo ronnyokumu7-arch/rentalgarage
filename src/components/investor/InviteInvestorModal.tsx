@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Link2, Loader2, Check, Copy, MessageSquare, Phone, UserPlus } from "lucide-react";
+import { LinkSimple as Link2, CircleNotch as Loader2, Check, Copy, Chat as MessageSquare, Phone, UserPlus } from "@phosphor-icons/react/ssr";
 import apiClient from "@/lib/api-client";
 import toast from "react-hot-toast";
 
@@ -74,7 +74,7 @@ export default function InviteInvestorModal({ isOpen, onClose }: InviteInvestorM
           <form onSubmit={handleSubmit} className="p-6 space-y-4">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                <UserPlus size={20} />
+                <UserPlus size={20} aria-hidden="true" />
               </div>
               <div>
                 <h3 className="text-lg font-bold text-[var(--color-ink)]">Invite Investor</h3>
@@ -138,7 +138,7 @@ export default function InviteInvestorModal({ isOpen, onClose }: InviteInvestorM
                 disabled={loading || !formData.full_name.trim() || !formData.email.trim()} 
                 className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? <Loader2 size={16} className="animate-spin" /> : <Link2 size={16} />}
+                {loading ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Link2 size={16} aria-hidden="true" />}
                 {loading ? "Generating..." : "Send Invite"}
               </button>
             </div>
@@ -146,7 +146,7 @@ export default function InviteInvestorModal({ isOpen, onClose }: InviteInvestorM
         ) : (
           <div className="p-6 space-y-4 text-center">
             <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto text-emerald-600 dark:text-emerald-400">
-              <Check size={32} />
+              <Check size={32} aria-hidden="true" />
             </div>
             <h3 className="text-lg font-bold text-[var(--color-ink)]">Invite Link Ready!</h3>
             <p className="text-sm text-[var(--color-ink-muted)]">
@@ -161,7 +161,7 @@ export default function InviteInvestorModal({ isOpen, onClose }: InviteInvestorM
                 className="p-2 rounded-lg bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] transition-all active:scale-95" 
                 title="Copy to clipboard"
               >
-                {copied ? <Check size={16} /> : <Copy size={16} />}
+                {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
               </button>
             </div>
 
@@ -170,7 +170,7 @@ export default function InviteInvestorModal({ isOpen, onClose }: InviteInvestorM
                 onClick={handleWhatsApp}
                 className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold text-[var(--color-ink)] bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-hover)]/80 transition-all"
               >
-                <MessageSquare size={14} />
+                <MessageSquare size={14} aria-hidden="true" />
                 WhatsApp
               </button>
               <button 
@@ -178,7 +178,7 @@ export default function InviteInvestorModal({ isOpen, onClose }: InviteInvestorM
                 disabled={!formData.phone_number}
                 className="flex items-center justify-center gap-1.5 px-3 py-2.5 rounded-xl text-xs font-bold text-[var(--color-ink)] bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-hover)]/80 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <Phone size={14} />
+                <Phone size={14} aria-hidden="true" />
                 SMS
               </button>
             </div>

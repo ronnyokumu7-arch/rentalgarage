@@ -1,12 +1,12 @@
 "use client";
 
 import React from "react";
-import { LucideIcon } from "lucide-react";
+import type { Icon } from "@phosphor-icons/react";
 
 interface Tab {
   id: string;
   label: string;
-  icon?: LucideIcon;
+  icon?: Icon;
   count?: number;
   disabled?: boolean;
 }
@@ -47,7 +47,7 @@ export default function TabPanel({
                 ${tab.disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
               `}
             >
-              {Icon && <Icon size={14} strokeWidth={2} />}
+              {Icon && <Icon size={14} weight="regular" aria-hidden="true" />}
               {tab.label}
               {tab.count !== undefined && (
                 <span
@@ -87,7 +87,7 @@ export default function TabPanel({
                 ${tab.disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}
               `}
             >
-              {Icon && <Icon size={15} strokeWidth={2} />}
+              {Icon && <Icon size={15} weight="regular" aria-hidden="true" />}
               {tab.label}
               {tab.count !== undefined && (
                 <span

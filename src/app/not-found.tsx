@@ -1,12 +1,12 @@
 // src/app/not-found.tsx
 import Link from "next/link";
-import { Compass } from "lucide-react";
+import { Compass } from "@phosphor-icons/react/ssr";
 
 export default function NotFound() {
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh] px-4 text-center">
       <div className="w-16 h-16 rounded-2xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] mb-5">
-        <Compass size={28} />
+        <Compass size={28} aria-hidden="true" />
       </div>
       <h1 className="text-4xl font-extrabold text-[var(--color-ink)] mb-2">Page not found</h1>
       <p className="text-sm text-[var(--color-ink-muted)] mb-8 max-w-sm">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { FileText, Upload, CheckCircle, AlertCircle, Loader2, ChevronRight } from "lucide-react";
+import { FileText, Upload, CheckCircle, WarningCircle as AlertCircle, CircleNotch as Loader2, CaretRight as ChevronRight } from "@phosphor-icons/react/ssr";
 import { vehiclesApi } from "@/lib/api/vehicles";
 import { investorContractsApi } from "@/lib/api/investorContracts";
 import InvestorContractSignModal from "@/components/investor/InvestorContractSignModal";
@@ -89,7 +89,7 @@ export default function InvestorVehicleProfilePage({ params }: { params: { vehic
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" />
+        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" aria-hidden="true" />
       </div>
     );
   }
@@ -135,15 +135,15 @@ export default function InvestorVehicleProfilePage({ params }: { params: { vehic
                 <div className="flex items-center gap-2">
                   {activeContract.status === 'signed' ? (
                     <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-                      <CheckCircle size={14} /> Signed & Active
+                      <CheckCircle size={14} aria-hidden="true" /> Signed & Active
                     </span>
                   ) : activeContract.status === 'pending_signature' ? (
                     <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-                      <AlertCircle size={14} /> Pending Your Signature
+                      <AlertCircle size={14} aria-hidden="true" /> Pending Your Signature
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-gray-500/10 text-gray-600 dark:text-gray-400 border border-gray-500/20">
-                      <FileText size={14} /> Draft
+                      <FileText size={14} aria-hidden="true" /> Draft
                     </span>
                   )}
                 </div>
@@ -152,13 +152,13 @@ export default function InvestorVehicleProfilePage({ params }: { params: { vehic
                   onClick={() => setIsSignModalOpen(true)}
                   className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--color-primary)] hover:underline transition-colors"
                 >
-                  View & Sign Contract <ChevronRight size={12} />
+                  View & Sign Contract <ChevronRight size={12} aria-hidden="true" />
                 </button>
               </div>
             ) : (
               <div className="flex flex-col gap-1 mt-1">
                 <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold bg-gray-500/10 text-gray-600 dark:text-gray-400 border border-gray-500/20 w-fit">
-                  <AlertCircle size={14} /> No Contract Generated
+                  <AlertCircle size={14} aria-hidden="true" /> No Contract Generated
                 </span>
                 <p className="text-xs text-[var(--color-ink-muted)]">
                   The agency has not generated a contract for this vehicle yet.
@@ -229,7 +229,7 @@ function DocumentUploadCard({ title, icon: Icon, uploaded, uploading, onUpload, 
     }`}>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
-          <Icon size={16} className={uploaded ? 'text-emerald-500' : 'text-[var(--color-ink-muted)]'} />
+          <Icon size={16} className={uploaded ? 'text-emerald-500' : 'text-[var(--color-ink-muted)]'} aria-hidden="true" />
           <h3 className="text-sm font-bold text-[var(--color-ink)]">{title}</h3>
         </div>
         {required && <span className="text-xs text-red-500">*</span>}
@@ -237,7 +237,7 @@ function DocumentUploadCard({ title, icon: Icon, uploaded, uploading, onUpload, 
       
       {uploaded ? (
         <div className="flex items-center gap-2 text-xs text-emerald-600 dark:text-emerald-400 font-medium">
-          <CheckCircle size={14} />
+          <CheckCircle size={14} aria-hidden="true" />
           <span>Uploaded</span>
         </div>
       ) : (
@@ -245,12 +245,12 @@ function DocumentUploadCard({ title, icon: Icon, uploaded, uploading, onUpload, 
           <div className="flex items-center justify-center gap-2 py-3 px-4 rounded-lg bg-[var(--color-surface-hover)] group-hover:bg-[var(--color-primary)]/10 transition-colors">
             {uploading ? (
               <>
-                <Loader2 size={14} className="animate-spin text-[var(--color-primary)]" />
+                <Loader2 size={14} className="animate-spin text-[var(--color-primary)]" aria-hidden="true" />
                 <span className="text-xs text-[var(--color-ink-muted)]">Uploading...</span>
               </>
             ) : (
               <>
-                <Upload size={14} className="text-[var(--color-primary)]" />
+                <Upload size={14} className="text-[var(--color-primary)]" aria-hidden="true" />
                 <span className="text-xs font-semibold text-[var(--color-primary)]">Upload File</span>
               </>
             )}

@@ -1,7 +1,7 @@
 // src/components/profile/ActivityLogCard.tsx
 "use client";
 
-import { FileText, Users, Car, Settings, Clock, AlertCircle } from "lucide-react";
+import { FileText, Users, Car, Gear as Settings, Clock, WarningCircle as AlertCircle } from "@phosphor-icons/react/ssr";
 import SectionCard from "@/components/ui/SectionCard";
 import type { ActivityLog } from "@/lib/api/activityLogs";
 
@@ -51,7 +51,7 @@ export default function ActivityLogCard({ logs }: ActivityLogCardProps) {
       {/* Unified Header */}
       <div className="flex items-center gap-3 p-6 pb-5 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/20">
         <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/10 flex items-center justify-center">
-          <Clock size={18} className="text-[var(--color-primary)]" />
+          <Clock size={18} className="text-[var(--color-primary)]" aria-hidden="true" />
         </div>
         <div>
           <h3 className="text-sm font-bold text-[var(--color-ink)]">Recent Activity</h3>
@@ -78,7 +78,7 @@ export default function ActivityLogCard({ logs }: ActivityLogCardProps) {
 
                   {/* Icon Node */}
                   <div className={`relative z-10 flex-shrink-0 w-10 h-10 rounded-xl border flex items-center justify-center transition-colors ${config.bg}`}>
-                    <Icon size={16} />
+                    <Icon size={16} aria-hidden="true" />
                   </div>
 
                   {/* Content Block */}
@@ -120,7 +120,7 @@ export default function ActivityLogCard({ logs }: ActivityLogCardProps) {
         ) : (
           <div className="py-12 text-center">
             <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
-              <AlertCircle size={28} className="text-[var(--color-ink-subtle)]" />
+              <AlertCircle size={28} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
             </div>
             <p className="text-sm font-bold text-[var(--color-ink)] mb-1">No Recent Activity</p>
             <p className="text-xs text-[var(--color-ink-muted)] max-w-[240px] mx-auto leading-relaxed">

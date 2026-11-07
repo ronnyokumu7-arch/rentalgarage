@@ -4,9 +4,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
-  Wrench, Clock, CheckCircle2, Car, Gauge, ChevronRight,
-  ShieldCheck, Contact, AlertTriangle,
-} from "lucide-react";
+  Wrench, Clock, CheckCircle as CheckCircle2, Car, Gauge, CaretRight as ChevronRight,
+  ShieldCheck, AddressBook as Contact, Warning as AlertTriangle,
+} from "@phosphor-icons/react/ssr";
 import type {
   NeedsAttentionData,
   ServiceDueAlert,
@@ -119,7 +119,7 @@ export function DesktopAlerts({ alerts }: { alerts: NeedsAttentionData }) {
       {!hasAny ? (
         <div className="flex flex-col items-center justify-center py-6 text-center">
           <div className="w-12 h-12 rounded-full bg-success/10 flex items-center justify-center mb-3">
-            <CheckCircle2 size={24} className="text-success" />
+            <CheckCircle2 size={24} className="text-success" aria-hidden="true" />
           </div>
           <p className="text-sm font-medium text-ink-muted">All caught up!</p>
           <p className="text-xs text-ink-subtle">No pending alerts</p>
@@ -223,7 +223,7 @@ function TabRow({
                   : "text-ink-muted hover:text-ink"
               }`}
             >
-              <Icon size={11} strokeWidth={2.5} />
+              <Icon size={11} weight="bold" aria-hidden="true" />
               <span className="hidden sm:inline">{tab.label}</span>
               <span className="tabular-nums opacity-70">{tab.count}</span>
             </button>
@@ -257,7 +257,7 @@ function OverdueList({ items }: { items: OverdueReturnAlert[] }) {
             className="group flex items-center gap-2.5 p-2 rounded-lg bg-amber-500/5 border border-amber-500/15 hover:border-amber-500/40 hover:bg-amber-500/10 transition-all"
           >
             <div className="w-7 h-7 rounded-md bg-amber-500/15 flex items-center justify-center flex-shrink-0">
-              <Clock size={12} className="text-amber-700 dark:text-amber-400" strokeWidth={2.5} />
+              <Clock size={12} className="text-amber-700 dark:text-amber-400" weight="bold" aria-hidden="true" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold text-ink truncate">
@@ -275,7 +275,7 @@ function OverdueList({ items }: { items: OverdueReturnAlert[] }) {
             </span>
             <ChevronRight
               size={12}
-              className="text-amber-500/60 group-hover:translate-x-0.5 transition-transform flex-shrink-0"
+              className="text-amber-500/60 group-hover:translate-x-0.5 transition-transform flex-shrink-0" aria-hidden="true"
             />
           </Link>
         );
@@ -286,7 +286,7 @@ function OverdueList({ items }: { items: OverdueReturnAlert[] }) {
           className="inline-flex items-center gap-0.5 text-[10px] font-bold text-primary hover:opacity-80 transition-opacity pt-0.5"
         >
           View all {items.length}
-          <ChevronRight size={11} />
+          <ChevronRight size={11} aria-hidden="true" />
         </Link>
       )}
     </div>
@@ -305,7 +305,7 @@ function ServiceList({ items }: { items: ServiceDueAlert[] }) {
             className="group flex items-center gap-2.5 p-2 rounded-lg bg-amber-500/5 border border-amber-500/15 hover:border-amber-500/40 hover:bg-amber-500/10 transition-all"
           >
             <div className="w-7 h-7 rounded-md bg-amber-500/15 flex items-center justify-center flex-shrink-0">
-              <Car size={12} className="text-amber-700 dark:text-amber-400" strokeWidth={2.5} />
+              <Car size={12} className="text-amber-700 dark:text-amber-400" weight="bold" aria-hidden="true" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold text-ink truncate font-mono">
@@ -316,7 +316,7 @@ function ServiceList({ items }: { items: ServiceDueAlert[] }) {
               </p>
             </div>
             <div className="flex items-center gap-1 flex-shrink-0">
-              <Gauge size={10} className="text-amber-600 dark:text-amber-400" />
+              <Gauge size={10} className="text-amber-600 dark:text-amber-400" aria-hidden="true" />
               <span
                 className={`text-[10px] font-bold tabular-nums ${
                   isOver
@@ -333,7 +333,7 @@ function ServiceList({ items }: { items: ServiceDueAlert[] }) {
             </div>
             <ChevronRight
               size={12}
-              className="text-amber-500/60 group-hover:translate-x-0.5 transition-transform flex-shrink-0"
+              className="text-amber-500/60 group-hover:translate-x-0.5 transition-transform flex-shrink-0" aria-hidden="true"
             />
           </Link>
         );
@@ -344,7 +344,7 @@ function ServiceList({ items }: { items: ServiceDueAlert[] }) {
           className="inline-flex items-center gap-0.5 text-[10px] font-bold text-primary hover:opacity-80 transition-opacity pt-0.5"
         >
           View all {items.length}
-          <ChevronRight size={11} />
+          <ChevronRight size={11} aria-hidden="true" />
         </Link>
       )}
     </div>
@@ -382,13 +382,13 @@ function DocsList({
                 <AlertTriangle
                   size={12}
                   className="text-amber-700 dark:text-amber-400"
-                  strokeWidth={2.5}
+                  weight="bold" aria-hidden="true"
                 />
               ) : (
                 <Contact
                   size={12}
                   className="text-amber-700 dark:text-amber-400"
-                  strokeWidth={2.5}
+                  weight="bold" aria-hidden="true"
                 />
               )}
             </div>
@@ -418,7 +418,7 @@ function DocsList({
             </span>
             <ChevronRight
               size={12}
-              className="text-amber-500/60 group-hover:translate-x-0.5 transition-transform flex-shrink-0"
+              className="text-amber-500/60 group-hover:translate-x-0.5 transition-transform flex-shrink-0" aria-hidden="true"
             />
           </Link>
         );
@@ -429,7 +429,7 @@ function DocsList({
           className="inline-flex items-center gap-0.5 text-[10px] font-bold text-primary hover:opacity-80 transition-opacity pt-0.5"
         >
           View all {items.length}
-          <ChevronRight size={11} />
+          <ChevronRight size={11} aria-hidden="true" />
         </Link>
       )}
     </div>

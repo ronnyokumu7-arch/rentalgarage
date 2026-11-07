@@ -3,8 +3,8 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { 
-  Loader2, User, Car, CalendarDays, FileText, AlertCircle
-} from "lucide-react";
+  CircleNotch as Loader2, User, Car, CalendarDots as CalendarDays, FileText, WarningCircle as AlertCircle
+} from "@phosphor-icons/react/ssr";
 import { clientsApi } from "@/lib/api/clients";
 import { vehiclesApi } from "@/lib/api/vehicles";
 import { bookingsApi } from "@/lib/api/bookings";
@@ -93,7 +93,7 @@ export default function SmartProfileViewer({ task }: SmartProfileViewerProps) {
     return (
       <div className="flex flex-col items-center justify-center h-full p-8 text-center bg-[var(--color-surface)] rounded-2xl border border-dashed border-[var(--color-surface-border)]">
         <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 ${config.colorClass}`}>
-          <Icon size={32} />
+          <Icon size={32} aria-hidden="true" />
         </div>
         <h3 className="text-sm font-bold text-[var(--color-ink)] mb-1">No Resource Linked</h3>
         <p className="text-xs text-[var(--color-ink-muted)] max-w-[200px]">
@@ -110,14 +110,14 @@ export default function SmartProfileViewer({ task }: SmartProfileViewerProps) {
       <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/30">
         <div className="flex items-center gap-3">
           <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${config.colorClass}`}>
-            <Icon size={20} />
+            <Icon size={20} aria-hidden="true" />
           </div>
           <div>
             <h3 className="text-sm font-bold text-[var(--color-ink)]">{config.label}</h3>
             <p className="text-[11px] text-[var(--color-ink-muted)]">ID: #{task.target_id}</p>
           </div>
         </div>
-        {loading && <Loader2 size={16} className="animate-spin text-[var(--color-ink-subtle)]" />}
+        {loading && <Loader2 size={16} className="animate-spin text-[var(--color-ink-subtle)]" aria-hidden="true" />}
       </div>
 
       {/* ✅ CONTENT AREA: Dynamic based on resource type */}
@@ -126,7 +126,7 @@ export default function SmartProfileViewer({ task }: SmartProfileViewerProps) {
         {error ? (
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div className="w-12 h-12 rounded-full bg-rose-500/10 flex items-center justify-center mb-3">
-              <AlertCircle size={24} className="text-rose-500" />
+              <AlertCircle size={24} className="text-rose-500" aria-hidden="true" />
             </div>
             <p className="text-sm font-semibold text-rose-600 dark:text-rose-400 mb-1">Load Failed</p>
             <p className="text-xs text-[var(--color-ink-muted)] max-w-[240px]">{error}</p>

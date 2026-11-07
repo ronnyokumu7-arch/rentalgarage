@@ -2,11 +2,11 @@
 "use client";
 
 import {
-  Calendar, CheckCircle2, Loader2, MoreVertical, UserPlus
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+  Calendar, CheckCircle as CheckCircle2, CircleNotch as Loader2, DotsThreeVertical as MoreVertical, UserPlus
+} from "@phosphor-icons/react/ssr";
+import type { Icon } from "@phosphor-icons/react";
 import { useTasksTab } from "@/hooks/dashboard/features/useTasksTab";
-import { Car, User, FileText } from "lucide-react";
+import { Car, User, FileText } from "@phosphor-icons/react/ssr";
 
 const getPriorityDotColor = (priority?: string) => {
   switch (priority?.toLowerCase()) {
@@ -26,7 +26,7 @@ const parseTaskTitle = (title: string): { action: string; subject: string | null
   return { action: title, subject: null };
 };
 
-const getSubjectIcon = (subject: string): LucideIcon => {
+const getSubjectIcon = (subject: string): Icon => {
   const lower = subject.toLowerCase();
   if (lower.includes('vehicle') || lower.includes('car') || lower.includes('plate') ||
       lower.includes('toyota') || lower.includes('nissan') || lower.includes('mazda') ||
@@ -54,7 +54,7 @@ export default function TasksTabContent() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-[var(--color-ink-muted)]">
-        <Loader2 size={24} className="animate-spin mb-3 text-[var(--color-primary)]" />
+        <Loader2 size={24} className="animate-spin mb-3 text-[var(--color-primary)]" aria-hidden="true" />
         <p className="text-sm font-medium">Loading tasks...</p>
       </div>
     );
@@ -64,7 +64,7 @@ export default function TasksTabContent() {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-center">
         <div className="w-14 h-14 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3">
-          <CheckCircle2 size={24} />
+          <CheckCircle2 size={24} aria-hidden="true" />
         </div>
         <p className="text-sm font-bold text-[var(--color-ink)]">All caught up!</p>
         <p className="text-xs text-[var(--color-ink-muted)] mt-1">No pending tasks right now.</p>
@@ -89,13 +89,13 @@ export default function TasksTabContent() {
                 <p className="text-sm font-semibold leading-tight text-[var(--color-ink)]">{action}</p>
                 {subject && SubjectIcon && (
                   <div className="flex items-center gap-1.5 mt-1">
-                    <SubjectIcon size={13} className="text-[var(--color-ink-muted)] flex-shrink-0" />
+                    <SubjectIcon size={13} className="text-[var(--color-ink-muted)] flex-shrink-0" aria-hidden="true" />
                     <span className="text-xs text-[var(--color-ink-muted)] truncate">{subject}</span>
                   </div>
                 )}
                 {task.due_date && (
                   <div className={`flex items-center gap-1.5 mt-2 text-[11px] font-bold uppercase tracking-wider ${overdue ? "text-rose-600 dark:text-rose-400" : "text-[var(--color-ink-subtle)]"}`}>
-                    <Calendar size={12} />
+                    <Calendar size={12} aria-hidden="true" />
                     {formatDate(task.due_date)}
                     {overdue && <span className="ml-1 px-1.5 py-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[9px] font-extrabold">OVERDUE</span>}
                   </div>
@@ -108,20 +108,20 @@ export default function TasksTabContent() {
                     onClick={(e) => { e.stopPropagation(); setOpenMenuId(openMenuId === safeTaskId ? null : safeTaskId); }}
                     className="p-1.5 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all active:scale-95"
                   >
-                    {updatingId === safeTaskId ? <Loader2 size={15} className="animate-spin" /> : <MoreVertical size={15} />}
+                    {updatingId === safeTaskId ? <Loader2 size={15} className="animate-spin" aria-hidden="true" /> : <MoreVertical size={15} aria-hidden="true" />}
                   </button>
                   {openMenuId === safeTaskId && (
                     <div className="absolute right-0 top-full mt-2 w-48 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-lg shadow-black/5 z-20 overflow-hidden animate-in fade-in slide-up duration-150">
                       {task.status === "unassigned" && (
                         <button onClick={(e) => { e.stopPropagation(); closeMenu(); handleClaimTask(safeTaskId); }}
                           className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-bold text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors">
-                          <UserPlus size={14} /> Claim Task
+                          <UserPlus size={14} aria-hidden="true" /> Claim Task
                         </button>
                       )}
                       {task.status !== "unassigned" && task.status !== "completed" && (
                         <button onClick={(e) => { e.stopPropagation(); closeMenu(); handleCompleteTask(safeTaskId); }}
                           className="w-full flex items-center gap-2.5 px-3 py-2.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors">
-                          <CheckCircle2 size={14} /> Mark Complete
+                          <CheckCircle2 size={14} aria-hidden="true" /> Mark Complete
                         </button>
                       )}
                     </div>

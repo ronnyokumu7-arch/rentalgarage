@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from 'react';
-import { MapPin } from 'lucide-react';
+import { MapPin } from "@phosphor-icons/react/ssr";
 
 interface AddressAutocompleteProps {
   value: string;
@@ -84,7 +84,7 @@ export default function AddressAutocomplete({
         {label}
       </label>
       <div className="relative">
-        <MapPin size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" />
+        <MapPin size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" aria-hidden="true" />
         <input
           type="text"
           value={value}
@@ -115,7 +115,7 @@ export default function AddressAutocomplete({
               onClick={() => handleSelect(address)}
             >
               <div className="flex items-start gap-2">
-                <MapPin size={12} className="text-[var(--color-ink-subtle)] mt-0.5 flex-shrink-0" />
+                <MapPin size={12} className="text-[var(--color-ink-subtle)] mt-0.5 flex-shrink-0" aria-hidden="true" />
                 <span className="text-[var(--color-ink)]">{address}</span>
               </div>
             </button>

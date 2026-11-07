@@ -3,7 +3,7 @@
 
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { TrendingUp, Wallet, CarFront } from "lucide-react";
+import { TrendUp as TrendingUp, Wallet, CarProfile as CarFront } from "@phosphor-icons/react/ssr";
 
 interface MobileInvestorStatsCarouselProps {
   totalVehicles: number;
@@ -109,7 +109,7 @@ export default function MobileInvestorStatsCarousel({
                 <div
                   className={`w-8 h-8 rounded-lg bg-gradient-to-br ${item.gradient} flex items-center justify-center shrink-0 shadow-lg`}
                 >
-                  <item.icon size={14} className="text-white" />
+                  <item.icon size={14} className="text-white" aria-hidden="true" />
                 </div>
               </div>
 

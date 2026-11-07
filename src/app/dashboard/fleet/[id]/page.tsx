@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Car, Loader2, AlertCircle } from "lucide-react";
+import { Car, CircleNotch as Loader2, WarningCircle as AlertCircle } from "@phosphor-icons/react/ssr";
 import { useVehicleDetail } from "@/hooks/fleet/useVehicleDetail";
 import { useVehicleActions } from "@/hooks/fleet/useVehicleActions";
 import { useFleetList } from "@/hooks/fleet/useFleetList";
@@ -63,7 +63,7 @@ export default function VehicleDetailPage({
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24 text-[var(--color-ink-muted)] gap-2">
-        <Loader2 size={20} className="animate-spin" /> Loading vehicle…
+        <Loader2 size={20} className="animate-spin" aria-hidden="true" /> Loading vehicle…
       </div>
     );
   }
@@ -71,7 +71,7 @@ export default function VehicleDetailPage({
   if (error || !vehicle) {
     return (
       <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] p-12 text-center">
-        <AlertCircle size={32} className="mx-auto text-rose-500 mb-3" />
+        <AlertCircle size={32} className="mx-auto text-rose-500 mb-3" aria-hidden="true" />
         <p className="text-sm font-bold text-[var(--color-ink)] mb-1">Vehicle not found</p>
         <p className="text-xs text-[var(--color-ink-muted)] mb-4">
           {error || "It may have been archived or removed."}
@@ -224,7 +224,7 @@ export default function VehicleDetailPage({
                           : "text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"
                     }`}
                   >
-                    <Icon size={18} className="flex-shrink-0" />
+                    <Icon size={18} className="flex-shrink-0" aria-hidden="true" />
                     <span className="truncate">{a.label}</span>
                   </button>
                 );
@@ -261,7 +261,7 @@ export default function VehicleDetailPage({
                         : "text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"
                   }`}
                 >
-                  <Icon size={14} className="flex-shrink-0" />
+                  <Icon size={14} className="flex-shrink-0" aria-hidden="true" />
                   <span className="truncate">{a.label}</span>
                 </button>
               );

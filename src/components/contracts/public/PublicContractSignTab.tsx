@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { CheckCircle2, FileText, Loader2, Eraser } from "lucide-react";
+import { CheckCircle as CheckCircle2, FileText, CircleNotch as Loader2, Eraser } from "@phosphor-icons/react/ssr";
 import { brand } from "@/lib/brand";
 import SignaturePad, { SignaturePadRef } from "@/components/public-docs/SignaturePad";
 import type { PublicContractView } from "@/lib/types";
@@ -61,7 +61,7 @@ export default function PublicContractSignTab({ contract, onSign, isSigned }: Pr
           className="w-16 h-16 rounded-full flex items-center justify-center mx-auto"
           style={{ backgroundColor: brand.colors.success.bg }}
         >
-          <CheckCircle2 className="w-8 h-8" style={{ color: brand.colors.success.main }} />
+          <CheckCircle2 className="w-8 h-8" style={{ color: brand.colors.success.main }} aria-hidden="true" />
         </div>
         <div>
           <h3 
@@ -90,7 +90,7 @@ export default function PublicContractSignTab({ contract, onSign, isSigned }: Pr
             className="text-sm font-bold flex items-center gap-2"
             style={{ color: brand.colors.ink.primary }}
           >
-            <FileText size={16} style={{ color: brand.colors.ink.muted }} />
+            <FileText size={16} style={{ color: brand.colors.ink.muted }} aria-hidden="true" />
             Electronic Signature
           </h4>
           <button
@@ -110,7 +110,7 @@ export default function PublicContractSignTab({ contract, onSign, isSigned }: Pr
             }}
             title="Clear signature and start over"
           >
-            <Eraser size={12} />
+            <Eraser size={12} aria-hidden="true" />
             Clear Signature
           </button>
         </div>
@@ -179,11 +179,11 @@ export default function PublicContractSignTab({ contract, onSign, isSigned }: Pr
       >
         {signing ? (
           <>
-            <Loader2 className="h-4 w-4 animate-spin" /> Processing...
+            <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Processing...
           </>
         ) : (
           <>
-            <CheckCircle2 size={16} /> Sign Contract
+            <CheckCircle2 size={16} aria-hidden="true" /> Sign Contract
           </>
         )}
       </button>

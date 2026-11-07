@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { X } from "lucide-react";
+import { X } from "@phosphor-icons/react/ssr";
 
 interface ModalProps {
   open: boolean;
@@ -81,7 +81,7 @@ export default function Modal({ open, onClose, title, subtitle, size = "md", chi
             className="p-2 rounded-xl hover:bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-all duration-150 active:scale-95 shrink-0"
             aria-label="Close"
           >
-            <X size={20} strokeWidth={2} />
+            <X size={20} weight="regular" aria-hidden="true" />
           </button>
         </div>
 

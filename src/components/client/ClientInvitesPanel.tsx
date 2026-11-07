@@ -3,8 +3,8 @@
 
 import { useCallback, useEffect, useState } from "react";
 import {
-  UserPlus, Link2, Copy, Check, Mail, X, Loader2, Clock, Ban, MessageCircle, User, Phone,
-} from "lucide-react";
+  UserPlus, LinkSimple as Link2, Copy, Check, Envelope as Mail, X, CircleNotch as Loader2, Clock, Prohibit as Ban, ChatCircle as MessageCircle, User, Phone,
+} from "@phosphor-icons/react/ssr";
 import toast from "react-hot-toast";
 import { clientInvitesApi, ClientInvite } from "@/lib/api/clientInvites";
 import { normalizePersonName } from "@/lib/client-name";
@@ -112,7 +112,7 @@ export default function ClientInvitesPanel() {
       <div className="flex flex-col gap-4 mb-4">
         <div>
           <h3 className="text-sm font-bold text-[var(--color-ink)] flex items-center gap-2">
-            <UserPlus size={15} className="text-[var(--color-primary)]" />
+            <UserPlus size={15} className="text-[var(--color-primary)]" aria-hidden="true" />
             Client Invites
           </h3>
           <p className="text-[10px] text-[var(--color-ink-muted)] mt-0.5">
@@ -123,7 +123,7 @@ export default function ClientInvitesPanel() {
         <div className="p-3 rounded-xl bg-[var(--color-surface-hover)]/50 border border-[var(--color-surface-border)] space-y-3">
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-2">
             <div className="relative sm:col-span-1">
-              <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
+              <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true" />
               <input
                 type="text"
                 value={expectedName}
@@ -134,7 +134,7 @@ export default function ClientInvitesPanel() {
               />
             </div>
             <div className="relative sm:col-span-1">
-              <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
+              <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true" />
               <input
                 type="tel"
                 value={expectedPhone}
@@ -160,7 +160,7 @@ export default function ClientInvitesPanel() {
               disabled={creating}
               className="sm:col-span-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition-all disabled:opacity-50"
             >
-              {creating ? <Loader2 size={14} className="animate-spin" /> : <Link2 size={14} />}
+              {creating ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Link2 size={14} aria-hidden="true" />}
               Generate Link
             </button>
           </div>
@@ -169,7 +169,7 @@ export default function ClientInvitesPanel() {
 
       {loading ? (
         <div className="flex justify-center py-6">
-          <Loader2 size={18} className="animate-spin text-[var(--color-ink-muted)]" />
+          <Loader2 size={18} className="animate-spin text-[var(--color-ink-muted)]" aria-hidden="true" />
         </div>
       ) : invites.length === 0 ? (
         <p className="text-xs text-[var(--color-ink-subtle)] text-center py-6">
@@ -188,14 +188,14 @@ export default function ClientInvitesPanel() {
                   <div className="flex items-center gap-2">
                     {inv.expected_name ? (
                       <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                        <User size={12} className="text-[var(--color-primary)] shrink-0" />
+                        <User size={12} className="text-[var(--color-primary)] shrink-0" aria-hidden="true" />
                         <span className="text-xs font-bold text-[var(--color-ink)] truncate">
                           {inv.expected_name}
                         </span>
                       </div>
                     ) : (
                       <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <Link2 size={12} className="text-[var(--color-ink-subtle)] shrink-0" />
+                        <Link2 size={12} className="text-[var(--color-ink-subtle)] shrink-0" aria-hidden="true" />
                         <span className="text-[11px] font-mono text-[var(--color-ink)] truncate">
                           ...{inv.token.slice(-8)}
                         </span>
@@ -209,20 +209,20 @@ export default function ClientInvitesPanel() {
                   <div className="mt-1 flex items-center gap-3 text-[10px] text-[var(--color-ink-subtle)]">
                     {inv.expected_phone && (
                       <div className="flex items-center gap-1">
-                        <Phone size={9} />
+                        <Phone size={9} aria-hidden="true" />
                         <span>{inv.expected_phone}</span>
                       </div>
                     )}
                     {inv.expected_name && (
                       <div className="flex items-center gap-1">
-                        <Link2 size={9} />
+                        <Link2 size={9} aria-hidden="true" />
                         <span className="font-mono">...{inv.token.slice(-8)}</span>
                       </div>
                     )}
                   </div>
 
                   <p className="text-[9px] text-[var(--color-ink-subtle)] mt-1 flex items-center gap-1">
-                    <Clock size={9} />
+                    <Clock size={9} aria-hidden="true" />
                     Expires {new Date(inv.expires_at).toLocaleDateString()} ·
                     Created {new Date(inv.created_at).toLocaleDateString()}
                   </p>
@@ -232,11 +232,11 @@ export default function ClientInvitesPanel() {
                   <div className="flex items-center gap-1.5 shrink-0">
                     <button type="button" onClick={() => setShareInvite(inv)} title="Share"
                       className="p-1.5 rounded-md text-[var(--color-ink-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors">
-                      <MessageCircle size={13} />
+                      <MessageCircle size={13} aria-hidden="true" />
                     </button>
                     <button type="button" onClick={() => handleCopy(inv)} title="Copy link"
                       className="p-1.5 rounded-md text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface)] transition-colors">
-                      {copied ? <Check size={13} className="text-emerald-500" /> : <Copy size={13} />}
+                      {copied ? <Check size={13} className="text-emerald-500" aria-hidden="true" /> : <Copy size={13} aria-hidden="true" />}
                     </button>
                     {confirmRevokeId === inv.id ? (
                       <button type="button" onClick={() => handleRevoke(inv.id)}
@@ -247,7 +247,7 @@ export default function ClientInvitesPanel() {
                     ) : (
                       <button type="button" onClick={() => setConfirmRevokeId(inv.id)} title="Revoke"
                         className="p-1.5 rounded-md text-[var(--color-ink-muted)] hover:text-rose-500 hover:bg-rose-500/10 transition-colors">
-                        <Ban size={13} />
+                        <Ban size={13} aria-hidden="true" />
                       </button>
                     )}
                   </div>
@@ -265,7 +265,7 @@ export default function ClientInvitesPanel() {
               <h4 className="text-sm font-bold text-[var(--color-ink)]">Share Onboarding Link</h4>
               <button type="button" onClick={() => setShareInvite(null)}
                 className="p-1.5 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] transition-colors">
-                <X size={16} />
+                <X size={16} aria-hidden="true" />
               </button>
             </div>
 
@@ -278,17 +278,17 @@ export default function ClientInvitesPanel() {
             <div className="grid grid-cols-3 gap-2 mb-3">
               <button type="button" onClick={() => handleCopy(shareInvite)}
                 className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-[var(--color-surface-border)] hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-primary)]/5 transition-all">
-                {copied ? <Check size={16} className="text-emerald-500" /> : <Copy size={16} className="text-[var(--color-ink-muted)]" />}
+                {copied ? <Check size={16} className="text-emerald-500" aria-hidden="true" /> : <Copy size={16} className="text-[var(--color-ink-muted)]" aria-hidden="true" />}
                 <span className="text-[10px] font-bold text-[var(--color-ink)]">Copy</span>
               </button>
               <button type="button" onClick={() => shareWhatsApp(shareInvite)}
                 className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-[var(--color-surface-border)] hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all">
-                <MessageCircle size={16} className="text-emerald-500" />
+                <MessageCircle size={16} className="text-emerald-500" aria-hidden="true" />
                 <span className="text-[10px] font-bold text-[var(--color-ink)]">WhatsApp</span>
               </button>
               <button type="button" onClick={() => shareEmail(shareInvite)}
                 className="flex flex-col items-center gap-1.5 p-3 rounded-xl border border-[var(--color-surface-border)] hover:border-blue-500/50 hover:bg-blue-500/5 transition-all">
-                <Mail size={16} className="text-blue-500" />
+                <Mail size={16} className="text-blue-500" aria-hidden="true" />
                 <span className="text-[10px] font-bold text-[var(--color-ink)]">Email</span>
               </button>
             </div>

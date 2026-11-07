@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, SlidersHorizontal } from "lucide-react";
+import { X, SlidersHorizontal } from "@phosphor-icons/react/ssr";
 
 interface FleetTourSheetProps {
   isOpen: boolean;
@@ -65,7 +65,7 @@ export default function FleetTourSheet({ isOpen, onClose }: FleetTourSheetProps)
               className="p-2 -mr-2 rounded-full text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] transition-colors"
               aria-label="Close"
             >
-              <X size={20} />
+              <X size={20} aria-hidden="true" />
             </button>
           </div>
 
@@ -80,7 +80,7 @@ export default function FleetTourSheet({ isOpen, onClose }: FleetTourSheetProps)
                   <div>
                     <h4 className="text-sm font-bold text-[var(--color-ink)] mb-1 flex items-center gap-2">
                       {step.title}
-                      {Icon && <Icon size={14} className="text-[var(--color-primary)]" />}
+                      {Icon && <Icon size={14} className="text-[var(--color-primary)]" aria-hidden="true" />}
                     </h4>
                     <p className="text-xs text-[var(--color-ink-muted)] leading-relaxed">
                       {step.description}

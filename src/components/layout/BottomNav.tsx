@@ -3,7 +3,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import type { LucideIcon } from "lucide-react";
+import type { Icon } from "@phosphor-icons/react";
 import type { NavItem } from "@/lib/nav-config";
 
 interface BottomNavProps {
@@ -105,7 +105,7 @@ export default function BottomNav({ navItems }: BottomNavProps) {
 
         {visibleItems.map((item) => {
           const active = isActive(item.href, item.children);
-          const Icon = item.icon as LucideIcon;
+          const Icon = item.icon as Icon;
           const displayLabel = getDisplayLabel(item.label);
 
           return (
@@ -122,7 +122,7 @@ export default function BottomNav({ navItems }: BottomNavProps) {
                     : "text-[var(--color-ink-muted)]"
                 }`}
               >
-                <Icon size={22} strokeWidth={active ? 2.2 : 1.8} />
+                <Icon size={22} weight={active ? "regular" : "light"} aria-hidden="true" />
               </div>
 
               <span

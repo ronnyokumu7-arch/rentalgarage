@@ -1,5 +1,5 @@
 // src/components/tasks/EntitySelector.tsx
-import { Search, User, Car, Calendar, CheckCircle2, } from "lucide-react";
+import { MagnifyingGlass as Search, User, Car, Calendar, CheckCircle as CheckCircle2, } from "@phosphor-icons/react/ssr";
 import type { User as UserType, Client, Vehicle, Booking } from "@/lib/types";
 import type { TabType, RelatedEntity } from "@/hooks/tasks/useCreateTask";
 
@@ -27,7 +27,7 @@ export default function EntitySelector({
     <div className="flex flex-col h-full">
       {/* Search */}
       <div className="relative mb-3">
-        <Search size={14} className="absolute left-3 top-2.5 text-slate-400" />
+        <Search size={14} className="absolute left-3 top-2.5 text-slate-400" aria-hidden="true" />
         <input
           type="text"
           value={searchQuery}
@@ -71,7 +71,7 @@ export default function EntitySelector({
               <p className="text-xs font-semibold text-slate-900 truncate">{u.full_name}</p>
               <p className="text-[10px] text-slate-500 truncate">{u.job_title || u.role}</p>
             </div>
-            {assignedTo === u.id && <CheckCircle2 size={14} className="text-indigo-600 flex-shrink-0" />}
+            {assignedTo === u.id && <CheckCircle2 size={14} className="text-indigo-600 flex-shrink-0" aria-hidden="true" />}
           </button>
         ))}
 
@@ -84,12 +84,12 @@ export default function EntitySelector({
               relatedEntity.type === "client" && relatedEntity.id === c.id ? "bg-indigo-50 border-indigo-300 ring-1 ring-indigo-500" : "bg-white border-slate-200 hover:border-slate-300"
             }`}
           >
-            <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0"><User size={12} /></div>
+            <div className="w-7 h-7 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 flex-shrink-0"><User size={12} aria-hidden="true" /></div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-semibold text-slate-900 truncate">{c.full_name}</p>
               <p className="text-[10px] text-slate-500 truncate">{c.phone}</p>
             </div>
-            {relatedEntity.type === "client" && relatedEntity.id === c.id && <CheckCircle2 size={14} className="text-indigo-600 flex-shrink-0" />}
+            {relatedEntity.type === "client" && relatedEntity.id === c.id && <CheckCircle2 size={14} className="text-indigo-600 flex-shrink-0" aria-hidden="true" />}
           </button>
         ))}
 
@@ -102,12 +102,12 @@ export default function EntitySelector({
               relatedEntity.type === "vehicle" && relatedEntity.id === v.id ? "bg-indigo-50 border-indigo-300 ring-1 ring-indigo-500" : "bg-white border-slate-200 hover:border-slate-300"
             }`}
           >
-            <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0"><Car size={12} /></div>
+            <div className="w-7 h-7 rounded-lg bg-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0"><Car size={12} aria-hidden="true" /></div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-semibold text-slate-900 truncate">{v.plate_number}</p>
               <p className="text-[10px] text-slate-500 truncate">{v.make} {v.model}</p>
             </div>
-            {relatedEntity.type === "vehicle" && relatedEntity.id === v.id && <CheckCircle2 size={14} className="text-indigo-600 flex-shrink-0" />}
+            {relatedEntity.type === "vehicle" && relatedEntity.id === v.id && <CheckCircle2 size={14} className="text-indigo-600 flex-shrink-0" aria-hidden="true" />}
           </button>
         ))}
 
@@ -120,12 +120,12 @@ export default function EntitySelector({
               relatedEntity.type === "booking" && relatedEntity.id === b.id ? "bg-indigo-50 border-indigo-300 ring-1 ring-indigo-500" : "bg-white border-slate-200 hover:border-slate-300"
             }`}
           >
-            <div className="w-7 h-7 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600 flex-shrink-0"><Calendar size={12} /></div>
+            <div className="w-7 h-7 rounded-lg bg-purple-100 flex items-center justify-center text-purple-600 flex-shrink-0"><Calendar size={12} aria-hidden="true" /></div>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-semibold text-slate-900 truncate">{b.booking_number || `#${b.id}`}</p>
               <p className="text-[10px] text-slate-500 truncate">{new Date(b.start_date).toLocaleDateString()}</p>
             </div>
-            {relatedEntity.type === "booking" && relatedEntity.id === b.id && <CheckCircle2 size={14} className="text-indigo-600 flex-shrink-0" />}
+            {relatedEntity.type === "booking" && relatedEntity.id === b.id && <CheckCircle2 size={14} className="text-indigo-600 flex-shrink-0" aria-hidden="true" />}
           </button>
         ))}
       </div>

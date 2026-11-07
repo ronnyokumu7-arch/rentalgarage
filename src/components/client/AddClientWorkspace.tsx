@@ -3,9 +3,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import {
-  Link2, Loader2, Check, Copy, MessageCircle, MessageSquare,
-  Mail, Clock, QrCode, User, Phone,
-} from "lucide-react";
+  LinkSimple as Link2, CircleNotch as Loader2, Check, Copy, ChatCircle as MessageCircle, Chat as MessageSquare,
+  Envelope as Mail, Clock, QrCode, User, Phone,
+} from "@phosphor-icons/react/ssr";
 import { QRCodeSVG } from "qrcode.react";
 import { clientInvitesApi, ClientInvite } from "@/lib/api/clientInvites";
 import { clientsApi } from "@/lib/api/clients";
@@ -243,7 +243,7 @@ export default function AddClientWorkspace({ onSuccess, onCancel }: AddClientWor
               : "text-[var(--color-ink-muted)] border-transparent hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] rounded-t-lg"
           }`}
         >
-          <Link2 size={16} /> Invite Client
+          <Link2 size={16} aria-hidden="true" /> Invite Client
         </button>
         <button
           onClick={() => setActiveTab("manual")}
@@ -253,7 +253,7 @@ export default function AddClientWorkspace({ onSuccess, onCancel }: AddClientWor
               : "text-[var(--color-ink-muted)] border-transparent hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] rounded-t-lg"
           }`}
         >
-          <User size={16} /> Manual Entry
+          <User size={16} aria-hidden="true" /> Manual Entry
         </button>
       </div>
 
@@ -264,7 +264,7 @@ export default function AddClientWorkspace({ onSuccess, onCancel }: AddClientWor
             <form onSubmit={handleInviteSubmit} className="space-y-5 max-w-lg mx-auto">
               <div className="flex items-center gap-3 mb-2">
                 <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] shrink-0">
-                  <Link2 size={20} />
+                  <Link2 size={20} aria-hidden="true" />
                 </div>
                 <div>
                   <h3 className="text-base font-bold text-[var(--color-ink)]">
@@ -283,7 +283,7 @@ export default function AddClientWorkspace({ onSuccess, onCancel }: AddClientWor
                   onClick={() => setInvitesModalOpen(true)}
                   className="w-full p-3 rounded-xl bg-blue-500/10 border border-blue-500/20 flex items-center gap-2 text-left hover:bg-blue-500/15 transition-colors active:scale-[0.99]"
                 >
-                  <Clock size={14} className="text-blue-600 dark:text-blue-400 shrink-0" />
+                  <Clock size={14} className="text-blue-600 dark:text-blue-400 shrink-0" aria-hidden="true" />
                   <p className="flex-1 text-xs font-medium text-blue-700 dark:text-blue-300">
                     You have {liveCount} live invite {liveCount === 1 ? "link" : "links"}.
                   </p>
@@ -302,7 +302,7 @@ export default function AddClientWorkspace({ onSuccess, onCancel }: AddClientWor
                   <div className="relative">
                     <User
                       size={14}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true"
                     />
                     <input
                       type="text"
@@ -316,7 +316,7 @@ export default function AddClientWorkspace({ onSuccess, onCancel }: AddClientWor
                   <div className="relative">
                     <Phone
                       size={14}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true"
                     />
                     <input
                       type="tel"
@@ -362,11 +362,11 @@ export default function AddClientWorkspace({ onSuccess, onCancel }: AddClientWor
                 >
                   {inviteLoading ? (
                     <>
-                      <Loader2 size={16} className="animate-spin" /> Generating...
+                      <Loader2 size={16} className="animate-spin" aria-hidden="true" /> Generating...
                     </>
                   ) : (
                     <>
-                      <Link2 size={16} /> Generate Link
+                      <Link2 size={16} aria-hidden="true" /> Generate Link
                     </>
                   )}
                 </button>
@@ -376,7 +376,7 @@ export default function AddClientWorkspace({ onSuccess, onCancel }: AddClientWor
             <div className="space-y-6 max-w-lg mx-auto">
               <div className="text-center">
                 <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto text-emerald-600 dark:text-emerald-400 mb-3">
-                  <Check size={32} />
+                  <Check size={32} aria-hidden="true" />
                 </div>
                 <h3 className="text-lg font-bold text-[var(--color-ink)]">
                   Invite Link Ready!
@@ -397,7 +397,7 @@ export default function AddClientWorkspace({ onSuccess, onCancel }: AddClientWor
                   level="M"
                 />
                 <p className="text-[10px] font-semibold text-slate-600 flex items-center gap-1.5">
-                  <QrCode size={12} /> Walk-in client? Let them scan to onboard.
+                  <QrCode size={12} aria-hidden="true" /> Walk-in client? Let them scan to onboard.
                 </p>
               </div>
 
@@ -406,7 +406,7 @@ export default function AddClientWorkspace({ onSuccess, onCancel }: AddClientWor
                   {linkFor(invite)}
                 </code>
                 <p className="text-[10px] text-[var(--color-ink-subtle)] mt-3 flex items-center justify-center gap-1.5">
-                  <Clock size={10} /> Single-use · expires{" "}
+                  <Clock size={10} aria-hidden="true" /> Single-use · expires{" "}
                   {new Date(invite.expires_at).toLocaleDateString()}
                 </p>
               </div>
@@ -417,9 +417,9 @@ export default function AddClientWorkspace({ onSuccess, onCancel }: AddClientWor
                   className="flex flex-col items-center gap-2 p-3 rounded-xl border border-[var(--color-surface-border)] hover:border-[var(--color-primary)]/50 hover:bg-[var(--color-primary)]/5 transition-all active:scale-95"
                 >
                   {copied ? (
-                    <Check size={18} className="text-emerald-500" />
+                    <Check size={18} className="text-emerald-500" aria-hidden="true" />
                   ) : (
-                    <Copy size={18} className="text-[var(--color-ink-muted)]" />
+                    <Copy size={18} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
                   )}
                   <span className="text-[10px] font-bold text-[var(--color-ink)]">
                     Copy
@@ -429,7 +429,7 @@ export default function AddClientWorkspace({ onSuccess, onCancel }: AddClientWor
                   onClick={shareWhatsApp}
                   className="flex flex-col items-center gap-2 p-3 rounded-xl border border-[var(--color-surface-border)] hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all active:scale-95"
                 >
-                  <MessageCircle size={18} className="text-emerald-500" />
+                  <MessageCircle size={18} className="text-emerald-500" aria-hidden="true" />
                   <span className="text-[10px] font-bold text-[var(--color-ink)]">
                     WhatsApp
                   </span>
@@ -438,7 +438,7 @@ export default function AddClientWorkspace({ onSuccess, onCancel }: AddClientWor
                   onClick={shareSms}
                   className="flex flex-col items-center gap-2 p-3 rounded-xl border border-[var(--color-surface-border)] hover:border-amber-500/50 hover:bg-amber-500/5 transition-all active:scale-95"
                 >
-                  <MessageSquare size={18} className="text-amber-500" />
+                  <MessageSquare size={18} className="text-amber-500" aria-hidden="true" />
                   <span className="text-[10px] font-bold text-[var(--color-ink)]">
                     SMS
                   </span>
@@ -447,7 +447,7 @@ export default function AddClientWorkspace({ onSuccess, onCancel }: AddClientWor
                   onClick={shareEmail}
                   className="flex flex-col items-center gap-2 p-3 rounded-xl border border-[var(--color-surface-border)] hover:border-blue-500/50 hover:bg-blue-500/5 transition-all active:scale-95"
                 >
-                  <Mail size={18} className="text-blue-500" />
+                  <Mail size={18} className="text-blue-500" aria-hidden="true" />
                   <span className="text-[10px] font-bold text-[var(--color-ink)]">
                     Email
                   </span>

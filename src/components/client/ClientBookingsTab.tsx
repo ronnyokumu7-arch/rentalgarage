@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ColumnDef } from "@tanstack/react-table";
-import { Calendar, ChevronRight, Banknote } from "lucide-react";
+import { Calendar, CaretRight as ChevronRight, Money as Banknote } from "@phosphor-icons/react/ssr";
 import toast from "react-hot-toast";
 import { bookingsApi } from "@/lib/api/bookings";
 import { vehiclesApi } from "@/lib/api/vehicles";
@@ -105,7 +105,7 @@ export default function ClientBookingsTab({ clientId }: { clientId: number }) {
       header: "Amount",
       cell: ({ row }) => (
         <span className="text-sm font-semibold text-gray-900 flex items-center gap-1">
-          <Banknote size={12} className="text-emerald-600" />
+          <Banknote size={12} className="text-emerald-600" aria-hidden="true" />
           {new Intl.NumberFormat("en-US", { style: "currency", currency: row.original.currency_code, maximumFractionDigits: 0 }).format(row.original.total_amount)}
         </span>
       ),
@@ -119,7 +119,7 @@ export default function ClientBookingsTab({ clientId }: { clientId: number }) {
           className="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors"
           title="View Booking"
         >
-          <ChevronRight size={14} />
+          <ChevronRight size={14} aria-hidden="true" />
         </button>
       ),
     },
@@ -130,7 +130,7 @@ export default function ClientBookingsTab({ clientId }: { clientId: number }) {
   return (
     <SectionCard className="!p-0 bg-white border-slate-200 shadow-sm overflow-hidden">
       <div className="p-4 border-b border-slate-100 flex items-center gap-2">
-        <Calendar size={16} className="text-gray-500" />
+        <Calendar size={16} className="text-gray-500" aria-hidden="true" />
         <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wide">Rental History</h3>
       </div>
       {bookings.length === 0 ? (

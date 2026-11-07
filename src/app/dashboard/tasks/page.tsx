@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { ListChecks, Users, CheckCircle2, ClipboardList, UserSquare2, CircleCheckBig } from "lucide-react";
+import { ListChecks, Users, CheckCircle as CheckCircle2, ClipboardText as ClipboardList, UserSquare as UserSquare2, CheckCircle as CircleCheckBig } from "@phosphor-icons/react/ssr";
 import { useTasksList } from "@/hooks/tasks/useTasksList";
 import type { Task } from "@/lib/types";
 import TaskProfileModal from "@/components/tasks/TaskProfileModal";
@@ -62,17 +62,17 @@ export default function TasksPage() {
     tasks: {
       title: "Task Management",
       description: "Track, assign, and monitor operational tasks across your team.",
-      icon: <ClipboardList size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+      icon: <ClipboardList size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
     },
     "assigned-to": {
       title: "Assigned To",
       description: "View and manage tasks by team member and workload distribution.",
-      icon: <UserSquare2 size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+      icon: <UserSquare2 size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
     },
     completed: {
       title: "Completed Tasks",
       description: "Review completed tasks, track historical performance, and reopen items.",
-      icon: <CircleCheckBig size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+      icon: <CircleCheckBig size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
     },
   }[activeTab];
 

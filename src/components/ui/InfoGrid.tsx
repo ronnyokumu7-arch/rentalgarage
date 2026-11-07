@@ -1,10 +1,10 @@
 import React from "react";
-import { LucideIcon } from "lucide-react";
+import type { Icon } from "@phosphor-icons/react";
 
 interface InfoItem {
   label: string;
   value: React.ReactNode;
-  icon?: LucideIcon;
+  icon?: Icon;
   copyable?: boolean;
   href?: string;
 }
@@ -36,7 +36,7 @@ export default function InfoGrid({
         const content = (
           <div className={`${compact ? "py-2" : "py-3"}`}>
             <div className="flex items-center gap-1.5 mb-1">
-              {Icon && <Icon size={13} strokeWidth={2} className="text-ink-subtle" />}
+              {Icon && <Icon size={13} weight="regular" className="text-ink-subtle" aria-hidden="true" />}
               <span className="text-xs font-medium text-ink-muted uppercase tracking-wide">
                 {item.label}
               </span>

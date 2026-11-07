@@ -2,14 +2,14 @@
 "use client";
 
 import {
-  Search,
+  MagnifyingGlass as Search,
   X,
   SlidersHorizontal,
   Shield,
-  Ban,
+  Prohibit as Ban,
   Archive,
   Calendar,
-} from "lucide-react";
+} from "@phosphor-icons/react/ssr";
 
 interface ClientsToolbarProps {
   isSelecting: boolean;
@@ -74,7 +74,7 @@ export default function ClientsToolbar({
                 className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] transition-colors"
                 aria-label="Clear selection"
               >
-                <X size={16} />
+                <X size={16} aria-hidden="true" />
               </button>
               <span className="text-sm font-bold text-[var(--color-ink)] tabular-nums">
                 {selectedCount} selected
@@ -87,21 +87,21 @@ export default function ClientsToolbar({
                 className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
                 aria-label="Verify clients"
               >
-                <Shield size={16} />
+                <Shield size={16} aria-hidden="true" />
               </button>
               <button
                 onClick={onBatchSuspend}
                 className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
                 aria-label="Suspend clients"
               >
-                <Ban size={16} />
+                <Ban size={16} aria-hidden="true" />
               </button>
               <button
                 onClick={onBatchArchive}
                 className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
                 aria-label="Archive clients"
               >
-                <Archive size={16} />
+                <Archive size={16} aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -111,7 +111,7 @@ export default function ClientsToolbar({
               <div className="relative flex-1 h-full">
                 <Search
                   size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true"
                 />
                 <input
                   ref={searchInputRef}
@@ -131,7 +131,7 @@ export default function ClientsToolbar({
                     className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[var(--color-surface-hover)] flex items-center justify-center hover:bg-[var(--color-surface-border)] transition-colors"
                     aria-label="Clear search"
                   >
-                    <X size={12} className="text-[var(--color-ink-muted)]" />
+                    <X size={12} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
                   </button>
                 )}
               </div>
@@ -153,7 +153,7 @@ export default function ClientsToolbar({
                         : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
                   }`}
                 >
-                  <SlidersHorizontal size={14} />
+                  <SlidersHorizontal size={14} aria-hidden="true" />
                   {hasActiveFilter && !filtersOpen && (
                     <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]" />
                   )}
@@ -203,7 +203,7 @@ export default function ClientsToolbar({
                           : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
                       }`}
                     >
-                      <Calendar size={11} className="flex-shrink-0" />
+                      <Calendar size={11} className="flex-shrink-0" aria-hidden="true" />
                       With Booking
                     </button>
 
@@ -215,7 +215,7 @@ export default function ClientsToolbar({
                           : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
                       }`}
                     >
-                      <Archive size={11} className="flex-shrink-0" />
+                      <Archive size={11} className="flex-shrink-0" aria-hidden="true" />
                       Archived
                     </button>
                   </div>

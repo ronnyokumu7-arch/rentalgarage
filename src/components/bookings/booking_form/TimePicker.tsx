@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { Clock } from "lucide-react";
+import { Clock } from "@phosphor-icons/react/ssr";
 
 interface TimePickerProps {
   value: string;
@@ -39,7 +39,7 @@ export default function TimePicker({ value, onChange, minTime }: TimePickerProps
       role="presentation"
     >
       <div className="w-full flex items-center justify-center gap-1.5 px-2 py-2.5 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink)] focus-within:ring-2 focus-within:ring-[var(--color-primary)]/30 focus-within:border-[var(--color-primary)] transition-all text-sm font-semibold tabular-nums">
-        <Clock size={14} className="text-[var(--color-ink-subtle)] shrink-0" />
+        <Clock size={14} className="text-[var(--color-ink-subtle)] shrink-0" aria-hidden="true" />
         <input
           ref={inputRef}
           type="time"
@@ -54,7 +54,7 @@ export default function TimePicker({ value, onChange, minTime }: TimePickerProps
       {/* Visual fallback label when no value is set */}
       {!value && (
         <span className="absolute inset-0 flex items-center justify-center gap-1.5 px-2 pointer-events-none text-sm font-semibold text-[var(--color-ink-subtle)] tabular-nums">
-          <Clock size={14} />
+          <Clock size={14} aria-hidden="true" />
           09:00
         </span>
       )}

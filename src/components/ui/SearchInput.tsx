@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { Search, X } from "lucide-react";
+import { MagnifyingGlass as Search, X } from "@phosphor-icons/react/ssr";
 
 interface SearchInputProps {
   value: string;
@@ -38,8 +38,8 @@ export default function SearchInput({
     <div className="relative">
       <Search
         size={16}
-        strokeWidth={2}
-        className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-subtle"
+        weight="regular"
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-subtle" aria-hidden="true"
       />
       <input
         type="text"
@@ -61,7 +61,7 @@ export default function SearchInput({
           }}
           className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-subtle hover:text-ink transition-colors"
         >
-          <X size={16} strokeWidth={2} />
+          <X size={16} weight="regular" aria-hidden="true" />
         </button>
       )}
     </div>

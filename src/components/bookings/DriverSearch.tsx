@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { UserCircle, Phone, CreditCard, Car } from "lucide-react";
+import { UserCircle, Phone, CreditCard, Car } from "@phosphor-icons/react/ssr";
 import type { DriverListItem } from "@/lib/types";
 
 interface DriverSearchProps {
@@ -43,7 +43,7 @@ export default function DriverSearch({
 
       {/* Search Input */}
       <div className="relative">
-        <UserCircle size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" />
+        <UserCircle size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" aria-hidden="true" />
         <input
           type="text"
           value={
@@ -115,18 +115,18 @@ export default function DriverSearch({
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-[10px] text-[var(--color-ink-muted)]">
                     <div className="flex items-center gap-1">
-                      <Phone size={10} />
+                      <Phone size={10} aria-hidden="true" />
                       <span>{driver.phone}</span>
                     </div>
                     {driver.id_number_masked && (
                       <div className="flex items-center gap-1">
-                        <CreditCard size={10} />
+                        <CreditCard size={10} aria-hidden="true" />
                         <span>ID {driver.id_number_masked}</span>
                       </div>
                     )}
                     {driver.dl_number_masked && (
                       <div className="flex items-center gap-1 col-span-2">
-                        <Car size={10} />
+                        <Car size={10} aria-hidden="true" />
                         <span>DL {driver.dl_number_masked}</span>
                       </div>
                     )}

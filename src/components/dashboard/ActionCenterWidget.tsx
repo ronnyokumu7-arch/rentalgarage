@@ -4,9 +4,9 @@
 import { useState, useEffect, useRef } from "react";
 import {
   Calendar,
-  Undo2,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+  ArrowUUpLeft as Undo2,
+} from "@phosphor-icons/react/ssr";
+import type { Icon } from "@phosphor-icons/react";
 
 import UpcomingRentalsTabContent from "@/components/dashboard/features/UpcomingRentalsTabContent";
 import ReturningTodayTabContent from "@/components/dashboard/features/ReturningTodayTabContent";
@@ -17,7 +17,7 @@ type SubTab = "upcoming" | "returning";
 
 const HEADER_COPY: Record<
   SubTab,
-  { title: string; description: string; icon: LucideIcon }
+  { title: string; description: string; icon: Icon }
 > = {
   upcoming: {
     title: "Upcoming",
@@ -58,7 +58,7 @@ export default function ActionCenterWidget() {
       <div className="px-5 py-3.5 border-b border-[var(--color-surface-border)] bg-gradient-to-r from-[var(--color-surface-hover)]/50 to-transparent">
         <div className="flex items-center gap-3.5 min-w-0 flex-1">
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-[var(--color-primary)] to-[var(--color-primary)]/80 flex items-center justify-center text-white shadow-sm shadow-[var(--color-primary)]/20 flex-shrink-0">
-            <HeaderIcon size={20} />
+            <HeaderIcon size={20} aria-hidden="true" />
           </div>
           <div className="min-w-0 flex-1">
             <h3 className="text-sm font-bold text-[var(--color-ink)] tracking-tight">
@@ -90,7 +90,7 @@ export default function ActionCenterWidget() {
                 : "text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)]"
             }`}
           >
-            <Calendar size={12} />
+            <Calendar size={12} aria-hidden="true" />
             <span>Upcoming</span>
             {!upcomingLoading && rentals.length > 0 && (
               <span
@@ -114,7 +114,7 @@ export default function ActionCenterWidget() {
                 : "text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)]"
             }`}
           >
-            <Undo2 size={12} />
+            <Undo2 size={12} aria-hidden="true" />
             <span>Returning</span>
             {!returningLoading && returns.length > 0 && (
               <span

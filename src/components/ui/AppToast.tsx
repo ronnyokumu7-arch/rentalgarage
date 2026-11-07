@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, AlertCircle, AlertTriangle, Info, X } from "lucide-react";
+import { CheckCircle as CheckCircle2, WarningCircle as AlertCircle, Warning as AlertTriangle, Info, X } from "@phosphor-icons/react/ssr";
 import { toast } from "react-hot-toast";
 
 export interface ToastAction {
@@ -98,7 +98,7 @@ export function AppToast({ t, response, onAction }: AppToastProps) {
         className="flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center"
         style={{ backgroundColor: config.bg, color: config.color }}
       >
-        <Icon size={18} strokeWidth={2.25} />
+        <Icon size={18} weight="regular" aria-hidden="true" />
       </div>
 
       {/* Content */}
@@ -135,7 +135,7 @@ export function AppToast({ t, response, onAction }: AppToastProps) {
         style={{ color: "var(--color-ink-subtle, #78716C)" }}
         aria-label="Dismiss"
       >
-        <X size={14} />
+        <X size={14} aria-hidden="true" />
       </button>
     </div>
   );

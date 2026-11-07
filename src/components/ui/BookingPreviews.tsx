@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { Phone, Mail, MessageCircle, Car, MapPin, DollarSign, ExternalLink } from "lucide-react";
+import { Phone, Envelope as Mail, ChatCircle as MessageCircle, Car, MapPin, CurrencyDollar as DollarSign, ArrowSquareOut as ExternalLink } from "@phosphor-icons/react/ssr";
 import type { Client, Vehicle } from "@/lib/types";
 import Badge from "@/components/ui/Badge";
 
@@ -24,7 +24,7 @@ export function ContactActions({ phone, email, className = "" }: ContactActionsP
           className="w-7 h-7 flex items-center justify-center rounded-lg bg-surface-hover text-ink-muted hover:bg-accent-bg hover:text-accent-dark transition-colors"
           title={`Call ${phone}`}
         >
-          <Phone size={14} />
+          <Phone size={14} aria-hidden="true" />
         </a>
       )}
       {email && (
@@ -33,7 +33,7 @@ export function ContactActions({ phone, email, className = "" }: ContactActionsP
           className="w-7 h-7 flex items-center justify-center rounded-lg bg-surface-hover text-ink-muted hover:bg-accent-bg hover:text-accent-dark transition-colors"
           title={`Email ${email}`}
         >
-          <Mail size={14} />
+          <Mail size={14} aria-hidden="true" />
         </a>
       )}
       {waNumber && (
@@ -44,7 +44,7 @@ export function ContactActions({ phone, email, className = "" }: ContactActionsP
           className="w-7 h-7 flex items-center justify-center rounded-lg bg-surface-hover text-ink-muted hover:bg-green-50 hover:text-green-600 transition-colors"
           title="WhatsApp"
         >
-          <MessageCircle size={14} />
+          <MessageCircle size={14} aria-hidden="true" />
         </a>
       )}
     </div>
@@ -85,17 +85,17 @@ export function ClientHoverLink({ client, children, className = "" }: ClientHove
           <div className="space-y-2 mb-3 text-xs">
             {client.email && (
               <div className="flex items-center gap-2 text-ink-muted">
-                <Mail size={12} /> <span className="truncate">{client.email}</span>
+                <Mail size={12} aria-hidden="true" /> <span className="truncate">{client.email}</span>
               </div>
             )}
             {client.phone && (
               <div className="flex items-center gap-2 text-ink-muted">
-                <Phone size={12} /> <span>{client.phone}</span>
+                <Phone size={12} aria-hidden="true" /> <span>{client.phone}</span>
               </div>
             )}
             {client.residential_address && (
               <div className="flex items-center gap-2 text-ink-muted">
-                <MapPin size={12} /> <span className="truncate">{client.residential_address}</span>
+                <MapPin size={12} aria-hidden="true" /> <span className="truncate">{client.residential_address}</span>
               </div>
             )}
           </div>
@@ -106,7 +106,7 @@ export function ClientHoverLink({ client, children, className = "" }: ClientHove
             href={`/dashboard/clients/${client.id}`}
             className="w-7 h-7 flex items-center justify-center rounded-lg bg-surface-hover text-ink-muted hover:bg-success-bg hover:text-success-text transition-colors"
           >
-            View Full Profile <ExternalLink size={10} />
+            View Full Profile <ExternalLink size={10} aria-hidden="true" />
           </Link>
         </div>
       </div>
@@ -142,7 +142,7 @@ export function VehicleHoverLink({ vehicle, children, className = "" }: VehicleH
         <div className="card !p-4 shadow-xl border border-surface-border/50 bg-surface-card">
           <div className="flex items-start gap-3 mb-3">
             <div className="w-12 h-12 rounded-xl bg-surface-hover flex items-center justify-center text-ink-muted">
-              <Car size={20} />
+              <Car size={20} aria-hidden="true" />
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-bold text-ink truncate">{vehicle.make} {vehicle.model}</p>
@@ -157,7 +157,7 @@ export function VehicleHoverLink({ vehicle, children, className = "" }: VehicleH
             <div className="p-2 rounded-lg bg-surface-hover">
               <p className="text-ink-subtle text-[10px] uppercase mb-0.5">Daily Rate</p>
               <p className="font-semibold text-ink flex items-center gap-1">
-                <DollarSign size={10} /> {Number(vehicle.daily_rate).toLocaleString()}
+                <DollarSign size={10} aria-hidden="true" /> {Number(vehicle.daily_rate).toLocaleString()}
               </p>
             </div>
             <div className="p-2 rounded-lg bg-surface-hover">
@@ -172,7 +172,7 @@ export function VehicleHoverLink({ vehicle, children, className = "" }: VehicleH
             href={`/dashboard/fleet/${vehicle.id}`}
             className="flex items-center justify-center gap-1 w-full py-1.5 rounded-lg bg-surface-hover text-xs font-medium text-ink-muted hover:bg-accent-bg hover:text-accent-dark transition-colors"
           >
-            View Full Details <ExternalLink size={10} />
+            View Full Details <ExternalLink size={10} aria-hidden="true" />
           </Link>
         </div>
       </div>

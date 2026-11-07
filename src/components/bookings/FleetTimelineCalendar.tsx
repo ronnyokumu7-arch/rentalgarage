@@ -5,15 +5,15 @@ import { format, isToday as checkIsToday, startOfDay, endOfDay, isBefore } from 
 import {
   Car,
   User,
-  Search,
+  MagnifyingGlass as Search,
   Calendar,
   Phone,
   Check,
   Gauge,
   Wrench,
-  CalendarDays,
-  Activity
-} from "lucide-react";
+  CalendarDots as CalendarDays,
+  Pulse as Activity
+} from "@phosphor-icons/react/ssr";
 import type { Vehicle, Booking, Client, BookingClientRelation } from "@/lib/types";
 import { getClientDisplayName } from "@/lib/client-name";
 
@@ -211,7 +211,7 @@ export default function FleetTimelineCalendar({
           <div className="bg-[var(--color-surface-hover)] border-b border-[var(--color-surface-border)] p-3.5 px-5 flex flex-row flex-nowrap items-center justify-between gap-4">
             <div className="flex items-center gap-3 text-xs whitespace-nowrap">
               <div className="w-8 h-8 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center flex-shrink-0">
-                <User size={16} />
+                <User size={16} aria-hidden="true" />
               </div>
               <div>
                 <span className="font-bold text-[var(--color-ink)] block">Associate Contract Holder</span>
@@ -250,7 +250,7 @@ export default function FleetTimelineCalendar({
             <div className="flex border-b border-[var(--color-surface-border)] bg-[var(--color-surface)] sticky top-0 z-30">
               <div className="w-36 sm:w-48 md:w-72 flex-shrink-0 p-3 px-4 border-r border-[var(--color-surface-border)] bg-[var(--color-surface)] flex items-center sticky left-0 z-40 gap-2">
                 <div className="relative flex-1">
-                  <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" />
+                  <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                   <input
                     type="text"
                     value={vehicleSearch}
@@ -307,7 +307,7 @@ export default function FleetTimelineCalendar({
                     <div className="w-36 sm:w-48 md:w-72 flex-shrink-0 p-2 sm:p-3 border-r border-[var(--color-surface-border)] bg-[var(--color-surface)] z-20 flex items-center justify-between sticky left-0 shadow-[4px_0_12px_-4px_rgba(0,0,0,0.05)] dark:shadow-[4px_0_12px_-4px_rgba(0,0,0,0.3)]">
                       <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
                         <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center text-[var(--color-ink-muted)] shrink-0">
-                          <Car size={15} />
+                          <Car size={15} aria-hidden="true" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <h4 className="text-[11px] sm:text-xs font-bold text-[var(--color-ink)] truncate">{vehicle.make} {vehicle.model}</h4>
@@ -315,7 +315,7 @@ export default function FleetTimelineCalendar({
                             <span className="text-[9px] sm:text-[10px] font-mono font-bold text-[var(--color-ink-muted)] uppercase truncate">{vehicle.plate_number || "No Plate"}</span>
                             <span className="hidden sm:inline text-[var(--color-surface-border)]">•</span>
                             <div className="hidden sm:flex items-center gap-1 text-[10px] text-[var(--color-ink-subtle)]">
-                              <Gauge size={10} className="text-[var(--color-primary)]" />
+                              <Gauge size={10} className="text-[var(--color-primary)]" aria-hidden="true" />
                               <span className="font-mono">{vehicle.current_mileage?.toLocaleString() || 0} km</span>
                             </div>
                           </div>
@@ -372,9 +372,9 @@ export default function FleetTimelineCalendar({
                               }}
                             >
                               {isPastBlock ? (
-                                <Check size={10} className="opacity-80" />
+                                <Check size={10} className="opacity-80" aria-hidden="true" />
                               ) : (
-                                <User size={10} className="opacity-80" />
+                                <User size={10} className="opacity-80" aria-hidden="true" />
                               )}
                             </div>
                           </div>
@@ -393,7 +393,7 @@ export default function FleetTimelineCalendar({
           <div className="border-t border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 p-3 px-4">
             <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3 md:gap-4">
               <div className="flex items-center gap-2.5 min-w-[200px]">
-                <Car size={16} className="text-[var(--color-primary)] shrink-0" />
+                <Car size={16} className="text-[var(--color-primary)] shrink-0" aria-hidden="true" />
                 <div className="flex flex-col">
                   <span className="text-xs font-bold text-[var(--color-ink)] truncate">
                     {selectedVehicle.make} {selectedVehicle.model}
@@ -406,28 +406,28 @@ export default function FleetTimelineCalendar({
 
               <div className="grid grid-cols-2 sm:grid-cols-4 items-center gap-4 text-xs">
                 <div className="flex items-center gap-2">
-                  <Gauge size={14} className="text-[var(--color-ink-muted)] shrink-0" />
+                  <Gauge size={14} className="text-[var(--color-ink-muted)] shrink-0" aria-hidden="true" />
                   <div className="flex flex-col">
                     <span className="text-[10px] text-[var(--color-ink-subtle)] uppercase font-bold">Odometer</span>
                     <span className="font-bold text-[var(--color-ink)] font-mono">{selectedVehicle.current_mileage?.toLocaleString() || 0} km</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Wrench size={14} className="text-[var(--color-ink-muted)] shrink-0" />
+                  <Wrench size={14} className="text-[var(--color-ink-muted)] shrink-0" aria-hidden="true" />
                   <div className="flex flex-col">
                     <span className="text-[10px] text-[var(--color-ink-subtle)] uppercase font-bold">Next Service</span>
                     <span className="font-bold text-[var(--color-ink)] font-mono">{selectedVehicle.next_service_km?.toLocaleString() || "N/A"} km</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <CalendarDays size={14} className="text-[var(--color-ink-muted)] shrink-0" />
+                  <CalendarDays size={14} className="text-[var(--color-ink-muted)] shrink-0" aria-hidden="true" />
                   <div className="flex flex-col">
                     <span className="text-[10px] text-[var(--color-ink-subtle)] uppercase font-bold">Days Rented</span>
                     <span className="font-bold text-[var(--color-primary)]">{rentedDays}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Activity size={14} className="text-[var(--color-ink-muted)] shrink-0" />
+                  <Activity size={14} className="text-[var(--color-ink-muted)] shrink-0" aria-hidden="true" />
                   <div className="flex flex-col">
                     <span className="text-[10px] text-[var(--color-ink-subtle)] uppercase font-bold">Utilization</span>
                     <span className="font-bold text-[var(--color-primary)]">{vehicleUtilizationRate}%</span>
@@ -457,12 +457,12 @@ export default function FleetTimelineCalendar({
             </h4>
             {tooltip.client?.phone && (
               <p className="text-[11px] text-[var(--color-ink-muted)] flex items-center gap-1.5 mb-3">
-                <Phone size={10} className="text-[var(--color-primary)]" />
+                <Phone size={10} className="text-[var(--color-primary)]" aria-hidden="true" />
                 <span className="font-mono">{tooltip.client.phone}</span>
               </p>
             )}
             <p className="text-[11px] text-[var(--color-ink-muted)] flex items-center gap-1.5">
-              <Calendar size={10} />
+              <Calendar size={10} aria-hidden="true" />
               {format(new Date(tooltip.booking.start_date), "MMM d")} - {format(new Date(tooltip.booking.end_date), "MMM d, yyyy")}
             </p>
           </div>

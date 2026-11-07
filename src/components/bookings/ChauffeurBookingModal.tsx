@@ -1,6 +1,6 @@
 "use client";
 
-import { X, CheckCircle } from "lucide-react";
+import { X, CheckCircle } from "@phosphor-icons/react/ssr";
 import ChauffeurForm from "./ChauffeurForm";
 
 interface ChauffeurBookingModalProps {
@@ -39,7 +39,7 @@ export default function ChauffeurBookingModal({ isOpen, onClose }: ChauffeurBook
             className="p-2 rounded-xl text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all duration-150 active:scale-95"
             aria-label="Close modal"
           >
-            <X size={18} strokeWidth={2} />
+            <X size={18} weight="regular" aria-hidden="true" />
           </button>
         </div>
 
@@ -63,7 +63,7 @@ export default function ChauffeurBookingModal({ isOpen, onClose }: ChauffeurBook
             form="chauffeur-booking-form"
             className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] shadow-lg shadow-[var(--color-primary)]/20 transition-all active:scale-[0.98]"
           >
-            <CheckCircle size={16} />
+            <CheckCircle size={16} aria-hidden="true" />
             Create Booking
           </button>
         </div>

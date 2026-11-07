@@ -2,7 +2,7 @@
 "use client";
 
 import React from "react";
-import { Check, Zap, Crown, Layers, Loader2 } from "lucide-react";
+import { Check, Lightning as Zap, Crown, Stack as Layers, CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
 
 export type PlanId = "Starter" | "Professional" | "Enterprise";
 export type BillingCycle = "monthly" | "annual";
@@ -97,7 +97,7 @@ export function PricingGrid({
 
               {isCurrentPlan && (
                 <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500 text-white tracking-wide shadow-sm uppercase flex items-center gap-1">
-                  <Check size={10} /> Active Subscription
+                  <Check size={10} aria-hidden="true" /> Active Subscription
                 </div>
               )}
 
@@ -110,7 +110,7 @@ export function PricingGrid({
                         : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)]"
                     }`}
                   >
-                    <Icon size={18} />
+                    <Icon size={18} aria-hidden="true" />
                   </div>
                   <span className="text-[10px] font-mono font-semibold uppercase tracking-wider px-2 py-0.5 rounded-md bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)]">
                     {plan.name}
@@ -138,7 +138,7 @@ export function PricingGrid({
                     >
                       <Check
                         size={14}
-                        className="text-emerald-500 shrink-0"
+                        className="text-emerald-500 shrink-0" aria-hidden="true"
                       />
                       <span>{f}</span>
                     </div>
@@ -173,7 +173,7 @@ export function PricingGrid({
                         : "border-[var(--color-surface-border)] group-hover:border-[var(--color-ink-subtle)]"
                     }`}
                   >
-                    {(isSelected || isCurrentPlan) && <Check size={12} />}
+                    {(isSelected || isCurrentPlan) && <Check size={12} aria-hidden="true" />}
                   </div>
                 </div>
 
@@ -190,7 +190,7 @@ export function PricingGrid({
                   >
                     {isSubmitting ? (
                       <>
-                        <Loader2 size={14} className="animate-spin" />
+                        <Loader2 size={14} className="animate-spin" aria-hidden="true" />
                         Processing...
                       </>
                     ) : (

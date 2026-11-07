@@ -1,9 +1,9 @@
 "use client";
 
 import { 
-  CheckCircle2, Clock, Tag, Calendar, Eye, Briefcase, DollarSign, Car, 
+  CheckCircle as CheckCircle2, Clock, Tag, Calendar, Eye, Briefcase, CurrencyDollar as DollarSign, Car,
   Shield, Users
-} from "lucide-react";
+} from "@phosphor-icons/react/ssr";
 import Badge from "@/components/ui/Badge";
 import type { Task } from "@/lib/types";
 
@@ -115,13 +115,13 @@ export default function ActionCenterList({
       <div className="flex-1 overflow-y-auto custom-scrollbar p-2 sm:p-3 space-y-2">
         {loading ? (
           <div className="flex flex-col items-center justify-center h-full text-[var(--color-ink-muted)]">
-            <Clock size={24} className="animate-spin mb-3 text-[var(--color-primary)]" />
+            <Clock size={24} className="animate-spin mb-3 text-[var(--color-primary)]" aria-hidden="true" />
             <p className="text-xs font-bold uppercase tracking-wider">Loading tasks...</p>
           </div>
         ) : displayTasks.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-8">
             <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mb-4">
-              <CheckCircle2 size={28} className="text-emerald-500" />
+              <CheckCircle2 size={28} className="text-emerald-500" aria-hidden="true" />
             </div>
             <p className="text-sm font-bold text-[var(--color-ink)] mb-1">All Caught Up!</p>
             <p className="text-xs text-[var(--color-ink-muted)] max-w-[220px] leading-relaxed">
@@ -154,7 +154,7 @@ export default function ActionCenterList({
                     {!isCompleted ? (
                       <div className={`w-2.5 h-2.5 rounded-full ring-2 ring-[var(--color-surface)] ${priorityDotColor}`} />
                     ) : (
-                      <CheckCircle2 size={16} className="text-emerald-500" />
+                      <CheckCircle2 size={16} className="text-emerald-500" aria-hidden="true" />
                     )}
                   </div>
 
@@ -188,11 +188,11 @@ export default function ActionCenterList({
 
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)]">
                       <span className="flex items-center gap-1">
-                        <CategoryIcon size={11} />
+                        <CategoryIcon size={11} aria-hidden="true" />
                         <span className="capitalize">{task.category}</span>
                       </span>
                       <span className={`flex items-center gap-1 ${isOverdue ? "text-rose-500" : ""}`}>
-                        <Calendar size={11} />
+                        <Calendar size={11} aria-hidden="true" />
                         {dateInfo.text}
                         {isOverdue && <span className="ml-1 px-1 py-0.5 rounded bg-rose-500/10 text-[9px] font-extrabold">OVERDUE</span>}
                       </span>
@@ -207,9 +207,9 @@ export default function ActionCenterList({
                       className="flex items-center gap-1 px-2 py-1.5 sm:px-3 sm:py-1.5 rounded-lg text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 hover:bg-emerald-500/10 border border-emerald-500/20 transition-all active:scale-95 disabled:opacity-50 flex-shrink-0"
                     >
                       {updatingId === task.id ? (
-                        <Clock size={12} className="animate-spin" />
+                        <Clock size={12} className="animate-spin" aria-hidden="true" />
                       ) : (
-                        <CheckCircle2 size={12} />
+                        <CheckCircle2 size={12} aria-hidden="true" />
                       )}
                       <span className="hidden sm:inline">Done</span>
                     </button>
@@ -221,7 +221,7 @@ export default function ActionCenterList({
                       className="p-2 rounded-lg text-[var(--color-ink-subtle)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-primary)] transition-colors flex-shrink-0"
                       title="View details"
                     >
-                      <Eye size={14} />
+                      <Eye size={14} aria-hidden="true" />
                     </button>
                   )}
                 </div>

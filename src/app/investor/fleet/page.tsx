@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Car, Plus, BarChart3 } from "lucide-react";
+import { Car, Plus, ChartBar as BarChart3 } from "@phosphor-icons/react/ssr";
 import { motion } from "framer-motion";
 import InvestorFleetList from "@/components/investor/InvestorFleetList";
 import { useInvestorFleetList } from "@/hooks/investor/useInvestorFleetList";
@@ -24,12 +24,12 @@ export default function InvestorFleetPage() {
     fleet: {
       title: "My Fleet",
       description: "Overview of your leased vehicles, their current status, and performance.",
-      icon: <Car size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+      icon: <Car size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
     },
     performance: {
       title: "Fleet Performance",
       description: "Deep insights into your fleet's utilization and profitability.",
-      icon: <BarChart3 size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+      icon: <BarChart3 size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
     },
   }[activeTab];
 
@@ -75,7 +75,7 @@ export default function InvestorFleetPage() {
           animate={{ opacity: 1, y: 0 }}
           className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-12 text-center"
         >
-          <BarChart3 size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" />
+          <BarChart3 size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" aria-hidden="true" />
           <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">Performance Analytics</h3>
           <p className="text-sm text-[var(--color-ink-muted)] max-w-md mx-auto">
             Advanced fleet performance metrics, real-time vehicle utilization analysis, and customized profitability timelines coming soon.
@@ -90,7 +90,7 @@ export default function InvestorFleetPage() {
           className="fixed bottom-20 right-6 md:bottom-8 md:right-8 z-50 group flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white rounded-full shadow-[var(--shadow-xl)] hover:scale-105 active:scale-95 transition-all duration-300 ease-out"
           title="Add New Vehicle"
         >
-          <Plus size={24} className="sm:w-7 sm:h-7 group-hover:rotate-90 transition-transform duration-300" />
+          <Plus size={24} className="sm:w-7 sm:h-7 group-hover:rotate-90 transition-transform duration-300" aria-hidden="true" />
           <span className="hidden md:block absolute right-full mr-4 px-3 py-1.5 bg-[var(--color-surface)] text-[var(--color-ink)] text-xs font-bold rounded-lg shadow-[var(--shadow-dropdown)] opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap border border-[var(--color-surface-border)]">
             Add Vehicle
           </span>

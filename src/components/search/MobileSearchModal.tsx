@@ -4,17 +4,17 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Search as SearchIcon,
+  MagnifyingGlass as SearchIcon,
   X,
-  Loader2,
-  ChevronDown,
-  ChevronRight,
-  Sparkles,
+  CircleNotch as Loader2,
+  CaretDown as ChevronDown,
+  CaretRight as ChevronRight,
+  Sparkle as Sparkles,
   Users,
-  CalendarDays,
+  CalendarDots as CalendarDays,
   Car,
   ArrowUpRight,
-} from "lucide-react";
+} from "@phosphor-icons/react/ssr";
 import { useGlobalSearch, type SearchScope } from "@/hooks/useGlobalSearch";
 
 /* ──────────────────────────────────────────────────────────────────────
@@ -199,9 +199,9 @@ export default function MobileSearchModal({ open, onClose }: MobileSearchModalPr
     }
     if (scope.icon) {
       const Icon = scope.icon;
-      return <Icon size={size} strokeWidth={2.25} className="flex-shrink-0 text-primary" />;
+      return <Icon size={size} weight="regular" className="flex-shrink-0 text-primary" aria-hidden="true" />;
     }
-    return <Sparkles size={size} strokeWidth={2.25} className="flex-shrink-0 text-primary" />;
+    return <Sparkles size={size} weight="regular" className="flex-shrink-0 text-primary" aria-hidden="true" />;
   };
 
   // ✅ Scope-aware preview — only slices categories in the active scope.
@@ -256,7 +256,7 @@ export default function MobileSearchModal({ open, onClose }: MobileSearchModalPr
               aria-expanded={showScopeMenu}
             >
               {renderScopeMark(activeScope, 12)}
-              <ChevronDown size={12} strokeWidth={2.5} className="text-ink-muted flex-shrink-0" />
+              <ChevronDown size={12} weight="bold" className="text-ink-muted flex-shrink-0" aria-hidden="true" />
             </button>
 
             {showScopeMenu && (
@@ -286,7 +286,7 @@ export default function MobileSearchModal({ open, onClose }: MobileSearchModalPr
                           {renderScopeMark(scope, 12)}
                         </span>
                         <span className="flex-1 text-left">{scope.label}</span>
-                        {isActive && <ChevronRight size={12} />}
+                        {isActive && <ChevronRight size={12} aria-hidden="true" />}
                       </button>
                     );
                   })}
@@ -308,7 +308,7 @@ export default function MobileSearchModal({ open, onClose }: MobileSearchModalPr
           />
 
           {loading && hasQuery && (
-            <Loader2 size={14} className="animate-spin text-primary flex-shrink-0" />
+            <Loader2 size={14} className="animate-spin text-primary flex-shrink-0" aria-hidden="true" />
           )}
         </div>
 
@@ -318,7 +318,7 @@ export default function MobileSearchModal({ open, onClose }: MobileSearchModalPr
           className="flex items-center justify-center w-10 h-10 rounded-full text-ink-muted hover:bg-surface-hover hover:text-ink transition-colors flex-shrink-0 active:scale-95"
           aria-label="Cancel search"
         >
-          <X size={20} strokeWidth={2} />
+          <X size={20} weight="regular" aria-hidden="true" />
         </button>
       </div>
 
@@ -327,7 +327,7 @@ export default function MobileSearchModal({ open, onClose }: MobileSearchModalPr
         {!hasQuery && (
           <div className="flex flex-col items-center justify-center py-16 text-center px-6">
             <div className="w-14 h-14 rounded-2xl bg-surface-hover flex items-center justify-center mb-3">
-              <SearchIcon size={22} className="text-ink-subtle" />
+              <SearchIcon size={22} className="text-ink-subtle" aria-hidden="true" />
             </div>
             <p className="text-sm font-bold text-ink mb-1">Search anything</p>
             <p className="text-xs text-ink-muted max-w-xs">
@@ -340,7 +340,7 @@ export default function MobileSearchModal({ open, onClose }: MobileSearchModalPr
         {hasQuery && !hasAnyResults && !loading && (
           <div className="flex flex-col items-center justify-center py-16 text-center px-6">
             <div className="w-14 h-14 rounded-2xl bg-surface-hover flex items-center justify-center mb-3">
-              <SearchIcon size={22} className="text-ink-subtle" />
+              <SearchIcon size={22} className="text-ink-subtle" aria-hidden="true" />
             </div>
             <p className="text-sm font-bold text-ink mb-1">
               No {activeScope.id === "all" ? "matches" : activeScope.label.toLowerCase()} for &ldquo;{debouncedQuery}&rdquo;
@@ -467,13 +467,13 @@ export default function MobileSearchModal({ open, onClose }: MobileSearchModalPr
               onClick={handleSubmit}
               className="w-full flex items-center gap-3 px-4 py-4 text-left hover:bg-surface-hover active:bg-surface-hover/80 transition-colors border-t border-surface-border/40"
             >
-              <SearchIcon size={16} className="text-ink-muted flex-shrink-0" />
+              <SearchIcon size={16} className="text-ink-muted flex-shrink-0" aria-hidden="true" />
               <span className="flex-1 text-sm font-semibold text-ink truncate">
                 {activeScope.id === "all"
                   ? `See all results for "${debouncedQuery}"`
                   : `See all ${activeScope.label.toLowerCase()} for "${debouncedQuery}"`}
               </span>
-              <ArrowUpRight size={16} className="text-ink-subtle flex-shrink-0" />
+              <ArrowUpRight size={16} className="text-ink-subtle flex-shrink-0" aria-hidden="true" />
             </button>
           </div>
         )}
@@ -545,7 +545,7 @@ function FlatRow({
       onClick={onClick}
       className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-surface-hover active:bg-surface-hover/80 transition-colors border-b border-surface-border/40"
     >
-      <Icon size={18} strokeWidth={1.8} className={`${iconColor} flex-shrink-0`} />
+      <Icon size={18} weight="light" className={`${iconColor} flex-shrink-0`} aria-hidden="true" />
       <div className="min-w-0 flex-1">
         <div className="flex items-center gap-1.5 flex-wrap">
           <span className="text-sm font-semibold text-ink truncate">{primary}</span>
@@ -559,7 +559,7 @@ function FlatRow({
           <p className="text-xs text-ink-muted truncate mt-0.5">{secondary}</p>
         )}
       </div>
-      <ChevronRight size={16} className="text-ink-subtle flex-shrink-0" />
+      <ChevronRight size={16} className="text-ink-subtle flex-shrink-0" aria-hidden="true" />
     </button>
   );
 }

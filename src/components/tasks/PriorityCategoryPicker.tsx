@@ -1,4 +1,4 @@
-import { Clock, TrendingUp, AlertCircle, CheckCircle2, Car, Building2, Tag, User } from "lucide-react";
+import { Clock, TrendUp as TrendingUp, WarningCircle as AlertCircle, CheckCircle as CheckCircle2, Car, Buildings as Building2, Tag, User } from "@phosphor-icons/react/ssr";
 // ✅ UPDATED: Import centralized types directly
 import type { TaskPriority, TaskCategory } from "@/lib/types";
 
@@ -44,7 +44,7 @@ export default function PriorityCategoryPicker({ priority, setPriority, category
                   isActive ? `${p.color} ring-1 ring-offset-1 ring-indigo-500` : "bg-white border-slate-200 text-slate-500 hover:border-slate-300"
                 }`}
               >
-                <Icon size={12} /> {p.label}
+                <Icon size={12} aria-hidden="true" /> {p.label}
               </button>
             );
           })}
@@ -67,7 +67,7 @@ export default function PriorityCategoryPicker({ priority, setPriority, category
                   isActive ? "bg-indigo-50 border-indigo-300 text-indigo-700 ring-1 ring-offset-1 ring-indigo-500" : "bg-white border-slate-200 text-slate-500 hover:border-slate-300"
                 }`}
               >
-                <Icon size={12} /> {c.label}
+                <Icon size={12} aria-hidden="true" /> {c.label}
               </button>
             );
           })}

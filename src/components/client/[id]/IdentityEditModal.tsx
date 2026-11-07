@@ -1,7 +1,7 @@
 // src/components/client/[id]/IdentityEditModal.tsx
 "use client";
 
-import { UserCircle, Camera } from "lucide-react";
+import { UserCircle, Camera } from "@phosphor-icons/react/ssr";
 import Modal from "@/components/ui/Modal";
 import SecureImage from "@/components/ui/SecureImage";
 import { normalizePersonName } from "@/lib/client-name";
@@ -64,11 +64,11 @@ export default function IdentityEditModal({
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <UserCircle size={40} className="text-[var(--color-primary)]" />
+                <UserCircle size={40} className="text-[var(--color-primary)]" aria-hidden="true" />
               )}
             </div>
             <label className="absolute -bottom-2 -right-2 w-9 h-9 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center cursor-pointer shadow-lg hover:bg-[var(--color-primary-hover)] transition-all active:scale-95 border-2 border-[var(--color-surface)]">
-              <Camera size={16} />
+              <Camera size={16} aria-hidden="true" />
               <input
                 type="file"
                 accept="image/*"

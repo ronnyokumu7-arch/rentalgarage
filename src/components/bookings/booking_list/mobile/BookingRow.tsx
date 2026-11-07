@@ -2,14 +2,14 @@
 "use client";
 
 import {
-  CalendarDays,
+  CalendarDots as CalendarDays,
   Phone,
-  MessageCircle,
-  ChevronRight,
-  AlertCircle,
+  ChatCircle as MessageCircle,
+  CaretRight as ChevronRight,
+  WarningCircle as AlertCircle,
   Car,
-  BadgeCheck,
-} from "lucide-react";
+  SealCheck as BadgeCheck,
+} from "@phosphor-icons/react/ssr";
 import { formatDateShort } from "../constants";
 import {
   getBookingAvatarColors,
@@ -64,7 +64,7 @@ export default function BookingRow({
           <div
             className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${avatar.bg}`}
           >
-            <CalendarDays size={20} className={avatar.icon} strokeWidth={1.75} />
+            <CalendarDays size={20} className={avatar.icon} weight="light" aria-hidden="true" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
@@ -74,14 +74,14 @@ export default function BookingRow({
               <span
                 className={`inline-flex items-center gap-1 flex-shrink-0 px-2 py-0.5 rounded-full border text-[8px] font-bold uppercase tracking-wide whitespace-nowrap ${paymentPill.classes}`}
               >
-                <PaymentIcon size={9} className="flex-shrink-0" strokeWidth={2.5} />
+                <PaymentIcon size={9} className="flex-shrink-0" weight="bold" aria-hidden="true" />
                 {paymentPill.label}
               </span>
             </div>
             <div className="flex items-center gap-1 mt-0.5">
               <CalendarDays
                 size={10}
-                className="text-[var(--color-ink-subtle)] flex-shrink-0"
+                className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true"
               />
               <span className="text-[10px] text-[var(--color-ink-muted)] font-medium">
                 {formatDateShort(item.start_date)}
@@ -95,7 +95,7 @@ export default function BookingRow({
         </div>
         <ChevronRight
           size={16}
-          className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1"
+          className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" aria-hidden="true"
         />
       </div>
 
@@ -114,7 +114,7 @@ export default function BookingRow({
                 onClick={(e) => e.stopPropagation()}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-border)] transition-colors text-[10px] font-bold text-[var(--color-ink)]"
               >
-                <Phone size={10} className="text-[var(--color-ink-muted)] flex-shrink-0" />
+                <Phone size={10} className="text-[var(--color-ink-muted)] flex-shrink-0" aria-hidden="true" />
                 <span className="font-mono tracking-tight whitespace-nowrap">
                   {phoneDisplay}
                 </span>
@@ -128,7 +128,7 @@ export default function BookingRow({
                   onClick={(e) => e.stopPropagation()}
                   className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-border)] transition-colors text-[10px] font-bold text-[var(--color-ink)]"
                 >
-                  <MessageCircle size={10} className="text-[var(--color-ink-muted)]" />
+                  <MessageCircle size={10} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
                   Message
                 </a>
               )}
@@ -144,7 +144,7 @@ export default function BookingRow({
           </p>
           {vehicle?.plate_number && (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-border)] transition-colors text-[10px] font-bold text-[var(--color-ink)] mt-1.5">
-              <Car size={10} className="text-[var(--color-ink-muted)]" />
+              <Car size={10} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
               <span className="font-mono tracking-tight">{vehicle.plate_number}</span>
             </span>
           )}

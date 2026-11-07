@@ -1,7 +1,7 @@
 // src/components/fleet/VehicleDocumentsCard.tsx
 "use client";
 
-import { FileText, Upload, Eye, CheckCircle2, AlertCircle } from "lucide-react";
+import { FileText, Upload, Eye, CheckCircle as CheckCircle2, WarningCircle as AlertCircle } from "@phosphor-icons/react/ssr";
 import type { Vehicle } from "@/lib/types";
 
 interface VehicleDocumentsCardProps {
@@ -30,7 +30,7 @@ function DocTile({
               ? "bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20"
               : "bg-[var(--color-surface-hover)] text-[var(--color-ink-subtle)] border border-[var(--color-surface-border)]"
           }`}>
-            <FileText className="w-4 h-4 sm:w-5 sm:h-5" />
+            <FileText className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />
           </div>
           <div className="min-w-0">
             <h4 className="text-xs sm:text-sm font-bold text-[var(--color-ink)] truncate">{title}</h4>
@@ -43,11 +43,11 @@ function DocTile({
         {/* Status Badge */}
         {isAvailable ? (
           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex-shrink-0">
-            <CheckCircle2 size={10} /> Active
+            <CheckCircle2 size={10} aria-hidden="true" /> Active
           </span>
         ) : (
           <span className="inline-flex lg:hidden items-center gap-1 px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 flex-shrink-0">
-            <AlertCircle size={10} /> Missing
+            <AlertCircle size={10} aria-hidden="true" /> Missing
           </span>
         )}
       </div>
@@ -60,14 +60,14 @@ function DocTile({
             onClick={onView}
             className="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[var(--color-ink)] bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-border)] active:scale-95 transition-all"
           >
-            <Eye size={14} /> View
+            <Eye size={14} aria-hidden="true" /> View
           </button>
         )}
         <button
           type="button"
           className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-[var(--color-primary)] bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 border border-[var(--color-primary)]/20 active:scale-95 transition-all"
         >
-          <Upload size={14} /> {isAvailable ? "Replace" : "Upload"}
+          <Upload size={14} aria-hidden="true" /> {isAvailable ? "Replace" : "Upload"}
         </button>
       </div>
     </div>
@@ -88,7 +88,7 @@ export default function VehicleDocumentsCard({
     <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-2xl p-4 sm:p-6 shadow-[var(--shadow-card)] space-y-3.5 sm:space-y-4">
       <div className="flex items-center justify-between">
         <h3 className="text-xs sm:text-sm font-bold text-[var(--color-ink)] flex items-center gap-2">
-          <FileText size={16} className="text-[var(--color-primary)] flex-shrink-0" /> Compliance Documents
+          <FileText size={16} className="text-[var(--color-primary)] flex-shrink-0" aria-hidden="true" /> Compliance Documents
         </h3>
         <span className="text-[10px] font-mono text-[var(--color-ink-muted)] bg-[var(--color-bg)] px-2 py-0.5 rounded-md border border-[var(--color-surface-border)]">
           {uploadedCount} / 3 Uploaded

@@ -6,17 +6,17 @@ import {
   FileText,
   Download,
   Copy,
-  Send,
-  Ban,
-  RotateCcw,
-  CalendarDays,
+  PaperPlaneTilt as Send,
+  Prohibit as Ban,
+  ArrowCounterClockwise as RotateCcw,
+  CalendarDots as CalendarDays,
   User,
-  PenLine,
-  CheckCircle2,
-  ChevronRight,
+  PencilLine as PenLine,
+  CheckCircle as CheckCircle2,
+  CaretRight as ChevronRight,
   ArrowUpRight,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+} from "@phosphor-icons/react/ssr";
+import type { Icon } from "@phosphor-icons/react";
 import DataTable, { RowAction } from "@/components/ui/DataTable";
 import CardGrid from "@/components/ui/CardGrid";
 
@@ -54,7 +54,7 @@ const statusStyles: Record<ContractStatus, { bg: string; text: string }> = {
 };
 
 // ✅ Premium per-status icons for the pill
-const statusIcons: Record<ContractStatus, LucideIcon> = {
+const statusIcons: Record<ContractStatus, Icon> = {
   draft: PenLine,
   sent: Send,
   signed: CheckCircle2,
@@ -196,7 +196,7 @@ export default function ContractsTable({
                   {/* Premium Icon Container with Glow */}
                   <div className="relative flex-shrink-0">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center shadow-md">
-                      <FileText size={16} className="text-[var(--color-primary)]" />
+                      <FileText size={16} className="text-[var(--color-primary)]" aria-hidden="true" />
                     </div>
                     {/* Live Status Indicator */}
                     <div className="absolute -top-0.5 -right-0.5">
@@ -216,7 +216,7 @@ export default function ContractsTable({
                       </span>
                     </div>
                     <div className="flex items-center gap-1 mt-0.5">
-                      <User size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                      <User size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                       <span className="text-[10px] text-[var(--color-ink-muted)] truncate">
                         {item.client_name || "Unassigned Client"}
                       </span>
@@ -225,7 +225,7 @@ export default function ContractsTable({
                 </div>
                 
                 <div className="flex items-center gap-1 flex-shrink-0">
-                  <ChevronRight size={16} className="text-[var(--color-ink-subtle)]" />
+                  <ChevronRight size={16} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
                 </div>
               </div>
             );
@@ -249,7 +249,7 @@ export default function ContractsTable({
                   </div>
 
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <CalendarDays size={11} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                    <CalendarDays size={11} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                     <span className="text-[10px] font-semibold text-[var(--color-ink-muted)]">
                       {item.signed_at ? formatDateShort(item.signed_at) : formatDateShort(item.created_at)}
                     </span>
@@ -267,10 +267,10 @@ export default function ContractsTable({
                     item.status === 'draft' ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400' :
                     'bg-[var(--color-danger-bg)] text-[var(--color-danger-text)]'
                   } shadow-sm`}>
-                    {item.status === 'signed' && <CheckCircle2 size={9} className="flex-shrink-0 opacity-90" />}
-                    {item.status === 'sent' && <Send size={9} className="flex-shrink-0 opacity-90" />}
-                    {item.status === 'draft' && <PenLine size={9} className="flex-shrink-0 opacity-90" />}
-                    {item.status === 'void' && <Ban size={9} className="flex-shrink-0 opacity-90" />}
+                    {item.status === 'signed' && <CheckCircle2 size={9} className="flex-shrink-0 opacity-90" aria-hidden="true" />}
+                    {item.status === 'sent' && <Send size={9} className="flex-shrink-0 opacity-90" aria-hidden="true" />}
+                    {item.status === 'draft' && <PenLine size={9} className="flex-shrink-0 opacity-90" aria-hidden="true" />}
+                    {item.status === 'void' && <Ban size={9} className="flex-shrink-0 opacity-90" aria-hidden="true" />}
                     {statusLabels[item.status]}
                   </span>
                 </div>
@@ -284,9 +284,9 @@ export default function ContractsTable({
                     }}
                     className="w-full mt-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 border border-[var(--color-primary)]/20 text-[var(--color-primary-text)] transition-all active:scale-[0.98] text-[11px] font-bold"
                   >
-                    {primaryAction.icon && <primaryAction.icon size={13} />}
+                    {primaryAction.icon && <primaryAction.icon size={13} aria-hidden="true" />}
                     {primaryAction.label}
-                    <ArrowUpRight size={13} className="opacity-70" />
+                    <ArrowUpRight size={13} className="opacity-70" aria-hidden="true" />
                   </button>
                 )}
               </div>
@@ -310,7 +310,7 @@ export default function ContractsTable({
                 return (
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-9 h-9 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center text-[var(--color-ink-subtle)] shrink-0">
-                      <FileText size={16} />
+                      <FileText size={16} aria-hidden="true" />
                     </div>
                     <div className="min-w-0">
                       <button
@@ -359,7 +359,7 @@ export default function ContractsTable({
                 const StatusIcon = statusIcons[c.status] || FileText;
                 return (
                   <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${style.bg} ${style.text}`}>
-                    <StatusIcon size={10} className="flex-shrink-0" />
+                    <StatusIcon size={10} className="flex-shrink-0" aria-hidden="true" />
                     {statusLabels[c.status] || c.status}
                   </span>
                 );

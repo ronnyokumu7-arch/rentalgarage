@@ -1,7 +1,7 @@
 import { useRouter } from "next/navigation";
 import {
-  Car, Archive, Shield, Ban, Wrench, Banknote, Pencil,
-} from "lucide-react";
+  Car, Archive, Shield, Prohibit as Ban, Wrench, Money as Banknote, PencilSimple as Pencil,
+} from "@phosphor-icons/react/ssr";
 import type { RowAction } from "@/components/ui/CardGrid";
 import type { Vehicle } from "@/lib/types";
 

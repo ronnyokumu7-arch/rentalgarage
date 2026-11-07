@@ -3,10 +3,10 @@
 
 import { useState } from "react";
 import {
-  Building2, ShieldCheck, Palette, Bell,
-  ChevronRight, ChevronLeft, Globe, Lock, Users,
-  Wallet, Landmark, Activity,
-} from "lucide-react";
+  Buildings as Building2, ShieldCheck, Palette, Bell,
+  CaretRight as ChevronRight, CaretLeft as ChevronLeft, Globe, Lock, Users,
+  Wallet, Bank as Landmark, Pulse as Activity,
+} from "@phosphor-icons/react/ssr";
 import PlatformCommissionSettings from "@/components/admin/PlatformCommissionSettings";
 import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
 
@@ -67,17 +67,17 @@ export default function SuperAdminSettingsPage() {
     platform: {
       title: "Platform Settings",
       description: "Configure how the platform operates, earns, and who controls it",
-      icon: <Globe size={20} />,
+      icon: <Globe size={20} aria-hidden="true" />,
     },
     revenue: {
       title: "Revenue Settings",
       description: "Configure commission, payment methods, and platform earnings",
-      icon: <Landmark size={20} />,
+      icon: <Landmark size={20} aria-hidden="true" />,
     },
     access: {
       title: "Access & Audit",
       description: "Manage super admins, authentication, and platform-wide audit logs",
-      icon: <ShieldCheck size={20} />,
+      icon: <ShieldCheck size={20} aria-hidden="true" />,
     },
   }[activeTab];
 
@@ -92,7 +92,7 @@ export default function SuperAdminSettingsPage() {
               className="p-2.5 rounded-xl text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] transition-all active:scale-95"
               title="Back to Settings Hub"
             >
-              <ChevronLeft size={18} />
+              <ChevronLeft size={18} aria-hidden="true" />
             </button>
           )}
           <div>
@@ -136,7 +136,7 @@ export default function SuperAdminSettingsPage() {
                 className="group relative flex items-center gap-4 p-5 rounded-2xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] hover:border-[var(--color-primary)]/50 hover:shadow-[var(--shadow-lg)] transition-all duration-200 cursor-pointer"
               >
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${theme.iconBg} ${theme.iconText} group-hover:scale-105 transition-transform duration-200`}>
-                  <Icon size={22} strokeWidth={1.8} />
+                  <Icon size={22} weight="light" aria-hidden="true" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
@@ -151,7 +151,7 @@ export default function SuperAdminSettingsPage() {
                 </div>
                 <ChevronRight
                   size={18}
-                  className="text-[var(--color-ink-subtle)] group-hover:text-[var(--color-primary)] group-hover:translate-x-1 transition-all duration-200 flex-shrink-0"
+                  className="text-[var(--color-ink-subtle)] group-hover:text-[var(--color-primary)] group-hover:translate-x-1 transition-all duration-200 flex-shrink-0" aria-hidden="true"
                 />
               </div>
             );
@@ -166,7 +166,7 @@ export default function SuperAdminSettingsPage() {
           ) : (
             <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-2xl shadow-[var(--shadow-card)] p-8 min-h-[400px] flex flex-col items-center justify-center text-center">
               <div className={`w-16 h-16 rounded-2xl ${getThemeClasses(activeModule.theme).iconBg} flex items-center justify-center mb-4`}>
-                <activeModule.icon size={32} className={getThemeClasses(activeModule.theme).iconText} />
+                <activeModule.icon size={32} className={getThemeClasses(activeModule.theme).iconText} aria-hidden="true" />
               </div>
               <h3 className="text-lg font-bold text-[var(--color-ink)] mb-2">{activeModule.title} Workspace</h3>
               <p className="text-sm text-[var(--color-ink-muted)] max-w-md mb-6">
@@ -176,7 +176,7 @@ export default function SuperAdminSettingsPage() {
                 onClick={() => setActiveModule(null)}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/5 hover:bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 transition-all active:scale-95"
               >
-                <ChevronLeft size={14} /> Back to Settings Hub
+                <ChevronLeft size={14} aria-hidden="true" /> Back to Settings Hub
               </button>
             </div>
           )}

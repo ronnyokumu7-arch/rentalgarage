@@ -3,7 +3,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useMemo, useEffect } from "react";
-import { CalendarDays } from "lucide-react";
+import { CalendarDots as CalendarDays } from "@phosphor-icons/react/ssr";
 import CardGrid from "@/components/ui/CardGrid";
 import type { Booking, Client, Vehicle } from "@/lib/types";
 import { getBookingActions, type BookingActionsContext } from "./getBookingActions";
@@ -149,7 +149,7 @@ export default function BookingsListMobile({
         {sortedBookings.length === 0 ? (
           <div className="p-12 text-center">
             <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
-              <CalendarDays size={24} className="text-[var(--color-ink-subtle)]" />
+              <CalendarDays size={24} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
             </div>
             <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">
               No bookings found

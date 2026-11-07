@@ -1,6 +1,6 @@
 // src/components/tenants/BusinessIdentitySection.tsx
 import { useState, useEffect } from 'react';
-import { Building2, Mail, Phone, Hash, MapPin, Edit3, Save, X, Loader2, Globe } from 'lucide-react';
+import { Buildings as Building2, Envelope as Mail, Phone, Hash, MapPin, NotePencil as Edit3, FloppyDisk as Save, X, CircleNotch as Loader2, Globe } from "@phosphor-icons/react/ssr";
 import toast from 'react-hot-toast';
 import { tenantProfileApi } from '@/lib/api/tenant-profile';
 import type { Tenant } from '@/lib/types';
@@ -69,7 +69,7 @@ export function BusinessIdentitySection({ tenant, onUpdated }: BusinessIdentityS
       <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/30">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
-            <Building2 size={18} />
+            <Building2 size={18} aria-hidden="true" />
           </div>
           <div>
             <h2 className="text-sm font-semibold text-[var(--color-ink)]">Business Identity</h2>
@@ -86,14 +86,14 @@ export function BusinessIdentitySection({ tenant, onUpdated }: BusinessIdentityS
                 disabled={isSaving}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] transition-colors disabled:opacity-50"
               >
-                <X size={14} /> Cancel
+                <X size={14} aria-hidden="true" /> Cancel
               </button>
               <button
                 onClick={handleSave}
                 disabled={isSaving}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary)]/90 transition-colors disabled:opacity-50"
               >
-                {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                {isSaving ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Save size={14} aria-hidden="true" />}
                 {isSaving ? 'Saving...' : 'Save'}
               </button>
             </>
@@ -102,7 +102,7 @@ export function BusinessIdentitySection({ tenant, onUpdated }: BusinessIdentityS
               onClick={() => setIsEditing(true)}
               className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 transition-colors"
             >
-              <Edit3 size={14} /> Edit Details
+              <Edit3 size={14} aria-hidden="true" /> Edit Details
             </button>
           )}
         </div>
@@ -113,7 +113,7 @@ export function BusinessIdentitySection({ tenant, onUpdated }: BusinessIdentityS
         {/* Company Name */}
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-[var(--color-ink-muted)] uppercase tracking-wider flex items-center gap-1.5">
-            <Building2 size={12} /> Company Name
+            <Building2 size={12} aria-hidden="true" /> Company Name
           </label>
           {isEditing ? (
             <input
@@ -130,7 +130,7 @@ export function BusinessIdentitySection({ tenant, onUpdated }: BusinessIdentityS
         {/* Primary Email */}
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-[var(--color-ink-muted)] uppercase tracking-wider flex items-center gap-1.5">
-            <Mail size={12} /> Primary Email
+            <Mail size={12} aria-hidden="true" /> Primary Email
           </label>
           {isEditing ? (
             <input
@@ -147,7 +147,7 @@ export function BusinessIdentitySection({ tenant, onUpdated }: BusinessIdentityS
         {/* Phone Number */}
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-[var(--color-ink-muted)] uppercase tracking-wider flex items-center gap-1.5">
-            <Phone size={12} /> Phone Number
+            <Phone size={12} aria-hidden="true" /> Phone Number
           </label>
           {isEditing ? (
             <input
@@ -164,7 +164,7 @@ export function BusinessIdentitySection({ tenant, onUpdated }: BusinessIdentityS
         {/* Website */}
         <div className="space-y-1.5">
           <label className="text-xs font-medium text-[var(--color-ink-muted)] uppercase tracking-wider flex items-center gap-1.5">
-            <Globe size={12} /> Website
+            <Globe size={12} aria-hidden="true" /> Website
           </label>
           {isEditing ? (
             <input
@@ -182,7 +182,7 @@ export function BusinessIdentitySection({ tenant, onUpdated }: BusinessIdentityS
         {/* Business Location */}
         <div className="space-y-1.5 md:col-span-2">
           <label className="text-xs font-medium text-[var(--color-ink-muted)] uppercase tracking-wider flex items-center gap-1.5">
-            <MapPin size={12} /> Business Location
+            <MapPin size={12} aria-hidden="true" /> Business Location
           </label>
           {isEditing ? (
             <input
@@ -199,7 +199,7 @@ export function BusinessIdentitySection({ tenant, onUpdated }: BusinessIdentityS
         {/* KRA PIN */}
         <div className="space-y-1.5 md:col-span-2">
           <label className="text-xs font-medium text-[var(--color-ink-muted)] uppercase tracking-wider flex items-center gap-1.5">
-            <Hash size={12} /> KRA PIN (Tax ID)
+            <Hash size={12} aria-hidden="true" /> KRA PIN (Tax ID)
           </label>
           {isEditing ? (
             <input

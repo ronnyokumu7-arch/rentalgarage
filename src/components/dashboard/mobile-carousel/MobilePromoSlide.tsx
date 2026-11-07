@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { Sparkles, ArrowUpRight } from "lucide-react";
+import { Sparkle as Sparkles, ArrowUpRight } from "@phosphor-icons/react/ssr";
 
 export interface Promo {
   id: string;
@@ -44,7 +44,7 @@ export default function MobilePromoSlide({ promo }: MobilePromoSlideProps) {
       <div className="space-y-2 pr-16 flex-1">
         <div className="flex items-center gap-1.5">
           <div className="w-5 h-5 rounded-md bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center shadow-sm">
-            <Sparkles size={11} className="text-white" />
+            <Sparkles size={11} className="text-white" aria-hidden="true" />
           </div>
           <span className="text-[9px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400">
             {promo.eyebrow}
@@ -64,7 +64,7 @@ export default function MobilePromoSlide({ promo }: MobilePromoSlideProps) {
         className="mt-3 inline-flex items-center gap-1 px-3.5 py-2 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 text-white text-xs font-bold hover:opacity-90 transition-opacity self-start"
       >
         {promo.ctaLabel}
-        <ArrowUpRight size={12} />
+        <ArrowUpRight size={12} aria-hidden="true" />
       </Link>
     </div>
   );

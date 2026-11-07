@@ -16,7 +16,7 @@ import {
   Lifebuoy,
   Checks,
   UserCircle,
-} from "@phosphor-icons/react";
+} from "@phosphor-icons/react/ssr";
 
 export interface NavChild {
   label: string;
@@ -36,62 +36,62 @@ export interface NavItem {
 
 // ✅ Dashboard: House icon (matches the "Home" label in bottom nav)
 const PremiumDashboardIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
-  <House size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <House size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} aria-hidden="true" />
 );
 
 const PremiumCalendarIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
-  <Calendar size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <Calendar size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} aria-hidden="true" />
 );
 
 // ✅ Clients: Two-heads icon
 const PremiumContactIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
-  <Users size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <Users size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} aria-hidden="true" />
 );
 
 // ✅ Team (formerly Users): Three-heads icon for internal community
 const PremiumTeamIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
-  <UsersThree size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <UsersThree size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} aria-hidden="true" />
 );
 
 const PremiumWalletIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
-  <Wallet size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <Wallet size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} aria-hidden="true" />
 );
 
 const PremiumBarChartIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
-  <ChartBar size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <ChartBar size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} aria-hidden="true" />
 );
 
 const PremiumSettingsIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
-  <Gear size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <Gear size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} aria-hidden="true" />
 );
 
 const PremiumBuildingIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
-  <Buildings size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <Buildings size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} aria-hidden="true" />
 );
 
 const PremiumCreditCardIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
-  <CreditCard size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <CreditCard size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} aria-hidden="true" />
 );
 
 const PremiumServerIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
-  <HardDrives size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <HardDrives size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} aria-hidden="true" />
 );
 
 const PremiumLifeBuoyIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
-  <Lifebuoy size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <Lifebuoy size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} aria-hidden="true" />
 );
 
 const PremiumTasksIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
-  <Checks size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <Checks size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} aria-hidden="true" />
 );
 
 const PremiumDriversIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
-  <UserCircle size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <UserCircle size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} aria-hidden="true" />
 );
 
 // ✅ Fleet: Front-facing car
 const PremiumFleetIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
-  <Car size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} />
+  <Car size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} aria-hidden="true" />
 );
 
 // ─── EXPORTABLE ICON MAP ──────────────────────────────────────────────────────

@@ -1,7 +1,7 @@
 // src/components/bookings/timeline/TimelineHeader.tsx
 "use client";
 
-import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, CaretLeft as ChevronLeft, CaretRight as ChevronRight } from "@phosphor-icons/react/ssr";
 import { format } from "date-fns";
 
 interface TimelineHeaderProps {
@@ -42,7 +42,7 @@ export default function TimelineHeader({
       {/* Left: Date and Step Info */}
       <div className="flex items-center gap-3">
         <div className="w-9 h-9 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center border border-[var(--color-primary)]/10 shrink-0">
-          <Calendar size={18} />
+          <Calendar size={18} aria-hidden="true" />
         </div>
         <div>
           {/* ✅ SLIGHTLY BIGGER FONT, SIMPLIFIED DATE */}
@@ -102,10 +102,10 @@ export default function TimelineHeader({
 
         <div className="flex rounded-xl border border-[var(--color-surface-border)] shadow-sm overflow-hidden bg-[var(--color-surface)]">
           <button onClick={() => onShiftWindow("backward")} className="p-2 hover:bg-[var(--color-surface-hover)] border-r border-[var(--color-surface-border)] text-[var(--color-ink-muted)] transition-colors">
-            <ChevronLeft size={16} />
+            <ChevronLeft size={16} aria-hidden="true" />
           </button>
           <button onClick={() => onShiftWindow("forward")} className="p-2 hover:bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] transition-colors">
-            <ChevronRight size={16} />
+            <ChevronRight size={16} aria-hidden="true" />
           </button>
         </div>
 

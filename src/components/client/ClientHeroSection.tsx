@@ -1,6 +1,6 @@
 "use client";
 
-import { Banknote, CalendarDays, Car } from "lucide-react";
+import { Money as Banknote, CalendarDots as CalendarDays, Car } from "@phosphor-icons/react/ssr";
 import type { Client } from "@/lib/types";
 import Badge from "@/components/ui/Badge";
 
@@ -41,17 +41,17 @@ export default function ClientHeroSection({ client, stats }: ClientHeroProps) {
         {/* Premium Stats Cards */}
         <div className="grid grid-cols-3 gap-3 w-full lg:w-auto">
           <div className="bg-gradient-to-br from-emerald-50 to-teal-50 border border-emerald-100 rounded-xl p-3 flex flex-col items-center justify-center min-w-[110px]">
-            <Banknote size={18} className="text-emerald-600 mb-1" />
+            <Banknote size={18} className="text-emerald-600 mb-1" aria-hidden="true" />
             <p className="text-[10px] uppercase text-emerald-700 font-semibold tracking-wide">Total Spent</p>
             <p className="text-lg font-bold text-gray-900">{formatKES(stats.totalSpent)}</p>
           </div>
           <div className="bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 rounded-xl p-3 flex flex-col items-center justify-center min-w-[110px]">
-            <CalendarDays size={18} className="text-blue-600 mb-1" />
+            <CalendarDays size={18} className="text-blue-600 mb-1" aria-hidden="true" />
             <p className="text-[10px] uppercase text-blue-700 font-semibold tracking-wide">Total Bookings</p>
             <p className="text-lg font-bold text-gray-900">{stats.totalBookings}</p>
           </div>
           <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100 rounded-xl p-3 flex flex-col items-center justify-center min-w-[110px]">
-            <Car size={18} className="text-amber-600 mb-1" />
+            <Car size={18} className="text-amber-600 mb-1" aria-hidden="true" />
             <p className="text-[10px] uppercase text-amber-700 font-semibold tracking-wide">Active Rentals</p>
             <p className="text-lg font-bold text-gray-900">{stats.activeRentals}</p>
           </div>

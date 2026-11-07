@@ -3,9 +3,9 @@
 
 import { useState, useEffect } from "react";
 import { 
-  User, Mail, Phone, Building2, Briefcase, 
-  Pencil, Save, X, ShieldAlert, Camera, Loader2
-} from "lucide-react";
+  User, Envelope as Mail, Phone, Buildings as Building2, Briefcase,
+  PencilSimple as Pencil, FloppyDisk as Save, X, ShieldWarning as ShieldAlert, Camera, CircleNotch as Loader2
+} from "@phosphor-icons/react/ssr";
 import toast from "react-hot-toast";
 import SectionCard from "@/components/ui/SectionCard";
 import SecureImage from "@/components/ui/SecureImage";
@@ -168,9 +168,9 @@ export default function UserPersonalInfoCard({
             </div>
             <label className="absolute inset-0 rounded-lg bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer">
               {isUploadingAvatar ? (
-                <Loader2 size={12} className="text-white animate-spin" />
+                <Loader2 size={12} className="text-white animate-spin" aria-hidden="true" />
               ) : (
-                <Camera size={12} className="text-white" />
+                <Camera size={12} className="text-white" aria-hidden="true" />
               )}
               <input
                 type="file"
@@ -201,15 +201,15 @@ export default function UserPersonalInfoCard({
           isEditing ? (
             <div className="flex items-center gap-1.5 shrink-0">
               <button onClick={handleCancel} className="min-h-[32px] sm:min-h-0 flex items-center justify-center gap-1 px-2.5 py-1 rounded-md text-xs sm:text-[10px] font-mono font-bold text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] transition-colors">
-                <X size={12} /> Cancel
+                <X size={12} aria-hidden="true" /> Cancel
               </button>
               <button onClick={handleSave} disabled={!formData.full_name.trim() || !formData.email.trim()} className="min-h-[32px] sm:min-h-0 flex items-center justify-center gap-1 px-3 py-1 rounded-md text-xs sm:text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition-colors disabled:opacity-50">
-                <Save size={12} /> Save
+                <Save size={12} aria-hidden="true" /> Save
               </button>
             </div>
           ) : (
             <button onClick={() => setIsEditing(true)} className="shrink-0 flex items-center gap-1 px-2.5 py-1 rounded-md text-xs sm:text-[10px] font-mono font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/5 hover:bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 transition-all active:scale-95 min-h-[32px] sm:min-h-0">
-              <Pencil size={11} /> Edit
+              <Pencil size={11} aria-hidden="true" /> Edit
             </button>
           )
         )}
@@ -223,7 +223,7 @@ export default function UserPersonalInfoCard({
             <input type="text" value={formData.full_name} onChange={(e) => setFormData({ ...formData, full_name: e.target.value })} className={`${inputBase} ${!formData.full_name.trim() ? 'border-rose-500 text-rose-500' : ''}`} placeholder="Enter full name" autoFocus />
           ) : (
             <div className={fieldRow}>
-              <User size={13} className="text-[var(--color-ink-subtle)] shrink-0" />
+              <User size={13} className="text-[var(--color-ink-subtle)] shrink-0" aria-hidden="true" />
               <span className={valueClass}>{user.full_name}</span>
             </div>
           )}
@@ -235,7 +235,7 @@ export default function UserPersonalInfoCard({
             <input type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} className={`${inputBase} ${!formData.email.trim() ? 'border-rose-500 text-rose-500' : ''}`} placeholder="name@company.com" />
           ) : (
             <div className={fieldRow}>
-              <Mail size={13} className="text-[var(--color-ink-subtle)] shrink-0" />
+              <Mail size={13} className="text-[var(--color-ink-subtle)] shrink-0" aria-hidden="true" />
               <span className={valueClass}>{user.email}</span>
             </div>
           )}
@@ -247,7 +247,7 @@ export default function UserPersonalInfoCard({
             <input type="tel" value={formData.phone_number} onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })} className={inputBase} placeholder="+254 700 000000" />
           ) : (
             <div className={fieldRow}>
-              <Phone size={13} className="text-[var(--color-ink-subtle)] shrink-0" />
+              <Phone size={13} className="text-[var(--color-ink-subtle)] shrink-0" aria-hidden="true" />
               <span className={user.phone_number ? valueClass : emptyClass}>{user.phone_number || "Not provided"}</span>
             </div>
           )}
@@ -268,7 +268,7 @@ export default function UserPersonalInfoCard({
             </select>
           ) : (
             <div className={fieldRow}>
-              <Building2 size={13} className="text-[var(--color-ink-subtle)] shrink-0" />
+              <Building2 size={13} className="text-[var(--color-ink-subtle)] shrink-0" aria-hidden="true" />
               <span className={user.department ? valueClass : emptyClass}>{user.department || "Not assigned"}</span>
             </div>
           )}
@@ -288,11 +288,11 @@ export default function UserPersonalInfoCard({
                   ))
                 )}
               </select>
-              {isSuperAdmin && <ShieldAlert size={15} className="text-amber-500 shrink-0" />}
+              {isSuperAdmin && <ShieldAlert size={15} className="text-amber-500 shrink-0" aria-hidden="true" />}
             </div>
           ) : (
             <div className={fieldRow}>
-              <Briefcase size={13} className="text-[var(--color-ink-subtle)] shrink-0" />
+              <Briefcase size={13} className="text-[var(--color-ink-subtle)] shrink-0" aria-hidden="true" />
               <span className={user.job_title ? valueClass : emptyClass}>{user.job_title || user.department || "Unassigned"}</span>
             </div>
           )}

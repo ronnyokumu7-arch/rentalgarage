@@ -3,9 +3,9 @@
 
 import { useEffect, useState } from "react";
 import {
-  Wallet, Landmark, Loader2, CheckCircle2, AlertCircle, Clock,
-  Smartphone, Copy, History, ArrowLeft, BadgeCheck, RefreshCw,
-} from "lucide-react";
+  Wallet, Bank as Landmark, CircleNotch as Loader2, CheckCircle as CheckCircle2, WarningCircle as AlertCircle, Clock,
+  DeviceMobile as Smartphone, Copy, ClockCounterClockwise as History, ArrowLeft, SealCheck as BadgeCheck, ArrowsClockwise as RefreshCw,
+} from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import toast from "react-hot-toast";
 import { useCommissionPayment } from "@/hooks/useCommissionPayment";
@@ -87,12 +87,12 @@ export default function CommissionPayPage() {
           href="/dashboard"
           className="p-2 rounded-lg border border-[var(--color-surface-border)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
         >
-          <ArrowLeft size={16} />
+          <ArrowLeft size={16} aria-hidden="true" />
         </Link>
         <div className="flex-1">
           <h1 className="text-2xl font-bold text-[var(--color-ink)] flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
-              <Wallet size={20} />
+              <Wallet size={20} aria-hidden="true" />
             </div>
             Pay Platform Commission
           </h1>
@@ -108,7 +108,7 @@ export default function CommissionPayPage() {
             className="p-2 rounded-lg border border-[var(--color-surface-border)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors disabled:opacity-50"
             title="Refresh"
           >
-            <RefreshCw size={16} className={loading ? "animate-spin" : ""} />
+            <RefreshCw size={16} className={loading ? "animate-spin" : ""} aria-hidden="true" />
           </button>
         )}
       </div>
@@ -116,7 +116,7 @@ export default function CommissionPayPage() {
       {/* ✅ NEW: ERROR STATE — never renders "settled" from a failed fetch */}
       {error && !infoLoaded && (
         <div className="p-6 rounded-2xl bg-rose-500/5 border border-rose-500/20 text-center">
-          <AlertCircle size={32} className="text-rose-500 mx-auto mb-3" />
+          <AlertCircle size={32} className="text-rose-500 mx-auto mb-3" aria-hidden="true" />
           <h2 className="text-base font-bold text-[var(--color-ink)] mb-1">Couldn't load your account</h2>
           <p className="text-sm text-[var(--color-ink-muted)] mb-4 max-w-sm mx-auto">
             {error}
@@ -126,7 +126,7 @@ export default function CommissionPayPage() {
             disabled={loading}
             className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--color-primary)] text-white text-sm font-bold hover:bg-[var(--color-primary)]/90 transition-all disabled:opacity-50"
           >
-            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+            <RefreshCw size={14} className={loading ? "animate-spin" : ""} aria-hidden="true" />
             {loading ? "Retrying..." : "Try Again"}
           </button>
         </div>
@@ -135,7 +135,7 @@ export default function CommissionPayPage() {
       {/* ✅ All settled state — ONLY when we successfully fetched and owed is zero */}
       {infoLoaded && !error && owed <= 0 && !hasPending && (
         <div className="p-8 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] text-center">
-          <CheckCircle2 size={40} className="text-emerald-500 mx-auto mb-3" />
+          <CheckCircle2 size={40} className="text-emerald-500 mx-auto mb-3" aria-hidden="true" />
           <h2 className="text-lg font-bold text-[var(--color-ink)] mb-1">You're all settled!</h2>
           <p className="text-sm text-[var(--color-ink-muted)]">
             No outstanding commission. New trips will appear here daily.
@@ -146,7 +146,7 @@ export default function CommissionPayPage() {
       {/* ✅ Pending verification banner (form hidden while pending) */}
       {infoLoaded && hasPending && (
         <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 flex items-start gap-3">
-          <Clock size={18} className="text-amber-500 shrink-0 mt-0.5" />
+          <Clock size={18} className="text-amber-500 shrink-0 mt-0.5" aria-hidden="true" />
           <div>
             <p className="text-sm font-bold text-amber-500">Payment awaiting verification</p>
             <p className="text-xs text-[var(--color-ink-muted)] mt-1">
@@ -180,7 +180,7 @@ export default function CommissionPayPage() {
           {/* Payment instructions — the real M-Pesa Paybill flow */}
           <div className="p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-surface-border)]">
             <h3 className="text-sm font-bold text-[var(--color-ink)] mb-3 flex items-center gap-2">
-              <Smartphone size={16} className="text-emerald-500" /> How to Pay via M-Pesa
+              <Smartphone size={16} className="text-emerald-500" aria-hidden="true" /> How to Pay via M-Pesa
             </h3>
 
             {hasPaybill ? (
@@ -191,7 +191,7 @@ export default function CommissionPayPage() {
                   2. Business Number:
                   <span className="font-mono font-bold text-[var(--color-ink)]">{info!.platform_paybill}</span>
                   <button type="button" onClick={() => copy(info!.platform_paybill!, "Paybill number")} className="p-1 rounded hover:bg-[var(--color-surface-hover)] text-[var(--color-ink-subtle)]">
-                    <Copy size={12} />
+                    <Copy size={12} aria-hidden="true" />
                   </button>
                 </p>
 
@@ -199,13 +199,13 @@ export default function CommissionPayPage() {
                   3. Account Number:
                   <span className="font-mono font-bold text-[var(--color-ink)]">{info!.platform_account_number}</span>
                   <button type="button" onClick={() => copy(info!.platform_account_number!, "Account number")} className="p-1 rounded hover:bg-[var(--color-surface-hover)] text-[var(--color-ink-subtle)]">
-                    <Copy size={12} />
+                    <Copy size={12} aria-hidden="true" />
                   </button>
                 </p>
 
                 {info!.platform_account_name && (
                   <p className="flex items-start gap-1.5 p-2 rounded-lg bg-emerald-500/5 border border-emerald-500/20">
-                    <BadgeCheck size={13} className="text-emerald-500 shrink-0 mt-0.5" />
+                    <BadgeCheck size={13} className="text-emerald-500 shrink-0 mt-0.5" aria-hidden="true" />
                     <span>
                       4. Confirm the account name shows as{" "}
                       <span className="font-bold text-emerald-500">{info!.platform_account_name}</span> before
@@ -219,14 +219,14 @@ export default function CommissionPayPage() {
 
                 {(info!.platform_phone || info!.platform_email) && (
                   <p className="text-[10px] text-[var(--color-ink-subtle)] pt-1 flex items-center gap-1">
-                    <Landmark size={11} />
+                    <Landmark size={11} aria-hidden="true" />
                     Questions? {info!.platform_phone} {info!.platform_email ? `• ${info!.platform_email}` : ""}
                   </p>
                 )}
               </div>
             ) : (
               <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/20 flex items-start gap-2">
-                <AlertCircle size={14} className="text-amber-500 shrink-0 mt-0.5" />
+                <AlertCircle size={14} className="text-amber-500 shrink-0 mt-0.5" aria-hidden="true" />
                 <p className="text-xs text-[var(--color-ink-muted)]">
                   Online payment details are being configured. Please contact support
                   {info?.platform_phone ? ` at ${info.platform_phone}` : ""}
@@ -285,7 +285,7 @@ export default function CommissionPayPage() {
                 disabled={submitting}
                 className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-[var(--color-primary)] text-white text-sm font-bold hover:bg-[var(--color-primary)]/90 transition-all disabled:opacity-50 shadow-lg shadow-[var(--color-primary)]/20"
               >
-                {submitting ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+                {submitting ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <CheckCircle2 size={16} aria-hidden="true" />}
                 {submitting ? "Submitting..." : "Submit Payment for Verification"}
               </button>
             </form>
@@ -297,7 +297,7 @@ export default function CommissionPayPage() {
       {payments.length > 0 && (
         <div className="p-5 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-surface-border)]">
           <h3 className="text-sm font-bold text-[var(--color-ink)] mb-3 flex items-center gap-2">
-            <History size={16} className="text-[var(--color-ink-muted)]" /> Payment History
+            <History size={16} className="text-[var(--color-ink-muted)]" aria-hidden="true" /> Payment History
           </h3>
           <div className="space-y-2">
             {payments.map((p) => (

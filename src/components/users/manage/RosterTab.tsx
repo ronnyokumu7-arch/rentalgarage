@@ -4,7 +4,7 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import dynamic from "next/dynamic";
 import toast from "react-hot-toast";
-import { Briefcase, Filter, Shield } from "lucide-react";
+import { Briefcase, Funnel as Filter, Shield } from "@phosphor-icons/react/ssr";
 import { usersApi } from "@/lib/api/users";
 import type { User } from "@/lib/types";
 import { useAuth } from "@/context/auth-context";

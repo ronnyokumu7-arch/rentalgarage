@@ -4,12 +4,12 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { 
-  CheckCircle2, UserPlus, Calendar, Clock, ArrowRight,
-  Zap, Sparkles, Loader2, MoreVertical,
+  CheckCircle as CheckCircle2, UserPlus, Calendar, Clock, ArrowRight,
+  Lightning as Zap, Sparkle as Sparkles, CircleNotch as Loader2, DotsThreeVertical as MoreVertical,
   Play, XCircle, Eye, Car, User, FileText, MapPin,
-  CalendarDays, ChevronRight, DollarSign
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+  CalendarDots as CalendarDays, CaretRight as ChevronRight, CurrencyDollar as DollarSign
+} from "@phosphor-icons/react/ssr";
+import type { Icon } from "@phosphor-icons/react";
 import toast from "react-hot-toast";
 
 import { useActionCenterTasks } from "@/hooks/dashboard/useActionCenterTasks";
@@ -19,7 +19,7 @@ import type { Booking } from "@/lib/types";
 
 type SubTab = "tasks" | "bookings" | "activity";
 
-const HEADER_COPY: Record<SubTab, { title: string; description: string; icon: LucideIcon; iconClassName?: string }> = {
+const HEADER_COPY: Record<SubTab, { title: string; description: string; icon: Icon; iconClassName?: string }> = {
   tasks: { title: "Active Tasks", description: "What needs your attention today", icon: Zap },
   bookings: { title: "Upcoming Rentals", description: "Track latest trips & late returns", icon: Calendar, iconClassName: "scale-y-90" },
   activity: { title: "Activity Logs", description: "The live pulse of your fleet's latest moves.", icon: Clock },
@@ -72,7 +72,7 @@ const parseTaskTitle = (title: string): { action: string; subject: string | null
   return { action: title, subject: null };
 };
 
-const getSubjectIcon = (subject: string): LucideIcon => {
+const getSubjectIcon = (subject: string): Icon => {
   const lower = subject.toLowerCase();
   if (lower.includes('vehicle') || lower.includes('car') || lower.includes('plate') ||
       lower.includes('toyota') || lower.includes('nissan') || lower.includes('mazda') ||
@@ -195,7 +195,7 @@ export default function ActionCenterWidget() {
             <div>
               <h3 className="text-sm font-bold text-[var(--color-ink)] tracking-tight flex items-center gap-2">
                 {headerCopy.title}
-                <Sparkles size={11} className="text-[var(--color-primary)] opacity-70" />
+                <Sparkles size={11} className="text-[var(--color-primary)] opacity-70" aria-hidden="true" />
               </h3>
               <p className="text-[10px] text-[var(--color-ink-muted)] mt-0.5">{headerCopy.description}</p>
             </div>
@@ -235,13 +235,13 @@ export default function ActionCenterWidget() {
           <div className="space-y-2 animate-in fade-in duration-200">
             {bookingsLoading ? (
               <div className="flex flex-col items-center justify-center py-6 text-[var(--color-ink-muted)] text-sm">
-                <Loader2 size={18} className="animate-spin mb-2 text-[var(--color-primary)]" />
+                <Loader2 size={18} className="animate-spin mb-2 text-[var(--color-primary)]" aria-hidden="true" />
                 Loading rentals...
               </div>
             ) : bookings.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-6 text-center">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-2">
-                  <Calendar size={18} />
+                  <Calendar size={18} aria-hidden="true" />
                 </div>
                 <p className="text-sm font-bold text-[var(--color-ink)]">No upcoming rentals</p>
                 <p className="text-[10px] text-[var(--color-ink-muted)] mt-0.5">Scheduled rentals will appear here.</p>
@@ -307,7 +307,7 @@ export default function ActionCenterWidget() {
                               )}
                             </div>
                             <div className="flex items-center gap-1 mt-0.5">
-                              <Car size={9} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                              <Car size={9} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                               <span className="text-[9px] font-medium text-[var(--color-ink-muted)] truncate">
                                 {vehicleLabel}
                               </span>
@@ -330,7 +330,7 @@ export default function ActionCenterWidget() {
                             className="p-1 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all active:scale-95"
                             aria-label="Booking actions"
                           >
-                            {actingBookingId === booking.id ? <Loader2 size={12} className="animate-spin" /> : <MoreVertical size={12} />}
+                            {actingBookingId === booking.id ? <Loader2 size={12} className="animate-spin" aria-hidden="true" /> : <MoreVertical size={12} aria-hidden="true" />}
                           </button>
 
                           {openBookingMenuId === booking.id && (
@@ -339,30 +339,30 @@ export default function ActionCenterWidget() {
                                 onClick={(e) => { e.stopPropagation(); setOpenBookingMenuId(null); router.push(`/dashboard/bookings/${booking.id}`); }}
                                 className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[10px] font-bold text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors"
                               >
-                                <Eye size={12} /> View Booking
+                                <Eye size={12} aria-hidden="true" /> View Booking
                               </button>
                               {isPending && (
                                 <button onClick={(e) => { e.stopPropagation(); handleBookingAction(booking.id, "confirm"); }}
                                   className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[10px] font-bold text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors border-t border-[var(--color-surface-border)]">
-                                  <CheckCircle2 size={12} /> Confirm Booking
+                                  <CheckCircle2 size={12} aria-hidden="true" /> Confirm Booking
                                 </button>
                               )}
                               {isConfirmed && (
                                 <button onClick={(e) => { e.stopPropagation(); handleBookingAction(booking.id, "activate"); }}
                                   className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors border-t border-[var(--color-surface-border)]">
-                                  <Play size={12} /> Start Trip
+                                  <Play size={12} aria-hidden="true" /> Start Trip
                                 </button>
                               )}
                               {isActive && (
                                 <button onClick={(e) => { e.stopPropagation(); handleBookingAction(booking.id, "complete"); }}
                                   className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors border-t border-[var(--color-surface-border)]">
-                                  <CheckCircle2 size={12} /> End Trip
+                                  <CheckCircle2 size={12} aria-hidden="true" /> End Trip
                                 </button>
                               )}
                               {(isPending || isConfirmed) && (
                                 <button onClick={(e) => { e.stopPropagation(); handleBookingAction(booking.id, "cancel"); }}
                                   className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[10px] font-bold text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 transition-colors border-t border-[var(--color-surface-border)]">
-                                  <XCircle size={12} /> Cancel Booking
+                                  <XCircle size={12} aria-hidden="true" /> Cancel Booking
                                 </button>
                               )}
                             </div>
@@ -374,7 +374,7 @@ export default function ActionCenterWidget() {
                       <div className="grid grid-cols-3 gap-1.5 mt-2 pt-1.5 border-t border-[var(--color-surface-border)]/40">
                         {/* Days */}
                         <div className="flex items-center gap-1">
-                          <CalendarDays size={9} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                          <CalendarDays size={9} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                           <div className="min-w-0">
                             <p className="text-[9px] font-bold text-[var(--color-ink)] leading-tight">
                               {days || 0}d
@@ -384,7 +384,7 @@ export default function ActionCenterWidget() {
 
                         {/* Date */}
                         <div className="flex items-center gap-1">
-                          <Clock size={9} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                          <Clock size={9} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                           <div className="min-w-0">
                             <p className="text-[9px] font-bold text-[var(--color-ink)] leading-tight truncate">
                               {formatDateShort(booking.start_date)}
@@ -394,7 +394,7 @@ export default function ActionCenterWidget() {
 
                         {/* Amount */}
                         <div className="flex items-center gap-1 justify-end">
-                          <DollarSign size={9} className="text-[var(--color-primary)] flex-shrink-0" />
+                          <DollarSign size={9} className="text-[var(--color-primary)] flex-shrink-0" aria-hidden="true" />
                           <div className="min-w-0">
                             <p className="text-[9px] font-bold text-[var(--color-primary-text)] leading-tight tabular-nums truncate">
                               {Number(booking.total_amount).toLocaleString()}
@@ -418,7 +418,7 @@ export default function ActionCenterWidget() {
                           )}
                           {destination && (
                             <span className="flex items-center gap-0.5 min-w-0">
-                              <MapPin size={8} className="text-[var(--color-primary)] flex-shrink-0" />
+                              <MapPin size={8} className="text-[var(--color-primary)] flex-shrink-0" aria-hidden="true" />
                               <span className="text-[8px] font-medium text-[var(--color-ink-muted)] truncate">
                                 {destination}
                               </span>
@@ -430,7 +430,7 @@ export default function ActionCenterWidget() {
                           className="inline-flex items-center gap-0.5 text-[8px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity group flex-shrink-0"
                         >
                           Details
-                          <ChevronRight size={10} className="group-hover:translate-x-0.5 transition-transform" />
+                          <ChevronRight size={10} className="group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
                         </button>
                       </div>
                     </div>
@@ -446,13 +446,13 @@ export default function ActionCenterWidget() {
           <div className="space-y-2 animate-in fade-in duration-200">
             {activityLoading ? (
               <div className="flex flex-col items-center justify-center py-6 text-[var(--color-ink-muted)] text-sm">
-                <Loader2 size={18} className="animate-spin mb-2 text-[var(--color-primary)]" />
+                <Loader2 size={18} className="animate-spin mb-2 text-[var(--color-primary)]" aria-hidden="true" />
                 Loading activity...
               </div>
             ) : activities.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-6 text-center">
                 <div className="w-10 h-10 rounded-xl bg-purple-500/10 border border-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-2">
-                  <Clock size={18} />
+                  <Clock size={18} aria-hidden="true" />
                 </div>
                 <p className="text-sm font-bold text-[var(--color-ink)]">No recent activity</p>
                 <p className="text-[10px] text-[var(--color-ink-muted)] mt-0.5">Recent fleet moves will be logged here.</p>
@@ -461,7 +461,7 @@ export default function ActionCenterWidget() {
               activities.map((activity: any) => (
                 <div key={`activity-${activity.id}`} className="p-2.5 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:border-[var(--color-primary)]/40 hover:shadow-sm transition-all duration-200 flex items-start gap-2.5">
                   <div className="w-7 h-7 rounded-lg bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center flex-shrink-0 text-[var(--color-primary)]">
-                    <Clock size={12} />
+                    <Clock size={12} aria-hidden="true" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-[10px] font-semibold text-[var(--color-ink)] leading-snug">
@@ -482,13 +482,13 @@ export default function ActionCenterWidget() {
           <div className="space-y-2 animate-in fade-in duration-200">
             {tasksLoading ? (
               <div className="flex flex-col items-center justify-center py-6 text-[var(--color-ink-muted)] text-sm">
-                <Loader2 size={18} className="animate-spin mb-2 text-[var(--color-primary)]" />
+                <Loader2 size={18} className="animate-spin mb-2 text-[var(--color-primary)]" aria-hidden="true" />
                 Loading tasks...
               </div>
             ) : tasks.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-6 text-center">
                 <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-2">
-                  <CheckCircle2 size={18} />
+                  <CheckCircle2 size={18} aria-hidden="true" />
                 </div>
                 <p className="text-sm font-bold text-[var(--color-ink)]">All caught up!</p>
                 <p className="text-[10px] text-[var(--color-ink-muted)] mt-0.5">No pending tasks right now.</p>
@@ -515,7 +515,7 @@ export default function ActionCenterWidget() {
                         )}
                         {task.due_date && (
                           <span className={`flex items-center gap-1 mt-0.5 text-[8px] font-bold uppercase tracking-wider ${overdue ? "text-rose-600 dark:text-rose-400" : "text-[var(--color-ink-subtle)]"}`}>
-                            <Calendar size={9} />
+                            <Calendar size={9} aria-hidden="true" />
                             {formatDate(task.due_date)}
                             {overdue && <span className="ml-1 px-1 py-0.5 rounded bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 text-[7px] font-extrabold">OVERDUE</span>}
                           </span>
@@ -529,20 +529,20 @@ export default function ActionCenterWidget() {
                             className="p-1 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all active:scale-95"
                             aria-label="Task actions"
                           >
-                            {updatingId === safeTaskId ? <Loader2 size={12} className="animate-spin" /> : <MoreVertical size={12} />}
+                            {updatingId === safeTaskId ? <Loader2 size={12} className="animate-spin" aria-hidden="true" /> : <MoreVertical size={12} aria-hidden="true" />}
                           </button>
                           {openMenuId === safeTaskId && (
                             <div className="absolute right-0 top-full mt-1 w-40 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-lg shadow-black/5 z-20 overflow-hidden animate-in fade-in slide-up duration-150">
                               {task.status === "unassigned" && (
                                 <button onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); handleClaimTask(safeTaskId); }}
                                   className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[10px] font-bold text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors">
-                                  <UserPlus size={12} /> Claim Task
+                                  <UserPlus size={12} aria-hidden="true" /> Claim Task
                                 </button>
                               )}
                               {task.status !== "unassigned" && task.status !== "completed" && (
                                 <button onClick={(e) => { e.stopPropagation(); setOpenMenuId(null); handleCompleteTask(safeTaskId); }}
                                   className="w-full flex items-center gap-2.5 px-3 py-2.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10 transition-colors">
-                                  <CheckCircle2 size={12} /> Mark Complete
+                                  <CheckCircle2 size={12} aria-hidden="true" /> Mark Complete
                                 </button>
                               )}
                             </div>
@@ -565,7 +565,7 @@ export default function ActionCenterWidget() {
           className="inline-flex items-center gap-1 text-[10px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity"
         >
           View all {headerCopy.title}
-          <ArrowRight size={12} />
+          <ArrowRight size={12} aria-hidden="true" />
         </button>
       </div>
     </div>

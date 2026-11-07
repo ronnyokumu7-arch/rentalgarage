@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Loader2, FileText, AlertCircle, CalendarDays, User, Car } from "lucide-react";
+import { CircleNotch as Loader2, FileText, WarningCircle as AlertCircle, CalendarDots as CalendarDays, User, Car } from "@phosphor-icons/react/ssr";
 import Modal from "@/components/ui/Modal";
 import PremiumEntitySelector from "@/components/financials/shared/PremiumEntitySelector";
 import { bookingsApi } from "@/lib/api/bookings";
@@ -191,7 +191,7 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
     return (
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center flex-shrink-0">
-          <FileText size={16} className="text-[var(--color-primary)]" />
+          <FileText size={16} className="text-[var(--color-primary)]" aria-hidden="true" />
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
@@ -204,18 +204,18 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
           </div>
           <div className="flex items-center gap-2 mt-0.5">
             <span className="text-[10px] text-[var(--color-ink-muted)] flex items-center gap-1">
-              <User size={10} />
+              <User size={10} aria-hidden="true" />
               {clientName}
             </span>
             <span className="text-[10px] text-[var(--color-ink-subtle)]">•</span>
             <span className="text-[10px] font-mono text-[var(--color-ink-muted)] flex items-center gap-1">
-              <Car size={10} />
+              <Car size={10} aria-hidden="true" />
               {vehiclePlate}
             </span>
           </div>
           <div className="flex items-center gap-2 mt-0.5">
             <span className="text-[10px] text-[var(--color-ink-muted)] flex items-center gap-1">
-              <CalendarDays size={10} />
+              <CalendarDays size={10} aria-hidden="true" />
               {new Date(booking.start_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })} → {new Date(booking.end_date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
             </span>
             <span className="text-[10px] text-[var(--color-ink-subtle)]">•</span>
@@ -394,7 +394,7 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
 
             {existingInvoice && (
               <div className="p-3 rounded-xl bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-start gap-2">
-                <AlertCircle size={14} className="text-[var(--color-primary)] mt-0.5 flex-shrink-0" />
+                <AlertCircle size={14} className="text-[var(--color-primary)] mt-0.5 flex-shrink-0" aria-hidden="true" />
                 <p className="text-[10px] text-[var(--color-ink)] font-medium">
                   After updating, <strong>regenerate the contract</strong> so it reflects the new rate and total.
                 </p>
@@ -417,7 +417,7 @@ export default function CreateInvoiceModal({ open, onClose, onCreated }: CreateI
             disabled={loading || !selectedBookingId || !customAmount || !customRate || !dueDate}
             className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] shadow-[var(--shadow-md)] hover:shadow-[var(--shadow-lg)] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {loading ? <Loader2 size={14} className="animate-spin" /> : <FileText size={14} />}
+            {loading ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <FileText size={14} aria-hidden="true" />}
             {loading ? "Processing..." : existingInvoice ? "Update Invoice" : "Generate Invoice"}
           </button>
         </div>

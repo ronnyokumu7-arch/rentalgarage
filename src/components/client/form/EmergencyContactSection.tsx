@@ -1,7 +1,7 @@
 // src/components/client/form/EmergencyContactSection.tsx
 "use client";
 
-import { Users } from "lucide-react";
+import { Users } from "@phosphor-icons/react/ssr";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import type { SectionProps } from "./types";
@@ -22,7 +22,7 @@ export default function EmergencyContactSection({
     >
       <div className="flex items-center gap-2.5 mb-4">
         <div className="w-7 h-7 rounded-lg bg-amber-500/10 text-amber-500 flex items-center justify-center">
-          <Users size={16} />
+          <Users size={16} aria-hidden="true" />
         </div>
         <h3 className="text-sm font-bold text-[var(--color-ink)]">
           Emergency Contact

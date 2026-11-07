@@ -6,20 +6,20 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   Users,
   Plus,
-  Search,
-  Loader2,
+  MagnifyingGlass as Search,
+  CircleNotch as Loader2,
   Phone,
-  Pencil,
+  PencilSimple as Pencil,
   Archive,
-  RotateCcw,
+  ArrowCounterClockwise as RotateCcw,
   UserCircle,
-  Filter,
-  ChevronRight,
+  Funnel as Filter,
+  CaretRight as ChevronRight,
   Briefcase,
-  FileBadge,
+  Certificate as FileBadge,
   Clock,
   ShieldCheck,
-} from "lucide-react";
+} from "@phosphor-icons/react/ssr";
 import Modal from "@/components/ui/Modal";
 import FilterDropdown from "@/components/ui/FilterDropdown";
 import DataTable, { RowAction } from "@/components/ui/DataTable";
@@ -313,13 +313,13 @@ export default function DriversPage() {
           title: "Company Drivers",
           description:
             "In-house driver pool — delivery tasks & chauffeur assignments.",
-          icon: <UserCircle size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+          icon: <UserCircle size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
         },
         contract: {
           title: "Contract Drivers",
           description:
             "External contracted drivers, freelancers, and temporary staffing.",
-          icon: <FileBadge size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+          icon: <FileBadge size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
         },
       })[activeTab],
     [activeTab],
@@ -380,7 +380,7 @@ export default function DriversPage() {
                     onClick={openCreate}
                     className="w-full h-10 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.99]"
                   >
-                    <Plus size={16} strokeWidth={2.5} />
+                    <Plus size={16} weight="bold" aria-hidden="true" />
                     Add Driver
                   </button>
                 }
@@ -389,12 +389,12 @@ export default function DriversPage() {
 
             {loading ? (
               <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2">
-                <Loader2 className="w-5 h-5 animate-spin" /> Loading drivers...
+                <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> Loading drivers...
               </div>
             ) : drivers.length === 0 ? (
               <div className="p-12 text-center">
                 <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
-                  <UserCircle size={24} className="text-[var(--color-ink-subtle)]" />
+                  <UserCircle size={24} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
                 </div>
                 <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">
                   No drivers yet
@@ -430,7 +430,7 @@ export default function DriversPage() {
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className="relative flex-shrink-0">
                           <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center shadow-md">
-                            <UserCircle size={16} className="text-[var(--color-primary)]" />
+                            <UserCircle size={16} className="text-[var(--color-primary)]" aria-hidden="true" />
                           </div>
                           <div className="absolute -top-0.5 -right-0.5">
                             <div
@@ -447,7 +447,7 @@ export default function DriversPage() {
                             {item.verification_status === "verified" && (
                               <ShieldCheck
                                 size={14}
-                                className="text-emerald-500 flex-shrink-0"
+                                className="text-emerald-500 flex-shrink-0" aria-hidden="true"
                               />
                             )}
                             <span
@@ -465,7 +465,7 @@ export default function DriversPage() {
                       </div>
                       <ChevronRight
                         size={16}
-                        className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1"
+                        className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" aria-hidden="true"
                       />
                     </div>
                   );
@@ -479,7 +479,7 @@ export default function DriversPage() {
                       <div className="flex items-center gap-3 mb-3">
                         <div className="flex items-center gap-2 min-w-0 flex-1">
                           <div className="w-7 h-7 rounded-lg bg-[var(--color-surface-hover)]/80 flex items-center justify-center flex-shrink-0">
-                            <Phone size={12} className="text-[var(--color-ink-subtle)]" />
+                            <Phone size={12} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
                           </div>
                           <div className="min-w-0">
                             <p className="text-xs font-semibold text-[var(--color-ink)] truncate leading-tight">
@@ -579,7 +579,7 @@ export default function DriversPage() {
                   <div className="relative flex-1">
                     <Search
                       size={16}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true"
                     />
                     <input
                       type="text"
@@ -614,19 +614,19 @@ export default function DriversPage() {
                   onClick={openCreate}
                   className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] shadow-lg shadow-[var(--color-primary)]/20 transition-all active:scale-[0.98]"
                 >
-                  <Plus size={16} /> Add Driver
+                  <Plus size={16} aria-hidden="true" /> Add Driver
                 </button>
               </div>
             </div>
 
             {loading ? (
               <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2">
-                <Loader2 className="w-5 h-5 animate-spin" /> Loading drivers...
+                <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> Loading drivers...
               </div>
             ) : drivers.length === 0 ? (
               <div className="p-12 text-center">
                 <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
-                  <UserCircle size={24} className="text-[var(--color-ink-subtle)]" />
+                  <UserCircle size={24} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
                 </div>
                 <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">
                   No drivers yet
@@ -649,7 +649,7 @@ export default function DriversPage() {
                       return (
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="w-9 h-9 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center text-[var(--color-ink-subtle)] shrink-0">
-                            <UserCircle size={16} />
+                            <UserCircle size={16} aria-hidden="true" />
                           </div>
                           <div className="min-w-0 flex flex-col">
                             <div className="flex items-center gap-1.5 flex-wrap">
@@ -659,7 +659,7 @@ export default function DriversPage() {
                               {driver.verification_status === "verified" && (
                                 <ShieldCheck
                                   size={14}
-                                  className="text-emerald-500 flex-shrink-0"
+                                  className="text-emerald-500 flex-shrink-0" aria-hidden="true"
                                 />
                               )}
                               <span
@@ -683,7 +683,7 @@ export default function DriversPage() {
                       <div className="flex items-center gap-2 text-sm text-[var(--color-ink)]">
                         <Phone
                           size={12}
-                          className="text-[var(--color-ink-subtle)] flex-shrink-0"
+                          className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true"
                         />
                         <span className="font-medium">{row.original.phone}</span>
                       </div>
@@ -747,7 +747,7 @@ export default function DriversPage() {
         /* ✅ Contract tab — renders at every viewport when deep-linked */
         <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-12 flex flex-col items-center justify-center text-center animate-in fade-in duration-300">
           <div className="w-16 h-16 rounded-2xl bg-[var(--color-primary-muted)] flex items-center justify-center mb-4">
-            <Briefcase size={24} className="text-[var(--color-primary-text)]" />
+            <Briefcase size={24} className="text-[var(--color-primary-text)]" aria-hidden="true" />
           </div>
           <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">
             Contract Drivers Hub
@@ -770,7 +770,7 @@ export default function DriversPage() {
       >
         {editingId && detailLoading ? (
           <div className="flex items-center justify-center py-12 text-[var(--color-ink-muted)]">
-            <Loader2 size={18} className="animate-spin mr-2" /> Loading driver...
+            <Loader2 size={18} className="animate-spin mr-2" aria-hidden="true" /> Loading driver...
           </div>
         ) : (
           <div className="space-y-4">

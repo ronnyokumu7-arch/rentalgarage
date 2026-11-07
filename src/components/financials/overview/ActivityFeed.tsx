@@ -2,7 +2,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Zap, ChevronRight } from "lucide-react";
+import { Lightning as Zap, CaretRight as ChevronRight } from "@phosphor-icons/react/ssr";
 import UnifiedActivityCard from "@/components/dashboard/UnifiedActivityCard";
 import { useActivityMapper } from "@/hooks/useActivityMapper";
 import type { ActivityLog } from "@/lib/api/activityLogs"; // ✅ CHANGED: Raw type
@@ -34,7 +34,7 @@ export default function ActivityFeed({ activities, limit = 10 }: ActivityFeedPro
     return (
       <div className="flex flex-col items-center justify-center py-12 text-[var(--color-ink-muted)]">
         <div className="w-14 h-14 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mb-4">
-          <Zap size={22} className="text-[var(--color-ink-subtle)]" />
+          <Zap size={22} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
         </div>
         <p className="text-sm font-semibold text-[var(--color-ink)]">No recent activity</p>
         <p className="text-xs text-[var(--color-ink-muted)] mt-1">Payments and contract updates will appear here</p>
@@ -63,7 +63,7 @@ export default function ActivityFeed({ activities, limit = 10 }: ActivityFeedPro
               className="inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity"
             >
               View all {filteredActivities.length} activities
-              <ChevronRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
+              <ChevronRight size={12} className="group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
             </button>
           </div>
         )}

@@ -1,7 +1,7 @@
 // src/components/client/form/PreviewCard.tsx
 "use client";
 
-import { User } from "lucide-react";
+import { User } from "@phosphor-icons/react/ssr";
 import SecureImage from "@/components/ui/SecureImage";
 
 interface PreviewCardProps {
@@ -40,13 +40,13 @@ export default function PreviewCard({
             className="w-14 h-14 rounded-full object-cover border-2 border-[var(--color-surface-border)]"
             fallback={
               <div className="w-14 h-14 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center border-2 border-[var(--color-surface-border)]">
-                <User size={20} />
+                <User size={20} aria-hidden="true" />
               </div>
             }
           />
         ) : (
           <div className="w-14 h-14 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center border-2 border-[var(--color-surface-border)]">
-            <User size={20} />
+            <User size={20} aria-hidden="true" />
           </div>
         )}
         <div className="min-w-0 flex-1">

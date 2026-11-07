@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Plus, Trash2 } from "lucide-react";
+import { X, Plus, Trash as Trash2 } from "@phosphor-icons/react/ssr";
 import {
   getCollections,
   createCollection,
@@ -92,7 +92,7 @@ export default function CollectionsModal({
             className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)]"
             aria-label="Close"
           >
-            <X size={16} />
+            <X size={16} aria-hidden="true" />
           </button>
         </div>
 
@@ -180,7 +180,7 @@ export default function CollectionsModal({
               onClick={handleDelete}
               className="h-10 px-3 rounded-xl text-xs font-bold text-rose-600 bg-rose-500/10 hover:bg-rose-500/20 flex items-center gap-1.5"
             >
-              <Trash2 size={14} />
+              <Trash2 size={14} aria-hidden="true" />
               Delete
             </button>
           )}
@@ -195,7 +195,7 @@ export default function CollectionsModal({
             disabled={!name.trim()}
             className="flex-1 h-10 rounded-xl text-xs font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] disabled:opacity-50 flex items-center justify-center gap-1.5"
           >
-            <Plus size={14} />
+            <Plus size={14} aria-hidden="true" />
             {isEditing ? "Save" : "Create"}
           </button>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Banknote } from "lucide-react";
+import { Money as Banknote } from "@phosphor-icons/react/ssr";
 import { useInlineBooking } from "@/hooks/profile/useInlineBooking";
 import type { Booking, Task } from "@/lib/types";
 import BookingHero from "./booking/BookingHero";
@@ -77,7 +77,7 @@ export default function InlineBookingViewer({ booking, task, onRefresh }: Inline
         <div className="flex items-center justify-between p-3 sm:p-4 rounded-xl sm:rounded-2xl bg-[var(--color-surface-hover)]/30 border border-[var(--color-surface-border)]">
           <div className="flex items-center gap-3 sm:gap-4 min-w-0">
             <div className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-emerald-500/5 border border-emerald-500/10 flex items-center justify-center text-emerald-500 shadow-xs shrink-0">
-              <Banknote size={18} className="sm:w-[22px] sm:h-[22px] shrink-0" />
+              <Banknote size={18} className="sm:w-[22px] sm:h-[22px] shrink-0" aria-hidden="true" />
             </div>
             <div className="min-w-0">
               <p className="text-[9px] sm:text-[10px] font-bold text-[var(--color-ink-muted)] uppercase tracking-widest mb-0.5 truncate">

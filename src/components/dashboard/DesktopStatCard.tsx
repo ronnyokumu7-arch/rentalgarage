@@ -2,14 +2,14 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { ArrowUpRight, ArrowDownRight } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight } from "@phosphor-icons/react/ssr";
+import type { Icon } from "@phosphor-icons/react";
 
 interface DesktopStatCardProps {
   label: string;
   value: string;
   subtext?: string;
-  icon: LucideIcon;
+  icon: Icon;
   trend?: { value: string; positive: boolean };
   trendLabel?: string;
   gradient: string;
@@ -52,12 +52,12 @@ export default function DesktopStatCard({
             {subtext && <p className="text-xs text-ink-subtle truncate">{subtext}</p>}
           </div>
           <div className={`rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center shrink-0 opacity-80 group-hover:opacity-100 transition-opacity ${isLarge ? "w-12 h-12" : "w-10 h-10"}`}>
-            <Icon size={isLarge ? 20 : 16} className="text-white" />
+            <Icon size={isLarge ? 20 : 16} className="text-white" aria-hidden="true" />
           </div>
         </div>
         {trend && (
           <div className={`flex items-center gap-1 text-xs font-semibold ${trend.positive ? 'text-success' : 'text-danger'} mt-1`}>
-            {trend.positive ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+            {trend.positive ? <ArrowUpRight size={14} aria-hidden="true" /> : <ArrowDownRight size={14} aria-hidden="true" />}
             {trend.value}
             <span className="text-ink-muted font-normal">{trendLabel}</span>
           </div>

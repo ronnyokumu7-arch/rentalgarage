@@ -5,16 +5,16 @@ import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useMemo } from "react";
 import {
   Users,
-  Loader2,
-  UserIcon,
-  MessageCircle,
+  CircleNotch as Loader2,
+  User as UserIcon,
+  ChatCircle as MessageCircle,
   Shield,
   Archive,
   Plus,
-  Building2,
+  Buildings as Building2,
   Clock,
   Phone,
-} from "lucide-react";
+} from "@phosphor-icons/react/ssr";
 import CardGrid, { RowAction } from "@/components/ui/CardGrid";
 import ReviewVerificationModal from "@/components/client/ReviewVerificationModal";
 import ClientsToolbar from "./mobile/ClientsToolbar";
@@ -325,12 +325,12 @@ export default function MobileClientsList({
         <div className="pb-4">
           {loading ? (
             <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2">
-              <Loader2 className="w-5 h-5 animate-spin" /> Loading clients...
+              <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> Loading clients...
             </div>
           ) : displayClients.length === 0 ? (
             <div className="p-12 text-center">
               <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
-                <Users size={24} className="text-[var(--color-ink-subtle)]" />
+                <Users size={24} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
               </div>
               <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">
                 No clients found
@@ -413,9 +413,9 @@ export default function MobileClientsList({
               className="w-12 h-12 rounded-xl bg-[var(--color-surface)]/80 backdrop-blur-xl border border-[var(--color-surface-border)] shadow-[0_8px_32px_rgba(0,0,0,0.25)] flex items-center justify-center active:scale-95 hover:bg-[var(--color-surface-hover)]/90 transition-all"
             >
               {activeTab === "individual" ? (
-                <Building2 size={18} className="text-[var(--color-ink-muted)]" />
+                <Building2 size={18} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
               ) : (
-                <UserIcon size={18} className="text-[var(--color-ink-muted)]" />
+                <UserIcon size={18} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
               )}
             </button>
 
@@ -426,9 +426,9 @@ export default function MobileClientsList({
               className="w-14 h-14 rounded-xl bg-[var(--color-primary)]/20 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.25)] flex items-center justify-center active:scale-95 hover:bg-[var(--color-primary)]/30 transition-all"
             >
               <div className="relative flex items-center justify-center">
-                <UserIcon size={22} strokeWidth={2} className="text-[var(--color-primary)]" />
+                <UserIcon size={22} weight="regular" className="text-[var(--color-primary)]" aria-hidden="true" />
                 <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center shadow-sm">
-                  <Plus size={10} strokeWidth={3.5} />
+                  <Plus size={10} weight="bold" aria-hidden="true" />
                 </span>
               </div>
             </button>

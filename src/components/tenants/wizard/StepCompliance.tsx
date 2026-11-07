@@ -1,5 +1,5 @@
 // src/components/tenants/wizard/StepCompliance.tsx
-import { FileText, DollarSign, Globe } from "lucide-react";
+import { FileText, CurrencyDollar as DollarSign, Globe } from "@phosphor-icons/react/ssr";
 import type { OnboardingFormData } from "@/hooks/useTenantOnboarding";
 
 interface StepComplianceProps {
@@ -29,7 +29,7 @@ export default function StepCompliance({ formData, updateField }: StepCompliance
               placeholder="e.g. A012345678Z"
               className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink)] font-mono uppercase focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none text-sm"
             />
-            <FileText size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" />
+            <FileText size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true" />
           </div>
           <p className="text-[11px] text-[var(--color-ink-subtle)]">Required for automated VAT calculation and tax invoice compliance.</p>
         </div>
@@ -48,7 +48,7 @@ export default function StepCompliance({ formData, updateField }: StepCompliance
               <option value="EUR">Euro (€)</option>
               <option value="GBP">British Pound (£)</option>
             </select>
-            <DollarSign size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" />
+            <DollarSign size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true" />
           </div>
         </div>
 
@@ -65,7 +65,7 @@ export default function StepCompliance({ formData, updateField }: StepCompliance
               <option value="UTC">UTC (Coordinated Universal Time)</option>
               <option value="Europe/London">Europe/London (GMT/BST)</option>
             </select>
-            <Globe size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" />
+            <Globe size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true" />
           </div>
         </div>
       </div>

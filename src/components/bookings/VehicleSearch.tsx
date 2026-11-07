@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Car, Hash, Gauge } from "lucide-react";
+import { Car, Hash, Gauge } from "@phosphor-icons/react/ssr";
 import type { Vehicle } from "@/lib/types";
 
 interface VehicleSearchProps {
@@ -37,7 +37,7 @@ export default function VehicleSearch({
 
       {/* Search Input */}
       <div className="relative">
-        <Car size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" />
+        <Car size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" aria-hidden="true" />
         <input
           type="text"
           value={
@@ -100,11 +100,11 @@ export default function VehicleSearch({
                   </div>
                   <div className="grid grid-cols-2 gap-2 text-[10px] text-[var(--color-ink-muted)]">
                     <div className="flex items-center gap-1">
-                      <Hash size={10} />
+                      <Hash size={10} aria-hidden="true" />
                       <span className="font-mono">{vehicle.plate_number}</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <Gauge size={10} />
+                      <Gauge size={10} aria-hidden="true" />
                       <span>{vehicle.current_mileage.toLocaleString()} km</span>
                     </div>
                     <div className="col-span-2 flex items-center justify-between pt-1 border-t border-[var(--color-surface-border)]">

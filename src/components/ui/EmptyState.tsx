@@ -1,8 +1,9 @@
 import React from "react";
-import { LucideIcon, Inbox } from "lucide-react";
+import {  Tray as Inbox } from "@phosphor-icons/react/ssr";
+import type { Icon } from "@phosphor-icons/react";
 
 interface EmptyStateProps {
-  icon?: LucideIcon;
+  icon?: Icon;
   title: string;
   description?: string;
   action?: React.ReactNode;
@@ -31,8 +32,8 @@ export default function EmptyState({
       >
         <Icon
           size={compact ? 22 : 28}
-          strokeWidth={1.6}
-          className="text-accent-dark"
+          weight="light"
+          className="text-accent-dark" aria-hidden="true"
         />
       </div>
 

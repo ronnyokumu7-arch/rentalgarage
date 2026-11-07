@@ -1,7 +1,7 @@
 // src/components/contracts/public/PublicContractDetails.tsx
 "use client";
 
-import { Calendar, Car, User, Banknote, UserCircle } from "lucide-react";
+import { Calendar, Car, User, Money as Banknote, UserCircle } from "@phosphor-icons/react/ssr";
 import { brand } from "@/lib/brand";
 import type { PublicContractView } from "@/lib/types";
 
@@ -28,7 +28,7 @@ export default function PublicContractDetails({ contract }: Props) {
         {/* Client Info */}
         <DetailSection
           title="Client Details"
-          icon={<User size={18} />}
+          icon={<User size={18} aria-hidden="true" />}
           primary={contract.client_name}
           secondary="Renter"
         />
@@ -36,7 +36,7 @@ export default function PublicContractDetails({ contract }: Props) {
         {/* Vehicle Info */}
         <DetailSection
           title="Vehicle Details"
-          icon={<Car size={18} />}
+          icon={<Car size={18} aria-hidden="true" />}
           primary={`${contract.vehicle_make} ${contract.vehicle_model}`}
           secondary={`Plate: ${contract.vehicle_plate}`}
         />
@@ -45,7 +45,7 @@ export default function PublicContractDetails({ contract }: Props) {
         {hasDriver && (
           <DetailSection
             title="Assigned Driver"
-            icon={<UserCircle size={18} />}
+            icon={<UserCircle size={18} aria-hidden="true" />}
             primary={contract.driver_name!}
             secondary={contract.driver_phone || "—"}
             tertiary={contract.driver_dl_number ? `DL ${contract.driver_dl_number}` : undefined}
@@ -55,7 +55,7 @@ export default function PublicContractDetails({ contract }: Props) {
         {/* Dates */}
         <DetailSection
           title="Rental Period"
-          icon={<Calendar size={18} />}
+          icon={<Calendar size={18} aria-hidden="true" />}
           primary={`${formatDate(contract.start_date)} to ${formatDate(contract.end_date)}`}
           secondary="Agreed rental duration"
         />
@@ -63,7 +63,7 @@ export default function PublicContractDetails({ contract }: Props) {
         {/* Financials */}
         <DetailSection
           title="Total Amount"
-          icon={<Banknote size={18} />}
+          icon={<Banknote size={18} aria-hidden="true" />}
           primary={`${contract.currency_code} ${Number(contract.total_amount).toLocaleString()}`}
           secondary="Total contract value"
         />

@@ -2,8 +2,8 @@
 "use client";
 
 import {
-  User, Camera, Upload, Mail, CreditCard, FileText, Eye,
-} from "lucide-react";
+  User, Camera, Upload, Envelope as Mail, CreditCard, FileText, Eye,
+} from "@phosphor-icons/react/ssr";
 import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import SecureImage from "@/components/ui/SecureImage";
@@ -50,7 +50,7 @@ export default function ClientDetailsSection({
       <div className="flex items-start justify-between mb-4">
         <div className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
-            <User size={16} />
+            <User size={16} aria-hidden="true" />
           </div>
           <h3 className="text-sm font-bold text-[var(--color-ink)]">Client Details</h3>
         </div>
@@ -69,12 +69,12 @@ export default function ClientDetailsSection({
                   src={existingAvatar}
                   alt="Avatar"
                   className="w-full h-full object-cover"
-                  fallback={<Camera size={16} className="text-[var(--color-ink-subtle)]" />}
+                  fallback={<Camera size={16} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />}
                 />
               ) : (
                 <Camera
                   size={16}
-                  className="text-[var(--color-ink-subtle)] group-hover:text-[var(--color-primary)] transition-colors"
+                  className="text-[var(--color-ink-subtle)] group-hover:text-[var(--color-primary)] transition-colors" aria-hidden="true"
                 />
               )}
             </div>
@@ -86,7 +86,7 @@ export default function ClientDetailsSection({
               onChange={(e) => setAvatarFile(e.target.files?.[0] || null)}
             />
             <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center shadow-lg border-2 border-[var(--color-surface)]">
-              <Upload size={10} />
+              <Upload size={10} aria-hidden="true" />
             </div>
           </label>
 
@@ -99,7 +99,7 @@ export default function ClientDetailsSection({
               }}
               className="flex items-center justify-center gap-1 px-2.5 py-1 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-[10px] font-semibold hover:bg-[var(--color-primary)]/20 transition-colors"
             >
-              <Eye size={10} />
+              <Eye size={10} aria-hidden="true" />
               View
             </button>
           )}
@@ -115,7 +115,7 @@ export default function ClientDetailsSection({
           <div className="relative">
             <User
               size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true"
             />
             <input
               type="text"
@@ -137,7 +137,7 @@ export default function ClientDetailsSection({
           <div className="relative">
             <User
               size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true"
             />
             <input
               type="text"
@@ -157,7 +157,7 @@ export default function ClientDetailsSection({
           <div className="relative">
             <Mail
               size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true"
             />
             <input
               type="email"
@@ -216,7 +216,7 @@ export default function ClientDetailsSection({
                   idType === "national_id"
                     ? "text-[var(--color-primary)]"
                     : "text-[var(--color-ink-muted)]"
-                }
+                } aria-hidden="true"
               />
               <span className="text-sm font-semibold text-[var(--color-ink)]">
                 National ID
@@ -243,7 +243,7 @@ export default function ClientDetailsSection({
                   idType === "passport"
                     ? "text-[var(--color-primary)]"
                     : "text-[var(--color-ink-muted)]"
-                }
+                } aria-hidden="true"
               />
               <span className="text-sm font-semibold text-[var(--color-ink)]">
                 Passport
@@ -254,7 +254,7 @@ export default function ClientDetailsSection({
           <div className="relative" id="field-id_number">
             <CreditCard
               size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true"
             />
             <input
               type="text"

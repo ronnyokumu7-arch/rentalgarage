@@ -1,7 +1,7 @@
 // src/components/client/[id]/DrivingSection.tsx
 "use client";
 
-import { Pencil, Car, CreditCard, Calendar, Info } from "lucide-react";
+import { PencilSimple as Pencil, Car, CreditCard, Calendar, Info } from "@phosphor-icons/react/ssr";
 import SectionCard from "@/components/ui/SectionCard";
 import { ProfileField } from "@/components/profile/ProfileLayout";
 import type { Client, DrivingArrangement } from "@/lib/types";
@@ -60,14 +60,14 @@ export default function DrivingSection({ client, onEdit }: DrivingSectionProps) 
           </>
         ) : arrangement === "pending" ? (
           <div className="mt-2 p-3 rounded-xl bg-blue-500/5 border border-blue-500/20 flex items-start gap-2">
-            <Info size={14} className="text-blue-500 shrink-0 mt-0.5" />
+            <Info size={14} className="text-blue-500 shrink-0 mt-0.5" aria-hidden="true" />
             <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
               Driving details will be collected as part of identity verification.
             </p>
           </div>
         ) : (
           <div className="mt-2 p-3 rounded-xl bg-amber-500/5 border border-amber-500/20 flex items-start gap-2">
-            <Info size={14} className="text-amber-500 shrink-0 mt-0.5" />
+            <Info size={14} className="text-amber-500 shrink-0 mt-0.5" aria-hidden="true" />
             <p className="text-xs text-amber-700 dark:text-amber-400 leading-relaxed">
               Client driving license is not required for{" "}
               {arrangement === "own_driver" ? "own driver" : "chauffeur"}{" "}
@@ -81,7 +81,7 @@ export default function DrivingSection({ client, onEdit }: DrivingSectionProps) 
             onClick={onEdit}
             className="text-xs font-bold text-[var(--color-primary)] hover:underline flex items-center gap-1"
           >
-            <Pencil size={12} /> Edit Driving
+            <Pencil size={12} aria-hidden="true" /> Edit Driving
           </button>
         </div>
       </div>

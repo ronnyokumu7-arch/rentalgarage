@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Users, X, } from "lucide-react";
+import { Users, X, } from "@phosphor-icons/react/ssr";
 import type { User } from "@/lib/types";
 
 interface UserFilterSelectorProps {
@@ -40,7 +40,7 @@ export default function UserFilterSelector({ users, selectedUserId, onChange, pl
             isOpen ? "border-[var(--color-primary)] bg-[var(--color-primary)]/5 text-[var(--color-primary)]" : "border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"
           }`}
         >
-          <Users size={14} />
+          <Users size={14} aria-hidden="true" />
         </button>
       ) : (
         <div className="flex items-center gap-2 h-9 px-3 rounded-xl border border-[var(--color-primary)]/20 bg-[var(--color-primary)]/5 text-[var(--color-ink)] transition-all animate-in fade-in zoom-in-95 duration-200">
@@ -57,7 +57,7 @@ export default function UserFilterSelector({ users, selectedUserId, onChange, pl
             className="ml-1 p-0.5 rounded-md text-[var(--color-ink-muted)] hover:text-rose-500 hover:bg-rose-500/10 transition-colors"
             title="Clear filter"
           >
-            <X size={12} />
+            <X size={12} aria-hidden="true" />
           </button>
         </div>
       )}

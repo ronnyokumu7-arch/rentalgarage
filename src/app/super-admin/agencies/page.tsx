@@ -7,7 +7,7 @@ import { TenantsTable } from "@/components/tenants/TenantsTable";
 import TenantSubscriptionVerification from "@/components/admin/TenantSubscriptionVerification";
 import CommissionPaymentVerification from "@/components/admin/CommissionPaymentVerification";
 import ConfirmDestructiveModal from "@/components/ui/ConfirmDestructiveModal";
-import { Building2, Wallet, ShieldCheck } from "lucide-react";
+import { Buildings as Building2, Wallet, ShieldCheck } from "@phosphor-icons/react/ssr";
 import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
 
 type HubTab = "directory" | "subscriptions" | "commission";
@@ -27,17 +27,17 @@ export default function SuperAdminAgenciesPage() {
     directory: {
       title: "Agency Directory",
       description: "Manage tenant directory and oversee registered agencies.",
-      icon: <Building2 size={20} />,
+      icon: <Building2 size={20} aria-hidden="true" />,
     },
     subscriptions: {
       title: "Subscription Approvals",
       description: "Review and verify agency subscription plans and renewals.",
-      icon: <ShieldCheck size={20} />,
+      icon: <ShieldCheck size={20} aria-hidden="true" />,
     },
     commission: {
       title: "Commission Verification",
       description: "Audit and verify commission payments from agency operations.",
-      icon: <Wallet size={20} />,
+      icon: <Wallet size={20} aria-hidden="true" />,
     },
   }[activeTab];
 

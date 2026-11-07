@@ -4,8 +4,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import type { LucideIcon } from "lucide-react";
-import { ChevronUp, ChevronRight, LogOut, Briefcase } from "lucide-react";
+import type { Icon } from "@phosphor-icons/react";
+import { CaretUp as ChevronUp, CaretRight as ChevronRight, SignOut as LogOut, Briefcase } from "@phosphor-icons/react/ssr";
 import type { NavItem } from "@/lib/nav-config";
 import { useAuth } from "@/context/auth-context";
 
@@ -204,7 +204,7 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
         <div className="grid grid-cols-3 gap-x-2 gap-y-6">
           {drawerItems.map((item) => {
             const active = isActive(item.href, item.children);
-            const Icon = item.icon as LucideIcon;
+            const Icon = item.icon as Icon;
             const href = item.href ?? (item.children?.[0]?.href || "#");
             const label = getDisplayLabel(item.label);
             const caption = (item as any).description || label;
@@ -220,17 +220,17 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
                 <div className="relative">
                   <Icon
                     size={22}
-                    strokeWidth={active ? 2.25 : 1.8}
+                    weight={active ? "regular" : "light"}
                     className={`transition-colors ${
                       active
                         ? "text-[var(--color-primary)]"
                         : "text-[var(--color-ink-muted)] group-hover:text-[var(--color-ink)]"
-                    }`}
+                    }`} aria-hidden="true"
                   />
                   {hasSubPanel && (
                     <ChevronRight
                       size={10}
-                      className="absolute -bottom-1 -right-1 text-[var(--color-ink-subtle)] bg-[var(--color-surface)] rounded-full"
+                      className="absolute -bottom-1 -right-1 text-[var(--color-ink-subtle)] bg-[var(--color-surface)] rounded-full" aria-hidden="true"
                     />
                   )}
                 </div>
@@ -251,8 +251,8 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
           >
             <LogOut
               size={22}
-              strokeWidth={1.8}
-              className="text-[var(--color-ink-muted)] group-hover:text-[var(--color-danger)] transition-colors"
+              weight="light"
+              className="text-[var(--color-ink-muted)] group-hover:text-[var(--color-danger)] transition-colors" aria-hidden="true"
             />
             <span className="text-[11px] font-semibold leading-tight text-center truncate max-w-full text-[var(--color-ink-muted)] group-hover:text-[var(--color-danger)] transition-colors">
               Sign out
@@ -298,7 +298,7 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
             <Briefcase
               size={13}
               className="text-[var(--color-ink-muted)] flex-shrink-0"
-              strokeWidth={2}
+              weight="regular" aria-hidden="true"
             />
             <span className="text-[11px] font-medium text-[var(--color-ink-muted)]">
               Business Tools
@@ -311,7 +311,7 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
             <ChevronUp
               size={14}
               className="text-[var(--color-ink-subtle)] transition-transform duration-300"
-              style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }}
+              style={{ transform: isOpen ? "rotate(180deg)" : "rotate(0deg)" }} aria-hidden="true"
             />
           </div>
         </div>

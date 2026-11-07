@@ -2,10 +2,10 @@
 
 import { useState, useRef, useEffect } from "react";
 import {
-  Pencil, X, Play, UserX,
-  Loader2, Save, MoreVertical, Phone,
+  PencilSimple as Pencil, X, Play, UserMinus as UserX,
+  CircleNotch as Loader2, FloppyDisk as Save, DotsThreeVertical as MoreVertical, Phone,
   Car, Gauge, Link, ArrowUpRight
-} from "lucide-react";
+} from "@phosphor-icons/react/ssr";
 import type { Booking, Client, Vehicle, Contract } from "@/lib/types";
 
 interface BookingHeroProps {
@@ -67,7 +67,7 @@ export default function BookingHero({
             
             <div className="flex flex-col gap-0.5 sm:gap-1 text-[11px] sm:text-xs text-[var(--color-ink-muted)] min-w-0">
               <span className="flex items-center gap-1.5 truncate">
-                <Phone size={12} className="text-[var(--color-ink-subtle)] shrink-0" /> 
+                <Phone size={12} className="text-[var(--color-ink-subtle)] shrink-0" aria-hidden="true" />
                 <span className="truncate">{client?.phone || "No phone provided"}</span>
               </span>
               
@@ -75,7 +75,7 @@ export default function BookingHero({
                 <div className="flex flex-col gap-0.5 mt-0.5 pl-0.5 min-w-0">
                   <span className="flex items-center gap-1.5 sm:gap-2 truncate">
                     <span className="flex items-center gap-1.5 truncate">
-                      <Car size={12} className="text-[var(--color-ink-subtle)] shrink-0" /> 
+                      <Car size={12} className="text-[var(--color-ink-subtle)] shrink-0" aria-hidden="true" />
                       <span className="truncate">{vehicle.make} {vehicle.model}</span>
                     </span>
                     <span className="font-mono text-[var(--color-ink-subtle)] shrink-0">
@@ -83,7 +83,7 @@ export default function BookingHero({
                     </span>
                   </span>
                   <span className="flex items-center gap-1.5 truncate">
-                    <Gauge size={12} className="text-[var(--color-ink-subtle)] shrink-0" /> 
+                    <Gauge size={12} className="text-[var(--color-ink-subtle)] shrink-0" aria-hidden="true" />
                     <span className="truncate">{vehicle.current_mileage.toLocaleString()} km</span>
                   </span>
                 </div>
@@ -101,14 +101,14 @@ export default function BookingHero({
                 className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] transition-colors"
                 title="Cancel Editing"
               >
-                <X size={16} />
+                <X size={16} aria-hidden="true" />
               </button>
               <button 
                 onClick={onSave} 
                 disabled={isSaving} 
                 className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary)]/90 transition-colors disabled:opacity-50 shadow-xs active:scale-95"
               >
-                {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />} 
+                {isSaving ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Save size={14} aria-hidden="true" />}
                 <span className="hidden sm:inline">Save Changes</span>
                 <span className="sm:hidden">Save</span>
               </button>
@@ -120,7 +120,7 @@ export default function BookingHero({
                 className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-[var(--color-ink-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 transition-all"
                 title="Edit Details"
               >
-                <Pencil size={16} />
+                <Pencil size={16} aria-hidden="true" />
               </button>
               
               {booking.status === "confirmed" && (
@@ -130,7 +130,7 @@ export default function BookingHero({
                   className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/5 transition-colors disabled:opacity-50"
                   title="Activate Booking"
                 >
-                  {isActionLoading ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} />}
+                  {isActionLoading ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
                 </button>
               )}
               {booking.status === "active" && (
@@ -140,7 +140,7 @@ export default function BookingHero({
                   className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-blue-600 dark:text-blue-400 hover:bg-blue-500/5 transition-colors disabled:opacity-50"
                   title="Complete Booking"
                 >
-                  {isActionLoading ? <Loader2 size={16} className="animate-spin" /> : <Play size={16} />}
+                  {isActionLoading ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
                 </button>
               )}
               
@@ -151,7 +151,7 @@ export default function BookingHero({
                   className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] transition-colors"
                   title="More Options"
                 >
-                  <MoreVertical size={16} />
+                  <MoreVertical size={16} aria-hidden="true" />
                 </button>
                 
                 {isMenuOpen && (
@@ -164,7 +164,7 @@ export default function BookingHero({
                           onClick={() => { onAction("cancel"); setIsMenuOpen(false); }} 
                           className="w-full flex items-center gap-2.5 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 text-[11px] sm:text-xs font-semibold text-rose-600 dark:text-rose-400 hover:bg-rose-500/5 transition-colors"
                         >
-                          <X size={14} className="shrink-0" /> 
+                          <X size={14} className="shrink-0" aria-hidden="true" />
                           <span className="truncate">Cancel Booking</span>
                         </button>
                       )}
@@ -175,7 +175,7 @@ export default function BookingHero({
                           onClick={() => { onAction("no_show"); setIsMenuOpen(false); }} 
                           className="w-full flex items-center gap-2.5 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 text-[11px] sm:text-xs font-semibold text-amber-600 dark:text-amber-400 hover:bg-amber-500/5 transition-colors"
                         >
-                          <UserX size={14} className="shrink-0" /> 
+                          <UserX size={14} className="shrink-0" aria-hidden="true" />
                           <span className="truncate">Mark as No-Show</span>
                         </button>
                       )}
@@ -189,10 +189,10 @@ export default function BookingHero({
                           className="w-full flex items-center justify-between gap-2.5 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 text-[11px] sm:text-xs font-semibold text-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 transition-colors group"
                         >
                           <span className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                            <Link size={14} className="shrink-0" /> 
+                            <Link size={14} className="shrink-0" aria-hidden="true" />
                             <span className="truncate">Share Contract</span>
                           </span>
-                          <ArrowUpRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                          <ArrowUpRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0" aria-hidden="true" />
                         </button>
                       )}
                       
@@ -203,10 +203,10 @@ export default function BookingHero({
                           className="w-full flex items-center justify-between gap-2.5 sm:gap-3 px-3 sm:px-4 py-2 sm:py-2.5 text-[11px] sm:text-xs font-semibold text-violet-600 dark:text-violet-400 hover:bg-violet-500/5 transition-colors group"
                         >
                           <span className="flex items-center gap-2.5 sm:gap-3 min-w-0">
-                            <Link size={14} className="shrink-0" /> 
+                            <Link size={14} className="shrink-0" aria-hidden="true" />
                             <span className="truncate">Copy Invoice Link</span>
                           </span>
-                          <ArrowUpRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0" />
+                          <ArrowUpRight size={12} className="opacity-0 group-hover:opacity-100 transition-opacity shrink-0" aria-hidden="true" />
                         </button>
                       )}
                     </div>

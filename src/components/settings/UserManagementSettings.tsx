@@ -3,9 +3,9 @@
 
 import { useEffect, useState } from "react";
 import {
-  Plus, Mail, Copy, Check, Loader2, MoreVertical,
-  ShieldAlert, UserCheck, Users as UsersIcon,
-} from "lucide-react";
+  Plus, Envelope as Mail, Copy, Check, CircleNotch as Loader2, DotsThreeVertical as MoreVertical,
+  ShieldWarning as ShieldAlert, UserCheck, Users as UsersIcon,
+} from "@phosphor-icons/react/ssr";
 import toast from "react-hot-toast";
 import { usersApi, type UserCreatePayload } from "@/lib/api/users";
 
@@ -115,7 +115,7 @@ export default function UserManagementSettings() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" />
+        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" aria-hidden="true" />
       </div>
     );
   }
@@ -133,7 +133,7 @@ export default function UserManagementSettings() {
           onClick={() => { setShowInviteModal(true); setInviteLink(null); }}
           className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition-all active:scale-95 shadow-[var(--shadow-md)] shadow-[var(--color-primary)]/20"
         >
-          <Plus size={14} />
+          <Plus size={14} aria-hidden="true" />
           <span className="hidden sm:inline">Invite User</span>
           <span className="sm:hidden">Invite</span>
         </button>
@@ -143,7 +143,7 @@ export default function UserManagementSettings() {
       {users.length === 0 ? (
         <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-2xl p-12 text-center">
           <div className="w-14 h-14 rounded-2xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center mx-auto mb-4">
-            <UsersIcon size={24} />
+            <UsersIcon size={24} aria-hidden="true" />
           </div>
           <h3 className="text-base font-bold text-[var(--color-ink)] mb-1">No team members yet</h3>
           <p className="text-sm text-[var(--color-ink-muted)] max-w-xs mx-auto">
@@ -197,7 +197,7 @@ export default function UserManagementSettings() {
                           className="p-2 rounded-lg hover:bg-emerald-500/10 text-emerald-600 transition-colors"
                           title="Reactivate"
                         >
-                          <UserCheck size={15} />
+                          <UserCheck size={15} aria-hidden="true" />
                         </button>
                       ) : (
                         <button
@@ -205,11 +205,11 @@ export default function UserManagementSettings() {
                           className="p-2 rounded-lg hover:bg-amber-500/10 text-amber-600 transition-colors"
                           title="Suspend"
                         >
-                          <ShieldAlert size={15} />
+                          <ShieldAlert size={15} aria-hidden="true" />
                         </button>
                       )}
                       <button className="p-2 rounded-lg hover:bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] transition-colors">
-                        <MoreVertical size={15} />
+                        <MoreVertical size={15} aria-hidden="true" />
                       </button>
                     </div>
                   </div>
@@ -274,15 +274,15 @@ export default function UserManagementSettings() {
                         <div className="flex items-center justify-end gap-1">
                           {user.is_suspended ? (
                             <button onClick={() => handleReactivate(user.id)} className="p-2 rounded-lg hover:bg-emerald-500/10 text-emerald-600 transition-colors" title="Reactivate">
-                              <UserCheck size={15} />
+                              <UserCheck size={15} aria-hidden="true" />
                             </button>
                           ) : (
                             <button onClick={() => handleSuspend(user.id)} className="p-2 rounded-lg hover:bg-amber-500/10 text-amber-600 transition-colors" title="Suspend">
-                              <ShieldAlert size={15} />
+                              <ShieldAlert size={15} aria-hidden="true" />
                             </button>
                           )}
                           <button className="p-2 rounded-lg hover:bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] transition-colors">
-                            <MoreVertical size={15} />
+                            <MoreVertical size={15} aria-hidden="true" />
                           </button>
                         </div>
                       </td>
@@ -303,7 +303,7 @@ export default function UserManagementSettings() {
               <form onSubmit={handleInvite} className="p-5 sm:p-6 space-y-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
-                    <Mail size={18} />
+                    <Mail size={18} aria-hidden="true" />
                   </div>
                   <div className="min-w-0">
                     <h3 className="text-base sm:text-lg font-bold text-[var(--color-ink)]">Invite Team Member</h3>
@@ -376,7 +376,7 @@ export default function UserManagementSettings() {
             ) : (
               <div className="p-6 space-y-4 text-center">
                 <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center mx-auto text-emerald-600 dark:text-emerald-400">
-                  <Check size={26} />
+                  <Check size={26} aria-hidden="true" />
                 </div>
                 <h3 className="text-base sm:text-lg font-bold text-[var(--color-ink)]">Invite Ready!</h3>
                 <p className="text-xs sm:text-sm text-[var(--color-ink-muted)]">
@@ -390,7 +390,7 @@ export default function UserManagementSettings() {
                     className="p-2 rounded-lg bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary-hover)] transition-all active:scale-95 shrink-0"
                     title="Copy to clipboard"
                   >
-                    {copied ? <Check size={14} /> : <Copy size={14} />}
+                    {copied ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
                   </button>
                 </div>
 

@@ -1,7 +1,7 @@
 // src/components/contracts/public/PublicContractActions.tsx
 "use client";
 
-import { CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle as CheckCircle2, CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
 import { brand } from "@/lib/brand";
 
 interface Props {
@@ -72,12 +72,12 @@ export default function PublicContractActions({
           >
             {isSigning ? (
               <>
-                <Loader2 className="h-4 w-4 animate-spin" /> 
+                <Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" />
                 Processing...
               </>
             ) : (
               <>
-                <CheckCircle2 size={16} /> 
+                <CheckCircle2 size={16} aria-hidden="true" />
                 Sign Contract
               </>
             )}
@@ -94,7 +94,7 @@ export default function PublicContractActions({
               transition: `all ${brand.easing.smooth}`,
             }}
           >
-            <CheckCircle2 size={16} style={{ color: brand.colors.success.main }} />
+            <CheckCircle2 size={16} style={{ color: brand.colors.success.main }} aria-hidden="true" />
             Contract Signed
           </div>
         )}

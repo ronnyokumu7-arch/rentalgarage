@@ -6,13 +6,13 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   FileText,
   Receipt,
-  DollarSign,
-  LayoutDashboard,
+  CurrencyDollar as DollarSign,
+  SquaresFour as LayoutDashboard,
   PiggyBank,
-  FilePlus2,
-  FileSignature,
-  Banknote,
-} from "lucide-react";
+  FilePlus as FilePlus2,
+  Signature as FileSignature,
+  Money as Banknote,
+} from "@phosphor-icons/react/ssr";
 
 import InvoicesTab from "@/components/financials/InvoicesTab";
 import ContractsTab from "@/components/financials/ContractsTab";
@@ -107,25 +107,25 @@ export default function FinancialsPage() {
           title: "Financials",
           mobileTitle: "Financials",
           description: "Complete financial health at a glance",
-          icon: <PiggyBank size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+          icon: <PiggyBank size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
         },
         invoices: {
           title: "Invoices",
           mobileTitle: "Invoices",
           description: "Create, send, and track all invoices",
-          icon: <FilePlus2 size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+          icon: <FilePlus2 size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
         },
         contracts: {
           title: "Contracts",
           mobileTitle: "Contracts",
           description: "Manage your rental contracts seamlessly",
-          icon: <FileSignature size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+          icon: <FileSignature size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
         },
         payments: {
           title: "Payments",
           mobileTitle: "Payments",
           description: "Monitor and reconcile incoming payments",
-          icon: <Banknote size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+          icon: <Banknote size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
         },
       })[activeTab],
     [activeTab],

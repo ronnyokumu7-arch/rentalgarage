@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Car, Loader2, Search, Filter, Plus, Gauge, RectangleHorizontal, ChevronRight, Lock } from "lucide-react";
+import { Car, CircleNotch as Loader2, MagnifyingGlass as Search, Funnel as Filter, Plus, Gauge, Rectangle as RectangleHorizontal, CaretRight as ChevronRight, Lock } from "@phosphor-icons/react/ssr";
 import FilterDropdown from "@/components/ui/FilterDropdown";
 import DataTable from "@/components/ui/DataTable";
 import CardGrid from "@/components/ui/CardGrid";
@@ -82,7 +82,7 @@ export default function InvestorFleetList({
   if (loading) {
     return (
       <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2">
-        <Loader2 className="w-5 h-5 animate-spin" /> Loading your vehicles...
+        <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> Loading your vehicles...
       </div>
     );
   }
@@ -110,7 +110,7 @@ export default function InvestorFleetList({
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full lg:w-auto">
           <div className="flex items-center gap-2 flex-1 sm:w-80">
             <div className="relative flex-1">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true" />
               <input
                 type="text"
                 value={search}
@@ -137,7 +137,7 @@ export default function InvestorFleetList({
             onClick={onAddVehicle}
             className="h-9 px-4 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm flex-shrink-0"
           >
-            <Plus size={14} strokeWidth={2.5} />
+            <Plus size={14} weight="bold" aria-hidden="true" />
             Add Vehicle
           </button>
         </div>
@@ -146,7 +146,7 @@ export default function InvestorFleetList({
       {filteredVehicles.length === 0 ? (
         <div className="p-12 text-center">
           <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
-            <Car size={24} className="text-[var(--color-ink-subtle)]" />
+            <Car size={24} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
           </div>
           <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No vehicles found</h3>
           <p className="text-sm text-[var(--color-ink-muted)] mb-4">
@@ -172,7 +172,7 @@ export default function InvestorFleetList({
                     <div className="flex items-center gap-3 min-w-0 flex-1">
                       <div className="relative flex-shrink-0">
                         <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center shadow-md">
-                          <Car size={16} className="text-[var(--color-primary)]" />
+                          <Car size={16} className="text-[var(--color-primary)]" aria-hidden="true" />
                         </div>
                         <div className={`absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full ${dot.color} ring-2 ring-[var(--color-surface)] shadow-sm ${dot.pulse ? "animate-pulse" : ""}`} />
                       </div>
@@ -182,18 +182,18 @@ export default function InvestorFleetList({
                         </div>
                         <div className="flex items-center gap-2 mt-0.5">
                           <div className="flex items-center gap-1">
-                            <RectangleHorizontal size={10} className="text-[var(--color-ink-subtle)]" />
+                            <RectangleHorizontal size={10} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
                             <span className="text-[10px] text-[var(--color-ink-muted)] font-mono font-semibold truncate">{formatPlate(item.plate_number)}</span>
                           </div>
                           <span className="text-[8px] text-[var(--color-ink-subtle)]">•</span>
                           <div className="flex items-center gap-1">
-                            <Gauge size={10} className="text-[var(--color-primary)]" />
+                            <Gauge size={10} className="text-[var(--color-primary)]" aria-hidden="true" />
                             <span className="text-[10px] text-[var(--color-primary-text)] font-mono font-semibold">{item.current_mileage.toLocaleString()} KM</span>
                           </div>
                         </div>
                       </div>
                     </div>
-                    <ChevronRight size={16} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
+                    <ChevronRight size={16} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" aria-hidden="true" />
                   </div>
                 );
               }}
@@ -218,7 +218,7 @@ export default function InvestorFleetList({
                           </p>
                           <span className="text-[9px] text-[var(--color-ink-muted)] uppercase flex items-center gap-1">
                             per {type}
-                            {locked && <Lock size={8} className="text-[var(--color-ink-subtle)]" />}
+                            {locked && <Lock size={8} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />}
                           </span>
                         </div>
                       )}
@@ -249,7 +249,7 @@ export default function InvestorFleetList({
                     return (
                       <div className="flex items-center gap-3 min-w-0">
                         <div className="w-9 h-9 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center text-[var(--color-ink-subtle)] shrink-0">
-                          <Car size={16} />
+                          <Car size={16} aria-hidden="true" />
                         </div>
                         <div className="min-w-0">
                           <button

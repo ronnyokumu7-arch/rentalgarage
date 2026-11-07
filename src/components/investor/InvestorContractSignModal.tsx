@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import SignatureCanvas from "react-signature-canvas";
-import { CheckCircle, AlertCircle, Loader2, PenLine, RotateCcw, X, Download } from "lucide-react";
+import { CheckCircle, WarningCircle as AlertCircle, CircleNotch as Loader2, PencilLine as PenLine, ArrowCounterClockwise as RotateCcw, X, Download } from "@phosphor-icons/react/ssr";
 import { investorContractsApi } from "@/lib/api/investorContracts";
 import type { InvestorContract } from "@/lib/types";
 import toast from "react-hot-toast";
@@ -88,7 +88,7 @@ export default function InvestorContractSignModal({
         <div className="flex items-center justify-between p-6 border-b border-[var(--color-surface-border)]">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
-              <PenLine size={20} />
+              <PenLine size={20} aria-hidden="true" />
             </div>
             <div>
               <h3 className="text-lg font-bold text-[var(--color-ink)]">
@@ -98,7 +98,7 @@ export default function InvestorContractSignModal({
             </div>
           </div>
           <button onClick={onClose} className="p-2 rounded-lg hover:bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] transition-colors">
-            <X size={20} />
+            <X size={20} aria-hidden="true" />
           </button>
         </div>
 
@@ -124,15 +124,15 @@ export default function InvestorContractSignModal({
               <div className="flex items-center gap-1.5">
                 {signerRole === "agency" ? (
                   contract.signed_by_investor ? (
-                    <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400"><CheckCircle size={12} /> Signed by Investor</span>
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400"><CheckCircle size={12} aria-hidden="true" /> Signed by Investor</span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400"><AlertCircle size={12} /> Pending Investor</span>
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400"><AlertCircle size={12} aria-hidden="true" /> Pending Investor</span>
                   )
                 ) : (
                   contract.signed_by_agency ? (
-                    <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400"><CheckCircle size={12} /> Signed by Agency</span>
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 dark:text-emerald-400"><CheckCircle size={12} aria-hidden="true" /> Signed by Agency</span>
                   ) : (
-                    <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400"><AlertCircle size={12} /> Pending Agency</span>
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-amber-600 dark:text-amber-400"><AlertCircle size={12} aria-hidden="true" /> Pending Agency</span>
                   )
                 )}
               </div>
@@ -146,13 +146,13 @@ export default function InvestorContractSignModal({
             rel="noopener noreferrer"
             className="flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-xl text-sm font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 transition-all border border-[var(--color-primary)]/20"
           >
-            <Download size={16} /> View / Download Contract PDF
+            <Download size={16} aria-hidden="true" /> View / Download Contract PDF
           </a>
 
           {/* Signature Pad */}
           <div>
             <h4 className="text-sm font-bold text-[var(--color-ink)] mb-3 flex items-center gap-2">
-              <PenLine size={16} className="text-[var(--color-primary)]" />
+              <PenLine size={16} className="text-[var(--color-primary)]" aria-hidden="true" />
               {signerRole === "agency" ? "Agency Representative Signature" : "Your Electronic Signature"}
             </h4>
             
@@ -183,7 +183,7 @@ export default function InvestorContractSignModal({
                 className="absolute top-2 right-2 p-1.5 rounded-lg bg-[var(--color-surface-hover)] hover:bg-red-500/10 text-[var(--color-ink-muted)] hover:text-red-500 transition-colors"
                 title="Clear signature"
               >
-                <RotateCcw size={16} />
+                <RotateCcw size={16} aria-hidden="true" />
               </button>
             </div>
 
@@ -219,7 +219,7 @@ export default function InvestorContractSignModal({
               disabled={isSigning || isEmpty || !isAgreed}
               className="flex-1 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {isSigning ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle size={18} />}
+              {isSigning ? <Loader2 size={18} className="animate-spin" aria-hidden="true" /> : <CheckCircle size={18} aria-hidden="true" />}
               {isSigning ? "Securing Signature..." : "Sign Contract"}
             </button>
           </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { Search, FileText, Filter, FileSignature } from "lucide-react";
+import { MagnifyingGlass as Search, FileText, Funnel as Filter, Signature as FileSignature } from "@phosphor-icons/react/ssr";
 import FilterDropdown from "@/components/ui/FilterDropdown";
 import { useInvoices } from "@/hooks/financials/useInvoices";
 import InvoicesTable from "./invoices/InvoicesTable";
@@ -108,7 +108,7 @@ export default function InvoicesTab() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
             <div className="flex items-center gap-2 flex-1 sm:w-80">
               <div className="relative flex-1">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true" />
                 <input
                   type="text"
                   value={search}
@@ -140,7 +140,7 @@ export default function InvoicesTab() {
               onClick={() => setCreateModalOpen(true)}
               className="h-9 px-4 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm flex-shrink-0 cursor-pointer touch-manipulation active:scale-[0.98]"
             >
-              <FileSignature size={14} strokeWidth={2.5} />
+              <FileSignature size={14} weight="bold" aria-hidden="true" />
               Generate Invoice
             </button>
           </div>
@@ -155,7 +155,7 @@ export default function InvoicesTab() {
         ) : displayedInvoices.length === 0 ? (
           <div className="p-12 text-center">
             <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
-              <FileText size={24} className="text-[var(--color-ink-subtle)]" />
+              <FileText size={24} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
             </div>
             <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No invoices found</h3>
             <p className="text-sm text-[var(--color-ink-muted)] mb-4">

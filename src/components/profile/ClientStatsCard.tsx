@@ -1,6 +1,6 @@
 "use client";
 
-import { Calendar, TrendingUp } from "lucide-react";
+import { Calendar, TrendUp as TrendingUp } from "@phosphor-icons/react/ssr";
 import SectionCard from "@/components/ui/SectionCard";
 import type { ClientStats } from "@/hooks/useClientProfile";
 
@@ -35,7 +35,7 @@ export default function ClientStatsCard({ stats }: ClientStatsCardProps) {
         <div className="pr-3.5 flex flex-col justify-between space-y-2 relative z-10">
           <div className="flex items-center justify-between gap-1">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--color-ink-muted)] flex items-center gap-1.5">
-              <Calendar size={11} className="text-[var(--color-ink-subtle)]" />
+              <Calendar size={11} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
               Bookings
             </span>
             <span className="text-[9px] font-mono px-1 rounded text-[var(--color-ink-muted)] bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)]">
@@ -57,7 +57,7 @@ export default function ClientStatsCard({ stats }: ClientStatsCardProps) {
         <div className="pl-3.5 flex flex-col justify-between space-y-2 relative z-10">
           <div className="flex items-center justify-between gap-1">
             <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--color-ink-muted)] flex items-center gap-1.5">
-              <TrendingUp size={11} className="text-emerald-500" />
+              <TrendingUp size={11} className="text-emerald-500" aria-hidden="true" />
               Revenue
             </span>
             <span className="text-[9px] font-mono px-1 rounded text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 font-bold">

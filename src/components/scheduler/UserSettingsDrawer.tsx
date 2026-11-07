@@ -7,10 +7,10 @@ import {
   User,
   Shield,
   Clock,
-  AlertTriangle,
-  Save,
-  Trash2,
-} from "lucide-react";
+  Warning as AlertTriangle,
+  FloppyDisk as Save,
+  Trash as Trash2,
+} from "@phosphor-icons/react/ssr";
 import { TeamMember } from "@/hooks/scheduler/useTaskSchedulerTimeline";
 
 export interface UserPermissions {
@@ -180,7 +180,7 @@ export default function UserSettingsDrawer({
               disabled={isSaving}
               className="w-8 h-8 rounded-lg bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors disabled:opacity-50"
             >
-              <X size={16} />
+              <X size={16} aria-hidden="true" />
             </button>
           </div>
 
@@ -193,7 +193,7 @@ export default function UserSettingsDrawer({
             {/* Basic Info Section */}
             <div className="space-y-3">
               <label className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--color-ink-subtle)] flex items-center gap-1.5">
-                <User size={13} />
+                <User size={13} aria-hidden="true" />
                 <span>Profile & Identity</span>
               </label>
 
@@ -253,7 +253,7 @@ export default function UserSettingsDrawer({
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <label className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--color-ink-subtle)] flex items-center gap-1.5">
-                  <Clock size={13} />
+                  <Clock size={13} aria-hidden="true" />
                   <span>Weekly Capacity</span>
                 </label>
                 <span className="text-xs font-mono font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/10 px-2 py-0.5 rounded-md border border-[var(--color-primary)]/20">
@@ -296,7 +296,7 @@ export default function UserSettingsDrawer({
             {/* Granular Permissions Matrix */}
             <div className="space-y-3">
               <label className="text-[11px] font-extrabold uppercase tracking-wider text-[var(--color-ink-subtle)] flex items-center gap-1.5">
-                <Shield size={13} />
+                <Shield size={13} aria-hidden="true" />
                 <span>Access Controls</span>
               </label>
 
@@ -352,13 +352,13 @@ export default function UserSettingsDrawer({
                     disabled={isSaving}
                     className="text-xs font-semibold text-rose-600 hover:text-rose-700 dark:text-rose-500 dark:hover:text-rose-400 flex items-center gap-1.5 transition-colors disabled:opacity-50"
                   >
-                    <Trash2 size={13} />
+                    <Trash2 size={13} aria-hidden="true" />
                     <span>Deactivate or Remove User</span>
                   </button>
                 ) : (
                   <div className="bg-rose-500/10 border border-rose-500/30 p-3 rounded-xl space-y-2 animate-in fade-in duration-150">
                     <p className="text-[11px] font-bold text-rose-700 dark:text-rose-400 flex items-center gap-1">
-                      <AlertTriangle size={13} />
+                      <AlertTriangle size={13} aria-hidden="true" />
                       <span>Confirm Deactivation?</span>
                     </p>
                     <p className="text-[10px] text-[var(--color-ink-muted)]">
@@ -409,7 +409,7 @@ export default function UserSettingsDrawer({
                 </>
               ) : (
                 <>
-                  <Save size={14} />
+                  <Save size={14} aria-hidden="true" />
                   <span>Save Changes</span>
                 </>
               )}

@@ -4,13 +4,13 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, useMemo } from "react";
 import {
-  Building2,
+  Buildings as Building2,
   User as UserIcon,
-  Link2,
-  UserRound,
+  LinkSimple as Link2,
+  User as UserRound,
   Building,
   UserPlus,
-} from "lucide-react";
+} from "@phosphor-icons/react/ssr";
 import ClientInvitesPanel from "@/components/client/ClientInvitesPanel";
 import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
 import MobileClientsList from "@/components/client/MobileClientsList";
@@ -113,7 +113,7 @@ export default function ClientsPage() {
         mobileTitle: "Clients",
         description:
           "Manage individual customer accounts, personal verification steps, and driver records.",
-        icon: <UserRound size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+        icon: <UserRound size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
       };
     }
     if (activeTab === "corporate") {
@@ -122,7 +122,7 @@ export default function ClientsPage() {
         mobileTitle: "Corporate",
         description:
           "Oversee commercial agency relationships, corporate profiles, and company contracts.",
-        icon: <Building size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+        icon: <Building size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
       };
     }
     return {
@@ -130,7 +130,7 @@ export default function ClientsPage() {
       mobileTitle: "Invites",
       description:
         "Generate single-use onboarding links and manage pending invitations.",
-      icon: <UserPlus size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+      icon: <UserPlus size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
     };
   }, [activeTab]);
 
@@ -184,7 +184,7 @@ export default function ClientsPage() {
           />
 
           <div className="hidden md:block p-12 text-center bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)]">
-            <Building2 size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" />
+            <Building2 size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" aria-hidden="true" />
             <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">
               Corporate Client Hub
             </h3>

@@ -1,33 +1,33 @@
 // src/lib/search/page-registry.ts
 "use client";
 
-import type { LucideIcon } from "lucide-react";
+import type { Icon } from "@phosphor-icons/react";
 import {
-  LayoutDashboard,
-  CalendarDays,
+  SquaresFour as LayoutDashboard,
+  CalendarDots as CalendarDays,
   Users,
   UserCircle,
-  Building2,
-  CarFront,
+  Buildings as Building2,
+  CarProfile as CarFront,
   Wrench,
-  BarChart3,
-  FilePlus2,
-  FileSignature,
-  Banknote,
+  ChartBar as BarChart3,
+  FilePlus as FilePlus2,
+  Signature as FileSignature,
+  Money as Banknote,
   Wallet,
-  CalendarRange,
-  KeyRound,
-  UserCog,
-  Settings as SettingsIcon,
+  CalendarDots as CalendarRange,
+  Key as KeyRound,
+  UserGear as UserCog,
+  Gear as SettingsIcon,
   CreditCard,
-  Puzzle,
-  Activity,
+  PuzzlePiece as Puzzle,
+  Pulse as Activity,
   Database,
   ListChecks,
-  TrendingUp,
-  LifeBuoy,
-  Server,
-} from "lucide-react";
+  TrendUp as TrendingUp,
+  Lifebuoy as LifeBuoy,
+  HardDrives as Server,
+} from "@phosphor-icons/react/ssr";
 
 /* ──────────────────────────────────────────────────────────────────────
    Types
@@ -64,7 +64,7 @@ export interface PageEntry {
   /** Route (may include `?tab=` and `?module=` deep links). */
   href: string;
   /** Lucide icon. */
-  icon: LucideIcon;
+  icon: Icon;
   /** Logical section this page belongs to. */
   section: RegistrySection;
   /** Which roles can see this page in search. */
@@ -655,7 +655,7 @@ export function toPageResult(entry: PageEntry): {
   label: string;
   description: string;
   href: string;
-  icon: LucideIcon;
+  icon: Icon;
   section: RegistrySection;
 } {
   return {

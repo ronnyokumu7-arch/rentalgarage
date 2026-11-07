@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Pin } from "lucide-react";
+import { X, PushPin as Pin } from "@phosphor-icons/react/ssr";
 
 import MobileFleetStatusSlide, {
   type CarouselVehicle,
@@ -149,7 +149,7 @@ export default function MobileCarouselCard({
             aria-label="Dismiss promo"
             className="p-1.5 rounded-lg text-ink-muted hover:bg-surface-hover hover:text-ink transition-colors bg-surface/50 backdrop-blur-sm"
           >
-            <X size={14} />
+            <X size={14} aria-hidden="true" />
           </button>
         )}
 
@@ -164,8 +164,8 @@ export default function MobileCarouselCard({
         >
           <Pin
             size={14}
-            strokeWidth={2}
-            className={pinned ? "fill-primary/30 rotate-45" : "rotate-45"}
+            weight="regular"
+            className={pinned ? "fill-primary/30 rotate-45" : "rotate-45"} aria-hidden="true"
           />
         </button>
       </div>

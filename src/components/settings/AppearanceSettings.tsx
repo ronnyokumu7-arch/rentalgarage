@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Monitor, Sun, Moon, LayoutGrid, AlignJustify, Check, Loader2 } from "lucide-react";
+import { Monitor, Sun, Moon, SquaresFour as LayoutGrid, TextAlignJustify as AlignJustify, Check, CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
 import toast from "react-hot-toast";
 import { userPreferencesApi, type UserPreferences } from "@/lib/api/user-preferences";
 
@@ -86,7 +86,7 @@ export default function AppearanceSettings() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-24">
-        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" />
+        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" aria-hidden="true" />
       </div>
     );
   }
@@ -121,7 +121,7 @@ export default function AppearanceSettings() {
                 >
                   {isActive && (
                     <span className="absolute top-1.5 right-1.5 w-4 h-4 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center">
-                      <Check size={10} strokeWidth={3} />
+                      <Check size={10} weight="bold" aria-hidden="true" />
                     </span>
                   )}
                   <div
@@ -131,7 +131,7 @@ export default function AppearanceSettings() {
                         : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)]"
                     }`}
                   >
-                    <Icon size={18} />
+                    <Icon size={18} aria-hidden="true" />
                   </div>
                   <span
                     className={`text-xs font-bold ${
@@ -180,7 +180,7 @@ export default function AppearanceSettings() {
                         : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)]"
                     }`}
                   >
-                    <Icon size={16} />
+                    <Icon size={16} aria-hidden="true" />
                   </div>
                   <div className="flex-1 min-w-0 text-left">
                     <p
@@ -196,7 +196,7 @@ export default function AppearanceSettings() {
                   </div>
                   {isActive && (
                     <span className="shrink-0 w-4 h-4 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center">
-                      <Check size={10} strokeWidth={3} />
+                      <Check size={10} weight="bold" aria-hidden="true" />
                     </span>
                   )}
                 </button>
@@ -209,7 +209,7 @@ export default function AppearanceSettings() {
       {/* ─── Saving indicator ─────────────────────────────────── */}
       {isSaving && (
         <div className="fixed bottom-6 right-4 sm:right-6 bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-xl shadow-lg px-3.5 py-2.5 flex items-center gap-2 animate-in slide-in-from-bottom-2 z-50">
-          <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--color-primary)]" />
+          <Loader2 className="w-3.5 h-3.5 animate-spin text-[var(--color-primary)]" aria-hidden="true" />
           <span className="text-xs font-semibold text-[var(--color-ink)]">Saving…</span>
         </div>
       )}

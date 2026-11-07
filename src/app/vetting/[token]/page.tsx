@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Camera, Loader2, ShieldCheck, Upload } from "lucide-react";
+import { Camera, CircleNotch as Loader2, ShieldCheck, Upload } from "@phosphor-icons/react/ssr";
 import toast from "react-hot-toast";
 import apiClient from "@/lib/api-client";
 import { getApiErrorMessage } from "@/lib/api-error";
@@ -217,9 +217,9 @@ export default function VettingPage() {
     }
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin" /></div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin" aria-hidden="true" /></div>;
   if (error || !preview) return <div className="min-h-screen flex items-center justify-center p-4 text-center"><p>{error || "Verification is unavailable."}</p></div>;
-  if (step === "success") return <div className="min-h-screen flex items-center justify-center p-4"><div className="max-w-md rounded-2xl bg-[var(--color-surface)] p-8 text-center shadow-xl"><ShieldCheck className="mx-auto mb-4 text-emerald-500" size={40} /><h1 className="text-xl font-bold">Verification submitted</h1><p className="mt-2 text-sm text-[var(--color-ink-muted)]">{preview.tenant_name} will review your documents and notify you of the outcome.</p></div></div>;
+  if (step === "success") return <div className="min-h-screen flex items-center justify-center p-4"><div className="max-w-md rounded-2xl bg-[var(--color-surface)] p-8 text-center shadow-xl"><ShieldCheck className="mx-auto mb-4 text-emerald-500" size={40} aria-hidden="true" /><h1 className="text-xl font-bold">Verification submitted</h1><p className="mt-2 text-sm text-[var(--color-ink-muted)]">{preview.tenant_name} will review your documents and notify you of the outcome.</p></div></div>;
 
   const DocumentCard = ({ slot, label }: { slot: DocumentSlot; label: string }) => (
     <div className="rounded-xl border border-[var(--color-surface-border)] p-3">
@@ -228,8 +228,8 @@ export default function VettingPage() {
         {documents[slot]?.name || (uploadedSlots.has(slot) ? "Already uploaded" : "Not selected")}
       </p>
       <div className="mt-3 grid grid-cols-2 gap-2">
-        <label className="cursor-pointer rounded-lg bg-[var(--color-surface-hover)] px-2 py-2 text-center text-[10px] font-bold"><Upload size={12} className="mr-1 inline" />Device<input className="hidden" type="file" accept={SUPPORTED_IMAGE_TYPES.join(",")} onChange={(event) => selectDocument(slot, event.target.files?.[0])} /></label>
-        <label className="cursor-pointer rounded-lg bg-[var(--color-primary)]/10 px-2 py-2 text-center text-[10px] font-bold text-[var(--color-primary)]"><Camera size={12} className="mr-1 inline" />Camera<input className="hidden" type="file" accept={SUPPORTED_IMAGE_TYPES.join(",")} capture="environment" onChange={(event) => selectDocument(slot, event.target.files?.[0])} /></label>
+        <label className="cursor-pointer rounded-lg bg-[var(--color-surface-hover)] px-2 py-2 text-center text-[10px] font-bold"><Upload size={12} className="mr-1 inline" aria-hidden="true" />Device<input className="hidden" type="file" accept={SUPPORTED_IMAGE_TYPES.join(",")} onChange={(event) => selectDocument(slot, event.target.files?.[0])} /></label>
+        <label className="cursor-pointer rounded-lg bg-[var(--color-primary)]/10 px-2 py-2 text-center text-[10px] font-bold text-[var(--color-primary)]"><Camera size={12} className="mr-1 inline" aria-hidden="true" />Camera<input className="hidden" type="file" accept={SUPPORTED_IMAGE_TYPES.join(",")} capture="environment" onChange={(event) => selectDocument(slot, event.target.files?.[0])} /></label>
       </div>
     </div>
   );
@@ -336,7 +336,7 @@ export default function VettingPage() {
                   <img src={selfiePreview} alt="Selfie preview" className="h-full w-full object-cover" />
                 ) : (
                   <div className="text-center">
-                    <Camera className="mx-auto mb-2" />
+                    <Camera className="mx-auto mb-2" aria-hidden="true" />
                     <p className="text-sm font-bold">Take selfie with ID</p>
                   </div>
                 )}

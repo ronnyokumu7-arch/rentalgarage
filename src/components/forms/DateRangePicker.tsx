@@ -1,6 +1,6 @@
 // src/components/forms/DateRangePicker.tsx
 "use client";
-import { CalendarDays, ArrowRight } from "lucide-react";
+import { CalendarDots as CalendarDays, ArrowRight } from "@phosphor-icons/react/ssr";
 
 interface DateRangePickerProps {
   startDate: string;
@@ -32,7 +32,7 @@ export default function DateRangePicker({
       <div className="flex items-center gap-2 p-2 bg-white border border-gray-300 rounded-xl focus-within:border-blue-500 focus-within:ring-4 focus-within:ring-blue-500/20 transition-all">
         {/* Start Date */}
         <div className="flex-1 relative group">
-          <CalendarDays size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
+          <CalendarDays size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors" aria-hidden="true" />
           <input
             type="date"
             value={startDate || ""}
@@ -45,12 +45,12 @@ export default function DateRangePicker({
 
         {/* Divider with Arrow */}
         <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gray-100 flex-shrink-0">
-          <ArrowRight size={14} className="text-gray-400" />
+          <ArrowRight size={14} className="text-gray-400" aria-hidden="true" />
         </div>
 
         {/* End Date */}
         <div className="flex-1 relative group">
-          <CalendarDays size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors" />
+          <CalendarDays size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors" aria-hidden="true" />
           <input
             type="date"
             value={endDate || ""}

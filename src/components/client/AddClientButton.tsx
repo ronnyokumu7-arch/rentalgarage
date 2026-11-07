@@ -1,7 +1,7 @@
 // src/components/client/AddClientButton.tsx
 "use client";
 
-import { UserPlus } from "lucide-react";
+import { UserPlus } from "@phosphor-icons/react/ssr";
 
 interface AddClientButtonProps {
   onClick: () => void;
@@ -21,7 +21,7 @@ export default function AddClientButton({ onClick }: AddClientButtonProps) {
         className="md:hidden w-full h-10 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-bold flex items-center justify-center gap-1.5 transition-all shadow-sm active:scale-[0.99]"
         aria-label="Add new client"
       >
-        <UserPlus size={16} strokeWidth={2.5} />
+        <UserPlus size={16} weight="bold" aria-hidden="true" />
         Add Client
       </button>
 
@@ -31,7 +31,7 @@ export default function AddClientButton({ onClick }: AddClientButtonProps) {
         className="hidden md:flex h-10 px-4 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-bold items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.98] shrink-0"
         aria-label="Add new client"
       >
-        <UserPlus size={16} strokeWidth={2.5} />
+        <UserPlus size={16} weight="bold" aria-hidden="true" />
         Add Client
       </button>
     </>

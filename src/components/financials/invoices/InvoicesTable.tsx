@@ -2,8 +2,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FileText, Download, Copy, DollarSign, XCircle, ExternalLink, Banknote, CalendarDays, User, PenLine, Send, CheckCircle2, AlertCircle, ChevronRight, Car } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import { FileText, Download, Copy, CurrencyDollar as DollarSign, XCircle, ArrowSquareOut as ExternalLink, Money as Banknote, CalendarDots as CalendarDays, User, PencilLine as PenLine, PaperPlaneTilt as Send, CheckCircle as CheckCircle2, WarningCircle as AlertCircle, CaretRight as ChevronRight, Car } from "@phosphor-icons/react/ssr";
+import type { Icon } from "@phosphor-icons/react";
 import DataTable, { RowAction } from "@/components/ui/DataTable";
 import CardGrid from "@/components/ui/CardGrid";
 import type { Invoice } from "@/lib/types";
@@ -27,7 +27,7 @@ const statusStyles: Record<string, { bg: string; text: string }> = {
 };
 
 // ✅ Premium per-status icons for the pill
-const statusIcons: Record<string, LucideIcon> = {
+const statusIcons: Record<string, Icon> = {
   draft: PenLine,
   sent: Send,
   partially_paid: Banknote,
@@ -166,7 +166,7 @@ export default function InvoicesTable({
                   {/* Premium Icon Container with Glow */}
                   <div className="relative flex-shrink-0">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center shadow-md">
-                      <FileText size={16} className="text-[var(--color-primary)]" />
+                      <FileText size={16} className="text-[var(--color-primary)]" aria-hidden="true" />
                     </div>
                     {/* Live Status Indicator */}
                     <div className="absolute -top-0.5 -right-0.5">
@@ -181,7 +181,7 @@ export default function InvoicesTable({
                       </span>
                     </div>
                     <div className="flex items-center gap-1 mt-0.5">
-                      <User size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                      <User size={10} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                       <span className="text-[10px] text-[var(--color-ink-muted)] truncate">
                         {clientName}
                       </span>
@@ -190,7 +190,7 @@ export default function InvoicesTable({
                 </div>
                 
                 <div className="flex items-center gap-1 flex-shrink-0">
-                  <ChevronRight size={16} className="text-[var(--color-ink-subtle)]" />
+                  <ChevronRight size={16} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
                 </div>
               </div>
             );
@@ -245,7 +245,7 @@ export default function InvoicesTable({
                 <div className="flex items-center justify-between mt-2">
                   {/* Due Date */}
                   <div className="flex items-center gap-1.5">
-                    <CalendarDays size={11} className={item.status === 'overdue' ? 'text-[var(--color-danger-text)]' : 'text-[var(--color-ink-subtle)]'} />
+                    <CalendarDays size={11} className={item.status === 'overdue' ? 'text-[var(--color-danger-text)]' : 'text-[var(--color-ink-subtle)]'} aria-hidden="true" />
                     <span className={`text-[10px] font-medium ${item.status === 'overdue' ? 'text-[var(--color-danger-text)] font-bold' : 'text-[var(--color-ink-muted)]'}`}>
                       {formatDate(item.due_date)}
                     </span>
@@ -253,7 +253,7 @@ export default function InvoicesTable({
 
                   {/* Status Pill */}
                   <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wide ${style.bg} ${style.text} shadow-sm`}>
-                    <StatusIcon size={9} className="flex-shrink-0 opacity-90" />
+                    <StatusIcon size={9} className="flex-shrink-0 opacity-90" aria-hidden="true" />
                     {statusLabel}
                   </span>
                 </div>
@@ -279,7 +279,7 @@ export default function InvoicesTable({
                 return (
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-9 h-9 rounded-full bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center text-[var(--color-ink-subtle)] shrink-0">
-                      <FileText size={16} />
+                      <FileText size={16} aria-hidden="true" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-semibold text-[var(--color-ink)] truncate">{invoice.invoice_number}</p>
@@ -306,7 +306,7 @@ export default function InvoicesTable({
                     title="View Booking Details"
                   >
                     {bookingRef}
-                    <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
                   </button>
                 ) : (
                   <span className="text-sm text-[var(--color-ink-muted)] italic">Orphaned</span>
@@ -367,7 +367,7 @@ export default function InvoicesTable({
 
                 return (
                   <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase ${style.bg} ${style.text}`}>
-                    <StatusIcon size={10} className="flex-shrink-0 opacity-80" />
+                    <StatusIcon size={10} className="flex-shrink-0 opacity-80" aria-hidden="true" />
                     {label}
                   </span>
                 );
@@ -390,9 +390,9 @@ export default function InvoicesTable({
                     className="group flex items-center gap-1.5 text-sm font-semibold text-[var(--color-ink)] hover:text-[var(--color-ink)] hover:underline transition-all text-left"
                     title="View Client Profile"
                   >
-                    <User size={12} className="text-[var(--color-ink-subtle)]" />
+                    <User size={12} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
                     {clientName}
-                    <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <ExternalLink size={12} className="opacity-0 group-hover:opacity-100 transition-opacity" aria-hidden="true" />
                   </button>
                 ) : (
                   <span className="text-sm text-[var(--color-ink-muted)] italic">Unknown</span>

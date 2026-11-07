@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { User, Mail, Phone, CreditCard, Pencil, Save, X, Camera, Check, Calendar } from "lucide-react";
+import { User, Envelope as Mail, Phone, CreditCard, PencilSimple as Pencil, FloppyDisk as Save, X, Camera, Check, Calendar } from "@phosphor-icons/react/ssr";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
 import type { Client } from "@/lib/types";
@@ -63,7 +63,7 @@ export default function PersonalInfoCard({ client, onSave }: PersonalInfoCardPro
     <div>
       <label className="label">{label}</label>
       <div className="relative group">
-        <Icon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] group-focus-within:text-[var(--color-primary)] transition-colors" />
+        <Icon size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] group-focus-within:text-[var(--color-primary)] transition-colors" aria-hidden="true" />
         <input
           type={type}
           value={value}
@@ -89,7 +89,7 @@ export default function PersonalInfoCard({ client, onSave }: PersonalInfoCardPro
       <div>
         <label className="label">{label}</label>
         <div className="relative group">
-          <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] group-focus-within:text-[var(--color-primary)] transition-colors pointer-events-none z-10" />
+          <Calendar size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] group-focus-within:text-[var(--color-primary)] transition-colors pointer-events-none z-10" aria-hidden="true" />
           <Flatpickr
             value={value}
             onChange={onChange}
@@ -114,7 +114,7 @@ export default function PersonalInfoCard({ client, onSave }: PersonalInfoCardPro
         <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/30">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-lg bg-[var(--color-primary-muted)] flex items-center justify-center">
-              <User size={16} className="text-[var(--color-primary)]" />
+              <User size={16} className="text-[var(--color-primary)]" aria-hidden="true" />
             </div>
             <div>
               <h3 className="text-[var(--color-ink)] font-semibold">Edit Profile</h3>
@@ -125,7 +125,7 @@ export default function PersonalInfoCard({ client, onSave }: PersonalInfoCardPro
             onClick={handleCancel}
             className="p-2 rounded-lg hover:bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-all"
           >
-            <X size={16} />
+            <X size={16} aria-hidden="true" />
           </button>
         </div>
 
@@ -193,7 +193,7 @@ export default function PersonalInfoCard({ client, onSave }: PersonalInfoCardPro
             onClick={handleSave}
             className="btn btn-primary btn-sm"
           >
-            <Save size={14} />
+            <Save size={14} aria-hidden="true" />
             Save Changes
           </button>
         </div>
@@ -221,7 +221,7 @@ export default function PersonalInfoCard({ client, onSave }: PersonalInfoCardPro
               </div>
             )}
             <div className="absolute inset-0 rounded-xl bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer">
-              <Camera size={14} className="text-white" />
+              <Camera size={14} className="text-white" aria-hidden="true" />
             </div>
           </div>
 
@@ -240,7 +240,7 @@ export default function PersonalInfoCard({ client, onSave }: PersonalInfoCardPro
           onClick={() => setIsEditing(true)}
           className="btn btn-ghost btn-sm text-[var(--color-ink-muted)] hover:text-[var(--color-primary)]"
         >
-          <Pencil size={14} />
+          <Pencil size={14} aria-hidden="true" />
           <span className="hidden sm:inline">Edit</span>
         </button>
       </div>
@@ -252,7 +252,7 @@ export default function PersonalInfoCard({ client, onSave }: PersonalInfoCardPro
           <div className="p-4 rounded-xl border border-transparent hover:border-[var(--color-surface-border)] hover:bg-[var(--color-surface-hover)] transition-all duration-200">
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-lg bg-[var(--color-primary-muted)] text-[var(--color-primary)] flex items-center justify-center shrink-0 mt-0.5">
-                <Mail size={14} />
+                <Mail size={14} aria-hidden="true" />
               </div>
               <div className="min-w-0 flex-1">
                 <span className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-muted)] mb-1">
@@ -269,7 +269,7 @@ export default function PersonalInfoCard({ client, onSave }: PersonalInfoCardPro
           <div className="p-4 rounded-xl border border-transparent hover:border-[var(--color-surface-border)] hover:bg-[var(--color-surface-hover)] transition-all duration-200">
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-lg bg-[var(--color-success-bg)] text-[var(--color-success)] flex items-center justify-center shrink-0 mt-0.5">
-                <Phone size={14} />
+                <Phone size={14} aria-hidden="true" />
               </div>
               <div className="min-w-0 flex-1">
                 <span className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-muted)] mb-1">
@@ -286,7 +286,7 @@ export default function PersonalInfoCard({ client, onSave }: PersonalInfoCardPro
           <div className="p-4 rounded-xl border border-transparent hover:border-[var(--color-surface-border)] hover:bg-[var(--color-surface-hover)] transition-all duration-200">
             <div className="flex items-start gap-3">
               <div className="w-8 h-8 rounded-lg bg-[var(--color-primary-muted)] text-[var(--color-primary)] flex items-center justify-center shrink-0 mt-0.5">
-                <CreditCard size={14} />
+                <CreditCard size={14} aria-hidden="true" />
               </div>
               <div className="min-w-0 flex-1">
                 <span className="block text-xs font-semibold uppercase tracking-wider text-[var(--color-ink-muted)] mb-1">
@@ -297,7 +297,7 @@ export default function PersonalInfoCard({ client, onSave }: PersonalInfoCardPro
                     {client.id_number || "Not provided"}
                   </span>
                   {client.id_number && (
-                    <Check size={12} className="text-[var(--color-success)] shrink-0" />
+                    <Check size={12} className="text-[var(--color-success)] shrink-0" aria-hidden="true" />
                   )}
                 </div>
               </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { FileText, CheckCircle2, Download, Loader2 } from "lucide-react";
+import { FileText, CheckCircle as CheckCircle2, Download, CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
 import { brand } from "@/lib/brand";
 
 import { usePublicContract } from "@/components/contracts/public/hooks/usePublicContract";
@@ -81,14 +81,14 @@ export default function PublicContractViewPage() {
                   className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
                   style={{ backgroundColor: brand.colors.success.bg }}
                 >
-                  <CheckCircle2 className="h-5 w-5" style={{ color: brand.colors.success.main }} />
+                  <CheckCircle2 className="h-5 w-5" style={{ color: brand.colors.success.main }} aria-hidden="true" />
                 </div>
               ) : (
                 <div 
                   className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
                   style={{ backgroundColor: brand.colors.info.bg }}
                 >
-                  <FileText className="h-5 w-5" style={{ color: brand.colors.info.main }} />
+                  <FileText className="h-5 w-5" style={{ color: brand.colors.info.main }} aria-hidden="true" />
                 </div>
               )}
               <div>
@@ -132,11 +132,11 @@ export default function PublicContractViewPage() {
             >
               {isDownloadingPdf ? (
                 <>
-                  <Loader2 size={14} className="animate-spin" /> Generating PDF...
+                  <Loader2 size={14} className="animate-spin" aria-hidden="true" /> Generating PDF...
                 </>
               ) : (
                 <>
-                  <Download size={14} /> Download PDF
+                  <Download size={14} aria-hidden="true" /> Download PDF
                 </>
               )}
             </button>

@@ -1,20 +1,20 @@
 "use client";
 
 import React from "react";
-import { LucideIcon } from "lucide-react";
+import type { Icon } from "@phosphor-icons/react";
 import Badge from "./Badge";
 
 interface InfoPill {
   label: string;
   value: string;
-  icon?: LucideIcon;
+  icon?: Icon;
 }
 
 interface ProfileHeaderProps {
   title: string;
   subtitle?: string;
   avatar?: React.ReactNode;
-  icon?: LucideIcon;
+  icon?: Icon;
   status?: { label: string; variant: "success" | "warning" | "danger" | "accent" | "neutral" | "critical" };
   infoPills?: InfoPill[];
   actions?: React.ReactNode;
@@ -41,7 +41,7 @@ export default function ProfileHeader({
             <div className="flex-shrink-0">{avatar}</div>
           ) : Icon ? (
             <div className="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 bg-accent-bg">
-              <Icon size={28} strokeWidth={1.6} className="text-accent-dark" />
+              <Icon size={28} weight="light" className="text-accent-dark" aria-hidden="true" />
             </div>
           ) : null}
 
@@ -75,7 +75,7 @@ export default function ProfileHeader({
                         rounded-lg bg-surface text-xs font-medium text-ink-muted
                         border border-surface-border"
                     >
-                      {PillIcon && <PillIcon size={12} strokeWidth={2} className="text-ink-subtle" />}
+                      {PillIcon && <PillIcon size={12} weight="regular" className="text-ink-subtle" aria-hidden="true" />}
                       <span className="text-ink-subtle">{pill.label}:</span>
                       <span className="text-ink">{pill.value}</span>
                     </div>

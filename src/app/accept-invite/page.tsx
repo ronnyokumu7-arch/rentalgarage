@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/context/auth-context";
 import apiClient from "@/lib/api-client";
 import NewUserForm, { UserInvitePreview } from "@/components/users/NewUserForm";
-import { Loader2, AlertCircle } from "lucide-react";
+import { CircleNotch as Loader2, WarningCircle as AlertCircle } from "@phosphor-icons/react/ssr";
 import toast from "react-hot-toast";
 
 // Separate component that uses useSearchParams
@@ -153,7 +153,7 @@ function AcceptInviteContent() {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950">
         <div className="text-center">
-          <Loader2 className="w-10 h-10 animate-spin text-[var(--color-primary)] mx-auto mb-4" />
+          <Loader2 className="w-10 h-10 animate-spin text-[var(--color-primary)] mx-auto mb-4" aria-hidden="true" />
           <p className="text-sm text-[var(--color-ink-muted)]">Loading invite details...</p>
         </div>
       </div>
@@ -165,7 +165,7 @@ function AcceptInviteContent() {
       <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950">
         <div className="max-w-md w-full p-8 bg-white dark:bg-gray-900 rounded-2xl border border-[var(--color-surface-border)] shadow-xl text-center">
           <div className="w-16 h-16 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="w-8 h-8 text-red-600 dark:text-red-400" />
+            <AlertCircle className="w-8 h-8 text-red-600 dark:text-red-400" aria-hidden="true" />
           </div>
           <h2 className="text-xl font-bold text-[var(--color-ink)] mb-2">Invite Error</h2>
           <p className="text-sm text-[var(--color-ink-muted)] mb-6">{error}</p>
@@ -210,7 +210,7 @@ export default function AcceptInvitePage() {
   return (
     <Suspense fallback={
       <div className="flex items-center justify-center min-h-screen bg-gray-50 dark:bg-gray-950">
-        <Loader2 className="w-10 h-10 animate-spin text-[var(--color-primary)]" />
+        <Loader2 className="w-10 h-10 animate-spin text-[var(--color-primary)]" aria-hidden="true" />
       </div>
     }>
       <AcceptInviteContent />

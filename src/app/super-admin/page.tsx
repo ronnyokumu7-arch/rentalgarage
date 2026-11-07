@@ -4,15 +4,15 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Building2,
-  CheckCircle2,
+  Buildings as Building2,
+  CheckCircle as CheckCircle2,
   Clock,
   XCircle,
-  TrendingUp,
-  AlertTriangle,
-  Loader2,
+  TrendUp as TrendingUp,
+  Warning as AlertTriangle,
+  CircleNotch as Loader2,
   ArrowRight,
-} from "lucide-react";
+} from "@phosphor-icons/react/ssr";
 import { tenantsApi } from "@/lib/api/tenants";
 import type { Tenant } from "@/lib/types";
 
@@ -87,7 +87,7 @@ export default function SuperAdminPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="w-10 h-10 animate-spin text-[var(--color-primary)]" />
+        <Loader2 className="w-10 h-10 animate-spin text-[var(--color-primary)]" aria-hidden="true" />
       </div>
     );
   }
@@ -99,7 +99,7 @@ export default function SuperAdminPage() {
         <div>
           <h1 className="text-2xl font-bold text-[var(--color-ink)] flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
-              <TrendingUp size={20} />
+              <TrendingUp size={20} aria-hidden="true" />
             </div>
             System Overview
           </h1>
@@ -111,7 +111,7 @@ export default function SuperAdminPage() {
           onClick={() => router.push("/super-admin/agencies")}
           className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-semibold text-[var(--color-primary)] bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 transition-all"
         >
-          View All Agencies <ArrowRight size={16} />
+          View All Agencies <ArrowRight size={16} aria-hidden="true" />
         </button>
       </div>
 
@@ -129,7 +129,7 @@ export default function SuperAdminPage() {
                   {stat.label}
                 </p>
                 <div className={`w-8 h-8 rounded-lg ${stat.bg} flex items-center justify-center ${stat.color}`}>
-                  <Icon size={16} />
+                  <Icon size={16} aria-hidden="true" />
                 </div>
               </div>
               <p className="text-2xl font-bold text-[var(--color-ink)]">{stat.value}</p>
@@ -144,7 +144,7 @@ export default function SuperAdminPage() {
         <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden">
           <div className="p-5 border-b border-[var(--color-surface-border)] flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <AlertTriangle size={16} className="text-[var(--color-warning-text)]" />
+              <AlertTriangle size={16} className="text-[var(--color-warning-text)]" aria-hidden="true" />
               <h3 className="text-sm font-bold text-[var(--color-ink)]">Subscriptions Needing Attention</h3>
             </div>
             <span className="text-xs font-semibold text-[var(--color-ink-muted)]">
@@ -154,7 +154,7 @@ export default function SuperAdminPage() {
           <div className="divide-y divide-[var(--color-surface-border)]">
             {attentionTenants.length === 0 ? (
               <div className="p-8 text-center text-sm text-[var(--color-ink-muted)]">
-                <CheckCircle2 size={24} className="mx-auto mb-2 text-[var(--color-success-text)] opacity-50" />
+                <CheckCircle2 size={24} className="mx-auto mb-2 text-[var(--color-success-text)] opacity-50" aria-hidden="true" />
                 All subscriptions are healthy!
               </div>
             ) : (
@@ -166,7 +166,7 @@ export default function SuperAdminPage() {
                 >
                   <div className="flex items-center gap-3 min-w-0">
                     <div className="w-9 h-9 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center text-[var(--color-ink-muted)] flex-shrink-0">
-                      <Building2 size={16} />
+                      <Building2 size={16} aria-hidden="true" />
                     </div>
                     <div className="min-w-0">
                       <p className="text-sm font-bold text-[var(--color-ink)] truncate">{tenant.name}</p>
@@ -204,7 +204,7 @@ export default function SuperAdminPage() {
               <div key={job.name} className="flex items-center justify-between p-4">
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-xl bg-[var(--color-success-bg)] flex items-center justify-center text-[var(--color-success-text)]">
-                    <CheckCircle2 size={16} />
+                    <CheckCircle2 size={16} aria-hidden="true" />
                   </div>
                   <div>
                     <p className="text-sm font-bold text-[var(--color-ink)]">{job.name}</p>

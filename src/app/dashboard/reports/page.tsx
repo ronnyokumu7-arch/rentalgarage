@@ -1,7 +1,7 @@
 // src/app/dashboard/reports/page.tsx
 "use client";
 
-import { LineChart } from "lucide-react";
+import { ChartLine as LineChart } from "@phosphor-icons/react/ssr";
 
 export default function ReportsPage() {
   return (
@@ -10,7 +10,7 @@ export default function ReportsPage() {
         <div className="flex items-center gap-3">
           {/* ✅ Bare Icon — hidden on mobile, visible from sm: up */}
           <span className="hidden sm:inline-flex">
-            <LineChart size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />
+            <LineChart size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />
           </span>
 
           <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
@@ -24,7 +24,7 @@ export default function ReportsPage() {
       </div>
 
       <div className="p-12 text-center bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] animate-in fade-in duration-300">
-        <LineChart size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" />
+        <LineChart size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" aria-hidden="true" />
         <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">Reports & Analytics Hub</h3>
         <p className="text-sm text-[var(--color-ink-muted)] max-w-md mx-auto">
           Revenue dashboards, vehicle utilization reports, client retention metrics, and operational KPIs coming soon.

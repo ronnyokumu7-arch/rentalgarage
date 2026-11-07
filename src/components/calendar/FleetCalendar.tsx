@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Car, CheckCircle2, Filter, X } from "lucide-react";
+import { CaretLeft as ChevronLeft, CaretRight as ChevronRight, Calendar as CalendarIcon, Car, CheckCircle as CheckCircle2, Funnel as Filter, X } from "@phosphor-icons/react/ssr";
 import { useCalendar } from "@/hooks/bookings/useCalendar";
 import CalendarGrid from "@/components/calendar/CalendarGrid";
 import type { Booking } from "@/lib/types";
@@ -37,7 +37,7 @@ export default function FleetCalendar() {
       >
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-9 h-9 rounded-lg bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] shrink-0">
-            <Filter size={16} />
+            <Filter size={16} aria-hidden="true" />
           </div>
           <div className="flex-1 min-w-0 text-left">
             <p className="text-sm font-bold text-[var(--color-ink)] truncate">
@@ -46,7 +46,7 @@ export default function FleetCalendar() {
             <p className="text-[11px] text-[var(--color-ink-muted)] truncate">Tap to filter fleet</p>
           </div>
         </div>
-        <ChevronRight size={18} className="text-[var(--color-ink-subtle)] shrink-0" />
+        <ChevronRight size={18} className="text-[var(--color-ink-subtle)] shrink-0" aria-hidden="true" />
       </button>
 
       {/* ─── MOBILE: Filter Drawer Overlay ─── */}
@@ -81,7 +81,7 @@ export default function FleetCalendar() {
                 className="p-1.5 rounded-lg hover:bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-all duration-200"
                 aria-label="Previous month"
               >
-                <ChevronLeft size={16} />
+                <ChevronLeft size={16} aria-hidden="true" />
               </button>
               <button 
                 onClick={goToToday} 
@@ -94,13 +94,13 @@ export default function FleetCalendar() {
                 className="p-1.5 rounded-lg hover:bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-all duration-200"
                 aria-label="Next month"
               >
-                <ChevronRight size={16} />
+                <ChevronRight size={16} aria-hidden="true" />
               </button>
             </div>
           </div>
           
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--color-surface)] border border-[var(--color-surface-border)] w-fit">
-            <CalendarIcon size={14} className="text-[var(--color-primary)]" />
+            <CalendarIcon size={14} className="text-[var(--color-primary)]" aria-hidden="true" />
             <span className="text-xs font-semibold text-[var(--color-ink)]">{selectedVehicleIds.size}</span>
             <span className="text-xs text-[var(--color-ink-muted)]">selected</span>
           </div>
@@ -132,7 +132,7 @@ export default function FleetCalendar() {
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3 min-w-0">
               <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] shadow-sm shrink-0">
-                <Car size={20} />
+                <Car size={20} aria-hidden="true" />
               </div>
               <div className="min-w-0">
                 <h2 className="text-sm font-bold text-[var(--color-ink)] truncate">Fleet Filter</h2>
@@ -145,7 +145,7 @@ export default function FleetCalendar() {
                 className="p-2 rounded-lg hover:bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors shrink-0"
                 aria-label="Close filter"
               >
-                <X size={18} />
+                <X size={18} aria-hidden="true" />
               </button>
             )}
           </div>
@@ -184,7 +184,7 @@ export default function FleetCalendar() {
                 </div>
                 {isActive && (
                   <div className="flex-shrink-0 ml-2">
-                    <CheckCircle2 size={16} className="text-[var(--color-primary)]" />
+                    <CheckCircle2 size={16} className="text-[var(--color-primary)]" aria-hidden="true" />
                   </div>
                 )}
               </button>

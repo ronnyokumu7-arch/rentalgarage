@@ -1,5 +1,5 @@
 // src/components/financials/overview/QuickActions.tsx
-import { Plus, CreditCard, FileText, ChevronRight } from "lucide-react";
+import { Plus, CreditCard, FileText, CaretRight as ChevronRight } from "@phosphor-icons/react/ssr";
 
 interface QuickActionsProps {
   onOpenCreateInvoice: () => void;
@@ -51,7 +51,7 @@ export default function QuickActions({
           >
             {/* Icon with gradient background matching Activity Feed style */}
             <div className={`relative flex-shrink-0 w-9 h-9 rounded-lg flex items-center justify-center transition-all ${action.color} border`}>
-              <Icon size={15} />
+              <Icon size={15} aria-hidden="true" />
             </div>
             
             {/* Text content */}
@@ -63,7 +63,7 @@ export default function QuickActions({
             {/* Chevron indicator matching Activity Feed */}
             <ChevronRight 
               size={14} 
-              className="text-[var(--color-ink-faint)] group-hover:text-[var(--color-primary)] group-hover:translate-x-0.5 transition-all flex-shrink-0" 
+              className="text-[var(--color-ink-faint)] group-hover:text-[var(--color-primary)] group-hover:translate-x-0.5 transition-all flex-shrink-0" aria-hidden="true"
             />
           </button>
         );

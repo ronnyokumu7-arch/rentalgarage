@@ -1,7 +1,7 @@
 // src/components/scheduler/SchedulerHeader.tsx
 "use client";
 
-import { ChevronLeft, ChevronRight, Calendar, Plus, Search, Filter, X, Minus, Plus as PlusIcon } from "lucide-react";
+import { CaretLeft as ChevronLeft, CaretRight as ChevronRight, Calendar, Plus, MagnifyingGlass as Search, Funnel as Filter, X, Minus, Plus as PlusIcon } from "@phosphor-icons/react/ssr";
 import { format, parseISO } from "date-fns";
 
 interface SchedulerHeaderProps {
@@ -51,14 +51,14 @@ export default function SchedulerHeader({
             className="flex items-center justify-center w-8 h-8 transition-colors rounded-lg hover:bg-[var(--color-surface)] text-[var(--color-ink-muted)]"
             title="Previous period"
           >
-            <ChevronLeft size={16} />
+            <ChevronLeft size={16} aria-hidden="true" />
           </button>
           <button
             type="button"
             onClick={onJumpToToday}
             className="flex items-center gap-1.5 px-3 h-8 text-xs font-extrabold transition-colors rounded-lg hover:bg-[var(--color-surface)] text-[var(--color-ink)]"
           >
-            <Calendar size={14} className="text-[var(--color-primary)]" />
+            <Calendar size={14} className="text-[var(--color-primary)]" aria-hidden="true" />
             Today
           </button>
           <button
@@ -67,7 +67,7 @@ export default function SchedulerHeader({
             className="flex items-center justify-center w-8 h-8 transition-colors rounded-lg hover:bg-[var(--color-surface)] text-[var(--color-ink-muted)]"
             title="Next period"
           >
-            <ChevronRight size={16} />
+            <ChevronRight size={16} aria-hidden="true" />
           </button>
         </nav>
 
@@ -80,7 +80,7 @@ export default function SchedulerHeader({
             className="flex items-center justify-center w-8 h-8 transition-colors rounded-lg hover:bg-[var(--color-surface)] text-[var(--color-ink-muted)] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
             title={canZoomIn ? "Zoom in: Show fewer days" : "Minimum view (1 day)"}
           >
-            <Minus size={14} />
+            <Minus size={14} aria-hidden="true" />
           </button>
           
           {/* View Indicator */}
@@ -100,7 +100,7 @@ export default function SchedulerHeader({
             className="flex items-center justify-center w-8 h-8 transition-colors rounded-lg hover:bg-[var(--color-surface)] text-[var(--color-ink-muted)] disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent"
             title={canZoomOut ? "Zoom out: Show more days" : "Maximum view (31 days)"}
           >
-            <PlusIcon size={14} />
+            <PlusIcon size={14} aria-hidden="true" />
           </button>
         </nav>
 
@@ -114,7 +114,7 @@ export default function SchedulerHeader({
       <div className="flex items-center gap-3">
         {/* Search */}
         <div className="relative">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true" />
           <input
             type="text"
             placeholder="Filter staff..."
@@ -126,7 +126,7 @@ export default function SchedulerHeader({
 
         {/* Status Filter */}
         <div className="relative flex items-center">
-          <Filter size={13} className="absolute left-3 text-[var(--color-ink-subtle)] pointer-events-none" />
+          <Filter size={13} className="absolute left-3 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true" />
           <select
             value={statusFilter}
             onChange={(e) => onStatusFilterChange(e.target.value)}
@@ -149,7 +149,7 @@ export default function SchedulerHeader({
               : "bg-[var(--color-primary)] text-white"
           }`}
         >
-          {isCreateMode ? <X size={15} /> : <Plus size={15} />}
+          {isCreateMode ? <X size={15} aria-hidden="true" /> : <Plus size={15} aria-hidden="true" />}
           <span>{isCreateMode ? "Exit" : "Schedule Workflow"}</span>
         </button>
       </div>

@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { Filter, Check } from "lucide-react";
+import { Funnel as Filter, Check } from "@phosphor-icons/react/ssr";
 
 export interface FilterOption {
   label: string;
@@ -74,7 +74,7 @@ export default function FilterDropdown({
         aria-haspopup="true"
         aria-expanded={isOpen}
       >
-        <Icon size={15} />
+        <Icon size={15} aria-hidden="true" />
       </button>
 
       {isOpen && (
@@ -95,7 +95,7 @@ export default function FilterDropdown({
                     }`}
                   >
                     <span>All {label}s</span>
-                    {value === null && <Check size={14} />}
+                    {value === null && <Check size={14} aria-hidden="true" />}
                   </button>
                   <div className="h-px bg-[var(--color-surface-border)]" />
                 </>
@@ -113,7 +113,7 @@ export default function FilterDropdown({
                   }`}
                 >
                   <span>{option.label}{option.count !== undefined ? ` (${option.count})` : ""}</span>
-                  {value === option.value && <Check size={14} />}
+                  {value === option.value && <Check size={14} aria-hidden="true" />}
                 </button>
               ))}
             </div>

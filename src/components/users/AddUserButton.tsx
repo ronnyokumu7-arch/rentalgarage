@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { UserPlus, Link2, ChevronDown } from "lucide-react";
+import { UserPlus, LinkSimple as Link2, CaretDown as ChevronDown } from "@phosphor-icons/react/ssr";
 
 interface AddUserButtonProps {
   onQuickAdd: () => void;
@@ -40,9 +40,9 @@ export default function AddUserButton({ onQuickAdd, onInvite }: AddUserButtonPro
         onClick={() => setMenuOpen(!menuOpen)}
         className="w-full md:w-auto h-10 px-4 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.99] shrink-0"
       >
-        <UserPlus size={16} strokeWidth={2.5} />
+        <UserPlus size={16} weight="bold" aria-hidden="true" />
         Add Member
-        <ChevronDown size={16} className={`transition-transform ${menuOpen ? "rotate-180" : ""}`} />
+        <ChevronDown size={16} className={`transition-transform ${menuOpen ? "rotate-180" : ""}`} aria-hidden="true" />
       </button>
 
       {menuOpen && (
@@ -52,7 +52,7 @@ export default function AddUserButton({ onQuickAdd, onInvite }: AddUserButtonPro
             className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors first:rounded-t-xl"
           >
             <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
-              <UserPlus size={16} />
+              <UserPlus size={16} aria-hidden="true" />
             </div>
             <div className="text-left">
               <div className="text-sm">Add Manually</div>
@@ -67,7 +67,7 @@ export default function AddUserButton({ onQuickAdd, onInvite }: AddUserButtonPro
             className="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors last:rounded-b-xl"
           >
             <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-500 flex items-center justify-center">
-              <Link2 size={16} />
+              <Link2 size={16} aria-hidden="true" />
             </div>
             <div className="text-left">
               <div className="text-sm">Invite User</div>

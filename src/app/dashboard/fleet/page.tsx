@@ -3,8 +3,8 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  Car, BarChart3, Wrench, CarFront, LineChart, Wrench as WrenchIcon,
-} from "lucide-react";
+  Car, ChartBar as BarChart3, Wrench, CarProfile as CarFront, ChartLine as LineChart, Wrench as WrenchIcon,
+} from "@phosphor-icons/react/ssr";
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useMobileFleet } from "@/hooks/fleet/useMobileFleet";
 import { useDesktopFleet } from "@/hooks/fleet/useDesktopFleet";
@@ -146,7 +146,7 @@ export default function FleetPage() {
         mobileTitle: "Manage Fleet",
         description:
           "Oversee your vehicles, track performance statuses, and manage your garage pipelines.",
-        icon: <CarFront size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+        icon: <CarFront size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
       };
     }
     if (activeTab === "performance") {
@@ -155,7 +155,7 @@ export default function FleetPage() {
         mobileTitle: "Performance",
         description:
           "Deep insights into your fleet's performance, utilization, and profitability.",
-        icon: <LineChart size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+        icon: <LineChart size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
       };
     }
     return {
@@ -163,7 +163,7 @@ export default function FleetPage() {
       mobileTitle: "Garage",
       description:
         "Onboard new vehicles, manage maintenance, and track service schedules.",
-      icon: <WrenchIcon size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+      icon: <WrenchIcon size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
     };
   }, [activeTab]);
 
@@ -256,7 +256,7 @@ export default function FleetPage() {
 
       {activeTab === "performance" && (
         <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-12 text-center animate-in fade-in duration-300">
-          <BarChart3 size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" />
+          <BarChart3 size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" aria-hidden="true" />
           <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">
             Performance Analytics
           </h3>
@@ -283,7 +283,7 @@ export default function FleetPage() {
               }}
             >
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[var(--color-warning-bg)] flex items-center justify-center text-[var(--color-warning-text)] sm:mb-4 group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
-                <Wrench size={20} className="sm:w-6 sm:h-6" />
+                <Wrench size={20} className="sm:w-6 sm:h-6" aria-hidden="true" />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-sm sm:text-base font-bold text-[var(--color-ink)] mb-1 sm:mb-2">
@@ -303,7 +303,7 @@ export default function FleetPage() {
 
             <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-4 sm:p-6 group cursor-pointer hover:border-[var(--color-primary)]/30 transition-all flex flex-row sm:flex-col items-start gap-3.5 sm:gap-0">
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[var(--color-danger-bg)] flex items-center justify-center text-[var(--color-danger-text)] sm:mb-4 group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
-                <Car size={20} className="sm:w-6 sm:h-6" />
+                <Car size={20} className="sm:w-6 sm:h-6" aria-hidden="true" />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-sm sm:text-base font-bold text-[var(--color-ink)] mb-1 sm:mb-2">
@@ -323,7 +323,7 @@ export default function FleetPage() {
 
             <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-4 sm:p-6 group cursor-pointer hover:border-[var(--color-primary)]/30 transition-all flex flex-row sm:flex-col items-start gap-3.5 sm:gap-0">
               <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-[var(--color-primary-muted)] flex items-center justify-center text-[var(--color-primary-text)] sm:mb-4 group-hover:scale-110 transition-transform duration-300 flex-shrink-0">
-                <BarChart3 size={20} className="sm:w-6 sm:h-6" />
+                <BarChart3 size={20} className="sm:w-6 sm:h-6" aria-hidden="true" />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="text-sm sm:text-base font-bold text-[var(--color-ink)] mb-1 sm:mb-2">
@@ -342,7 +342,7 @@ export default function FleetPage() {
 
           <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-12 flex flex-col items-center justify-center text-center">
             <div className="w-16 h-16 rounded-2xl bg-[var(--color-warning-bg)] flex items-center justify-center mb-4">
-              <Wrench size={24} className="text-[var(--color-warning-text)]" />
+              <Wrench size={24} className="text-[var(--color-warning-text)]" aria-hidden="true" />
             </div>
             <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">
               Garage Hub

@@ -3,16 +3,16 @@
 
 import { useState } from "react";
 import {
-  CalendarDays,
+  CalendarDots as CalendarDays,
   Users,
   Car,
   FileText,
   CreditCard,
   CheckSquare,
   Shield,
-  Building2,
+  Buildings as Building2,
   Archive,
-} from "lucide-react";
+} from "@phosphor-icons/react/ssr";
 import PremiumTabSwitcher from "@/components/ui/PremiumTabSwitcher";
 
 const VAULT_TABS = [
@@ -38,7 +38,7 @@ export default function VaultPage() {
             {/* ✅ Vault signature: tinted container kept, hidden on mobile */}
             <span className="hidden sm:inline-flex">
               <div className="p-3 rounded-2xl bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20">
-                <Archive size={24} className="text-[var(--color-primary)]" />
+                <Archive size={24} className="text-[var(--color-primary)]" aria-hidden="true" />
               </div>
             </span>
 
@@ -69,7 +69,7 @@ export default function VaultPage() {
           {/* We will replace these placeholders with the actual Tab components in the next steps */}
           {activeTab === "bookings" && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <CalendarDays size={48} className="text-[var(--color-ink-subtle)] mb-4" />
+              <CalendarDays size={48} className="text-[var(--color-ink-subtle)] mb-4" aria-hidden="true" />
               <h3 className="text-lg font-bold text-[var(--color-ink)] mb-2">Bookings Vault</h3>
               <p className="text-sm text-[var(--color-ink-muted)] max-w-md">
                 Loading archived and cancelled bookings...
@@ -79,7 +79,7 @@ export default function VaultPage() {
 
           {activeTab === "clients" && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Users size={48} className="text-[var(--color-ink-subtle)] mb-4" />
+              <Users size={48} className="text-[var(--color-ink-subtle)] mb-4" aria-hidden="true" />
               <h3 className="text-lg font-bold text-[var(--color-ink)] mb-2">Clients Vault</h3>
               <p className="text-sm text-[var(--color-ink-muted)] max-w-md">
                 Loading archived client records...
@@ -89,7 +89,7 @@ export default function VaultPage() {
 
           {activeTab === "vehicles" && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Car size={48} className="text-[var(--color-ink-subtle)] mb-4" />
+              <Car size={48} className="text-[var(--color-ink-subtle)] mb-4" aria-hidden="true" />
               <h3 className="text-lg font-bold text-[var(--color-ink)] mb-2">Vehicles Vault</h3>
               <p className="text-sm text-[var(--color-ink-muted)] max-w-md">
                 Loading retired and archived vehicles...
@@ -99,7 +99,7 @@ export default function VaultPage() {
 
           {activeTab === "financials" && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <FileText size={48} className="text-[var(--color-ink-subtle)] mb-4" />
+              <FileText size={48} className="text-[var(--color-ink-subtle)] mb-4" aria-hidden="true" />
               <h3 className="text-lg font-bold text-[var(--color-ink)] mb-2">Financials Vault</h3>
               <p className="text-sm text-[var(--color-ink-muted)] max-w-md">
                 Loading voided invoices and contracts...
@@ -109,7 +109,7 @@ export default function VaultPage() {
 
           {activeTab === "payments" && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <CreditCard size={48} className="text-[var(--color-ink-subtle)] mb-4" />
+              <CreditCard size={48} className="text-[var(--color-ink-subtle)] mb-4" aria-hidden="true" />
               <h3 className="text-lg font-bold text-[var(--color-ink)] mb-2">Payments History</h3>
               <p className="text-sm text-[var(--color-ink-muted)] max-w-md">
                 Loading completed and voided payment records...
@@ -119,7 +119,7 @@ export default function VaultPage() {
 
           {activeTab === "tasks" && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <CheckSquare size={48} className="text-[var(--color-ink-subtle)] mb-4" />
+              <CheckSquare size={48} className="text-[var(--color-ink-subtle)] mb-4" aria-hidden="true" />
               <h3 className="text-lg font-bold text-[var(--color-ink)] mb-2">Tasks Archive</h3>
               <p className="text-sm text-[var(--color-ink-muted)] max-w-md">
                 Loading completed and archived tasks...
@@ -129,7 +129,7 @@ export default function VaultPage() {
 
           {activeTab === "users" && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Shield size={48} className="text-[var(--color-ink-subtle)] mb-4" />
+              <Shield size={48} className="text-[var(--color-ink-subtle)] mb-4" aria-hidden="true" />
               <h3 className="text-lg font-bold text-[var(--color-ink)] mb-2">Users Vault</h3>
               <p className="text-sm text-[var(--color-ink-muted)] max-w-md">
                 Loading inactive and suspended user accounts...
@@ -139,7 +139,7 @@ export default function VaultPage() {
 
           {activeTab === "tenants" && (
             <div className="flex flex-col items-center justify-center py-12 text-center">
-              <Building2 size={48} className="text-[var(--color-ink-subtle)] mb-4" />
+              <Building2 size={48} className="text-[var(--color-ink-subtle)] mb-4" aria-hidden="true" />
               <h3 className="text-lg font-bold text-[var(--color-ink)] mb-2">Tenants Vault</h3>
               <p className="text-sm text-[var(--color-ink-muted)] max-w-md">
                 Loading archived and cancelled agency accounts...

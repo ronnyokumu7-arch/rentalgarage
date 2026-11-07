@@ -1,7 +1,7 @@
 // src/app/super-admin/agencies/new/page.tsx
 "use client";
 
-import { ArrowLeft, Sparkles, ShieldCheck, ArrowRight, Loader2 } from "lucide-react";
+import { ArrowLeft, Sparkle as Sparkles, ShieldCheck, ArrowRight, CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
 import { useRouter } from "next/navigation";
 import { useTenantOnboarding } from "@/hooks/useTenantOnboarding";
 import WizardStepper from "@/components/tenants/wizard/WizardStepper";
@@ -37,7 +37,7 @@ export default function NewTenantWizardPage() {
           onClick={() => router.push("/super-admin/agencies")}
           className="flex items-center gap-2 text-sm font-semibold text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
         >
-          <ArrowLeft size={16} /> Back to Directory
+          <ArrowLeft size={16} aria-hidden="true" /> Back to Directory
         </button>
         <span className="text-xs font-mono font-semibold px-3 py-1 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
           Onboarding Engine v2.5
@@ -49,7 +49,7 @@ export default function NewTenantWizardPage() {
         <div>
           <h1 className="text-2xl font-bold text-[var(--color-ink)] flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
-              <Sparkles size={20} />
+              <Sparkles size={20} aria-hidden="true" />
             </div>
             Onboard New Platform Tenant
           </h1>
@@ -58,7 +58,7 @@ export default function NewTenantWizardPage() {
           </p>
         </div>
         <div className="flex items-center gap-2 bg-[var(--color-surface-hover)] p-1.5 rounded-xl border border-[var(--color-surface-border)]">
-          <ShieldCheck size={16} className="text-[var(--color-success-text)] ml-2" />
+          <ShieldCheck size={16} className="text-[var(--color-success-text)] ml-2" aria-hidden="true" />
           <span className="text-xs font-medium text-[var(--color-ink-muted)] pr-2">
             Multi-Tenant Isolation Ready
           </span>
@@ -95,7 +95,7 @@ export default function NewTenantWizardPage() {
             disabled={currentStep === 1 || isSubmitting}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold text-[var(--color-ink-muted)] border border-[var(--color-surface-border)] hover:bg-[var(--color-surface-hover)] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
           >
-            <ArrowLeft size={14} /> Back
+            <ArrowLeft size={14} aria-hidden="true" /> Back
           </button>
 
           {currentStep < 3 ? (
@@ -104,7 +104,7 @@ export default function NewTenantWizardPage() {
               onClick={handleNext}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold bg-[var(--color-primary)] text-white hover:opacity-90 transition-all shadow-sm"
             >
-              Continue <ArrowRight size={14} />
+              Continue <ArrowRight size={14} aria-hidden="true" />
             </button>
           ) : (
             <button
@@ -115,11 +115,11 @@ export default function NewTenantWizardPage() {
             >
               {isSubmitting ? (
                 <>
-                  <Loader2 size={14} className="animate-spin" /> Provisioning Environment...
+                  <Loader2 size={14} className="animate-spin" aria-hidden="true" /> Provisioning Environment...
                 </>
               ) : (
                 <>
-                  Provision Tenant <Sparkles size={14} />
+                  Provision Tenant <Sparkles size={14} aria-hidden="true" />
                 </>
               )}
             </button>

@@ -1,5 +1,5 @@
 // src/components/tenants/wizard/StepOrganization.tsx
-import { Building2, Phone, MapPin, Mail } from "lucide-react";
+import { Buildings as Building2, Phone, MapPin, Envelope as Mail } from "@phosphor-icons/react/ssr";
 import type { OnboardingFormData } from "@/hooks/useTenantOnboarding";
 
 interface StepOrganizationProps {
@@ -64,7 +64,7 @@ export default function StepOrganization({ formData, updateField }: StepOrganiza
               placeholder="e.g. Apex Luxury Fleet Rentals Ltd"
               className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none text-sm"
             />
-            <Building2 size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" />
+            <Building2 size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true" />
           </div>
         </div>
 
@@ -81,7 +81,7 @@ export default function StepOrganization({ formData, updateField }: StepOrganiza
               placeholder="e.g. info@apexfleet.co.ke"
               className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none text-sm"
             />
-            <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" />
+            <Mail size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true" />
           </div>
           <p className="text-[11px] text-[var(--color-ink-subtle)]">Used for invoices and official correspondence.</p>
         </div>
@@ -99,7 +99,7 @@ export default function StepOrganization({ formData, updateField }: StepOrganiza
               placeholder="e.g. +254 700 000 000"
               className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none text-sm"
             />
-            <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" />
+            <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true" />
           </div>
         </div>
 
@@ -116,7 +116,7 @@ export default function StepOrganization({ formData, updateField }: StepOrganiza
               placeholder="e.g. Westlands, Nairobi"
               className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none text-sm"
             />
-            <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" />
+            <MapPin size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true" />
           </div>
         </div>
       </div>

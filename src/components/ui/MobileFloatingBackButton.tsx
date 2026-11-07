@@ -2,8 +2,8 @@
 "use client";
 
 import Link from "next/link";
-import type { LucideIcon } from "lucide-react";
-import { ArrowLeft } from "lucide-react";
+import type { Icon } from "@phosphor-icons/react";
+import { ArrowLeft } from "@phosphor-icons/react/ssr";
 
 /* ──────────────────────────────────────────────────────────────────────
    Floating back button — fixed bottom-right, inset-surface chrome,
@@ -16,7 +16,7 @@ interface MobileFloatingBackButtonProps {
   /** Label revealed on hover (desktop only) */
   label: string;
   /** Icon override. Defaults to ArrowLeft. */
-  icon?: LucideIcon;
+  icon?: Icon;
   /** Accessible label for screen readers (falls back to label) */
   ariaLabel?: string;
 }
@@ -39,7 +39,7 @@ export default function MobileFloatingBackButton({
     >
       <Icon
         size={18}
-        className="text-[var(--color-ink)] shrink-0 transition-transform group-hover:-translate-x-0.5"
+        className="text-[var(--color-ink)] shrink-0 transition-transform group-hover:-translate-x-0.5" aria-hidden="true"
       />
       <span className="text-xs font-bold text-[var(--color-ink)] whitespace-nowrap opacity-0 w-0 group-hover:opacity-100 group-hover:w-auto transition-all duration-300 overflow-hidden">
         {label}

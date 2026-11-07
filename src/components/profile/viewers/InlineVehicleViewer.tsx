@@ -1,10 +1,10 @@
 "use client";
 
 import {
-  Save, Loader2, Car, Calendar, DollarSign, Gauge,
-  Shield, FileText, Upload, ZoomIn, X, Pencil,
-  CheckCircle, AlertTriangle, RotateCcw
-} from "lucide-react";
+  FloppyDisk as Save, CircleNotch as Loader2, Car, Calendar, CurrencyDollar as DollarSign, Gauge,
+  Shield, FileText, Upload, MagnifyingGlassPlus as ZoomIn, X, PencilSimple as Pencil,
+  CheckCircle, Warning as AlertTriangle, ArrowCounterClockwise as RotateCcw
+} from "@phosphor-icons/react/ssr";
 import { useInlineVehicle } from "@/hooks/profile/useInlineVehicle";
 import type { Vehicle, Task } from "@/lib/types";
 import Badge from "@/components/ui/Badge";
@@ -52,7 +52,7 @@ export default function InlineVehicleViewer({ vehicle, task, onRefresh }: Inline
               onClick={() => setViewingImage(null)} 
               className="absolute top-2 right-2 sm:-top-12 sm:right-0 p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors z-10"
             >
-              <X size={20} className="sm:w-6 sm:h-6" />
+              <X size={20} className="sm:w-6 sm:h-6" aria-hidden="true" />
             </button>
             <img 
               src={viewingImage} 
@@ -71,7 +71,7 @@ export default function InlineVehicleViewer({ vehicle, task, onRefresh }: Inline
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2.5 sm:gap-4 min-w-0">
             <div className="w-10 h-10 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl bg-[var(--color-primary)]/5 border border-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] shrink-0">
-              <Car size={20} className="sm:w-6 sm:h-6" />
+              <Car size={20} className="sm:w-6 sm:h-6" aria-hidden="true" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1 min-w-0">
@@ -102,14 +102,14 @@ export default function InlineVehicleViewer({ vehicle, task, onRefresh }: Inline
                   className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] transition-colors"
                   title="Cancel Editing"
                 >
-                  <X size={16} />
+                  <X size={16} aria-hidden="true" />
                 </button>
                 <button 
                   onClick={handleSaveWithRefresh} 
                   disabled={isSaving} 
                   className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-4 py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-[11px] sm:text-xs font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary)]/90 transition-colors disabled:opacity-50 shadow-xs active:scale-95"
                 >
-                  {isSaving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                  {isSaving ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Save size={14} aria-hidden="true" />}
                   <span className="hidden sm:inline">Save Changes</span>
                   <span className="sm:hidden">Save</span>
                 </button>
@@ -121,7 +121,7 @@ export default function InlineVehicleViewer({ vehicle, task, onRefresh }: Inline
                   className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-[var(--color-ink-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/5 transition-all"
                   title="Edit Details"
                 >
-                  <Pencil size={16} />
+                  <Pencil size={16} aria-hidden="true" />
                 </button>
                 
                 {vehicle.status === "pending_activation" && (
@@ -131,7 +131,7 @@ export default function InlineVehicleViewer({ vehicle, task, onRefresh }: Inline
                     className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/5 transition-colors disabled:opacity-50"
                     title="Activate Vehicle"
                   >
-                    {isActionLoading ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />}
+                    {isActionLoading ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <CheckCircle size={16} aria-hidden="true" />}
                   </button>
                 )}
                 {vehicle.status === "available" && (
@@ -141,7 +141,7 @@ export default function InlineVehicleViewer({ vehicle, task, onRefresh }: Inline
                     className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-amber-600 dark:text-amber-400 hover:bg-amber-500/5 transition-colors disabled:opacity-50"
                     title="Send to Maintenance"
                   >
-                    <AlertTriangle size={16} />
+                    <AlertTriangle size={16} aria-hidden="true" />
                   </button>
                 )}
                 {vehicle.status === "maintenance" && (
@@ -151,7 +151,7 @@ export default function InlineVehicleViewer({ vehicle, task, onRefresh }: Inline
                     className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl text-blue-600 dark:text-blue-400 hover:bg-blue-500/5 transition-colors disabled:opacity-50"
                     title="Reactivate Vehicle"
                   >
-                    {isActionLoading ? <Loader2 size={16} className="animate-spin" /> : <RotateCcw size={16} />}
+                    {isActionLoading ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <RotateCcw size={16} aria-hidden="true" />}
                   </button>
                 )}
               </>
@@ -191,7 +191,7 @@ export default function InlineVehicleViewer({ vehicle, task, onRefresh }: Inline
                 <div key={i} className="min-w-0">
                   <label className={labelClass}>{field.label}</label>
                   <div className={`${valueClass} ${field.isWarning ? 'text-rose-600 dark:text-rose-400' : ''}`}>
-                    <field.icon size={14} className={`shrink-0 ${field.isWarning ? 'text-rose-500' : 'text-[var(--color-ink-subtle)]'}`} />
+                    <field.icon size={14} className={`shrink-0 ${field.isWarning ? 'text-rose-500' : 'text-[var(--color-ink-subtle)]'}`} aria-hidden="true" />
                     <span className="truncate">{field.value}</span>
                     {field.warningText && <span className="text-[9px] font-bold uppercase ml-1 shrink-0">{field.warningText}</span>}
                   </div>
@@ -281,7 +281,7 @@ function DocumentCard({ title, imageUrl, isUploading, onUpload, onView }: {
         <img src={imageUrl} alt={title} className="w-full h-full object-cover" />
       ) : (
         <div className="flex-1 flex flex-col items-center justify-center text-[var(--color-ink-subtle)]">
-          <FileText size={20} className="sm:w-6 sm:h-6 mb-1.5 sm:mb-2 opacity-50" />
+          <FileText size={20} className="sm:w-6 sm:h-6 mb-1.5 sm:mb-2 opacity-50" aria-hidden="true" />
           <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider">No Document</span>
         </div>
       )}
@@ -294,7 +294,7 @@ function DocumentCard({ title, imageUrl, isUploading, onUpload, onView }: {
             className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-white/20 hover:bg-white/40 text-white transition-colors" 
             title="View Document"
           >
-            <ZoomIn size={16} className="sm:w-[18px] sm:h-[18px]" />
+            <ZoomIn size={16} className="sm:w-[18px] sm:h-[18px]" aria-hidden="true" />
           </button>
         )}
         <button 
@@ -303,7 +303,7 @@ function DocumentCard({ title, imageUrl, isUploading, onUpload, onView }: {
           className="p-2 sm:p-2.5 rounded-lg sm:rounded-xl bg-white/20 hover:bg-white/40 text-white transition-colors disabled:opacity-50" 
           title="Upload New"
         >
-          {isUploading ? <Loader2 size={16} className="animate-spin sm:w-[18px] sm:h-[18px]" /> : <Upload size={16} className="sm:w-[18px] sm:h-[18px]" />}
+          {isUploading ? <Loader2 size={16} className="animate-spin sm:w-[18px] sm:h-[18px]" aria-hidden="true" /> : <Upload size={16} className="sm:w-[18px] sm:h-[18px]" aria-hidden="true" />}
         </button>
       </div>
       

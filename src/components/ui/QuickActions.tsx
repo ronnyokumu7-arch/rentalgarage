@@ -1,11 +1,11 @@
 "use client";
 
 import React from "react";
-import { LucideIcon } from "lucide-react";
+import type { Icon } from "@phosphor-icons/react";
 
 interface QuickAction {
   label: string;
-  icon: LucideIcon;
+  icon: Icon;
   onClick: () => void;
   variant?: "default" | "primary" | "danger";
   disabled?: boolean;
@@ -49,7 +49,7 @@ export default function QuickActions({
               ${action.disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:scale-[1.02]"}
             `}
           >
-            <Icon size={20} strokeWidth={1.8} />
+            <Icon size={20} weight="light" aria-hidden="true" />
             <span className="text-xs font-medium text-center">{action.label}</span>
           </button>
         );

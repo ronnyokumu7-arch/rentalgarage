@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Calendar, Loader2 } from "lucide-react";
+import { X, Calendar, CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
 import type { PublicInvoiceView } from "@/lib/types";
 
 interface PublicRescheduleModalProps {
@@ -97,7 +97,7 @@ export default function PublicRescheduleModal({
       >
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <Calendar size={18} style={{ color: '#6D28D9' }} />
+            <Calendar size={18} style={{ color: '#6D28D9' }} aria-hidden="true" />
             <h3 className="text-base font-bold" style={{ color: '#1C1917' }}>Reschedule Booking</h3>
           </div>
           <button
@@ -115,7 +115,7 @@ export default function PublicRescheduleModal({
               e.currentTarget.style.background = 'transparent';
             }}
           >
-            <X size={18} style={{ color: '#57534E' }} />
+            <X size={18} style={{ color: '#57534E' }} aria-hidden="true" />
           </button>
         </div>
 
@@ -225,7 +225,7 @@ export default function PublicRescheduleModal({
               }}
             >
               {isSubmitting ? (
-                <><Loader2 className="h-4 w-4 animate-spin" /> Updating...</>
+                <><Loader2 className="h-4 w-4 animate-spin" aria-hidden="true" /> Updating...</>
               ) : (
                 <>Update Schedule</>
               )}

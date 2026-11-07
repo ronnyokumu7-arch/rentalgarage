@@ -1,7 +1,7 @@
 // src/components/public-docs/PublicInvoiceHeader.tsx
 "use client";
 
-import { FileText, MapPin, Phone, Mail } from "lucide-react";
+import { FileText, MapPin, Phone, Envelope as Mail } from "@phosphor-icons/react/ssr";
 import { brand } from "@/lib/brand";
 
 
@@ -52,7 +52,7 @@ export default function PublicInvoiceHeader({ invoice }: Props) {
               border: `1px solid ${brand.colors.primaryMuted}`,
             }}
           >
-            <FileText size={28} style={{ color: brand.colors.primary }} />
+            <FileText size={28} style={{ color: brand.colors.primary }} aria-hidden="true" />
           </div>
         )}
 
@@ -78,7 +78,7 @@ export default function PublicInvoiceHeader({ invoice }: Props) {
                 className="flex items-center gap-1.5"
                 style={{ color: brand.colors.ink.muted }}
               >
-                <MapPin size={12} style={{ color: brand.colors.ink.subtle }} className="shrink-0" />
+                <MapPin size={12} style={{ color: brand.colors.ink.subtle }} className="shrink-0" aria-hidden="true" />
                 {invoice.tenant_address}
               </span>
             )}
@@ -87,7 +87,7 @@ export default function PublicInvoiceHeader({ invoice }: Props) {
                 className="flex items-center gap-1.5"
                 style={{ color: brand.colors.ink.muted }}
               >
-                <Phone size={12} style={{ color: brand.colors.ink.subtle }} className="shrink-0" />
+                <Phone size={12} style={{ color: brand.colors.ink.subtle }} className="shrink-0" aria-hidden="true" />
                 {invoice.tenant_phone}
               </span>
             )}
@@ -96,7 +96,7 @@ export default function PublicInvoiceHeader({ invoice }: Props) {
                 className="flex items-center gap-1.5 min-w-0"
                 style={{ color: brand.colors.ink.muted }}
               >
-                <Mail size={12} style={{ color: brand.colors.ink.subtle }} className="shrink-0" />
+                <Mail size={12} style={{ color: brand.colors.ink.subtle }} className="shrink-0" aria-hidden="true" />
                 <span className="truncate">{invoice.tenant_email}</span>
               </span>
             )}
@@ -111,7 +111,7 @@ export default function PublicInvoiceHeader({ invoice }: Props) {
               border: `1px solid ${brand.colors.primaryMuted}`,
             }}
           >
-            <FileText size={12} />
+            <FileText size={12} aria-hidden="true" />
             {invoice.invoice_number}
           </div>
         </div>

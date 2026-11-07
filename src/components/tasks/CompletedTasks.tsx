@@ -3,10 +3,10 @@
 
 import { useRouter } from "next/navigation";
 import {
-  Calendar, Tag, CheckCircle2, RotateCcw, Eye,
-  Search, Clock, Users, UserX, Wrench, Building2, Briefcase, DollarSign, Shield, Car,
-  ChevronRight
-} from "lucide-react";
+  Calendar, Tag, CheckCircle as CheckCircle2, ArrowCounterClockwise as RotateCcw, Eye,
+  MagnifyingGlass as Search, Clock, Users, UserMinus as UserX, Wrench, Buildings as Building2, Briefcase, CurrencyDollar as DollarSign, Shield, Car,
+  CaretRight as ChevronRight
+} from "@phosphor-icons/react/ssr";
 import FilterDropdown from "@/components/ui/FilterDropdown";
 import DataTable, { RowAction } from "@/components/ui/DataTable";
 import CardGrid from "@/components/ui/CardGrid";
@@ -112,7 +112,7 @@ export default function CompletedTasksTab({
   if (loading) {
     return (
       <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2">
-        <Clock className="w-5 h-5 animate-spin" /> Loading tasks...
+        <Clock className="w-5 h-5 animate-spin" aria-hidden="true" /> Loading tasks...
       </div>
     );
   }
@@ -145,7 +145,7 @@ export default function CompletedTasksTab({
           <div className="flex items-center gap-2 flex-1 sm:w-80">
             {/* Search Input */}
             <div className="relative flex-1">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true" />
               <input
                 type="text"
                 value={search}
@@ -201,10 +201,10 @@ export default function CompletedTasksTab({
                   <div className="flex items-center gap-2 min-w-0 flex-1">
                     <div className="relative flex-shrink-0">
                       <div className="w-8 h-8 rounded-lg bg-emerald-500/5 border border-emerald-500/20 flex items-center justify-center">
-                        <CategoryIcon size={14} className="text-emerald-500" />
+                        <CategoryIcon size={14} className="text-emerald-500" aria-hidden="true" />
                       </div>
                       <div className="absolute -top-0.5 -right-0.5">
-                        <CheckCircle2 size={10} className="text-emerald-500" />
+                        <CheckCircle2 size={10} className="text-emerald-500" aria-hidden="true" />
                       </div>
                     </div>
                     
@@ -226,7 +226,7 @@ export default function CompletedTasksTab({
                     </div>
                   </div>
                   
-                  <ChevronRight size={14} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
+                  <ChevronRight size={14} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" aria-hidden="true" />
                 </div>
               );
             }}
@@ -267,7 +267,7 @@ export default function CompletedTasksTab({
 
                     {/* Completed Date */}
                     <div className="flex items-center gap-1.5 min-w-0 flex-1">
-                      <CheckCircle2 size={10} className="text-emerald-500 flex-shrink-0" />
+                      <CheckCircle2 size={10} className="text-emerald-500 flex-shrink-0" aria-hidden="true" />
                       <div className="min-w-0">
                         <p className="text-[11px] font-semibold text-[var(--color-ink)] truncate leading-tight">
                           {formatDate(item.completed_at)}
@@ -288,7 +288,7 @@ export default function CompletedTasksTab({
                       }}
                       className="text-[10px] font-semibold text-blue-600 hover:underline flex items-center gap-1"
                     >
-                      <RotateCcw size={11} />
+                      <RotateCcw size={11} aria-hidden="true" />
                       Reopen
                     </button>
                   </div>
@@ -314,7 +314,7 @@ export default function CompletedTasksTab({
                   return (
                     <div className="flex items-center gap-3 min-w-0">
                       <div className="w-9 h-9 rounded-lg bg-emerald-500/5 border border-emerald-500/10 flex items-center justify-center text-emerald-500 flex-shrink-0">
-                        <CategoryIcon size={16} />
+                        <CategoryIcon size={16} aria-hidden="true" />
                       </div>
                       <div className="min-w-0">
                         <button
@@ -328,7 +328,7 @@ export default function CompletedTasksTab({
                           {task.title}
                         </button>
                         <p className="text-xs text-[var(--color-ink-muted)] truncate capitalize flex items-center gap-1 mt-0.5">
-                          <Tag size={10} /> {task.category}
+                          <Tag size={10} aria-hidden="true" /> {task.category}
                         </p>
                       </div>
                     </div>
@@ -351,7 +351,7 @@ export default function CompletedTasksTab({
                     </div>
                   ) : (
                     <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[10px] font-bold uppercase bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] border border-[var(--color-surface-border)]">
-                      <UserX size={10} /> Unassigned
+                      <UserX size={10} aria-hidden="true" /> Unassigned
                     </span>
                   );
                 },
@@ -371,7 +371,7 @@ export default function CompletedTasksTab({
                 accessorKey: "due_date",
                 cell: ({ row }) => (
                   <div className="flex items-center gap-2">
-                    <Calendar size={12} className="text-[var(--color-ink-subtle)]" />
+                    <Calendar size={12} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
                     <span className="text-xs font-medium text-[var(--color-ink)]">
                       {formatDate(row.original.due_date)}
                     </span>

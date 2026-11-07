@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, CheckCircle } from "lucide-react";
+import { CircleNotch as Loader2, CheckCircle } from "@phosphor-icons/react/ssr";
 
 interface SubmitButtonProps {
   loading: boolean;
@@ -23,12 +23,12 @@ export default function SubmitButton({
     >
       {loading ? (
         <>
-          <Loader2 size={16} className="animate-spin" />
+          <Loader2 size={16} className="animate-spin" aria-hidden="true" />
           {loadingLabel}
         </>
       ) : (
         <>
-          <CheckCircle size={16} />
+          <CheckCircle size={16} aria-hidden="true" />
           {label}
         </>
       )}

@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
 import { useTheme } from "next-themes";
 import {
-  Car, Archive, Shield, Loader2, Ban, Wrench,
-  CarFront, Banknote, Pencil, Plus,
-} from "lucide-react";
+  Car, Archive, Shield, CircleNotch as Loader2, Prohibit as Ban, Wrench,
+  CarProfile as CarFront, Money as Banknote, PencilSimple as Pencil, Plus,
+} from "@phosphor-icons/react/ssr";
 import CardGrid, { RowAction } from "@/components/ui/CardGrid";
 import CollectionsModal from "@/components/fleet/CollectionsModal";
 import FleetToolbar from "@/components/fleet/mobile/FleetToolbar";
@@ -447,12 +447,12 @@ export default function MobileFleetList({
 
       {loading ? (
         <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2">
-          <Loader2 className="w-5 h-5 animate-spin" /> Loading vehicles...
+          <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> Loading vehicles...
         </div>
       ) : displayVehicles.length === 0 ? (
         <div className="p-12 text-center">
           <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
-            <Car size={24} className="text-[var(--color-ink-subtle)]" />
+            <Car size={24} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
           </div>
           <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">
             No vehicles found
@@ -527,7 +527,7 @@ export default function MobileFleetList({
               aria-label="Back to Vehicles"
               className="w-12 h-12 rounded-xl bg-[var(--color-surface)]/80 backdrop-blur-xl border border-[var(--color-surface-border)] shadow-[0_8px_32px_rgba(0,0,0,0.25)] flex items-center justify-center active:scale-95 hover:bg-[var(--color-surface-hover)]/90 transition-all"
             >
-              <CarFront size={18} className="text-[var(--color-ink-muted)]" />
+              <CarFront size={18} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
             </button>
           )}
 
@@ -540,11 +540,11 @@ export default function MobileFleetList({
             <div className="relative flex items-center justify-center">
               <CarFront
                 size={22}
-                strokeWidth={2}
-                className="text-[var(--color-primary)]"
+                weight="regular"
+                className="text-[var(--color-primary)]" aria-hidden="true"
               />
               <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center shadow-sm">
-                <Plus size={10} strokeWidth={3.5} />
+                <Plus size={10} weight="bold" aria-hidden="true" />
               </span>
             </div>
           </button>

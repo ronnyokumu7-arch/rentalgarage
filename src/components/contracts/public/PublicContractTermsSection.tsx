@@ -2,7 +2,7 @@
 "use client";
 
 import { useState } from "react";
-import { Shield, Scale, AlertCircle, FileText, CheckCircle2, Fuel, MapPin, Clock } from "lucide-react";
+import { Shield, Scales as Scale, WarningCircle as AlertCircle, FileText, CheckCircle as CheckCircle2, GasPump as Fuel, MapPin, Clock } from "@phosphor-icons/react/ssr";
 import { brand } from "@/lib/brand";
 
 interface Props {
@@ -27,7 +27,7 @@ export default function PublicContractTermsSection({ tenantName }: Props) {
           className="text-sm font-bold flex items-center gap-2"
           style={{ color: brand.colors.ink.primary }}
         >
-          <FileText size={18} style={{ color: brand.colors.info.light }} />
+          <FileText size={18} style={{ color: brand.colors.info.light }} aria-hidden="true" />
           Terms & Conditions
         </h3>
         <p 
@@ -59,7 +59,7 @@ export default function PublicContractTermsSection({ tenantName }: Props) {
                   backgroundColor: isActive ? brand.colors.info.bg : 'transparent',
                 }}
               >
-                <Icon size={14} />
+                <Icon size={14} aria-hidden="true" />
                 {tab.label}
               </button>
             );
@@ -109,7 +109,7 @@ function SummaryTab({ tenantName }: { tenantName: string }) {
             "I have no serious driving offenses in the last 5 years"
           ].map((item, i) => (
             <li key={i} className="flex items-start gap-2">
-              <CheckCircle2 size={14} style={{ color: brand.colors.info.light }} className="flex-shrink-0 mt-0.5" />
+              <CheckCircle2 size={14} style={{ color: brand.colors.info.light }} className="flex-shrink-0 mt-0.5" aria-hidden="true" />
               <span 
                 className="text-xs"
                 style={{ color: brand.colors.info.text }}
@@ -184,17 +184,17 @@ function PoliciesTab({ tenantName }: { tenantName: string }) {
       }}
     >
       <PolicyItem 
-        icon={<Fuel size={14} style={{ color: brand.colors.secondary }} />}
+        icon={<Fuel size={14} style={{ color: brand.colors.secondary }} aria-hidden="true" />}
         title="Fuel Policy"
         content="Return the car with the same fuel level as pickup. If below, a refueling fee applies."
       />
       <PolicyItem 
-        icon={<MapPin size={14} style={{ color: brand.colors.secondary }} />}
+        icon={<MapPin size={14} style={{ color: brand.colors.secondary }} aria-hidden="true" />}
         title="Mileage Limit"
         content="Daily limit: 550 KM. Excess mileage: KES 50 per KM."
       />
       <PolicyItem 
-        icon={<Clock size={14} style={{ color: brand.colors.secondary }} />}
+        icon={<Clock size={14} style={{ color: brand.colors.secondary }} aria-hidden="true" />}
         title="Late Returns"
         content="Returns over 2 hours late are charged as a new rental day."
       />

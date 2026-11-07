@@ -2,7 +2,7 @@
 export const dynamic = 'force-dynamic';
 
 import type { Metadata, Viewport } from "next";
-import { Inter, Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { AuthProvider } from "@/context/auth-context";
 import { Toaster } from "react-hot-toast";
@@ -16,32 +16,29 @@ import ThemeColorSync from "@/components/ThemeColorSync";
 // ── Premium Font Configuration ──────────────────────────────
 
 // 1. Sans-Serif (Primary UI / paragraphs) - Inter for clean readability
-const sansFont = Inter({
-  subsets: ["latin"],
+const sansFont = localFont({
+  src: "./fonts/inter-latin-variable.woff2",
   variable: "--font-sans",
   display: "swap",
-  weight: ["300", "400", "500", "600", "700", "800", "900"],
-  preload: true,
+  weight: "300 900",
   fallback: ["system-ui", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "Helvetica Neue", "Arial", "sans-serif"],
 });
 
 // 2. Display (Titles, headers — brand identity) - Space Grotesk for premium feel
-const displayFont = Space_Grotesk({
-  subsets: ["latin"],
+const displayFont = localFont({
+  src: "./fonts/space-grotesk-latin-variable.woff2",
   variable: "--font-display",
   display: "swap",
-  weight: ["400", "500", "600", "700"],
-  preload: true,
+  weight: "400 700",
   fallback: ["Inter", "system-ui", "sans-serif"],
 });
 
 // 3. Monospace (Numbers, IDs, plates, amounts) - JetBrains Mono for tech premium
-const monoFont = JetBrains_Mono({
-  subsets: ["latin"],
+const monoFont = localFont({
+  src: "./fonts/jetbrains-mono-latin-variable.woff2",
   variable: "--font-mono",
   display: "swap",
-  weight: ["400", "500", "600", "700"],
-  preload: true,
+  weight: "400 700",
   fallback: ["SF Mono", "Menlo", "Monaco", "Consolas", "monospace"],
 });
 
@@ -151,10 +148,6 @@ export default function RootLayout({
       className={`${sansFont.variable} ${displayFont.variable} ${monoFont.variable}`}
     >
       <head>
-        {/* Preconnect to Google Fonts for faster loading */}
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-
         {/* DNS Prefetch for external resources */}
         <link rel="dns-prefetch" href="https://api.rentalgarage.co.ke" />
         <link rel="dns-prefetch" href="https://images.rentalgarage.co.ke" />

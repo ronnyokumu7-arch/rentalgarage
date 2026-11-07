@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, Mail, Lock, ArrowRight, ChevronRight } from "lucide-react";
+import { Eye, EyeSlash as EyeOff, Envelope as Mail, Lock, ArrowRight, CaretRight as ChevronRight } from "@phosphor-icons/react/ssr";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/auth-context";
 import { getApiErrorMessage } from "@/lib/api-error";
@@ -118,7 +118,7 @@ export default function LoginPage() {
               autoComplete="email"
               autoFocus
             />
-            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-500 transition-colors" size={18} />
+            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-500 transition-colors" size={18} aria-hidden="true" />
           </div>
         </motion.div>
 
@@ -145,14 +145,14 @@ export default function LoginPage() {
               required
               autoComplete="current-password"
             />
-            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-500 transition-colors" size={18} />
+            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-purple-500 transition-colors" size={18} aria-hidden="true" />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors focus:outline-none"
               tabIndex={-1}
             >
-              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
             </button>
           </div>
         </motion.div>
@@ -213,7 +213,7 @@ export default function LoginPage() {
             ) : (
               <>
                 Sign In
-                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+                <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" aria-hidden="true" />
               </>
             )}
           </button>
@@ -229,7 +229,7 @@ export default function LoginPage() {
             className="font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-700 dark:hover:text-purple-300 transition-colors inline-flex items-center gap-0.5 group"
           >
             Get started
-            <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" />
+            <ChevronRight size={14} className="group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
           </Link>
         </p>
       </motion.div>

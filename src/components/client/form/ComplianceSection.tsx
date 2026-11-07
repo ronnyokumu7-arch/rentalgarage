@@ -2,8 +2,8 @@
 "use client";
 
 import {
-  Shield, Car, Calendar, FileText, AlertCircle,
-} from "lucide-react";
+  Shield, Car, Calendar, FileText, WarningCircle as AlertCircle,
+} from "@phosphor-icons/react/ssr";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
 import AddressAutocomplete from "@/components/ui/AddressAutocomplete";
@@ -46,7 +46,7 @@ export default function ComplianceSection({
     <section className={sectionClass}>
       <div className="flex items-center gap-2.5 mb-4">
         <div className="w-7 h-7 rounded-lg bg-purple-500/10 text-purple-500 flex items-center justify-center">
-          <Shield size={16} />
+          <Shield size={16} aria-hidden="true" />
         </div>
         <div className="flex items-center gap-2">
           <h3 className="text-sm font-bold text-[var(--color-ink)]">
@@ -73,7 +73,7 @@ export default function ComplianceSection({
           <div className="relative">
             <Car
               size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true"
             />
             <input
               type="text"
@@ -97,7 +97,7 @@ export default function ComplianceSection({
           <div className="relative group">
             <Calendar
               size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none z-10"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none z-10" aria-hidden="true"
             />
             <Flatpickr
               value={formData.dl_expiry}
@@ -123,7 +123,7 @@ export default function ComplianceSection({
           <div className="relative group">
             <Calendar
               size={14}
-              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none z-10"
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none z-10" aria-hidden="true"
             />
             <Flatpickr
               value={formData.dl_issued_date}
@@ -182,7 +182,7 @@ export default function ComplianceSection({
         </div>
         {!requiresSelfDriveDL && (
           <p className="text-[10px] text-[var(--color-ink-muted)] mt-2 flex items-center gap-1.5">
-            <AlertCircle size={12} className="text-amber-500" />
+            <AlertCircle size={12} className="text-amber-500" aria-hidden="true" />
             Client DL not required for{" "}
             {drivingArrangement === "own_driver" ? "own driver" : "chauffeur"}{" "}
             arrangements.

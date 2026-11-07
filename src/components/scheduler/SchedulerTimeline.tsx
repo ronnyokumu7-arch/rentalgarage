@@ -1,7 +1,7 @@
 // src/components/scheduler/SchedulerTimeline.tsx
 "use client";
 
-import { Users } from "lucide-react";
+import { Users } from "@phosphor-icons/react/ssr";
 import { format, isToday } from "date-fns";
 import { ScheduledTask, TeamMember } from "@/hooks/scheduler/useTaskSchedulerTimeline";
 import UserRosterRow from "./UserRosterRow";
@@ -58,7 +58,7 @@ export default function SchedulerTimeline({
       <div className="flex sticky top-0 z-10 bg-[var(--color-surface)] border-b border-[var(--color-surface-border)] shadow-sm">
         <div className="sticky left-0 z-20 w-72 shrink-0 p-4 border-r border-[var(--color-surface-border)] bg-[var(--color-surface)]/95 font-extrabold text-[11px] uppercase text-[var(--color-ink-subtle)] flex items-center justify-between">
           <span>Team Roster</span> 
-          <Users size={14} />
+          <Users size={14} aria-hidden="true" />
         </div>
         <div className="flex flex-1 min-w-[700px]">
           {timelineDays.map((day) => (

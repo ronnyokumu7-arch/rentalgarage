@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Car } from "lucide-react";
+import { Car } from "@phosphor-icons/react/ssr";
 import SecureLightbox from "@/components/ui/SecureLightbox";
 import ClientDetailsSection from "./form/ClientDetailsSection";
 import DrivingArrangementSection from "./form/DrivingArrangementSection";
@@ -161,7 +161,7 @@ export default function NewClientForm({
                   />
                 ) : (
                   <div className="w-12 h-12 rounded-xl bg-[var(--color-primary)]/20 text-[var(--color-primary)] flex items-center justify-center">
-                    <Car size={24} />
+                    <Car size={24} aria-hidden="true" />
                   </div>
                 )}
                 <div>

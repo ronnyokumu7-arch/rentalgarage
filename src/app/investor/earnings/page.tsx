@@ -3,9 +3,9 @@
 
 import { useState, useMemo } from "react";
 import {
-  Wallet, TrendingUp, Clock, CheckCircle, Search, Filter,
+  Wallet, TrendUp as TrendingUp, Clock, CheckCircle, MagnifyingGlass as Search, Funnel as Filter,
   ArrowDownRight, Minus
-} from "lucide-react";
+} from "@phosphor-icons/react/ssr";
 import DataTable from "@/components/ui/DataTable";
 import CardGrid from "@/components/ui/CardGrid";
 import FilterDropdown from "@/components/ui/FilterDropdown";
@@ -108,7 +108,7 @@ export default function InvestorEarningsPage() {
       <div>
         <div className="flex items-center gap-3">
           <span className="hidden sm:inline-flex">
-            <Wallet size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />
+            <Wallet size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />
           </span>
           <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
             Earnings &amp; Payouts
@@ -174,7 +174,7 @@ export default function InvestorEarningsPage() {
         <div className="p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex flex-col sm:flex-row gap-3 items-stretch sm:items-center justify-between">
           <div className="flex items-center gap-2 flex-1 sm:max-w-md">
             <div className="relative flex-1">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true" />
               <input
                 type="text"
                 value={search}
@@ -197,7 +197,7 @@ export default function InvestorEarningsPage() {
           </div>
 
           <button className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-xs font-bold text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-all">
-            <ArrowDownRight size={14} />
+            <ArrowDownRight size={14} aria-hidden="true" />
             Export CSV
           </button>
         </div>
@@ -205,7 +205,7 @@ export default function InvestorEarningsPage() {
         {filteredEarnings.length === 0 ? (
           <div className="p-12 text-center">
             <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
-              <Wallet size={24} className="text-[var(--color-ink-subtle)]" />
+              <Wallet size={24} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
             </div>
             <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No earnings found</h3>
             <p className="text-sm text-[var(--color-ink-muted)]">
@@ -231,7 +231,7 @@ export default function InvestorEarningsPage() {
                     <div className="flex items-center justify-between w-full">
                       <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${bg}`}>
-                          <Icon size={18} className={color} />
+                          <Icon size={18} className={color} aria-hidden="true" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="text-sm font-bold text-[var(--color-ink)] truncate">{item.vehicle_plate}</p>
@@ -290,7 +290,7 @@ export default function InvestorEarningsPage() {
                       const label = type === "revenue_share" ? "Revenue Share" : type === "maintenance_deduction" ? "Maintenance" : "Payout";
                       return (
                         <div className="flex items-center gap-2">
-                          <Icon size={16} className={color} />
+                          <Icon size={16} className={color} aria-hidden="true" />
                           <span className="text-sm font-medium text-[var(--color-ink)]">{label}</span>
                         </div>
                       );

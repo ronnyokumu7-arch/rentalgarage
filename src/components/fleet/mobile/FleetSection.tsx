@@ -1,7 +1,7 @@
 // src/components/fleet/mobile/FleetSection.tsx
 "use client";
 
-import { ChevronDown, ChevronRight, MoreHorizontal } from "lucide-react";
+import { CaretDown as ChevronDown, CaretRight as ChevronRight, DotsThree as MoreHorizontal } from "@phosphor-icons/react/ssr";
 import FleetVehicleRow from "./FleetVehicleRow";
 import type { Vehicle } from "@/lib/types";
 import type { FleetSectionData } from "./types";
@@ -60,9 +60,9 @@ export default function FleetSection({
             <>
               <div className="w-5 h-5 flex items-center justify-center shrink-0">
                 {isCollapsed ? (
-                  <ChevronRight size={14} className="text-[var(--color-ink-muted)]" />
+                  <ChevronRight size={14} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
                 ) : (
-                  <ChevronDown size={14} className="text-[var(--color-ink-muted)]" />
+                  <ChevronDown size={14} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
                 )}
               </div>
               <span className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink)] truncate group-hover:text-[var(--color-primary)] transition-colors">
@@ -81,7 +81,7 @@ export default function FleetSection({
             className="w-7 h-7 rounded-md flex items-center justify-center text-[var(--color-ink-subtle)] hover:bg-[var(--color-surface-hover)] transition-colors"
             aria-label="Edit collection"
           >
-            <MoreHorizontal size={14} />
+            <MoreHorizontal size={14} aria-hidden="true" />
           </button>
         )}
       </div>

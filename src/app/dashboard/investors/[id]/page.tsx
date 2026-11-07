@@ -6,20 +6,20 @@ import { useRouter, useParams, useSearchParams } from "next/navigation";
 import {
   User as UserIcon,
   Phone,
-  Mail,
+  Envelope as Mail,
   Car,
   FileText,
-  Loader2,
+  CircleNotch as Loader2,
   Archive,
-  CheckCircle2,
+  CheckCircle as CheckCircle2,
   CreditCard,
-  Building2,
+  Buildings as Building2,
   Shield,
   Wallet,
-  TrendingUp,
+  TrendUp as TrendingUp,
   ArrowUpRight,
-  LayoutGrid,
-} from "lucide-react";
+  SquaresFour as LayoutGrid,
+} from "@phosphor-icons/react/ssr";
 import toast from "react-hot-toast";
 
 import ProfileLayout, { ProfileField } from "@/components/profile/ProfileLayout";
@@ -148,7 +148,7 @@ export default function InvestorDetailPage() {
                 : "bg-[var(--color-surface)] text-rose-600 border border-rose-200 hover:bg-rose-50 dark:border-rose-900/50 dark:hover:bg-rose-900/20"
             }`}
           >
-            {actionLoading ? <Loader2 size={16} className="animate-spin" /> : statusKind === "suspended" ? <CheckCircle2 size={16} /> : <Archive size={16} />}
+            {actionLoading ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : statusKind === "suspended" ? <CheckCircle2 size={16} aria-hidden="true" /> : <Archive size={16} aria-hidden="true" />}
             {statusKind === "suspended" ? "Reactivate" : "Suspend"}
           </button>
         )
@@ -184,14 +184,14 @@ export default function InvestorDetailPage() {
                   <div className="px-6 py-4 border-b border-[var(--color-surface-border)] flex items-center justify-between">
                     <div className="flex items-center gap-2.5">
                       <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/15 text-[var(--color-primary)] flex items-center justify-center">
-                        <Wallet size={16} />
+                        <Wallet size={16} aria-hidden="true" />
                       </div>
                       <div>
                         <p className="text-sm font-bold text-[var(--color-ink)]">Earnings</p>
                         <p className="text-[10px] font-semibold uppercase tracking-wider text-[var(--color-ink-muted)]">Lifetime projection</p>
                       </div>
                     </div>
-                    <TrendingUp size={16} className="text-emerald-500" />
+                    <TrendingUp size={16} className="text-emerald-500" aria-hidden="true" />
                   </div>
                   <div className="p-6 space-y-4">
                     <div>
@@ -212,7 +212,7 @@ export default function InvestorDetailPage() {
                       onClick={() => handleTabChange("contracts")}
                       className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/5 hover:bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 transition-all"
                     >
-                      View Contracts <ArrowUpRight size={14} />
+                      View Contracts <ArrowUpRight size={14} aria-hidden="true" />
                     </button>
                   </div>
                 </div>
@@ -242,7 +242,7 @@ export default function InvestorDetailPage() {
             <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden">
               {vehicles.length === 0 ? (
                 <div className="p-12 text-center">
-                  <Car size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" />
+                  <Car size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" aria-hidden="true" />
                   <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No Vehicles Yet</h3>
                   <p className="text-sm text-[var(--color-ink-muted)]">This investor hasn't added any vehicles to the platform.</p>
                 </div>
@@ -258,7 +258,7 @@ export default function InvestorDetailPage() {
                           onClick={() => router.push(`/dashboard/fleet/${item.id}`)}
                         >
                           <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
-                            <Car size={20} />
+                            <Car size={20} aria-hidden="true" />
                           </div>
                           <div>
                             <p className="text-sm font-bold text-[var(--color-ink)]">{item.make} {item.model}</p>
@@ -283,7 +283,7 @@ export default function InvestorDetailPage() {
                       columns={[
                         { header: "Vehicle", accessorKey: "make", cell: ({ row }) => (
                           <div className="flex items-center gap-3">
-                            <Car size={16} className="text-[var(--color-ink-subtle)]" />
+                            <Car size={16} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
                             <span className="font-semibold text-[var(--color-ink)]">{row.original.make} {row.original.model}</span>
                           </div>
                         )},
@@ -303,7 +303,7 @@ export default function InvestorDetailPage() {
             <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden">
               {contracts.length === 0 ? (
                 <div className="p-12 text-center">
-                  <FileText size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" />
+                  <FileText size={48} className="mx-auto text-[var(--color-ink-subtle)] mb-4" aria-hidden="true" />
                   <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">No Contracts Found</h3>
                   <p className="text-sm text-[var(--color-ink-muted)]">No lease contracts have been generated for this investor's vehicles yet.</p>
                 </div>

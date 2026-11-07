@@ -1,12 +1,13 @@
 import React from "react";
-import { Check, Clock, Circle, LucideIcon } from "lucide-react";
+import { Check, Clock, Circle } from "@phosphor-icons/react/ssr";
+import type { Icon } from "@phosphor-icons/react";
 
 interface TimelineStep {
   label: string;
   description?: string;
   timestamp?: string;
   status: "completed" | "current" | "pending";
-  icon?: LucideIcon;
+  icon?: Icon;
 }
 
 interface StatusTimelineProps {
@@ -52,11 +53,11 @@ export default function StatusTimeline({
                 `}
               >
                 {step.status === "completed" ? (
-                  <Check size={14} strokeWidth={2.5} />
+                  <Check size={14} weight="bold" aria-hidden="true" />
                 ) : step.status === "current" ? (
-                  Icon ? <Icon size={14} strokeWidth={2} /> : <Clock size={14} strokeWidth={2} />
+                  Icon ? <Icon size={14} weight="regular" aria-hidden="true" /> : <Clock size={14} weight="regular" aria-hidden="true" />
                 ) : (
-                  Icon ? <Icon size={14} strokeWidth={2} /> : <Circle size={14} strokeWidth={2} />
+                  Icon ? <Icon size={14} weight="regular" aria-hidden="true" /> : <Circle size={14} weight="regular" aria-hidden="true" />
                 )}
               </div>
 
@@ -113,11 +114,11 @@ export default function StatusTimeline({
               `}
             >
               {step.status === "completed" ? (
-                <Check size={14} strokeWidth={2.5} />
+                <Check size={14} weight="bold" aria-hidden="true" />
               ) : step.status === "current" ? (
-                Icon ? <Icon size={14} strokeWidth={2} /> : <Clock size={14} strokeWidth={2} />
+                Icon ? <Icon size={14} weight="regular" aria-hidden="true" /> : <Clock size={14} weight="regular" aria-hidden="true" />
               ) : (
-                Icon ? <Icon size={14} strokeWidth={2} /> : <Circle size={14} strokeWidth={2} />
+                Icon ? <Icon size={14} weight="regular" aria-hidden="true" /> : <Circle size={14} weight="regular" aria-hidden="true" />
               )}
             </div>
 

@@ -1,7 +1,7 @@
 // src/components/users/UsersToolbar.tsx
 "use client";
 
-import { Search, Shield, Briefcase, Filter } from "lucide-react";
+import { MagnifyingGlass as Search, Shield, Briefcase, Funnel as Filter } from "@phosphor-icons/react/ssr";
 import FilterDropdown from "@/components/ui/FilterDropdown";
 import AddUserButton from "@/components/users/AddUserButton";
 import type { CategoryMode } from "@/hooks/users/useUsersList";
@@ -52,7 +52,7 @@ export default function UsersToolbar({
                 : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
             }`}
           >
-            <Shield size={13} />
+            <Shield size={13} aria-hidden="true" />
             <span>Executive</span>
           </button>
 
@@ -65,7 +65,7 @@ export default function UsersToolbar({
                 : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
             }`}
           >
-            <Briefcase size={13} />
+            <Briefcase size={13} aria-hidden="true" />
             <span>Staff</span>
           </button>
         </div>
@@ -94,7 +94,7 @@ export default function UsersToolbar({
         <div className="flex items-center gap-2 flex-1 sm:w-80">
           {/* Search Input */}
           <div className="relative flex-1">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" />
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true" />
             <input
               type="text"
               value={search}

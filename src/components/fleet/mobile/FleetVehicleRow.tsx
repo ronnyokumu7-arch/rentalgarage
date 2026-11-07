@@ -2,8 +2,8 @@
 "use client";
 
 import {
-  Gauge, Wrench, CheckCircle2, Circle, MoreVertical,
-} from "lucide-react";
+  Gauge, Wrench, CheckCircle as CheckCircle2, Circle, DotsThreeVertical as MoreVertical,
+} from "@phosphor-icons/react/ssr";
 import {
   getVehicleBodyIcon,
   getVehicleBrandLogoUrl,
@@ -111,7 +111,7 @@ export default function FleetVehicleRow({
     if (needsMileageAttention) {
       return (
         <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 dark:text-amber-400 whitespace-nowrap">
-          <Wrench size={10} className="flex-shrink-0" />
+          <Wrench size={10} className="flex-shrink-0" aria-hidden="true" />
           Update Mileage
         </span>
       );
@@ -156,7 +156,7 @@ export default function FleetVehicleRow({
           <BodyIcon
             size={20}
             className="text-[var(--color-ink-muted)]"
-            strokeWidth={1.75}
+            weight="light" aria-hidden="true"
           />
         )}
       </div>
@@ -190,7 +190,7 @@ export default function FleetVehicleRow({
           </span>
 
           <span className="inline-flex items-center gap-1">
-            <Gauge size={11} className="flex-shrink-0 text-[var(--color-ink-subtle)]" />
+            <Gauge size={11} className="flex-shrink-0 text-[var(--color-ink-subtle)]" aria-hidden="true" />
             <span className="font-mono tracking-tight">
               {formatMileage(item.current_mileage)} km
             </span>
@@ -210,7 +210,7 @@ export default function FleetVehicleRow({
                   needsMileageAttention
                     ? ""
                     : "text-[var(--color-ink-subtle)]"
-                }`}
+                }`} aria-hidden="true"
               />
               <span className="font-mono tracking-tight">
                 {formatMileage(item.next_service_km)} km
@@ -218,7 +218,7 @@ export default function FleetVehicleRow({
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 text-[var(--color-ink-subtle)]">
-              <Wrench size={11} className="flex-shrink-0" />
+              <Wrench size={11} className="flex-shrink-0" aria-hidden="true" />
               <span className="font-mono tracking-tight italic">Not set</span>
             </span>
           )}
@@ -236,7 +236,7 @@ export default function FleetVehicleRow({
           aria-label="Vehicle actions"
           className="absolute top-3 right-3 w-7 h-7 rounded-md flex items-center justify-center text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors active:scale-90"
         >
-          <MoreVertical size={16} strokeWidth={2} />
+          <MoreVertical size={16} weight="regular" aria-hidden="true" />
         </button>
       )}
 
@@ -246,13 +246,13 @@ export default function FleetVehicleRow({
             <CheckCircle2
               size={22}
               className="text-[var(--color-primary)]"
-              strokeWidth={2.25}
+              weight="regular" aria-hidden="true"
             />
           ) : (
             <Circle
               size={22}
               className="text-[var(--color-ink-subtle)]"
-              strokeWidth={1.5}
+              weight="light" aria-hidden="true"
             />
           )}
         </div>

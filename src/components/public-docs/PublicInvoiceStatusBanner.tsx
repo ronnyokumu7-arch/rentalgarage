@@ -1,7 +1,7 @@
 // src/components/public-docs/PublicInvoiceStatusBanner.tsx
 "use client";
 
-import { FileText, CheckCircle2, Download, XCircle, Send, Loader2 } from "lucide-react";
+import { FileText, CheckCircle as CheckCircle2, Download, XCircle, PaperPlaneTilt as Send, CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
 import type { PublicInvoiceView } from "@/lib/types";
 
 interface PublicInvoiceStatusBannerProps {
@@ -20,7 +20,7 @@ export default function PublicInvoiceStatusBanner({ invoice, onDownloadPdf, isDo
     if (isVoid) {
       return {
         bg: 'rgba(185, 28, 28, 0.05)',
-        icon: <XCircle className="h-5 w-5 shrink-0" style={{ color: '#B91C1C' }} />,
+        icon: <XCircle className="h-5 w-5 shrink-0" style={{ color: '#B91C1C' }} aria-hidden="true" />,
         title: isQuotation ? "Quotation Cancelled" : "Invoice Voided",
         subtitle: "This document has been cancelled. Please contact the agency for a new one.",
         titleColor: '#B91C1C',
@@ -30,7 +30,7 @@ export default function PublicInvoiceStatusBanner({ invoice, onDownloadPdf, isDo
     if (isQuotation) {
       return {
         bg: 'rgba(109, 40, 217, 0.05)',
-        icon: <Send className="h-5 w-5 shrink-0" style={{ color: '#6D28D9' }} />,
+        icon: <Send className="h-5 w-5 shrink-0" style={{ color: '#6D28D9' }} aria-hidden="true" />,
         title: "Quotation Ready",
         subtitle: "Review the details below and accept to confirm your booking.",
         titleColor: '#6D28D9',
@@ -40,7 +40,7 @@ export default function PublicInvoiceStatusBanner({ invoice, onDownloadPdf, isDo
     if (isPaid) {
       return {
         bg: 'rgba(4, 120, 87, 0.05)',
-        icon: <CheckCircle2 className="h-5 w-5 shrink-0" style={{ color: '#047857' }} />,
+        icon: <CheckCircle2 className="h-5 w-5 shrink-0" style={{ color: '#047857' }} aria-hidden="true" />,
         title: "Invoice Fully Paid",
         subtitle: "Thank you for your payment.",
         titleColor: '#047857',
@@ -49,7 +49,7 @@ export default function PublicInvoiceStatusBanner({ invoice, onDownloadPdf, isDo
     }
     return {
       bg: 'rgba(29, 78, 216, 0.05)',
-      icon: <FileText className="h-5 w-5 shrink-0" style={{ color: '#1D4ED8' }} />,
+      icon: <FileText className="h-5 w-5 shrink-0" style={{ color: '#1D4ED8' }} aria-hidden="true" />,
       title: "Pending Payment",
       subtitle: "Please review the details below and arrange payment.",
       titleColor: '#1D4ED8',
@@ -133,11 +133,11 @@ export default function PublicInvoiceStatusBanner({ invoice, onDownloadPdf, isDo
       >
         {isDownloadingPdf ? (
           <>
-            <Loader2 size={14} className="animate-spin" /> Generating PDF...
+            <Loader2 size={14} className="animate-spin" aria-hidden="true" /> Generating PDF...
           </>
         ) : (
           <>
-            <Download size={14} /> Download PDF
+            <Download size={14} aria-hidden="true" /> Download PDF
           </>
         )}
       </button>

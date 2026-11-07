@@ -1,11 +1,11 @@
 "use client";
 import React from "react";
-import { LucideIcon } from "lucide-react";
+import type { Icon } from "@phosphor-icons/react";
 
 interface Action {
   label: string;
   onClick: () => void;
-  icon?: LucideIcon;
+  icon?: Icon;
   variant?: "primary" | "secondary" | "ghost" | "danger";
   disabled?: boolean;
 }
@@ -13,7 +13,7 @@ interface Action {
 interface PageHeaderProps {
   title: string;
   subtitle?: string;
-  icon?: LucideIcon;
+  icon?: Icon;
   actions?: Action[];
   breadcrumb?: { label: string; href?: string }[];
   children?: React.ReactNode;
@@ -67,7 +67,7 @@ export default function PageHeader({
             <div
               className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-accent-bg"
             >
-              <Icon size={20} className="text-accent-dark" strokeWidth={1.8} />
+              <Icon size={20} className="text-accent-dark" weight="light" aria-hidden="true" />
             </div>
           )}
           <div className="min-w-0">
@@ -94,7 +94,7 @@ export default function PageHeader({
                   disabled={action.disabled}
                   className={actionStyles[action.variant ?? "primary"]}
                 >
-                  {ActionIcon && <ActionIcon size={16} strokeWidth={2} />}
+                  {ActionIcon && <ActionIcon size={16} weight="regular" aria-hidden="true" />}
                   {action.label}
                 </button>
               );

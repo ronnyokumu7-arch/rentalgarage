@@ -1,7 +1,7 @@
 // src/components/bookings/booking_list/BookingsList.tsx
 "use client";
 
-import { Loader2 } from "lucide-react";
+import { CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
 import BookingsToolbar from "./BookingsToolbar";
 import BookingsListMobile from "./BookingsListMobile";
 import BookingsListDesktop from "./BookingsListDesktop";
@@ -58,7 +58,7 @@ export default function BookingsList({
 
       {loading ? (
         <div className="p-12 text-center text-[var(--color-ink-muted)] flex items-center justify-center gap-2 text-sm font-medium">
-          <Loader2 className="w-5 h-5 animate-spin" /> Loading bookings...
+          <Loader2 className="w-5 h-5 animate-spin" aria-hidden="true" /> Loading bookings...
         </div>
       ) : (
         <>

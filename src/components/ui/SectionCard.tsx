@@ -2,12 +2,12 @@
 "use client";
 
 import React from "react";
-import { LucideIcon } from "lucide-react";
+import type { Icon } from "@phosphor-icons/react";
 
 interface SectionCardProps {
   title?: string;
   subtitle?: string;
-  icon?: LucideIcon;
+  icon?: Icon;
   actions?: React.ReactNode;
   children: React.ReactNode;
   padding?: boolean | string; // Allow custom padding override like "!p-0"
@@ -67,7 +67,7 @@ export default function SectionCard({
                     : "bg-[var(--color-primary)]/5 border-[var(--color-primary)]/10 text-[var(--color-primary)]"
                 }`}
               >
-                <Icon size={18} strokeWidth={1.8} />
+                <Icon size={18} weight="light" aria-hidden="true" />
               </div>
             )}
             <div className="min-w-0">

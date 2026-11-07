@@ -1,7 +1,7 @@
 "use client";
 import { confirmAction } from "@/lib/utils/confirmAction";
 
-import { X, Plus, Settings, Trash2 } from "lucide-react";
+import { X, Plus, Gear as Settings, Trash as Trash2 } from "@phosphor-icons/react/ssr";
 import { TeamMember } from "@/hooks/scheduler/useTaskSchedulerTimeline";
 
 interface UserActionsDrawerProps {
@@ -59,7 +59,7 @@ export default function UserActionsDrawer({
               onClick={onClose}
               className="w-8 h-8 rounded-lg bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
             >
-              <X size={16} />
+              <X size={16} aria-hidden="true" />
             </button>
           </div>
 
@@ -79,7 +79,7 @@ export default function UserActionsDrawer({
                 className="w-full p-3 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] hover:border-[var(--color-primary)]/40 transition-all flex items-center gap-3 group"
               >
                 <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 flex items-center justify-center group-hover:bg-[var(--color-primary)]/20 transition-colors">
-                  <Plus size={16} className="text-[var(--color-primary)]" />
+                  <Plus size={16} className="text-[var(--color-primary)]" aria-hidden="true" />
                 </div>
                 <div className="text-left">
                   <p className="text-xs font-bold text-[var(--color-ink)]">Create Task for User</p>
@@ -95,7 +95,7 @@ export default function UserActionsDrawer({
                 className="w-full p-3 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] hover:border-[var(--color-primary)]/40 transition-all flex items-center gap-3 group"
               >
                 <div className="w-8 h-8 rounded-lg bg-blue-500/10 flex items-center justify-center group-hover:bg-blue-500/20 transition-colors">
-                  <Settings size={16} className="text-blue-500" />
+                  <Settings size={16} className="text-blue-500" aria-hidden="true" />
                 </div>
                 <div className="text-left">
                   <p className="text-xs font-bold text-[var(--color-ink)]">User Settings</p>
@@ -120,7 +120,7 @@ export default function UserActionsDrawer({
                 className="w-full p-3 rounded-xl bg-rose-500/10 border border-rose-500/30 hover:bg-rose-500/20 transition-all flex items-center gap-3 text-rose-600 dark:text-rose-400"
               >
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center">
-                  <Trash2 size={16} />
+                  <Trash2 size={16} aria-hidden="true" />
                 </div>
                 <div className="text-left">
                   <p className="text-xs font-bold">Deactivate User</p>

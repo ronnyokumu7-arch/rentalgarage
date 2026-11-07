@@ -4,7 +4,7 @@
 import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { Eye, EyeOff, CheckCircle2, Lock } from "lucide-react";
+import { Eye, EyeSlash as EyeOff, CheckCircle as CheckCircle2, Lock } from "@phosphor-icons/react/ssr";
 import apiClient from "@/lib/api-client";
 import "@/app/login.css";
 
@@ -69,7 +69,7 @@ function ResetPasswordForm() {
           className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
           style={{ backgroundColor: 'rgba(185, 28, 28, 0.10)' }}
         >
-          <Lock size={30} style={{ color: '#B91C1C' }} strokeWidth={1.8} />
+          <Lock size={30} style={{ color: '#B91C1C' }} weight="light" aria-hidden="true" />
         </div>
         <h2 className="text-2xl font-bold mb-2 tracking-tight" style={{ color: '#1C1917' }}>
           Invalid Reset Link
@@ -170,7 +170,7 @@ function ResetPasswordForm() {
                 <Lock 
                   className="absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors" 
                   size={17}
-                  style={{ color: '#A8A39E' }}
+                  style={{ color: '#A8A39E' }} aria-hidden="true"
                 />
                 <button
                   type="button"
@@ -181,7 +181,7 @@ function ResetPasswordForm() {
                   onMouseLeave={(e) => e.currentTarget.style.color = '#A8A39E'}
                   tabIndex={-1}
                 >
-                  {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                  {showPassword ? <EyeOff size={17} aria-hidden="true" /> : <Eye size={17} aria-hidden="true" />}
                 </button>
               </div>
 
@@ -244,7 +244,7 @@ function ResetPasswordForm() {
                 <Lock 
                   className="absolute left-3.5 top-1/2 -translate-y-1/2" 
                   size={17}
-                  style={{ color: '#A8A39E' }}
+                  style={{ color: '#A8A39E' }} aria-hidden="true"
                 />
               </div>
               {confirm.length > 0 && !isMatch && (
@@ -294,7 +294,7 @@ function ResetPasswordForm() {
             className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
             style={{ backgroundColor: 'rgba(4, 120, 87, 0.10)' }}
           >
-            <CheckCircle2 size={30} style={{ color: '#047857' }} strokeWidth={1.8} />
+            <CheckCircle2 size={30} style={{ color: '#047857' }} weight="light" aria-hidden="true" />
           </div>
           <h2 className="text-2xl font-bold mb-2 tracking-tight" style={{ color: '#1C1917' }}>
             Password Updated

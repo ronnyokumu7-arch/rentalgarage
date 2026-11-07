@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, DragEvent, ChangeEvent } from "react";
-import { Upload, X, FileImage, AlertCircle } from "lucide-react";
+import { Upload, X, FileImage, WarningCircle as AlertCircle } from "@phosphor-icons/react/ssr";
 
 interface FileUploadProps {
   value: File | null;
@@ -138,7 +138,7 @@ export default function FileUpload({
                 opacity-0 group-hover:opacity-100"
               aria-label="Remove file"
             >
-              <X size={12} strokeWidth={2.5} />
+              <X size={12} weight="bold" aria-hidden="true" />
             </button>
           )}
           {!disabled && (
@@ -163,7 +163,7 @@ export default function FileUpload({
         />
         {displayError && (
           <p className="flex items-center gap-1.5 mt-2 text-xs text-danger font-medium">
-            <AlertCircle size={13} strokeWidth={2} />
+            <AlertCircle size={13} weight="regular" aria-hidden="true" />
             {displayError}
           </p>
         )}
@@ -200,9 +200,9 @@ export default function FileUpload({
             ${dragOver ? "bg-accent text-white" : "bg-accent-bg text-accent-dark"}`}
         >
           {value ? (
-            <FileImage size={20} strokeWidth={1.8} />
+            <FileImage size={20} weight="light" aria-hidden="true" />
           ) : (
-            <Upload size={20} strokeWidth={1.8} />
+            <Upload size={20} weight="light" aria-hidden="true" />
           )}
         </div>
 
@@ -239,7 +239,7 @@ export default function FileUpload({
 
       {displayError && (
         <p className="flex items-center gap-1.5 mt-2 text-xs text-danger font-medium">
-          <AlertCircle size={13} strokeWidth={2} />
+          <AlertCircle size={13} weight="regular" aria-hidden="true" />
           {displayError}
         </p>
       )}

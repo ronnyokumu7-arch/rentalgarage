@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { MapPin, Home, Briefcase, Pencil, Save, X } from "lucide-react";
+import { MapPin, House as Home, Briefcase, PencilSimple as Pencil, FloppyDisk as Save, X } from "@phosphor-icons/react/ssr";
 import SectionCard from "@/components/ui/SectionCard";
 import type { Client } from "@/lib/types";
 
@@ -32,7 +32,7 @@ export default function AddressCard({ client, onSave }: AddressCardProps) {
       {/* Sleek Minimal Header */}
       <div className="flex items-center justify-between px-3.5 py-2 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/10">
         <div className="flex items-center gap-2">
-          <MapPin size={13} className="text-[var(--color-primary)]" />
+          <MapPin size={13} className="text-[var(--color-primary)]" aria-hidden="true" />
           <h3 className="text-[10px] font-mono font-bold text-[var(--color-ink)] uppercase tracking-widest">
             Location Details
           </h3>
@@ -48,7 +48,7 @@ export default function AddressCard({ client, onSave }: AddressCardProps) {
                 : "text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)]"
             }`}
           >
-            <Home size={11} />
+            <Home size={11} aria-hidden="true" />
             <span>Home</span>
           </button>
           
@@ -60,7 +60,7 @@ export default function AddressCard({ client, onSave }: AddressCardProps) {
                 : "text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)]"
             }`}
           >
-            <Briefcase size={11} />
+            <Briefcase size={11} aria-hidden="true" />
             <span>Work</span>
           </button>
         </div>
@@ -72,7 +72,7 @@ export default function AddressCard({ client, onSave }: AddressCardProps) {
           <div className="space-y-2.5 animate-in fade-in duration-150">
             <div className="flex items-center justify-between">
               <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-[var(--color-ink-muted)] flex items-center gap-1.5">
-                <Icon size={11} className="text-[var(--color-primary)]" />
+                <Icon size={11} className="text-[var(--color-primary)]" aria-hidden="true" />
                 Editing {activeTab === "residential" ? "Home" : "Work"} Address
               </span>
             </div>
@@ -90,14 +90,14 @@ export default function AddressCard({ client, onSave }: AddressCardProps) {
                 onClick={() => setIsEditing(false)} 
                 className="flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-mono font-bold text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] transition-colors"
               >
-                <X size={11} />
+                <X size={11} aria-hidden="true" />
                 <span>Cancel</span>
               </button>
               <button 
                 onClick={handleSave} 
                 className="flex items-center gap-1 px-3 py-1 rounded-md text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 transition-colors"
               >
-                <Save size={11} />
+                <Save size={11} aria-hidden="true" />
                 <span>Save Changes</span>
               </button>
             </div>
@@ -106,7 +106,7 @@ export default function AddressCard({ client, onSave }: AddressCardProps) {
           <div className="group relative pl-3 border-l-2 border-transparent hover:border-[var(--color-primary)]/40 transition-all duration-200">
             <div className="flex items-center justify-between gap-2 mb-1">
               <span className="text-[9px] font-mono font-bold uppercase tracking-widest text-[var(--color-ink-muted)] flex items-center gap-1.5">
-                <Icon size={11} className="text-[var(--color-ink-subtle)]" />
+                <Icon size={11} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
                 {activeTab === "residential" ? "Home Address" : "Work Place / Business"}
               </span>
 
@@ -116,7 +116,7 @@ export default function AddressCard({ client, onSave }: AddressCardProps) {
                 className="p-1 rounded opacity-0 group-hover:opacity-100 text-[var(--color-ink-subtle)] hover:text-[var(--color-primary)] hover:bg-[var(--color-surface-hover)] transition-all"
                 title="Edit Address"
               >
-                <Pencil size={11} />
+                <Pencil size={11} aria-hidden="true" />
               </button>
             </div>
 

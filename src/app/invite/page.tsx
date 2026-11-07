@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { AlertCircle, CheckCircle, Loader2 } from "lucide-react";
+import { WarningCircle as AlertCircle, CheckCircle, CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
 import toast from "react-hot-toast";
 import { usersApi } from "@/lib/api/users";
 import apiClient from "@/lib/api-client";
@@ -156,7 +156,7 @@ function InviteContent() {
     return (
       <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center p-4">
         <div className="flex items-center gap-2 text-[var(--color-ink-muted)]">
-          <Loader2 size={20} className="animate-spin" />
+          <Loader2 size={20} className="animate-spin" aria-hidden="true" />
           <span className="text-sm font-medium">Loading your invitation...</span>
         </div>
       </div>
@@ -169,7 +169,7 @@ function InviteContent() {
       <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center p-4">
         <div className="w-full max-w-md bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-8 text-center">
           <div className="w-16 h-16 rounded-full bg-[var(--color-danger-bg)] flex items-center justify-center mx-auto mb-4">
-            <AlertCircle size={32} className="text-[var(--color-danger-text)]" />
+            <AlertCircle size={32} className="text-[var(--color-danger-text)]" aria-hidden="true" />
           </div>
           <h2 className="text-xl font-bold text-[var(--color-ink)] mb-2">Invalid Invite Link</h2>
           <p className="text-sm text-[var(--color-ink-muted)] mb-6">{pageError || "This invite link is invalid or has expired."}</p>
@@ -190,14 +190,14 @@ function InviteContent() {
       <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center p-4">
         <div className="w-full max-w-md bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-8 text-center animate-in zoom-in-95 duration-300">
           <div className="w-16 h-16 rounded-full bg-[var(--color-success-bg)] flex items-center justify-center mx-auto mb-4">
-            <CheckCircle size={32} className="text-[var(--color-success-text)]" />
+            <CheckCircle size={32} className="text-[var(--color-success-text)]" aria-hidden="true" />
           </div>
           <h2 className="text-xl font-bold text-[var(--color-ink)] mb-2">Account Activated!</h2>
           <p className="text-sm text-[var(--color-ink-muted)] mb-6">
             Your account has been successfully set up. Redirecting you to the login page...
           </p>
           <div className="flex justify-center">
-            <Loader2 size={24} className="animate-spin text-[var(--color-primary)]" />
+            <Loader2 size={24} className="animate-spin text-[var(--color-primary)]" aria-hidden="true" />
           </div>
         </div>
       </div>
@@ -229,7 +229,7 @@ export default function InvitePage() {
     <Suspense
       fallback={
         <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center p-4">
-          <Loader2 size={24} className="animate-spin text-[var(--color-ink-muted)]" />
+          <Loader2 size={24} className="animate-spin text-[var(--color-ink-muted)]" aria-hidden="true" />
         </div>
       }
     >

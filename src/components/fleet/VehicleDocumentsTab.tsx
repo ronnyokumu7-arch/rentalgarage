@@ -2,7 +2,7 @@
 
 import { useRef } from "react";
 import toast from "react-hot-toast";
-import { ShieldCheck, AlertCircle, Upload, Eye } from "lucide-react";
+import { ShieldCheck, WarningCircle as AlertCircle, Upload, Eye } from "@phosphor-icons/react/ssr";
 import { vehiclesApi } from "@/lib/api/vehicles";
 import type { Vehicle } from "@/lib/types";
 
@@ -79,7 +79,7 @@ export default function VehicleDocumentsTab({ vehicle, onUploaded }: VehicleDocu
                   : "bg-rose-500/10 text-rose-500"
               }`}
             >
-              {doc.hasFile ? <ShieldCheck size={14} /> : <AlertCircle size={14} />}
+              {doc.hasFile ? <ShieldCheck size={14} aria-hidden="true" /> : <AlertCircle size={14} aria-hidden="true" />}
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-xs font-bold text-[var(--color-ink)]">{doc.label}</p>
@@ -100,7 +100,7 @@ export default function VehicleDocumentsTab({ vehicle, onUploaded }: VehicleDocu
               onClick={() => doc.ref.current?.click()}
               className="flex-1 h-8 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] text-[11px] font-bold text-[var(--color-ink)] transition-colors flex items-center justify-center gap-1.5"
             >
-              <Upload size={11} /> {doc.hasFile ? "Replace" : "Upload"}
+              <Upload size={11} aria-hidden="true" /> {doc.hasFile ? "Replace" : "Upload"}
             </button>
             {doc.hasFile && (
               <button
@@ -108,7 +108,7 @@ export default function VehicleDocumentsTab({ vehicle, onUploaded }: VehicleDocu
                 className="h-8 w-8 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] flex items-center justify-center transition-colors"
                 aria-label="Preview"
               >
-                <Eye size={12} className="text-[var(--color-ink-muted)]" />
+                <Eye size={12} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
               </button>
             )}
           </div>

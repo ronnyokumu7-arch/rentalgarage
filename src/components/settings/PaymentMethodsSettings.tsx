@@ -1,7 +1,7 @@
 // src/components/settings/PaymentMethodsSettings.tsx
 "use client";
 
-import { Info } from "lucide-react";
+import { Info } from "@phosphor-icons/react/ssr";
 import { useAuth } from "@/context/auth-context";
 import { usePaymentGateways } from "@/hooks/usePaymentGateways";
 import { PaymentGatewaysSection } from "@/components/tenants/PaymentGatewaysSection";
@@ -66,7 +66,7 @@ export default function PaymentMethodsSettings() {
     <div className="space-y-4">
       {/* Context Banner: Explains where these details appear */}
       <div className="flex items-start gap-3 p-4 rounded-2xl bg-[var(--color-primary-muted)] border border-[var(--color-primary)]/20">
-        <Info size={16} className="text-[var(--color-primary-text)] mt-0.5 flex-shrink-0" />
+        <Info size={16} className="text-[var(--color-primary-text)] mt-0.5 flex-shrink-0" aria-hidden="true" />
         <p className="text-sm text-[var(--color-primary-text)] leading-relaxed">
           These payment methods are displayed on your invoices so clients know exactly how to pay for their bookings.
         </p>

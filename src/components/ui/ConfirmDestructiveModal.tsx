@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { AlertTriangle, Loader2 } from "lucide-react";
+import { Warning as AlertTriangle, CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
 
 interface ConfirmDestructiveModalProps {
   open: boolean;
@@ -56,7 +56,7 @@ export default function ConfirmDestructiveModal({
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-150">
       <div className="w-full max-w-md rounded-2xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-[var(--shadow-xl)] overflow-hidden">
         <div className={`px-5 py-4 ${accent.bg} flex items-start gap-3`}>
-          <AlertTriangle className={`w-5 h-5 ${accent.icon} shrink-0 mt-0.5`} />
+          <AlertTriangle className={`w-5 h-5 ${accent.icon} shrink-0 mt-0.5`} aria-hidden="true" />
           <div>
             <h3 className="text-sm font-bold text-[var(--color-ink)]">{title}</h3>
             <p className="text-xs text-[var(--color-ink-muted)] mt-0.5 leading-relaxed">{message}</p>
@@ -89,7 +89,7 @@ export default function ConfirmDestructiveModal({
               disabled={!canConfirm || loading}
               className={`btn text-xs flex-1 text-white ${accent.btn}`}
             >
-              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : null}
               {confirmLabel}
             </button>
           </div>

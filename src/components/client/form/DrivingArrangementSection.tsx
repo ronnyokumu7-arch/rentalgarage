@@ -2,8 +2,8 @@
 "use client";
 
 import {
-  Car, UserCheck, Shield, FileText, Calendar, AlertCircle,
-} from "lucide-react";
+  Car, UserCheck, Shield, FileText, Calendar, WarningCircle as AlertCircle,
+} from "@phosphor-icons/react/ssr";
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
 import PhoneInput from "react-phone-number-input";
@@ -58,7 +58,7 @@ export default function DrivingArrangementSection({
     <section className={sectionClass}>
       <div className="flex items-center gap-2.5 mb-4">
         <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
-          <Car size={16} />
+          <Car size={16} aria-hidden="true" />
         </div>
         <h3 className="text-sm font-bold text-[var(--color-ink)]">
           Driving Arrangement
@@ -84,7 +84,7 @@ export default function DrivingArrangementSection({
           />
           <Car
             size={20}
-            className={isSelfDrive ? "text-[var(--color-primary)]" : "text-[var(--color-ink-muted)]"}
+            className={isSelfDrive ? "text-[var(--color-primary)]" : "text-[var(--color-ink-muted)]"} aria-hidden="true"
           />
           <span className="text-sm font-bold text-[var(--color-ink)]">Self Drive</span>
           <span className="text-[10px] text-[var(--color-ink-muted)] text-center">
@@ -109,7 +109,7 @@ export default function DrivingArrangementSection({
           />
           <UserCheck
             size={20}
-            className={isOwnDriver ? "text-[var(--color-primary)]" : "text-[var(--color-ink-muted)]"}
+            className={isOwnDriver ? "text-[var(--color-primary)]" : "text-[var(--color-ink-muted)]"} aria-hidden="true"
           />
           <span className="text-sm font-bold text-[var(--color-ink)]">My Driver</span>
           <span className="text-[10px] text-[var(--color-ink-muted)] text-center">
@@ -134,7 +134,7 @@ export default function DrivingArrangementSection({
           />
           <Shield
             size={20}
-            className={isChauffeur ? "text-[var(--color-primary)]" : "text-[var(--color-ink-muted)]"}
+            className={isChauffeur ? "text-[var(--color-primary)]" : "text-[var(--color-ink-muted)]"} aria-hidden="true"
           />
           <span className="text-sm font-bold text-[var(--color-ink)]">Chauffeur</span>
           <span className="text-[10px] text-[var(--color-ink-muted)] text-center">
@@ -147,7 +147,7 @@ export default function DrivingArrangementSection({
       {isSelfDrive && (
         <div className="mt-2 p-4 rounded-xl bg-purple-500/5 border border-purple-500/20 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="flex items-center gap-2">
-            <Car size={14} className="text-purple-500" />
+            <Car size={14} className="text-purple-500" aria-hidden="true" />
             <h4 className="text-xs font-bold text-[var(--color-ink)]">
               Your Driving License
             </h4>
@@ -161,7 +161,7 @@ export default function DrivingArrangementSection({
               <div className="relative">
                 <Car
                   size={14}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true"
                 />
                 <input
                   type="text"
@@ -181,7 +181,7 @@ export default function DrivingArrangementSection({
               <div className="relative group">
                 <Calendar
                   size={14}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none z-10"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none z-10" aria-hidden="true"
                 />
                 <Flatpickr
                   value={formData.dl_expiry}
@@ -202,7 +202,7 @@ export default function DrivingArrangementSection({
               <div className="relative group">
                 <Calendar
                   size={14}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none z-10"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none z-10" aria-hidden="true"
                 />
                 <Flatpickr
                   value={formData.dl_issued_date}
@@ -241,7 +241,7 @@ export default function DrivingArrangementSection({
       {isOwnDriver && (
         <div className="mt-2 p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="flex items-center gap-2">
-            <UserCheck size={14} className="text-blue-500" />
+            <UserCheck size={14} className="text-blue-500" aria-hidden="true" />
             <h4 className="text-xs font-bold text-[var(--color-ink)]">
               Driver Details
             </h4>
@@ -371,7 +371,7 @@ export default function DrivingArrangementSection({
       {/* CHAUFFEUR: informational note */}
       {isChauffeur && (
         <div className="mt-2 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 flex items-start gap-2.5 animate-in fade-in slide-in-from-top-2 duration-300">
-          <AlertCircle size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+          <AlertCircle size={16} className="text-emerald-500 shrink-0 mt-0.5" aria-hidden="true" />
           <div>
             <p className="text-xs font-bold text-[var(--color-ink)]">
               Agency will assign a driver

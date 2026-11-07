@@ -4,13 +4,13 @@
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  Loader2,
-  Search as SearchIcon,
+  CircleNotch as Loader2,
+  MagnifyingGlass as SearchIcon,
   User,
-  CalendarDays,
+  CalendarDots as CalendarDays,
   Car,
   ArrowLeft,
-} from "lucide-react";
+} from "@phosphor-icons/react/ssr";
 import { useGlobalSearch, type SearchScope } from "@/hooks/useGlobalSearch";
 import {
   ClientResultRow,
@@ -73,7 +73,7 @@ export default function SearchResultsPage() {
       <div className="space-y-6">
         <PageHeader query={query} />
         <div className="flex items-center justify-center min-h-[40vh] text-[var(--color-ink-muted)]">
-          <Loader2 className="w-5 h-5 animate-spin mr-3 text-[var(--color-primary)]" />
+          <Loader2 className="w-5 h-5 animate-spin mr-3 text-[var(--color-primary)]" aria-hidden="true" />
           <span className="text-sm font-medium">Searching...</span>
         </div>
       </div>
@@ -156,7 +156,7 @@ function EmptyState({ title, description }: { title: string; description: string
   return (
     <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-12 flex flex-col items-center justify-center text-center">
       <div className="w-14 h-14 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mb-4">
-        <SearchIcon size={20} className="text-[var(--color-ink-subtle)]" />
+        <SearchIcon size={20} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
       </div>
       <h3 className="text-sm font-bold text-[var(--color-ink)] mb-1">{title}</h3>
       <p className="text-xs text-[var(--color-ink-muted)] max-w-md">{description}</p>
@@ -200,7 +200,7 @@ function FilterChips({
             }`}
             aria-pressed={isActive}
           >
-            <Icon size={12} strokeWidth={2.5} />
+            <Icon size={12} weight="bold" aria-hidden="true" />
             <span>{cat.label}</span>
             <span
               className={`text-[10px] tabular-nums px-1.5 py-0.5 rounded-full ${
@@ -228,7 +228,7 @@ function PageHeader({ query, count }: { query?: string; count?: number }) {
       <div className="min-w-0">
         <div className="flex items-center gap-3">
           <span className="hidden sm:inline-flex">
-            <SearchIcon size={24} strokeWidth={1.5} className="text-[var(--color-primary)]" />
+            <SearchIcon size={24} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />
           </span>
           <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight truncate">
             {query ? `Results for "${query}"` : "Search"}
@@ -244,7 +244,7 @@ function PageHeader({ query, count }: { query?: string; count?: number }) {
         href="/dashboard"
         className="inline-flex items-center gap-1.5 text-xs font-semibold text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors self-start sm:self-auto"
       >
-        <ArrowLeft size={14} />
+        <ArrowLeft size={14} aria-hidden="true" />
         Back to Dashboard
       </Link>
     </div>

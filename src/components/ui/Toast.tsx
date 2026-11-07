@@ -1,7 +1,7 @@
 "use client";
 
 import { Toaster as HotToaster, ToastBar, toast } from "react-hot-toast";
-import { X, Info } from "lucide-react";
+import { X, Info } from "@phosphor-icons/react/ssr";
 
 /**
  * Brand-configured Toaster — drop this into your root layout once.
@@ -77,7 +77,7 @@ export function Toaster() {
                     text-ink-subtle hover:bg-surface-hover hover:text-ink transition-colors"
                   aria-label="Dismiss"
                 >
-                  <X size={14} strokeWidth={2} />
+                  <X size={14} weight="regular" aria-hidden="true" />
                 </button>
               )}
             </div>
@@ -97,7 +97,7 @@ export const brandToast = {
   loading: (msg: string) => toast.loading(msg),
   info: (msg: string) =>
     toast(msg, {
-      icon: <Info size={18} className="text-accent-dark" />,
+      icon: <Info size={18} className="text-accent-dark" aria-hidden="true" />,
     }),
 
   /** Promise-aware toast — auto handles loading/success/error */

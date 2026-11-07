@@ -3,8 +3,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import {
-  CalendarPlus, Plane, Users, ChevronDown, Plus, X,
-} from "lucide-react";
+  CalendarPlus, Airplane as Plane, Users, CaretDown as ChevronDown, Plus, X,
+} from "@phosphor-icons/react/ssr";
 
 import SelfDriveBookingModal from "./SelfDriveBookingModal";
 import AirportTransferModal from "./AirportTransferModal";
@@ -107,11 +107,11 @@ export function NewBookingButton() {
         onClick={() => setMenuOpen(!menuOpen)}
         className="w-full md:w-auto h-10 px-4 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-sm active:scale-[0.99] shrink-0"
       >
-        <CalendarPlus size={16} strokeWidth={2.5} />
+        <CalendarPlus size={16} weight="bold" aria-hidden="true" />
         New Booking
         <ChevronDown
           size={16}
-          className={`transition-transform ${menuOpen ? "rotate-180" : ""}`}
+          className={`transition-transform ${menuOpen ? "rotate-180" : ""}`} aria-hidden="true"
         />
       </button>
 
@@ -131,7 +131,7 @@ export function NewBookingButton() {
                   <div
                     className={`w-8 h-8 rounded-lg ${opt.bg} ${opt.iconColor} flex items-center justify-center`}
                   >
-                    <Icon size={16} />
+                    <Icon size={16} aria-hidden="true" />
                   </div>
                   <div className="text-left">
                     <div className="text-sm">{opt.label}</div>
@@ -200,7 +200,7 @@ export function NewBookingFab() {
                   <div
                     className={`w-8 h-8 rounded-lg ${opt.bg} ${opt.iconColor} flex items-center justify-center flex-shrink-0`}
                   >
-                    <Icon size={14} strokeWidth={2} />
+                    <Icon size={14} weight="regular" aria-hidden="true" />
                   </div>
                   <div className="min-w-0">
                     <p className="text-xs font-bold text-[var(--color-ink)] truncate">
@@ -226,16 +226,16 @@ export function NewBookingFab() {
         >
           <div className="relative flex items-center justify-center">
             {open ? (
-              <X size={22} strokeWidth={2.5} className="text-[var(--color-primary)]" />
+              <X size={22} weight="bold" className="text-[var(--color-primary)]" aria-hidden="true" />
             ) : (
               <>
                 <CalendarPlus
                   size={22}
-                  strokeWidth={2.5}
-                  className="text-[var(--color-primary)]"
+                  weight="bold"
+                  className="text-[var(--color-primary)]" aria-hidden="true"
                 />
                 <span className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center shadow-sm">
-                  <Plus size={9} strokeWidth={3.5} />
+                  <Plus size={9} weight="bold" aria-hidden="true" />
                 </span>
               </>
             )}

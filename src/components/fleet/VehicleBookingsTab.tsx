@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Calendar, Loader2, Car } from "lucide-react";
+import { Calendar, CircleNotch as Loader2, Car } from "@phosphor-icons/react/ssr";
 import type { Booking } from "@/lib/types";
 import { formatDateShort } from "@/components/bookings/booking_list/constants";
 
@@ -22,7 +22,7 @@ export default function VehicleBookingsTab({ bookings, loading }: VehicleBooking
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12 text-[var(--color-ink-muted)]">
-        <Loader2 size={20} className="animate-spin mr-2" />
+        <Loader2 size={20} className="animate-spin mr-2" aria-hidden="true" />
         <span className="text-sm">Loading bookings…</span>
       </div>
     );
@@ -32,7 +32,7 @@ export default function VehicleBookingsTab({ bookings, loading }: VehicleBooking
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <div className="w-14 h-14 rounded-xl bg-[var(--color-surface-hover)] flex items-center justify-center mb-3">
-          <Calendar size={24} className="text-[var(--color-ink-subtle)]" />
+          <Calendar size={24} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
         </div>
         <p className="text-sm font-bold text-[var(--color-ink)]">No bookings yet</p>
         <p className="text-xs text-[var(--color-ink-muted)] mt-1">
@@ -52,7 +52,7 @@ export default function VehicleBookingsTab({ bookings, loading }: VehicleBooking
             className="flex items-center gap-3 p-4 hover:bg-[var(--color-surface-hover)]/40 transition-colors"
           >
             <div className="w-9 h-9 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center flex-shrink-0">
-              <Car size={14} />
+              <Car size={14} aria-hidden="true" />
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2 flex-wrap">

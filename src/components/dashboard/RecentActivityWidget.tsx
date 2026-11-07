@@ -1,7 +1,7 @@
 // src/components/dashboard/RecentActivityWidget.tsx
 "use client";
 
-import { Activity, Clock, CalendarDays, CalendarRange, Loader2 } from "lucide-react";
+import { Pulse as Activity, Clock, CalendarDots as CalendarDays, CalendarDots as CalendarRange, CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
 import { useActivityTab } from "@/hooks/dashboard/features/useActivityTab";
 import UnifiedActivityCard from "@/components/dashboard/UnifiedActivityCard";
 
@@ -27,7 +27,7 @@ export default function RecentActivityWidget() {
       <div className="px-5 py-3.5 border-b border-[var(--color-surface-border)] bg-gradient-to-r from-[var(--color-surface-hover)]/50 to-transparent">
         <div className="flex items-center gap-3.5 min-w-0">
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center text-white shadow-sm shadow-purple-500/20 flex-shrink-0">
-            <Activity size={20} />
+            <Activity size={20} aria-hidden="true" />
           </div>
           <div className="min-w-0">
             <h3 className="text-sm font-bold text-[var(--color-ink)] tracking-tight flex items-center gap-1.5">
@@ -46,12 +46,12 @@ export default function RecentActivityWidget() {
       <div className="flex-1 overflow-y-auto custom-scrollbar px-4 py-4 space-y-2.5 max-h-[min(50vh,330px)] md:max-h-[420px]">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-12 text-[var(--color-ink-muted)]">
-            <Loader2 size={24} className="animate-spin mb-3 text-purple-500" />
+            <Loader2 size={24} className="animate-spin mb-3 text-purple-500" aria-hidden="true" />
             <p className="text-sm font-medium">Loading activity...</p>
           </div>
         ) : visibleActivities.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-12 text-center">
-            <Activity size={24} className="text-[var(--color-ink-subtle)] mb-3" />
+            <Activity size={24} className="text-[var(--color-ink-subtle)] mb-3" aria-hidden="true" />
             <p className="text-sm font-bold text-[var(--color-ink)]">No recent activity</p>
             <p className="text-xs text-[var(--color-ink-muted)] mt-1">
               Payments and contract updates will appear here.
@@ -84,7 +84,7 @@ export default function RecentActivityWidget() {
                     : "text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)]"
                 }`}
               >
-                <Icon size={12} strokeWidth={isActive ? 2.5 : 2} />
+                <Icon size={12} weight={isActive ? "bold" : "regular"} aria-hidden="true" />
                 <span className="truncate">{filter.label}</span>
               </button>
             );

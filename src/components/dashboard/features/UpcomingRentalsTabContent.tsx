@@ -4,8 +4,8 @@
 import { useRouter } from "next/navigation";
 import {
   Calendar, Car, MapPin,
-  Loader2, MoreVertical, Play, XCircle, Eye,
-} from "lucide-react";
+  CircleNotch as Loader2, DotsThreeVertical as MoreVertical, Play, XCircle, Eye,
+} from "@phosphor-icons/react/ssr";
 import { useUpcomingRentalsTab } from "@/hooks/dashboard/features/useUpcomingRentalsTab";
 import BookingActionsSheet, { SheetAction } from "./BookingActionsSheet";
 import { useState } from "react";
@@ -79,7 +79,7 @@ export default function UpcomingRentalsTabContent() {
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-[var(--color-ink-muted)]">
-        <Loader2 size={24} className="animate-spin mb-3 text-[var(--color-primary)]" />
+        <Loader2 size={24} className="animate-spin mb-3 text-[var(--color-primary)]" aria-hidden="true" />
         <p className="text-sm font-medium">Loading upcoming rentals...</p>
       </div>
     );
@@ -89,7 +89,7 @@ export default function UpcomingRentalsTabContent() {
     return (
       <div className="flex flex-col items-center justify-center py-8 text-center">
         <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-blue-500/10 to-blue-500/5 border border-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-3">
-          <Calendar size={24} />
+          <Calendar size={24} aria-hidden="true" />
         </div>
         <p className="text-sm font-bold text-[var(--color-ink)]">No upcoming rentals</p>
         <p className="text-xs text-[var(--color-ink-muted)] mt-1">
@@ -124,7 +124,7 @@ export default function UpcomingRentalsTabContent() {
                   <div className={`w-9 h-9 rounded-xl flex items-center justify-center shadow-sm flex-shrink-0 ${
                     isConfirmed ? "bg-blue-500/10 text-blue-500" : "bg-amber-500/10 text-amber-500"
                   }`}>
-                    <Car size={18} />
+                    <Car size={18} aria-hidden="true" />
                   </div>
 
                   <div className="min-w-0 flex-1">
@@ -158,7 +158,7 @@ export default function UpcomingRentalsTabContent() {
               {/* Row 2: Stats Strip */}
               <div className="mt-3 flex items-center justify-between gap-2 px-3 py-2 rounded-lg bg-[var(--color-surface-hover)]/50 border border-[var(--color-surface-border)]/50">
                 <div className="flex items-center gap-2">
-                  <Calendar size={14} className="text-[var(--color-primary)]" />
+                  <Calendar size={14} className="text-[var(--color-primary)]" aria-hidden="true" />
                   <div>
                     <p className="text-xs font-bold text-[var(--color-ink)] leading-tight">{formatDateShort(booking.start_date)}</p>
                     <p className="text-[9px] font-medium text-[var(--color-ink-muted)] leading-tight">Pickup</p>
@@ -184,7 +184,7 @@ export default function UpcomingRentalsTabContent() {
                 <div className="flex items-center gap-1 min-w-0 flex-1">
                   {destination ? (
                     <>
-                      <MapPin size={11} className="text-[var(--color-ink-subtle)] flex-shrink-0" />
+                      <MapPin size={11} className="text-[var(--color-ink-subtle)] flex-shrink-0" aria-hidden="true" />
                       <span className="text-[11px] font-medium text-[var(--color-ink-muted)] truncate">{destination}</span>
                     </>
                   ) : (
@@ -299,7 +299,7 @@ function UpcomingRentalMenu({ bookingId, isConfirmed, isPending, onAction, onVie
         className="p-1.5 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all active:scale-95"
         aria-label="Booking actions"
       >
-        <MoreVertical size={15} />
+        <MoreVertical size={15} aria-hidden="true" />
       </button>
 
       <BookingActionsSheet

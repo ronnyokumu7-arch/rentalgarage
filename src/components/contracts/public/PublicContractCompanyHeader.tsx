@@ -1,7 +1,7 @@
 // src/components/contracts/public/PublicContractCompanyHeader.tsx
 "use client";
 
-import { FileText, MapPin, Phone, Mail } from "lucide-react";
+import { FileText, MapPin, Phone, Envelope as Mail } from "@phosphor-icons/react/ssr";
 import { brand } from "@/lib/brand";
 import type { TenantProfile } from "@/lib/types";
 
@@ -40,7 +40,7 @@ export default function PublicContractCompanyHeader({ tenant }: Props) {
               border: `1px solid ${brand.colors.primaryMuted}`,
             }}
           >
-            <FileText size={28} style={{ color: brand.colors.primary }} />
+            <FileText size={28} style={{ color: brand.colors.primary }} aria-hidden="true" />
           </div>
         )}
 
@@ -66,7 +66,7 @@ export default function PublicContractCompanyHeader({ tenant }: Props) {
                 className="flex items-center gap-1.5"
                 style={{ color: brand.colors.ink.muted }}
               >
-                <MapPin size={12} style={{ color: brand.colors.ink.subtle }} className="shrink-0" />
+                <MapPin size={12} style={{ color: brand.colors.ink.subtle }} className="shrink-0" aria-hidden="true" />
                 {tenant.business_location}
               </span>
             )}
@@ -75,7 +75,7 @@ export default function PublicContractCompanyHeader({ tenant }: Props) {
                 className="flex items-center gap-1.5"
                 style={{ color: brand.colors.ink.muted }}
               >
-                <Phone size={12} style={{ color: brand.colors.ink.subtle }} className="shrink-0" />
+                <Phone size={12} style={{ color: brand.colors.ink.subtle }} className="shrink-0" aria-hidden="true" />
                 {tenant.phone}
               </span>
             )}
@@ -84,7 +84,7 @@ export default function PublicContractCompanyHeader({ tenant }: Props) {
                 className="flex items-center gap-1.5 min-w-0"
                 style={{ color: brand.colors.ink.muted }}
               >
-                <Mail size={12} style={{ color: brand.colors.ink.subtle }} className="shrink-0" />
+                <Mail size={12} style={{ color: brand.colors.ink.subtle }} className="shrink-0" aria-hidden="true" />
                 <span className="truncate">{tenant.email}</span>
               </span>
             )}

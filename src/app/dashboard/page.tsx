@@ -3,10 +3,10 @@
 
 import { useState, useEffect } from "react";
 import {
-  LayoutDashboard, Activity, BarChart3, DollarSign, ArrowUpRight, Zap,
-  Landmark, TrendingUp, AlertCircle, Wallet, Gauge, CalendarRange, LineChart,
-  ChevronRight
-} from "lucide-react";
+  SquaresFour as LayoutDashboard, Pulse as Activity, ChartBar as BarChart3, CurrencyDollar as DollarSign, ArrowUpRight, Lightning as Zap,
+  Bank as Landmark, TrendUp as TrendingUp, WarningCircle as AlertCircle, Wallet, Gauge, CalendarDots as CalendarRange, ChartLine as LineChart,
+  CaretRight as ChevronRight
+} from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -78,17 +78,17 @@ export default function DashboardPage() {
     overview: {
       title: "Dashboard",
       description: "Real-time overview of your rental business performance",
-      icon: <Gauge size={28} strokeWidth={1.5} className="text-[var(--color-primary)] hidden sm:block" />
+      icon: <Gauge size={28} weight="light" className="text-[var(--color-primary)] hidden sm:block" aria-hidden="true" />
     },
     activity: {
       title: "Bookings Calendar",
       description: "Visual overview of all upcoming and active rentals",
-      icon: <CalendarRange size={28} strokeWidth={1.5} className="text-[var(--color-primary)] hidden sm:block" />
+      icon: <CalendarRange size={28} weight="light" className="text-[var(--color-primary)] hidden sm:block" aria-hidden="true" />
     },
     reports: {
       title: "Analytics",
       description: "Deep insights into your business performance",
-      icon: <LineChart size={28} strokeWidth={1.5} className="text-[var(--color-primary)] hidden sm:block" />
+      icon: <LineChart size={28} weight="light" className="text-[var(--color-primary)] hidden sm:block" aria-hidden="true" />
     },
   }[activeTab as "overview" | "activity" | "reports"];
 
@@ -165,7 +165,7 @@ export default function DashboardPage() {
                       <p className="text-sm font-bold text-amber-800 dark:text-amber-300">KES {parseFloat(commission.outstanding_balance).toLocaleString()}</p>
                     </div>
                     <Link href="/commission/pay" className="flex items-center gap-1 px-3.5 py-1.5 rounded-lg bg-amber-600 text-white text-xs font-medium hover:bg-amber-700 transition-colors">
-                      Pay<ArrowUpRight size={12} />
+                      Pay<ArrowUpRight size={12} aria-hidden="true" />
                     </Link>
                   </div>
                 )}
@@ -235,12 +235,12 @@ export default function DashboardPage() {
                             <p className="text-xs text-ink-subtle truncate">Awaiting collection</p>
                           </div>
                           <div className="rounded-xl bg-gradient-to-br from-rose-500 to-red-600 flex items-center justify-center shrink-0 opacity-80 group-hover:opacity-100 transition-opacity w-10 h-10">
-                            <AlertCircle size={16} className="text-white" />
+                            <AlertCircle size={16} className="text-white" aria-hidden="true" />
                           </div>
                         </div>
                         <div className="flex items-center justify-end mt-1 h-4">
                           <span className="text-[10px] font-bold text-[var(--color-primary)] flex items-center gap-0.5 opacity-80 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all">
-                            View Invoices <ChevronRight size={12} />
+                            View Invoices <ChevronRight size={12} aria-hidden="true" />
                           </span>
                         </div>
                       </div>
@@ -264,7 +264,7 @@ export default function DashboardPage() {
                   <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="flex items-center justify-between p-4 rounded-2xl bg-warning/10 border border-warning/20">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-warning/20 flex items-center justify-center">
-                        <DollarSign size={16} className="text-warning-text" />
+                        <DollarSign size={16} className="text-warning-text" aria-hidden="true" />
                       </div>
                       <div>
                         <p className="text-xs font-semibold text-ink">Outstanding Balance</p>
@@ -272,7 +272,7 @@ export default function DashboardPage() {
                       </div>
                     </div>
                     <Link href="/commission/pay" className="flex items-center gap-1 px-4 py-2 rounded-lg bg-warning text-white text-xs font-bold hover:bg-warning-hover transition-all">
-                      Pay Now<ArrowUpRight size={14} />
+                      Pay Now<ArrowUpRight size={14} aria-hidden="true" />
                     </Link>
                   </motion.div>
                 )}
@@ -299,10 +299,10 @@ export default function DashboardPage() {
         {!isMobile && activeTab === "reports" && (
           <motion.div key="reports" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.3 }}>
             <div className="bg-surface border border-surface-border shadow-card rounded-2xl p-8 sm:p-12 flex flex-col items-center justify-center text-center">
-              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4"><BarChart3 size={32} className="text-primary" /></div>
+              <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mb-4"><BarChart3 size={32} className="text-primary" aria-hidden="true" /></div>
               <h3 className="text-lg font-bold text-ink font-display mb-2">Reports & Analytics</h3>
               <p className="text-sm text-ink-muted max-w-md">Deep dive into your revenue, fleet utilization, and client retention metrics. This module is currently under development.</p>
-              <div className="mt-4 flex items-center gap-2 text-xs text-ink-subtle"><Zap size={14} className="text-primary" />Coming soon</div>
+              <div className="mt-4 flex items-center gap-2 text-xs text-ink-subtle"><Zap size={14} className="text-primary" aria-hidden="true" />Coming soon</div>
             </div>
           </motion.div>
         )}

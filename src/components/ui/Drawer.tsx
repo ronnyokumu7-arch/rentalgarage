@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X } from "lucide-react";
+import { X } from "@phosphor-icons/react/ssr";
 
 type DrawerSize = "sm" | "md" | "lg" | "xl" | "full";
 
@@ -106,7 +106,7 @@ export default function Drawer({
                   text-ink-subtle hover:bg-surface-hover hover:text-ink transition-colors flex-shrink-0"
                 aria-label="Close"
               >
-                <X size={18} strokeWidth={2} />
+                <X size={18} weight="regular" aria-hidden="true" />
               </button>
             )}
           </div>

@@ -5,12 +5,12 @@ import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Users,
-  CalendarClock,
+  CalendarDots as CalendarClock,
   ShieldCheck,
-  UserCog,
-  CalendarRange,
-  KeyRound,
-} from "lucide-react";
+  UserGear as UserCog,
+  CalendarDots as CalendarRange,
+  Key as KeyRound,
+} from "@phosphor-icons/react/ssr";
 import RosterTab from "@/components/users/manage/RosterTab";
 import SchedulerTab from "@/components/users/manage/SchedulerTab";
 import RolesTab from "@/components/users/manage/RolesTab";
@@ -72,19 +72,19 @@ export default function UsersPage() {
       title: "Team Roster",
       description:
         "Manage your team members, assign roles, and control system access.",
-      icon: <UserCog size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+      icon: <UserCog size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
     },
     scheduler: {
       title: "Shift Scheduler",
       description:
         "Plan shifts, manage availability, and track team time allocation.",
-      icon: <CalendarRange size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+      icon: <CalendarRange size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
     },
     roles: {
       title: "Roles & Permissions",
       description:
         "Configure custom roles, permissions, and access levels for your team.",
-      icon: <KeyRound size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" />,
+      icon: <KeyRound size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
     },
   }[activeTab];
 

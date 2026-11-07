@@ -2,19 +2,19 @@
 
 import React from "react";
 import { 
-  CheckCircle2, 
+  CheckCircle as CheckCircle2,
   Play, 
   Flag, 
   XCircle, 
-  UserX, 
+  UserMinus as UserX,
   Archive, 
-  RotateCcw, 
-  Loader2, 
+  ArrowCounterClockwise as RotateCcw,
+  CircleNotch as Loader2,
   Calendar,
-  Sparkles,
+  Sparkle as Sparkles,
   ShieldCheck,
   Hash
-} from "lucide-react";
+} from "@phosphor-icons/react/ssr";
 import { useBookingLifecycle } from "@/hooks/bookings/useBookingLifecycle";
 import type { Booking } from "@/lib/types";
 
@@ -67,12 +67,12 @@ export function BookingHeaderWidget({ booking, onRefresh }: BookingHeaderWidgetP
         <div className="space-y-1.5">
           <div className="flex items-center gap-2.5 flex-wrap">
             <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-[var(--color-ink-muted)] flex items-center gap-1">
-              <Hash size={12} className="text-[var(--color-primary)]" />
+              <Hash size={12} className="text-[var(--color-primary)]" aria-hidden="true" />
               Reservation Blueprint
             </span>
             <span className="w-1 h-1 rounded-full bg-[var(--color-surface-border)]" />
             <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
-              <ShieldCheck size={11} /> Ledger Secured
+              <ShieldCheck size={11} aria-hidden="true" /> Ledger Secured
             </span>
           </div>
 
@@ -104,7 +104,7 @@ export function BookingHeaderWidget({ booking, onRefresh }: BookingHeaderWidgetP
 
         {/* Timestamp Meta Tag */}
         <div className="flex items-center gap-2 px-3.5 py-2 rounded-2xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-xs text-xs text-[var(--color-ink-muted)]">
-          <Calendar size={14} className="text-[var(--color-primary)] shrink-0" />
+          <Calendar size={14} className="text-[var(--color-primary)] shrink-0" aria-hidden="true" />
           <span>
             Booked on <strong className="text-[var(--color-ink)] font-mono">{createdDate}</strong>
           </span>
@@ -118,7 +118,7 @@ export function BookingHeaderWidget({ booking, onRefresh }: BookingHeaderWidgetP
 
         <div className="flex items-center gap-2 text-xs font-bold text-[var(--color-ink)]">
           <div className="p-2 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)]">
-            <Sparkles size={16} />
+            <Sparkles size={16} aria-hidden="true" />
           </div>
           <div>
             <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-[var(--color-ink-muted)]">
@@ -141,9 +141,9 @@ export function BookingHeaderWidget({ booking, onRefresh }: BookingHeaderWidgetP
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 transition-all shadow-md shadow-blue-500/10 active:scale-[0.98] disabled:opacity-50"
               >
                 {loadingAction === "confirm" ? (
-                  <Loader2 size={15} className="animate-spin" />
+                  <Loader2 size={15} className="animate-spin" aria-hidden="true" />
                 ) : (
-                  <CheckCircle2 size={15} />
+                  <CheckCircle2 size={15} aria-hidden="true" />
                 )}
                 <span>Confirm Booking</span>
               </button>
@@ -153,9 +153,9 @@ export function BookingHeaderWidget({ booking, onRefresh }: BookingHeaderWidgetP
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-rose-600 bg-rose-50 border border-rose-200 hover:bg-rose-100 dark:bg-rose-950/30 dark:border-rose-900 dark:hover:bg-rose-900/40 transition-all active:scale-[0.98] disabled:opacity-50"
               >
                 {loadingAction === "cancel" ? (
-                  <Loader2 size={15} className="animate-spin" />
+                  <Loader2 size={15} className="animate-spin" aria-hidden="true" />
                 ) : (
-                  <XCircle size={15} />
+                  <XCircle size={15} aria-hidden="true" />
                 )}
                 <span>Cancel</span>
               </button>
@@ -171,9 +171,9 @@ export function BookingHeaderWidget({ booking, onRefresh }: BookingHeaderWidgetP
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-all shadow-md shadow-emerald-500/10 active:scale-[0.98] disabled:opacity-50"
               >
                 {loadingAction === "activate" ? (
-                  <Loader2 size={15} className="animate-spin" />
+                  <Loader2 size={15} className="animate-spin" aria-hidden="true" />
                 ) : (
-                  <Play size={15} />
+                  <Play size={15} aria-hidden="true" />
                 )}
                 <span>Dispatch Vehicle</span>
               </button>
@@ -183,9 +183,9 @@ export function BookingHeaderWidget({ booking, onRefresh }: BookingHeaderWidgetP
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] transition-all active:scale-[0.98] disabled:opacity-50"
               >
                 {loadingAction === "noShow" ? (
-                  <Loader2 size={15} className="animate-spin" />
+                  <Loader2 size={15} className="animate-spin" aria-hidden="true" />
                 ) : (
-                  <UserX size={15} />
+                  <UserX size={15} aria-hidden="true" />
                 )}
                 <span>Flag No-Show</span>
               </button>
@@ -195,9 +195,9 @@ export function BookingHeaderWidget({ booking, onRefresh }: BookingHeaderWidgetP
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-all active:scale-[0.98] disabled:opacity-50"
               >
                 {loadingAction === "cancel" ? (
-                  <Loader2 size={15} className="animate-spin" />
+                  <Loader2 size={15} className="animate-spin" aria-hidden="true" />
                 ) : (
-                  <XCircle size={15} />
+                  <XCircle size={15} aria-hidden="true" />
                 )}
                 <span>Cancel</span>
               </button>
@@ -212,9 +212,9 @@ export function BookingHeaderWidget({ booking, onRefresh }: BookingHeaderWidgetP
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-white bg-purple-600 hover:bg-purple-700 transition-all shadow-md shadow-purple-500/10 active:scale-[0.98] disabled:opacity-50"
             >
               {loadingAction === "complete" ? (
-                <Loader2 size={15} className="animate-spin" />
+                <Loader2 size={15} className="animate-spin" aria-hidden="true" />
               ) : (
-                <Flag size={15} />
+                <Flag size={15} aria-hidden="true" />
               )}
               <span>Complete Charter</span>
             </button>
@@ -228,9 +228,9 @@ export function BookingHeaderWidget({ booking, onRefresh }: BookingHeaderWidgetP
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-[var(--color-ink)] bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] hover:bg-[var(--color-surface-border)]/50 transition-all active:scale-[0.98] disabled:opacity-50"
             >
               {loadingAction === "restore" ? (
-                <Loader2 size={15} className="animate-spin" />
+                <Loader2 size={15} className="animate-spin" aria-hidden="true" />
               ) : (
-                <RotateCcw size={15} />
+                <RotateCcw size={15} aria-hidden="true" />
               )}
               <span>Restore Booking</span>
             </button>
@@ -242,9 +242,9 @@ export function BookingHeaderWidget({ booking, onRefresh }: BookingHeaderWidgetP
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] transition-all active:scale-[0.98] disabled:opacity-50"
               >
                 {loadingAction === "archive" ? (
-                  <Loader2 size={15} className="animate-spin" />
+                  <Loader2 size={15} className="animate-spin" aria-hidden="true" />
                 ) : (
-                  <Archive size={15} />
+                  <Archive size={15} aria-hidden="true" />
                 )}
                 <span>Archive</span>
               </button>

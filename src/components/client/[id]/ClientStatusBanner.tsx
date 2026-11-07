@@ -1,7 +1,7 @@
 // src/components/client/[id]/ClientStatusBanner.tsx
 "use client";
 
-import { Clock, ShieldCheck } from "lucide-react";
+import { Clock, ShieldCheck } from "@phosphor-icons/react/ssr";
 import type { Client } from "@/lib/types";
 
 interface ClientStatusBannerProps {
@@ -35,7 +35,7 @@ export default function ClientStatusBanner({
         >
           <Clock
             size={20}
-            className={isRejected ? "text-rose-600" : "text-amber-600"}
+            className={isRejected ? "text-rose-600" : "text-amber-600"} aria-hidden="true"
           />
         </div>
         <div>
@@ -75,7 +75,7 @@ export default function ClientStatusBanner({
             : "bg-amber-600 hover:bg-amber-700"
         }`}
       >
-        <ShieldCheck size={14} />
+        <ShieldCheck size={14} aria-hidden="true" />
         {isRejected ? "Re-verify" : isUnderReview ? "Review Now" : "Manage"}
       </button>
     </div>

@@ -1,5 +1,5 @@
 // src/components/tenants/health/PaymentReliabilityStreak.tsx
-import { CreditCard, CheckCircle2, AlertCircle, TrendingUp } from 'lucide-react';
+import { CreditCard, CheckCircle as CheckCircle2, WarningCircle as AlertCircle, TrendUp as TrendingUp } from "@phosphor-icons/react/ssr";
 import type { PaymentReliability } from '@/lib/types';
 
 interface PaymentReliabilityStreakProps {
@@ -22,7 +22,7 @@ export function PaymentReliabilityStreak({ data }: PaymentReliabilityStreakProps
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/30">
         <div className="flex items-center gap-3">
           <div className={`p-1.5 rounded-lg ${colors.bg} ${colors.text}`}>
-            <CreditCard size={16} />
+            <CreditCard size={16} aria-hidden="true" />
           </div>
           <div>
             <h2 className="text-sm font-semibold text-[var(--color-ink)]">Payment Reliability</h2>
@@ -32,7 +32,7 @@ export function PaymentReliabilityStreak({ data }: PaymentReliabilityStreakProps
         
         {/* Rate Badge */}
         <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border ${colors.bg} ${colors.text} ${colors.border}`}>
-          <TrendingUp size={12} />
+          <TrendingUp size={12} aria-hidden="true" />
           {data.onTimePaymentRate}% On-Time
         </div>
       </div>
@@ -57,14 +57,14 @@ export function PaymentReliabilityStreak({ data }: PaymentReliabilityStreakProps
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold text-[var(--color-ink-muted)] uppercase tracking-widest flex items-center gap-1.5">
-              <CheckCircle2 size={11} className="opacity-50" /> Paid Invoices
+              <CheckCircle2 size={11} className="opacity-50" aria-hidden="true" /> Paid Invoices
             </label>
             <p className="text-lg font-bold text-[var(--color-ink)]">{data.totalInvoicesPaid}</p>
           </div>
 
           <div className="space-y-1.5">
             <label className="text-[10px] font-bold text-[var(--color-ink-muted)] uppercase tracking-widest flex items-center gap-1.5">
-              <AlertCircle size={11} className="opacity-50" /> Overdue
+              <AlertCircle size={11} className="opacity-50" aria-hidden="true" /> Overdue
             </label>
             <p className={`text-lg font-bold ${data.overdueInvoicesCount > 0 ? 'text-rose-400' : 'text-[var(--color-ink)]'}`}>
               {data.overdueInvoicesCount}

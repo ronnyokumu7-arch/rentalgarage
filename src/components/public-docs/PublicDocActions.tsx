@@ -1,6 +1,6 @@
 // src/components/public-docs/PublicDocActions.tsx
 import React from "react";
-import { Loader2 } from "lucide-react";
+import { CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
 
 interface ActionButton {
   label: string;
@@ -83,7 +83,7 @@ export default function PublicDocActions({ actions }: PublicDocActionsProps) {
               e.currentTarget.style.transform = 'translateY(0)';
             }}
           >
-            {action.loading ? <Loader2 className="w-4 h-4 animate-spin" /> : action.icon}
+            {action.loading ? <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" /> : action.icon}
             {action.label}
           </button>
         ))}

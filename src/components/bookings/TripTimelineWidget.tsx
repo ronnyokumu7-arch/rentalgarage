@@ -4,13 +4,13 @@ import React from "react";
 import {
   Calendar,
   Clock,
-  AlertTriangle,
+  Warning as AlertTriangle,
   MapPin,
-  Navigation,
-  CheckCircle2,
+  NavigationArrow as Navigation,
+  CheckCircle as CheckCircle2,
   Timer,
-  Sparkles,
-} from "lucide-react";
+  Sparkle as Sparkles,
+} from "@phosphor-icons/react/ssr";
 import { useTripTimeline } from "@/hooks/bookings/useTripTimeline";
 import type { Booking } from "@/lib/types";
 import { formatDateShort } from "@/components/bookings/booking_list/constants";
@@ -35,7 +35,7 @@ export function TripTimelineWidget({ booking }: TripTimelineWidgetProps) {
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--color-surface-border)] pb-5">
         <div className="flex items-center gap-3.5">
           <div className="relative flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--color-primary)]/15 to-[var(--color-primary)]/5 text-[var(--color-primary)] border border-[var(--color-primary)]/20 shadow-inner">
-            <Timer size={22} />
+            <Timer size={22} aria-hidden="true" />
             {booking.status === "active" && !isOverdue && (
               <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-[var(--color-surface)] animate-pulse" />
             )}
@@ -46,7 +46,7 @@ export function TripTimelineWidget({ booking }: TripTimelineWidgetProps) {
                 Charter Schedule & Telemetry
               </span>
               <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20">
-                <Sparkles size={10} /> Live Tracking
+                <Sparkles size={10} aria-hidden="true" /> Live Tracking
               </span>
             </div>
             <p className="text-base font-bold text-[var(--color-ink)] tracking-tight mt-0.5">
@@ -62,7 +62,7 @@ export function TripTimelineWidget({ booking }: TripTimelineWidgetProps) {
         <div className="flex items-center gap-2">
           {isOverdue && (
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-[var(--color-danger-bg)] text-[var(--color-danger-text)] border border-[var(--color-danger-border,#f87171)]/30 animate-pulse shadow-sm">
-              <AlertTriangle size={15} />
+              <AlertTriangle size={15} aria-hidden="true" />
               <span>Overdue Return</span>
             </div>
           )}
@@ -76,7 +76,7 @@ export function TripTimelineWidget({ booking }: TripTimelineWidgetProps) {
 
           {booking.status === "completed" && (
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-              <CheckCircle2 size={15} />
+              <CheckCircle2 size={15} aria-hidden="true" />
               <span>Charter Concluded</span>
             </div>
           )}
@@ -114,7 +114,7 @@ export function TripTimelineWidget({ booking }: TripTimelineWidgetProps) {
               >
                 {/* Node Center Icon */}
                 {node.isCompleted ? (
-                  <CheckCircle2 size={12} className="stroke-[3]" />
+                  <CheckCircle2 size={12} className="stroke-[3]" aria-hidden="true" />
                 ) : (
                   <div className="w-1.5 h-1.5 rounded-full bg-current" />
                 )}
@@ -142,7 +142,7 @@ export function TripTimelineWidget({ booking }: TripTimelineWidgetProps) {
                     )}
                   </div>
                   <p className="text-[11px] text-[var(--color-ink-muted)] font-medium flex items-center gap-1 truncate">
-                    <MapPin size={12} className="text-[var(--color-primary)] shrink-0" />
+                    <MapPin size={12} className="text-[var(--color-primary)] shrink-0" aria-hidden="true" />
                     <span className="truncate">{locationText}</span>
                   </p>
                 </div>
@@ -150,17 +150,17 @@ export function TripTimelineWidget({ booking }: TripTimelineWidgetProps) {
                 {/* Date & Time Pill Nodes */}
                 <div className="md:col-span-6 flex flex-wrap items-center md:justify-end gap-2 text-xs">
                   <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] font-mono text-[11px] font-semibold text-[var(--color-ink)] shadow-xs">
-                    <Calendar size={13} className="text-[var(--color-primary)]" />
+                    <Calendar size={13} className="text-[var(--color-primary)]" aria-hidden="true" />
                     <span>{node.dateString}</span>
                   </div>
                   <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] font-mono text-[11px] font-semibold text-[var(--color-ink)] shadow-xs">
-                    <Clock size={13} className="text-[var(--color-primary)]" />
+                    <Clock size={13} className="text-[var(--color-primary)]" aria-hidden="true" />
                     <span>{node.timeString}</span>
                   </div>
                   {/* ✅ LIFECYCLE: Show actual return time for completed bookings */}
                   {node.type === "dropoff" && booking.status === "completed" && booking.actual_return_at && (
                     <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 font-mono text-[11px] font-semibold text-emerald-600 shadow-xs">
-                      <CheckCircle2 size={13} />
+                      <CheckCircle2 size={13} aria-hidden="true" />
                       <span>Actual: {formatDateShort(booking.actual_return_at)}</span>
                     </div>
                   )}
@@ -176,7 +176,7 @@ export function TripTimelineWidget({ booking }: TripTimelineWidgetProps) {
         <div className="pt-3 border-t border-[var(--color-surface-border)] space-y-2">
           <div className="flex items-center justify-between text-xs font-mono font-bold text-[var(--color-ink-muted)]">
             <span className="flex items-center gap-1">
-              <Navigation size={13} className="text-[var(--color-primary)]" /> Real-time Progress
+              <Navigation size={13} className="text-[var(--color-primary)]" aria-hidden="true" /> Real-time Progress
             </span>
             <span className={isOverdue ? "text-[var(--color-danger)] font-bold" : "text-[var(--color-primary)]"}>
               {tripProgress}%

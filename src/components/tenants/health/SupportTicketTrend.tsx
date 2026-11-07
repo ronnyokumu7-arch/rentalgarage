@@ -1,5 +1,5 @@
 // src/components/tenants/health/SupportTicketTrend.tsx
-import { MessageSquare, Clock, CheckCircle2, TrendingUp, TrendingDown, Minus } from 'lucide-react';
+import { Chat as MessageSquare, Clock, CheckCircle as CheckCircle2, TrendUp as TrendingUp, TrendDown as TrendingDown, Minus } from "@phosphor-icons/react/ssr";
 import type { SupportTicketTrend } from '@/lib/types';
 
 interface SupportTicketTrendProps {
@@ -25,7 +25,7 @@ export function SupportTicketTrend({ data }: SupportTicketTrendProps) {
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/30 shrink-0">
         <div className="flex items-center gap-3">
           <div className="p-1.5 rounded-lg bg-orange-500/10 text-orange-400">
-            <MessageSquare size={16} />
+            <MessageSquare size={16} aria-hidden="true" />
           </div>
           <div>
             <h2 className="text-sm font-semibold text-[var(--color-ink)]">Support Tickets</h2>
@@ -35,7 +35,7 @@ export function SupportTicketTrend({ data }: SupportTicketTrendProps) {
         
         {/* Trend Badge */}
         <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-[var(--color-surface-border)] bg-[var(--color-surface-hover)] ${trend.color}`}>
-          <TrendIcon size={12} />
+          <TrendIcon size={12} aria-hidden="true" />
           {trend.label}
         </div>
       </div>
@@ -62,14 +62,14 @@ export function SupportTicketTrend({ data }: SupportTicketTrendProps) {
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold text-[var(--color-ink-muted)] uppercase tracking-widest flex items-center gap-1.5">
-                <CheckCircle2 size={11} className="opacity-50" /> Resolved (30d)
+                <CheckCircle2 size={11} className="opacity-50" aria-hidden="true" /> Resolved (30d)
               </label>
               <p className="text-lg font-bold text-[var(--color-ink)]">{data.closedThisMonth}</p>
             </div>
 
             <div className="space-y-1.5">
               <label className="text-[10px] font-bold text-[var(--color-ink-muted)] uppercase tracking-widest flex items-center gap-1.5">
-                <Clock size={11} className="opacity-50" /> Avg Resolution
+                <Clock size={11} className="opacity-50" aria-hidden="true" /> Avg Resolution
               </label>
               <p className="text-lg font-bold text-[var(--color-ink)]">
                 {data.avgResolutionTimeHours}

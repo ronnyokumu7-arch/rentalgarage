@@ -2,7 +2,7 @@
 "use client";
 
 import { Fragment, useState, useEffect, useRef, useCallback } from "react";
-import { MoreVertical, X } from "lucide-react";
+import { DotsThreeVertical as MoreVertical, X } from "@phosphor-icons/react/ssr";
 import { createPortal } from "react-dom";
 
 export interface RowAction<T> {
@@ -239,7 +239,7 @@ export default function TenantCardGrid<T>({
     <div className="flex items-center justify-center h-full min-h-[200px] p-12 text-center">
       <div>
         <div className="w-16 h-16 bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
-          <MoreVertical size={24} className="text-[var(--color-ink-subtle)]" />
+          <MoreVertical size={24} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
         </div>
         <h3 className="text-base font-bold text-[var(--color-ink)] mb-2">{emptyMessage}</h3>
         {emptySubMessage && (
@@ -284,7 +284,7 @@ export default function TenantCardGrid<T>({
           role="menuitem"
           aria-disabled={action.disabled}
         >
-          {action.icon && <action.icon size={isMobileView ? 20 : 16} className="flex-shrink-0" />}
+          {action.icon && <action.icon size={isMobileView ? 20 : 16} className="flex-shrink-0" aria-hidden="true" />}
           <span className="truncate">{action.label}</span>
         </button>
       </Fragment>
@@ -393,7 +393,7 @@ export default function TenantCardGrid<T>({
                           aria-expanded={openActionId === id}
                           aria-haspopup="true"
                         >
-                          <MoreVertical size={compact ? 16 : 18} />
+                          <MoreVertical size={compact ? 16 : 18} aria-hidden="true" />
                         </button>
                       </div>
                     )}
@@ -474,7 +474,7 @@ export default function TenantCardGrid<T>({
                     className="p-2 bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-border)] transition-all active:scale-95"
                     aria-label="Close"
                   >
-                    <X size={18} className="text-[var(--color-ink-muted)]" />
+                    <X size={18} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
                   </button>
                 </div>
                 

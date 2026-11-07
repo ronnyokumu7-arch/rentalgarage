@@ -2,7 +2,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "@phosphor-icons/react/ssr";
 
 export default function NewBookingPage() {
   const router = useRouter();
@@ -17,7 +17,7 @@ export default function NewBookingPage() {
             onClick={() => router.push("/dashboard/bookings")}
             className="inline-flex items-center gap-2 text-sm font-medium text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors"
           >
-            <ArrowLeft size={16} /> Back to Bookings
+            <ArrowLeft size={16} aria-hidden="true" /> Back to Bookings
           </button>
           <h1 className="text-lg font-bold text-[var(--color-ink)] hidden sm:block">New Booking Onboarding</h1>
           <div className="w-24" /> {/* Spacer for perfect center alignment */}

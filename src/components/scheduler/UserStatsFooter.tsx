@@ -1,7 +1,7 @@
 // src/components/scheduler/UserStatsFooter.tsx
 "use client";
 
-import { Briefcase, CheckCircle2, AlertTriangle } from "lucide-react";
+import { Briefcase, CheckCircle as CheckCircle2, Warning as AlertTriangle } from "@phosphor-icons/react/ssr";
 import { TeamMember, ScheduledTask } from "@/hooks/scheduler/useTaskSchedulerTimeline";
 import { isBefore, startOfDay } from "date-fns";
 
@@ -50,7 +50,7 @@ export default function UserStatsFooter({ user, tasks, onClose:_onClose }: UserS
         <div className="flex items-center gap-6">
           {/* Active */}
           <div className="flex items-center gap-2">
-            <Briefcase size={14} className="text-[var(--color-primary)]" />
+            <Briefcase size={14} className="text-[var(--color-primary)]" aria-hidden="true" />
             <div>
               <p className="text-[9px] font-bold uppercase text-[var(--color-ink-subtle)] leading-none">Active</p>
               <p className="text-sm font-extrabold text-[var(--color-ink)] tabular-nums leading-none mt-0.5">{activeTasks.length}</p>
@@ -59,7 +59,7 @@ export default function UserStatsFooter({ user, tasks, onClose:_onClose }: UserS
 
           {/* Completed */}
           <div className="flex items-center gap-2">
-            <CheckCircle2 size={14} className="text-emerald-500" />
+            <CheckCircle2 size={14} className="text-emerald-500" aria-hidden="true" />
             <div>
               <p className="text-[9px] font-bold uppercase text-[var(--color-ink-subtle)] leading-none">Done</p>
               <p className="text-sm font-extrabold text-emerald-500 tabular-nums leading-none mt-0.5">{completedTasks.length}</p>
@@ -68,7 +68,7 @@ export default function UserStatsFooter({ user, tasks, onClose:_onClose }: UserS
 
           {/* Overdue */}
           <div className="flex items-center gap-2">
-            <AlertTriangle size={14} className={overdueTasks.length > 0 ? "text-rose-500" : "text-emerald-500"} />
+            <AlertTriangle size={14} className={overdueTasks.length > 0 ? "text-rose-500" : "text-emerald-500"} aria-hidden="true" />
             <div>
               <p className="text-[9px] font-bold uppercase text-[var(--color-ink-subtle)] leading-none">Overdue</p>
               <p className={`text-sm font-extrabold tabular-nums leading-none mt-0.5 ${

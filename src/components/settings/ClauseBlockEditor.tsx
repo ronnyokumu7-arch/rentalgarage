@@ -3,8 +3,8 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  Type, List, ListOrdered, Trash2, ChevronUp, ChevronDown, Plus,
-} from "lucide-react";
+  TextT as Type, List, ListNumbers as ListOrdered, Trash as Trash2, CaretUp as ChevronUp, CaretDown as ChevronDown, Plus,
+} from "@phosphor-icons/react/ssr";
 import { Block, BlockType, parseBlocks, serializeBlocks } from "@/lib/markdownLite";
 
 // ── Auto-growing single-block textarea ──────────────────────────────
@@ -90,11 +90,11 @@ export default function ClauseBlockEditor({
               className="mt-1 shrink-0 rounded p-1 text-[var(--color-ink-subtle)] transition-colors hover:bg-[var(--color-primary)]/10 hover:text-[var(--color-primary)]"
             >
               {b.type === "bullet" ? (
-                <List className="h-3.5 w-3.5" />
+                <List className="h-3.5 w-3.5" aria-hidden="true" />
               ) : b.type === "numbered" ? (
-                <ListOrdered className="h-3.5 w-3.5" />
+                <ListOrdered className="h-3.5 w-3.5" aria-hidden="true" />
               ) : (
-                <Type className="h-3.5 w-3.5" />
+                <Type className="h-3.5 w-3.5" aria-hidden="true" />
               )}
             </button>
 
@@ -108,16 +108,16 @@ export default function ClauseBlockEditor({
           {/* Row: action buttons — always visible on mobile, on hover on desktop */}
           <div className="flex items-center justify-end gap-0.5 px-2 pb-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
             <button onClick={() => move(i, -1)} className="rounded p-1 text-[var(--color-ink-subtle)] hover:bg-[var(--color-surface-hover)]" title="Move up">
-              <ChevronUp className="h-3.5 w-3.5" />
+              <ChevronUp className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
             <button onClick={() => move(i, 1)} className="rounded p-1 text-[var(--color-ink-subtle)] hover:bg-[var(--color-surface-hover)]" title="Move down">
-              <ChevronDown className="h-3.5 w-3.5" />
+              <ChevronDown className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
             <button onClick={() => addBelow(i)} className="rounded p-1 text-[var(--color-ink-subtle)] hover:bg-[var(--color-surface-hover)]" title="Add block below">
-              <Plus className="h-3.5 w-3.5" />
+              <Plus className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
             <button onClick={() => remove(i)} className="rounded p-1 text-[var(--color-danger-text)] hover:bg-[var(--color-danger-bg)]" title="Delete block">
-              <Trash2 className="h-3.5 w-3.5" />
+              <Trash2 className="h-3.5 w-3.5" aria-hidden="true" />
             </button>
           </div>
         </div>
@@ -127,7 +127,7 @@ export default function ClauseBlockEditor({
         onClick={() => commit([...blocks, { type: "paragraph", text: "" }])}
         className="flex items-center gap-1 px-2 text-xs font-semibold text-[var(--color-primary)] hover:underline"
       >
-        <Plus className="h-3.5 w-3.5" /> Add block
+        <Plus className="h-3.5 w-3.5" aria-hidden="true" /> Add block
       </button>
 
       <p className="px-2 text-[11px] leading-relaxed text-[var(--color-ink-subtle)]">

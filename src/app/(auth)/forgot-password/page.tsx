@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Mail, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { Envelope as Mail, ArrowLeft, CheckCircle as CheckCircle2 } from "@phosphor-icons/react/ssr";
 import apiClient from "@/lib/api-client";
 import "@/app/login.css";
 
@@ -97,7 +97,7 @@ export default function ForgotPasswordPage() {
                 <Mail 
                   className="absolute left-3.5 top-1/2 -translate-y-1/2 transition-colors" 
                   size={17}
-                  style={{ color: '#A8A39E' }}
+                  style={{ color: '#A8A39E' }} aria-hidden="true"
                 />
               </div>
             </div>
@@ -142,7 +142,7 @@ export default function ForgotPasswordPage() {
             onMouseEnter={(e) => e.currentTarget.style.color = '#1C1917'}
             onMouseLeave={(e) => e.currentTarget.style.color = '#57534E'}
           >
-            <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" />
+            <ArrowLeft size={16} className="group-hover:-translate-x-0.5 transition-transform" aria-hidden="true" />
             Back to login
           </Link>
         </>
@@ -153,7 +153,7 @@ export default function ForgotPasswordPage() {
             className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5"
             style={{ backgroundColor: 'rgba(4, 120, 87, 0.10)' }}
           >
-            <CheckCircle2 size={30} style={{ color: '#047857' }} strokeWidth={1.8} />
+            <CheckCircle2 size={30} style={{ color: '#047857' }} weight="light" aria-hidden="true" />
           </div>
           <h2 className="text-2xl font-bold mb-2 tracking-tight" style={{ color: '#1C1917' }}>
             Check your inbox

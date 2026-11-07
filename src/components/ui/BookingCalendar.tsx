@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon } from "lucide-react";
+import { CaretLeft as ChevronLeft, CaretRight as ChevronRight, Calendar as CalendarIcon } from "@phosphor-icons/react/ssr";
 
 interface CalendarEvent {
   id: string | number;
@@ -61,7 +61,7 @@ export default function BookingCalendar({ events = [], currentMonth }: BookingCa
     <div className="card p-4">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <CalendarIcon size={18} className="text-accent-dark" />
+          <CalendarIcon size={18} className="text-accent-dark" aria-hidden="true" />
           <h3 className="text-sm font-semibold text-ink">
             {monthNames[selectedDate.getMonth()]} {selectedDate.getFullYear()}
           </h3>
@@ -71,13 +71,13 @@ export default function BookingCalendar({ events = [], currentMonth }: BookingCa
             onClick={() => navigateMonth(-1)}
             className="w-7 h-7 rounded-lg flex items-center justify-center text-ink-muted hover:bg-surface-hover transition-colors"
           >
-            <ChevronLeft size={16} />
+            <ChevronLeft size={16} aria-hidden="true" />
           </button>
           <button
             onClick={() => navigateMonth(1)}
             className="w-7 h-7 rounded-lg flex items-center justify-center text-ink-muted hover:bg-surface-hover transition-colors"
           >
-            <ChevronRight size={16} />
+            <ChevronRight size={16} aria-hidden="true" />
           </button>
         </div>
       </div>

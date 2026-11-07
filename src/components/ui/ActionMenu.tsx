@@ -1,11 +1,12 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { MoreVertical, LucideIcon } from "lucide-react";
+import { DotsThreeVertical as MoreVertical } from "@phosphor-icons/react/ssr";
+import type { Icon } from "@phosphor-icons/react";
 
 interface ActionMenuItem {
   label: string;
-  icon?: LucideIcon;
+  icon?: Icon;
   onClick: () => void;
   variant?: "default" | "danger";
   disabled?: boolean;
@@ -37,7 +38,7 @@ export default function ActionMenu({ items, align = "right" }: ActionMenuProps) 
         className="w-8 h-8 rounded-lg flex items-center justify-center
           text-ink-muted hover:bg-surface-hover hover:text-ink transition-colors"
       >
-        <MoreVertical size={16} strokeWidth={2} />
+        <MoreVertical size={16} weight="regular" aria-hidden="true" />
       </button>
 
       {open && (
@@ -58,7 +59,7 @@ export default function ActionMenu({ items, align = "right" }: ActionMenuProps) 
                 disabled={item.disabled}
                 className={`dropdown-item ${item.variant === "danger" ? "danger" : ""}`}
               >
-                {Icon && <Icon size={15} strokeWidth={1.8} />}
+                {Icon && <Icon size={15} weight="light" aria-hidden="true" />}
                 {item.label}
               </button>
             );

@@ -1,7 +1,7 @@
 // src/components/calendar/BookingChip.tsx
 "use client";
 
-import { Car } from "lucide-react";
+import { Car } from "@phosphor-icons/react/ssr";
 import type { Booking, Vehicle } from "@/lib/types";
 
 interface BookingChipProps {
@@ -25,7 +25,7 @@ export default function BookingChip({ booking, vehicle, onClick }: BookingChipPr
       onClick={onClick}
       className={`w-full text-left px-2 py-1 rounded-md border text-[10px] font-medium truncate flex items-center gap-1.5 transition-all hover:scale-[1.02] hover:shadow-sm ${STATUS_STYLES[booking.status] || STATUS_STYLES.completed}`}
     >
-      <Car size={10} className="flex-shrink-0 opacity-70" />
+      <Car size={10} className="flex-shrink-0 opacity-70" aria-hidden="true" />
       <span className="truncate font-bold">{vehicle?.plate_number || "N/A"}</span>
     </button>
   );

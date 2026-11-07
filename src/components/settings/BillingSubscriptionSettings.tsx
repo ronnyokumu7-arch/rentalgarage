@@ -3,9 +3,9 @@
 
 import React, { useState } from "react";
 import {
-  CreditCard, CheckCircle2, ArrowLeft, ShieldCheck, Building2, Smartphone,
-  Receipt, Send, Info, AlertTriangle, ChevronDown, CalendarClock, Zap,
-} from "lucide-react";
+  CreditCard, CheckCircle as CheckCircle2, ArrowLeft, ShieldCheck, Buildings as Building2, DeviceMobile as Smartphone,
+  Receipt, PaperPlaneTilt as Send, Info, Warning as AlertTriangle, CaretDown as ChevronDown, CalendarDots as CalendarClock, Lightning as Zap,
+} from "@phosphor-icons/react/ssr";
 import toast from "react-hot-toast";
 
 import { useBillingSubscription } from "@/hooks/settings/useBillingSubscription";
@@ -144,7 +144,7 @@ export default function BillingSubscriptionSettings() {
 
       {showRedBanner && (
         <div className="bg-rose-500/10 border border-rose-500/20 rounded-xl p-3 sm:p-4 flex items-start gap-3">
-          <AlertTriangle className="text-rose-500 mt-0.5 shrink-0" size={18} />
+          <AlertTriangle className="text-rose-500 mt-0.5 shrink-0" size={18} aria-hidden="true" />
           <div className="min-w-0">
             <h3 className="text-sm font-bold text-rose-500">Subscription Inactive</h3>
             <p className="text-xs text-rose-400 mt-1 leading-relaxed">
@@ -177,7 +177,7 @@ export default function BillingSubscriptionSettings() {
                     : "#6366f1",
               }}
             >
-              <ShieldCheck size={22} />
+              <ShieldCheck size={22} aria-hidden="true" />
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 mb-0.5">
@@ -219,7 +219,7 @@ export default function BillingSubscriptionSettings() {
           <div className="grid grid-cols-2 gap-4 sm:gap-6">
             <div>
               <div className="flex items-center gap-1.5 text-[var(--color-ink-subtle)] mb-1.5">
-                <CalendarClock size={11} strokeWidth={2.25} />
+                <CalendarClock size={11} weight="regular" aria-hidden="true" />
                 <span className="text-[9px] font-bold uppercase tracking-[0.15em]">Next Renewal</span>
               </div>
               <p className="text-sm font-bold text-[var(--color-ink)] tabular-nums">
@@ -228,7 +228,7 @@ export default function BillingSubscriptionSettings() {
             </div>
             <div>
               <div className="flex items-center gap-1.5 text-[var(--color-ink-subtle)] mb-1.5">
-                <Zap size={11} strokeWidth={2.25} />
+                <Zap size={11} weight="regular" aria-hidden="true" />
                 <span className="text-[9px] font-bold uppercase tracking-[0.15em]">Billing Cycle</span>
               </div>
               <p className="text-sm font-bold text-[var(--color-ink)] capitalize">
@@ -272,7 +272,7 @@ export default function BillingSubscriptionSettings() {
 
           {activeSubscription.status === "pending_verification" && (
             <div className="mt-4 flex items-start gap-2 px-3 py-2.5 rounded-lg bg-amber-500/[0.06] border border-amber-500/20">
-              <Info size={12} className="text-amber-500 mt-0.5 shrink-0" />
+              <Info size={12} className="text-amber-500 mt-0.5 shrink-0" aria-hidden="true" />
               <p className="text-[11px] text-amber-600 dark:text-amber-400 leading-relaxed">
                 Awaiting Super Admin approval. Your plan will activate shortly after confirmation.
               </p>
@@ -332,14 +332,14 @@ export default function BillingSubscriptionSettings() {
             onClick={() => setStep("PLANS")}
             className="flex items-center gap-2 text-xs font-semibold text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] mb-4 sm:mb-6 transition-colors"
           >
-            <ArrowLeft size={14} /> Back to Plans
+            <ArrowLeft size={14} aria-hidden="true" /> Back to Plans
           </button>
 
           {isSubmitted ? (
             <div className="bg-[var(--color-surface)] border border-emerald-500/30 rounded-2xl p-6 sm:p-12 text-center space-y-4">
               <div className="w-14 h-14 sm:w-16 sm:h-16 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mx-auto">
-                <CheckCircle2 size={28} className="sm:hidden" />
-                <CheckCircle2 size={32} className="hidden sm:block" />
+                <CheckCircle2 size={28} className="sm:hidden" aria-hidden="true" />
+                <CheckCircle2 size={32} className="hidden sm:block" aria-hidden="true" />
               </div>
               <h3 className="text-lg sm:text-xl font-bold text-[var(--color-ink)]">Payment Submitted for Review!</h3>
               <p className="text-xs text-[var(--color-ink-muted)] max-w-md mx-auto leading-relaxed">
@@ -381,13 +381,13 @@ export default function BillingSubscriptionSettings() {
                       className="mt-3 w-full flex items-center justify-between text-[11px] font-bold text-[var(--color-primary)] py-1"
                     >
                       <span>{showPlanDetails ? "Hide" : "View"} plan details</span>
-                      <ChevronDown size={14} className={`transition-transform ${showPlanDetails ? "rotate-180" : ""}`} />
+                      <ChevronDown size={14} className={`transition-transform ${showPlanDetails ? "rotate-180" : ""}`} aria-hidden="true" />
                     </button>
                   </div>
 
                   <div className="hidden lg:block">
                     <div className="flex items-center gap-2 text-indigo-500 text-[10px] font-bold uppercase tracking-wider mb-4">
-                      <Info size={12} /> Selected Tier
+                      <Info size={12} aria-hidden="true" /> Selected Tier
                     </div>
                     <div className="mb-6">
                       <h3 className="text-2xl font-bold text-[var(--color-ink)] mb-1">
@@ -409,7 +409,7 @@ export default function BillingSubscriptionSettings() {
                       <ul className="space-y-2">
                         {PLAN_FEATURES[selectedPlan]?.map((feature, i) => (
                           <li key={i} className="flex items-start gap-2 text-xs text-[var(--color-ink)]">
-                            <CheckCircle2 size={12} className="text-emerald-500 mt-0.5 shrink-0" />
+                            <CheckCircle2 size={12} className="text-emerald-500 mt-0.5 shrink-0" aria-hidden="true" />
                             {feature}
                           </li>
                         ))}
@@ -422,7 +422,7 @@ export default function BillingSubscriptionSettings() {
                       <ul className="space-y-2">
                         {PLAN_FEATURES[selectedPlan]?.map((feature, i) => (
                           <li key={i} className="flex items-start gap-2 text-xs text-[var(--color-ink)]">
-                            <CheckCircle2 size={12} className="text-emerald-500 mt-0.5 shrink-0" />
+                            <CheckCircle2 size={12} className="text-emerald-500 mt-0.5 shrink-0" aria-hidden="true" />
                             {feature}
                           </li>
                         ))}
@@ -434,7 +434,7 @@ export default function BillingSubscriptionSettings() {
 
               <div className="lg:col-span-7 lg:order-2 bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-2xl p-4 sm:p-6">
                 <div className="flex items-center gap-2 text-[var(--color-ink)] text-sm font-bold mb-4">
-                  <CreditCard size={16} /> How to Complete Payment
+                  <CreditCard size={16} aria-hidden="true" /> How to Complete Payment
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
@@ -446,7 +446,7 @@ export default function BillingSubscriptionSettings() {
                         : "border-[var(--color-surface-border)] text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)]"
                     }`}
                   >
-                    <Smartphone size={18} />
+                    <Smartphone size={18} aria-hidden="true" />
                     <div className="text-xs">
                       <div className="font-bold">M-Pesa Express</div>
                       <div className="text-[10px] opacity-80">Paybill Transfer</div>
@@ -460,7 +460,7 @@ export default function BillingSubscriptionSettings() {
                         : "border-[var(--color-surface-border)] text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)]"
                     }`}
                   >
-                    <Building2 size={18} />
+                    <Building2 size={18} aria-hidden="true" />
                     <div className="text-xs">
                       <div className="font-bold">Bank Transfer</div>
                       <div className="text-[10px] opacity-80">EFT / RTGS</div>
@@ -474,7 +474,7 @@ export default function BillingSubscriptionSettings() {
                       Payment Reference Code <span className="text-rose-500">*</span>
                     </label>
                     <div className="relative">
-                      <Receipt size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" />
+                      <Receipt size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                       <input
                         type="text"
                         required
@@ -494,7 +494,7 @@ export default function BillingSubscriptionSettings() {
                       <div className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin" />
                     ) : (
                       <>
-                        <Send size={14} /> Submit Payment for Verification
+                        <Send size={14} aria-hidden="true" /> Submit Payment for Verification
                       </>
                     )}
                   </button>

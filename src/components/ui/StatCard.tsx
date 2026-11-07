@@ -1,12 +1,12 @@
 "use client";
 
-import { type LucideIcon } from "lucide-react";
+import type { Icon } from "@phosphor-icons/react";
 
 interface StatCardProps {
   title: string;
   value: string | number;
   subtitle?: string;
-  icon: LucideIcon;
+  icon: Icon;
   variant?: "default" | "accent" | "success" | "warning" | "danger";
   trend?: { value: string; isPositive: boolean };
 }
@@ -74,7 +74,7 @@ export default function StatCard({
         <div className="flex items-center gap-3">
           {/* Icon Pill with micro-interaction (scales and rotates slightly) */}
           <div className={`p-2.5 rounded-xl ${currentStyle.bg} transition-all duration-300 group-hover:scale-110 group-hover:rotate-3`}>
-            <Icon size={20} className={currentStyle.text} strokeWidth={2.2} />
+            <Icon size={20} className={currentStyle.text} weight="regular" aria-hidden="true" />
           </div>
           
           {/* Value with tabular-nums for premium financial alignment */}

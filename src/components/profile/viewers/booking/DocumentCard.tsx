@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, CheckCircle2, AlertCircle, Eye, Link, Download, Clock } from "lucide-react";
+import { FileText, CheckCircle as CheckCircle2, WarningCircle as AlertCircle, Eye, Link, Download, Clock } from "@phosphor-icons/react/ssr";
 
 interface DocumentCardProps {
   title: string;
@@ -62,7 +62,7 @@ export default function DocumentCard({
       {/* Left: Icon & Info */}
       <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
         <div className={`p-2 sm:p-2.5 rounded-lg sm:rounded-xl border shrink-0 transition-colors ${config.bg}`}>
-          <FileText size={18} className={`sm:w-5 sm:h-5 ${config.color}`} />
+          <FileText size={18} className={`sm:w-5 sm:h-5 ${config.color}`} aria-hidden="true" />
         </div>
         
         <div className="min-w-0 space-y-0.5 sm:space-y-1">
@@ -71,7 +71,7 @@ export default function DocumentCard({
           </h5>
           <div className="flex items-center gap-1.5">
             <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[8px] sm:text-[9px] font-bold uppercase tracking-wider border ${config.bg} ${config.color}`}>
-              <config.icon size={10} className="shrink-0" />
+              <config.icon size={10} className="shrink-0" aria-hidden="true" />
               <span>{config.label}</span>
             </span>
           </div>
@@ -87,7 +87,7 @@ export default function DocumentCard({
             className="p-1.5 sm:p-2 rounded-lg text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] active:scale-95 transition-all" 
             title="View Document"
           >
-            <Eye size={16} />
+            <Eye size={16} aria-hidden="true" />
           </button>
           <button 
             type="button"
@@ -95,7 +95,7 @@ export default function DocumentCard({
             className="p-1.5 sm:p-2 rounded-lg text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] active:scale-95 transition-all" 
             title="Copy Link"
           >
-            <Link size={16} />
+            <Link size={16} aria-hidden="true" />
           </button>
           <button 
             type="button"
@@ -103,7 +103,7 @@ export default function DocumentCard({
             className="p-1.5 sm:p-2 rounded-lg text-[var(--color-ink-muted)] hover:text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 active:scale-95 transition-all" 
             title="Download PDF"
           >
-            <Download size={16} />
+            <Download size={16} aria-hidden="true" />
           </button>
         </div>
       )}

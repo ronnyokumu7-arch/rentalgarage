@@ -4,14 +4,14 @@
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
-  TrendingUp,
-  TrendingDown,
-  AlertCircle,
+  TrendUp as TrendingUp,
+  TrendDown as TrendingDown,
+  WarningCircle as AlertCircle,
   Wallet,
-  CalendarRange,
+  CalendarDots as CalendarRange,
   Calendar,
-  ChevronRight,
-} from "lucide-react";
+  CaretRight as ChevronRight,
+} from "@phosphor-icons/react/ssr";
 import Link from "next/link";
 
 interface MobileStatsCarouselProps {
@@ -167,7 +167,7 @@ export default function MobileStatsCarousel(props: MobileStatsCarouselProps) {
                     <div className="flex items-center gap-1.5 min-w-0">
                       {item.trend && (
                         <span className={`flex items-center gap-0.5 text-[9px] font-bold shrink-0 ${item.trend.textColor}`}>
-                          <item.trend.icon size={10} strokeWidth={2.5} />
+                          <item.trend.icon size={10} weight="bold" aria-hidden="true" />
                           {item.trend.value}
                         </span>
                       )}
@@ -180,7 +180,7 @@ export default function MobileStatsCarousel(props: MobileStatsCarouselProps) {
                   </div>
 
                   <div className={`w-7 h-7 rounded-lg bg-gradient-to-br ${item.gradient} flex items-center justify-center shrink-0 shadow-sm mt-0.5`}>
-                    <item.icon size={12} className="text-white" />
+                    <item.icon size={12} className="text-white" aria-hidden="true" />
                   </div>
                 </div>
               </div>
@@ -202,7 +202,7 @@ export default function MobileStatsCarousel(props: MobileStatsCarouselProps) {
                 </div>
                 {isLinked && (
                   <span className="text-[9px] font-bold text-[var(--color-primary)] flex items-center gap-0.5 opacity-80 group-hover/card:opacity-100 group-hover/card:translate-x-0.5 transition-all leading-none">
-                    Get paid <ChevronRight size={10} />
+                    Get paid <ChevronRight size={10} aria-hidden="true" />
                   </span>
                 )}
               </div>

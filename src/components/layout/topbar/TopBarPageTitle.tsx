@@ -1,7 +1,7 @@
 // src/components/layout/topbar/TopBarPageTitle.tsx
 "use client";
 
-import { ChevronDown, Info } from "lucide-react";
+import { CaretDown as ChevronDown, Info } from "@phosphor-icons/react/ssr";
 
 interface TopBarPageTitleProps {
   title: string;
@@ -25,7 +25,7 @@ export default function TopBarPageTitle({
         <Icon 
           size={18} 
           weight="duotone"
-          className="flex-shrink-0 text-[var(--color-primary)]" 
+          className="flex-shrink-0 text-[var(--color-primary)]" aria-hidden="true"
         />
       )}
 
@@ -41,10 +41,10 @@ export default function TopBarPageTitle({
         </span>
         <ChevronDown
           size={14}
-          strokeWidth={2.5}
+          weight="bold"
           className={`text-ink-muted flex-shrink-0 transition-transform duration-200 ${
             expanded ? "rotate-180" : ""
-          }`}
+          }`} aria-hidden="true"
         />
       </button>
 
@@ -55,7 +55,7 @@ export default function TopBarPageTitle({
           className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-[var(--color-primary)] bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/15 transition-colors active:scale-95"
           aria-label="About this page"
         >
-          <Info size={15} strokeWidth={2.25} />
+          <Info size={15} weight="regular" aria-hidden="true" />
         </button>
       )}
     </div>

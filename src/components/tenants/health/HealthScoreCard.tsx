@@ -1,5 +1,5 @@
 // src/components/tenants/health/HealthScoreCard.tsx
-import { Activity, TrendingUp, TrendingDown, Minus, AlertTriangle, ShieldCheck, ShieldAlert } from 'lucide-react';
+import { Pulse as Activity, TrendUp as TrendingUp, TrendDown as TrendingDown, Minus, Warning as AlertTriangle, ShieldCheck, ShieldWarning as ShieldAlert } from "@phosphor-icons/react/ssr";
 import type { HealthScore } from '@/lib/types';
 
 interface HealthScoreCardProps {
@@ -67,7 +67,7 @@ export function HealthScoreCard({ score }: HealthScoreCardProps) {
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/30 shrink-0">
         <div className="flex items-center gap-3">
           <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-400">
-            <Activity size={16} />
+            <Activity size={16} aria-hidden="true" />
           </div>
           <div>
             <h2 className="text-sm font-semibold text-[var(--color-ink)]">Agency Health Score</h2>
@@ -125,7 +125,7 @@ export function HealthScoreCard({ score }: HealthScoreCardProps) {
           {/* Risk Level Badge & Trend */}
           <div className="flex items-center justify-center gap-3">
             <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border ${styles.bg} ${styles.text} ${styles.border}`}>
-              <RiskIcon size={14} />
+              <RiskIcon size={14} aria-hidden="true" />
               {score.riskLevel} Risk
             </div>
             
@@ -133,9 +133,9 @@ export function HealthScoreCard({ score }: HealthScoreCardProps) {
               score.trend === 'up' ? 'text-emerald-400' : 
               score.trend === 'down' ? 'text-rose-400' : 'text-slate-400'
             }`}>
-              {score.trend === 'up' && <TrendingUp size={14} />}
-              {score.trend === 'down' && <TrendingDown size={14} />}
-              {score.trend === 'stable' && <Minus size={14} />}
+              {score.trend === 'up' && <TrendingUp size={14} aria-hidden="true" />}
+              {score.trend === 'down' && <TrendingDown size={14} aria-hidden="true" />}
+              {score.trend === 'stable' && <Minus size={14} aria-hidden="true" />}
               {score.trend === 'up' ? 'Improving' : score.trend === 'down' ? 'Declining' : 'Stable'}
             </div>
           </div>

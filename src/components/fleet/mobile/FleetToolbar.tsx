@@ -2,9 +2,9 @@
 "use client";
 
 import {
-  X, Search, SlidersHorizontal, Wrench, Archive,
+  X, MagnifyingGlass as Search, SlidersHorizontal, Wrench, Archive,
   FolderPlus, Folder, Plus,
-} from "lucide-react";
+} from "@phosphor-icons/react/ssr";
 import type { VehicleStatus } from "@/lib/types";
 import type { VehicleCollection } from "@/lib/collections";
 
@@ -83,7 +83,7 @@ export default function FleetToolbar({
                 className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] transition-colors"
                 aria-label="Clear selection"
               >
-                <X size={16} />
+                <X size={16} aria-hidden="true" />
               </button>
               <span className="text-sm font-bold text-[var(--color-ink)] tabular-nums">
                 {selectedCount} selected
@@ -95,28 +95,28 @@ export default function FleetToolbar({
                 className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 transition-colors"
                 aria-label="Add to collection"
               >
-                <FolderPlus size={16} />
+                <FolderPlus size={16} aria-hidden="true" />
               </button>
               <button
                 onClick={onBatchMileage}
                 className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
                 aria-label="Update mileage"
               >
-                <Wrench size={16} />
+                <Wrench size={16} aria-hidden="true" />
               </button>
               <button
                 onClick={onBatchMaintenance}
                 className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
                 aria-label="Send to maintenance"
               >
-                <Wrench size={16} />
+                <Wrench size={16} aria-hidden="true" />
               </button>
               <button
                 onClick={onBatchArchive}
                 className="w-9 h-9 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors"
                 aria-label="Archive"
               >
-                <Archive size={16} />
+                <Archive size={16} aria-hidden="true" />
               </button>
             </div>
           </div>
@@ -126,7 +126,7 @@ export default function FleetToolbar({
               <div className="relative flex-1 h-full">
                 <Search
                   size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-ink-subtle)] pointer-events-none" aria-hidden="true"
                 />
                 <input
                   ref={searchInputRef}
@@ -146,7 +146,7 @@ export default function FleetToolbar({
                     className="absolute right-2 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-[var(--color-surface-hover)] flex items-center justify-center hover:bg-[var(--color-surface-border)] transition-colors"
                     aria-label="Clear search"
                   >
-                    <X size={12} className="text-[var(--color-ink-muted)]" />
+                    <X size={12} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
                   </button>
                 )}
               </div>
@@ -168,7 +168,7 @@ export default function FleetToolbar({
                         : "bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
                   }`}
                 >
-                  <SlidersHorizontal size={14} />
+                  <SlidersHorizontal size={14} aria-hidden="true" />
                   {hasActiveFilter && !filtersOpen && (
                     <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)]" />
                   )}
@@ -209,7 +209,7 @@ export default function FleetToolbar({
                                   : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
                               }`}
                             >
-                              <Folder size={11} className="flex-shrink-0" />
+                              <Folder size={11} className="flex-shrink-0" aria-hidden="true" />
                               {c.name}
                             </button>
                           );
@@ -244,7 +244,7 @@ export default function FleetToolbar({
                           : "text-[var(--color-ink-muted)] border-[var(--color-surface-border)] hover:text-[var(--color-ink)]"
                       }`}
                     >
-                      <Wrench size={11} className="flex-shrink-0" />
+                      <Wrench size={11} className="flex-shrink-0" aria-hidden="true" />
                       Garage
                     </button>
                     <button
@@ -254,7 +254,7 @@ export default function FleetToolbar({
                       }}
                       className="flex-shrink-0 h-8 px-4 rounded-full text-[11px] font-bold transition-colors border border-dashed border-[var(--color-surface-border)] text-[var(--color-ink-muted)] hover:text-[var(--color-primary)] hover:border-[var(--color-primary)] flex items-center gap-1.5"
                     >
-                      <Plus size={11} className="flex-shrink-0" />
+                      <Plus size={11} className="flex-shrink-0" aria-hidden="true" />
                       New Collection
                     </button>
                   </div>

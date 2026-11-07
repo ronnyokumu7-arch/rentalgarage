@@ -4,11 +4,11 @@
 import { useMemo, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
-  Building2, ShieldCheck, Palette, Bell, CreditCard, ChevronRight, ChevronLeft,
-  Puzzle, Database, Key, Globe, Lock, BarChart3, UserCheck, Receipt, Landmark,
-  HardDrive, Activity, Webhook, SlidersHorizontal, UserCog, Landmark as LandmarkIcon,
-  ServerCog, ShieldHalf, ScrollText,
-} from "lucide-react";
+  Buildings as Building2, ShieldCheck, Palette, Bell, CreditCard, CaretRight as ChevronRight, CaretLeft as ChevronLeft,
+  PuzzlePiece as Puzzle, Database, Key, Globe, Lock, ChartBar as BarChart3, UserCheck, Receipt, Bank as Landmark,
+  HardDrive, Pulse as Activity, WebhooksLogo as Webhook, SlidersHorizontal, UserGear as UserCog, Bank as LandmarkIcon,
+  HardDrives as ServerCog, Shield as ShieldHalf, Scroll as ScrollText,
+} from "@phosphor-icons/react/ssr";
 
 import BusinessProfileSettings from "@/components/settings/BusinessProfileSettings";
 import BusinessPoliciesSettings from "@/components/settings/BusinessPoliciesSettings";
@@ -147,11 +147,11 @@ export default function SettingsPage() {
   const filteredModules = SETTINGS_MODULES.filter((m) => m.tab === activeTab);
 
   const currentTabInfo = {
-    general: { title: "General Settings", description: "Manage your agency configuration and system preferences", icon: <SlidersHorizontal size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" /> },
-    team: { title: "Team & Access", description: "Manage staff, roles, and authentication settings", icon: <UserCog size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" /> },
-    financials: { title: "Financial Settings", description: "Configure billing, invoices, and payment methods", icon: <LandmarkIcon size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" /> },
-    system: { title: "System Settings", description: "Manage integrations, API keys, and webhooks", icon: <ServerCog size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" /> },
-    advanced: { title: "Advanced Settings", description: "Data management, backups, and system health monitoring", icon: <ShieldHalf size={28} strokeWidth={1.5} className="text-[var(--color-primary)]" /> },
+    general: { title: "General Settings", description: "Manage your agency configuration and system preferences", icon: <SlidersHorizontal size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" /> },
+    team: { title: "Team & Access", description: "Manage staff, roles, and authentication settings", icon: <UserCog size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" /> },
+    financials: { title: "Financial Settings", description: "Configure billing, invoices, and payment methods", icon: <LandmarkIcon size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" /> },
+    system: { title: "System Settings", description: "Manage integrations, API keys, and webhooks", icon: <ServerCog size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" /> },
+    advanced: { title: "Advanced Settings", description: "Data management, backups, and system health monitoring", icon: <ShieldHalf size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" /> },
   }[activeTab];
 
   return (
@@ -165,7 +165,7 @@ export default function SettingsPage() {
               onClick={handleModuleClose}
               className="lg:hidden self-start flex items-center gap-1 text-xs font-semibold text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors mb-2"
             >
-              <ChevronLeft size={14} />
+              <ChevronLeft size={14} aria-hidden="true" />
               Settings
             </button>
           )}
@@ -177,7 +177,7 @@ export default function SettingsPage() {
               className="hidden lg:flex p-2 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-colors shrink-0"
               title="Back to Settings Hub"
             >
-              <ChevronLeft size={18} />
+              <ChevronLeft size={18} aria-hidden="true" />
             </button>
           )}
 
@@ -220,7 +220,7 @@ export default function SettingsPage() {
                 className="group relative flex items-center gap-4 p-5 rounded-2xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] shadow-[var(--shadow-card)] hover:border-[var(--color-primary)]/50 hover:shadow-[var(--shadow-lg)] transition-all duration-200 cursor-pointer"
               >
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${theme.iconBg} ${theme.iconText} group-hover:scale-105 transition-transform duration-200`}>
-                  <Icon size={22} strokeWidth={1.8} />
+                  <Icon size={22} weight="light" aria-hidden="true" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
@@ -237,7 +237,7 @@ export default function SettingsPage() {
                     {module.description}
                   </p>
                 </div>
-                <ChevronRight size={18} className="text-[var(--color-ink-subtle)] group-hover:text-[var(--color-primary)] group-hover:translate-x-1 transition-all duration-200 flex-shrink-0" />
+                <ChevronRight size={18} className="text-[var(--color-ink-subtle)] group-hover:text-[var(--color-primary)] group-hover:translate-x-1 transition-all duration-200 flex-shrink-0" aria-hidden="true" />
               </div>
             );
           })}
@@ -261,7 +261,7 @@ export default function SettingsPage() {
           ) : (
             <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-2xl shadow-[var(--shadow-card)] p-8 min-h-[400px] flex flex-col items-center justify-center text-center">
               <div className={`w-16 h-16 rounded-2xl ${getThemeClasses(activeModule.theme).iconBg} flex items-center justify-center mb-4`}>
-                <activeModule.icon size={32} className={getThemeClasses(activeModule.theme).iconText} />
+                <activeModule.icon size={32} className={getThemeClasses(activeModule.theme).iconText} aria-hidden="true" />
               </div>
               <h3 className="text-lg font-bold text-[var(--color-ink)] mb-2">
                 {activeModule.title} Workspace
@@ -273,7 +273,7 @@ export default function SettingsPage() {
                 onClick={handleModuleClose}
                 className="flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/5 hover:bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 transition-all active:scale-95"
               >
-                <ChevronLeft size={14} /> Back to Settings Hub
+                <ChevronLeft size={14} aria-hidden="true" /> Back to Settings Hub
               </button>
             </div>
           )}

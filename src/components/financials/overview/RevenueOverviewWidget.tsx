@@ -1,7 +1,7 @@
 // src/components/financials/overview/RevenueOverviewWidget.tsx
 "use client";
 
-import { TrendingUp, TrendingDown, Wallet, ArrowUpRight, ArrowDownRight, Sparkles, Clock } from "lucide-react";
+import { TrendUp as TrendingUp, TrendDown as TrendingDown, Wallet, ArrowUpRight, ArrowDownRight, Sparkle as Sparkles, Clock } from "@phosphor-icons/react/ssr";
 import type { RevenueOverview } from "@/hooks/financials/useFinancialOverview";
 
 interface Props {
@@ -42,7 +42,7 @@ export default function RevenueOverviewWidget({ data }: Props) {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-[var(--color-primary)]/20 to-[var(--color-primary)]/5 border border-[var(--color-primary)]/20 flex items-center justify-center text-[var(--color-primary)]">
-              <Wallet size={16} />
+              <Wallet size={16} aria-hidden="true" />
             </div>
             <div>
               <h3 className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)]">Revenue Overview</h3>
@@ -55,7 +55,7 @@ export default function RevenueOverviewWidget({ data }: Props) {
                 ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20" 
                 : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
             }`}>
-              {trend.positive ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />}
+              {trend.positive ? <ArrowUpRight size={12} aria-hidden="true" /> : <ArrowDownRight size={12} aria-hidden="true" />}
               {trend.change.toFixed(1)}%
             </div>
           )}
@@ -76,7 +76,7 @@ export default function RevenueOverviewWidget({ data }: Props) {
             <div className="flex items-center justify-between mb-1.5">
               <p className="text-[10px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)]">Total Revenue</p>
               <div className="flex items-center gap-1">
-                <Sparkles size={12} className="text-[var(--color-primary)] opacity-60" />
+                <Sparkles size={12} className="text-[var(--color-primary)] opacity-60" aria-hidden="true" />
                 <span className="text-[8px] font-medium text-[var(--color-ink-muted)] uppercase tracking-wider">Lifetime</span>
               </div>
             </div>
@@ -89,7 +89,7 @@ export default function RevenueOverviewWidget({ data }: Props) {
               <div className={`flex items-center gap-1 text-[10px] font-bold ${
                 trend.positive ? "text-emerald-600 dark:text-emerald-400" : "text-rose-600 dark:text-rose-400"
               }`}>
-                {trend.positive ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+                {trend.positive ? <TrendingUp size={12} aria-hidden="true" /> : <TrendingDown size={12} aria-hidden="true" />}
                 {trend.positive ? "+" : ""}{trend.change.toFixed(1)}% vs last month
               </div>
             </div>
@@ -102,7 +102,7 @@ export default function RevenueOverviewWidget({ data }: Props) {
           <div className="bg-[var(--color-surface-hover)]/30 rounded-xl p-3.5 border border-[var(--color-surface-border)] transition-all duration-200 hover:border-[var(--color-primary)]/20 hover:bg-[var(--color-surface-hover)]/50">
             <div className="flex items-center justify-between mb-1">
               <p className="text-[8px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)]">Avg. Monthly</p>
-              <TrendingUp size={12} className="text-emerald-500/60" />
+              <TrendingUp size={12} className="text-emerald-500/60" aria-hidden="true" />
             </div>
             <p className="text-base font-extrabold text-[var(--color-ink)] tabular-nums">
               {formatCurrency(data.avg_monthly_revenue)}
@@ -117,7 +117,7 @@ export default function RevenueOverviewWidget({ data }: Props) {
           <div className="bg-[var(--color-surface-hover)]/30 rounded-xl p-3.5 border border-[var(--color-surface-border)] transition-all duration-200 hover:border-amber-500/20 hover:bg-[var(--color-surface-hover)]/50">
             <div className="flex items-center justify-between mb-1">
               <p className="text-[8px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)]">Pending</p>
-              <Clock size={12} className="text-amber-500/60" />
+              <Clock size={12} className="text-amber-500/60" aria-hidden="true" />
             </div>
             <p className="text-base font-extrabold text-amber-600 dark:text-amber-400 tabular-nums">
               {formatCurrency(data.total_pending)}

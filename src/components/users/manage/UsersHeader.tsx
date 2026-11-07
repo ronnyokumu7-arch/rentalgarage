@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { Users, CalendarDays, ShieldCheck } from "lucide-react";
+import { Users, CalendarDots as CalendarDays, ShieldCheck } from "@phosphor-icons/react/ssr";
 
 export type UserMainTab = "roster" | "scheduler" | "roles";
 
@@ -24,19 +24,19 @@ export default function UsersHeader({ activeTab, onTabChange }: UsersHeaderProps
         return {
           title: "Team Management",
           description: "Manage executive leadership, staff accounts, verification steps, and system access.",
-          icon: <Users className="w-4 h-4 sm:w-5 sm:h-5" />,
+          icon: <Users className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />,
         };
       case "scheduler":
         return {
           title: "Duty & Shift Scheduler",
           description: "Plan shift timelines, monitor workload distribution, and assign operational tasks.",
-          icon: <CalendarDays className="w-4 h-4 sm:w-5 sm:h-5" />,
+          icon: <CalendarDays className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />,
         };
       case "roles":
         return {
           title: "Role Templates & Security",
           description: "Configure role-based access control (RBAC), security scopes, and granular permissions.",
-          icon: <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" />,
+          icon: <ShieldCheck className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden="true" />,
         };
     }
   }, [activeTab]);
@@ -80,7 +80,7 @@ export default function UsersHeader({ activeTab, onTabChange }: UsersHeaderProps
                   : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)]"
               }`}
             >
-              <Icon size={14} className="flex-shrink-0" />
+              <Icon size={14} className="flex-shrink-0" aria-hidden="true" />
               <span>{tab.label}</span>
             </button>
           );

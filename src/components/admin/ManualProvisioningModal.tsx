@@ -4,7 +4,7 @@
 import React, { useState } from "react";
 import apiClient from "@/lib/api-client";
 import toast from "react-hot-toast";
-import { Hash, DollarSign, X, ShieldCheck, Loader2 } from "lucide-react";
+import { Hash, CurrencyDollar as DollarSign, X, ShieldCheck, CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
 
 interface ManualProvisioningModalProps {
   tenantId: number;
@@ -67,7 +67,7 @@ export function ManualProvisioningModal({
         <div className="flex items-center justify-between p-5 border-b border-[var(--color-surface-border)]">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
-              <ShieldCheck size={20} />
+              <ShieldCheck size={20} aria-hidden="true" />
             </div>
             <div>
               <h3 className="text-base font-bold text-[var(--color-ink)]">Manual Provisioning</h3>
@@ -80,7 +80,7 @@ export function ManualProvisioningModal({
             onClick={onClose}
             className="p-1 rounded-lg hover:bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)]"
           >
-            <X size={18} />
+            <X size={18} aria-hidden="true" />
           </button>
         </div>
 
@@ -141,7 +141,7 @@ export function ManualProvisioningModal({
                 Reference / Receipt # *
               </label>
               <div className="relative">
-                <Hash size={14} className="absolute left-3 top-3 text-[var(--color-ink-subtle)]" />
+                <Hash size={14} className="absolute left-3 top-3 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                 <input
                   type="text"
                   required
@@ -161,7 +161,7 @@ export function ManualProvisioningModal({
                 Amount Collected (KES)
               </label>
               <div className="relative">
-                <DollarSign size={14} className="absolute left-3 top-3 text-[var(--color-ink-subtle)]" />
+                <DollarSign size={14} className="absolute left-3 top-3 text-[var(--color-ink-subtle)]" aria-hidden="true" />
                 <input
                   type="number"
                   placeholder="e.g. 50000"
@@ -200,7 +200,7 @@ export function ManualProvisioningModal({
               disabled={isSubmitting}
               className="px-4 py-2 rounded-xl bg-[var(--color-primary)] text-white text-xs font-semibold flex items-center gap-2 hover:opacity-90 disabled:opacity-50"
             >
-              {isSubmitting ? <Loader2 size={14} className="animate-spin" /> : "Confirm & Provision Plan"}
+              {isSubmitting ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : "Confirm & Provision Plan"}
             </button>
           </div>
         </form>

@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { Check } from "@phosphor-icons/react/ssr";
 
 interface Step {
   id: number;
@@ -37,7 +37,7 @@ export default function WizardStepper({ steps, currentStep }: WizardStepperProps
                   : "bg-[var(--color-surface-hover)] text-[var(--color-ink-subtle)]"
               }`}
             >
-              {isComplete ? <Check size={14} /> : step.id}
+              {isComplete ? <Check size={14} aria-hidden="true" /> : step.id}
             </div>
             <div className="text-center md:text-left">
               <p

@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Loader2, Calendar } from "lucide-react";
+import { CircleNotch as Loader2, Calendar } from "@phosphor-icons/react/ssr";
 import Modal from "@/components/ui/Modal";
 import type { Booking } from "@/lib/types";
 import type { ExtendBookingPayload } from "@/lib/api/bookings";
@@ -69,7 +69,7 @@ export default function ExtendBookingModal({ open, onClose, booking, onExtend, i
         <div>
           <label className={labelClass}>New End Date <span className="text-[var(--color-danger)]">*</span></label>
           <div className="relative">
-            <Calendar size={16} className="absolute left-4 top-3.5 text-[var(--color-ink-subtle)]" />
+            <Calendar size={16} className="absolute left-4 top-3.5 text-[var(--color-ink-subtle)]" aria-hidden="true" />
             <input
               type="datetime-local"
               value={newEndDate}
@@ -97,7 +97,7 @@ export default function ExtendBookingModal({ open, onClose, booking, onExtend, i
             Cancel
           </button>
           <button type="submit" disabled={isLoading || !newEndDate} className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition-all disabled:opacity-50">
-            {isLoading ? <Loader2 size={14} className="animate-spin" /> : <Calendar size={14} />}
+            {isLoading ? <Loader2 size={14} className="animate-spin" aria-hidden="true" /> : <Calendar size={14} aria-hidden="true" />}
             {isLoading ? "Processing..." : "Confirm Extension"}
           </button>
         </div>

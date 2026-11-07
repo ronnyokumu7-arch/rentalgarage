@@ -5,15 +5,15 @@ import Link from "next/link";
 import { 
   Car, 
   Gauge, 
-  ShieldAlert, 
-  Fuel, 
-  Sparkles, 
+  ShieldWarning as ShieldAlert,
+  GasPump as Fuel,
+  Sparkle as Sparkles,
   ArrowUpRight, 
-  KeyRound, 
-  CheckCircle2, 
+  Key as KeyRound,
+  CheckCircle as CheckCircle2,
   Hash,
   Calendar
-} from "lucide-react";
+} from "@phosphor-icons/react/ssr";
 import type { Booking } from "@/lib/types";
 
 interface Props {
@@ -30,7 +30,7 @@ export function VehicleShowcaseWidget({ booking }: Props) {
         <div className="flex items-center justify-between border-b border-[var(--color-surface-border)] pb-4">
           <div className="flex items-center gap-3">
             <div className="p-2.5 rounded-2xl bg-amber-500/10 text-amber-500 border border-amber-500/20">
-              <ShieldAlert size={20} />
+              <ShieldAlert size={20} aria-hidden="true" />
             </div>
             <div>
               <h2 className="text-[10px] font-mono font-bold uppercase tracking-widest text-[var(--color-ink-muted)]">
@@ -83,7 +83,7 @@ export function VehicleShowcaseWidget({ booking }: Props) {
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[var(--color-surface-border)] pb-5">
         <div className="flex items-center gap-3.5">
           <div className="relative flex items-center justify-center w-12 h-12 rounded-2xl bg-gradient-to-br from-[var(--color-primary)]/15 to-[var(--color-primary)]/5 text-[var(--color-primary)] border border-[var(--color-primary)]/20 shadow-inner">
-            <Car size={22} />
+            <Car size={22} aria-hidden="true" />
             <span className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-500 border-2 border-[var(--color-surface)]" />
           </div>
           <div>
@@ -92,7 +92,7 @@ export function VehicleShowcaseWidget({ booking }: Props) {
                 Assigned Fleet Asset
               </span>
               <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] border border-[var(--color-primary)]/20">
-                <Sparkles size={10} /> Tier 1 Asset
+                <Sparkles size={10} aria-hidden="true" /> Tier 1 Asset
               </span>
             </div>
             <h2 className="text-lg font-bold text-[var(--color-ink)] tracking-tight mt-0.5">
@@ -103,7 +103,7 @@ export function VehicleShowcaseWidget({ booking }: Props) {
 
         {/* License Plate Identity Tag */}
         <div className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] font-mono text-xs font-bold text-[var(--color-ink)] shadow-xs">
-          <Hash size={14} className="text-[var(--color-primary)]" />
+          <Hash size={14} className="text-[var(--color-primary)]" aria-hidden="true" />
           <span className="tracking-wider uppercase">{plateNumber}</span>
         </div>
       </div>
@@ -113,7 +113,7 @@ export function VehicleShowcaseWidget({ booking }: Props) {
         {/* Model Year Node */}
         <div className="p-3.5 rounded-2xl bg-[var(--color-surface-hover)]/40 border border-[var(--color-surface-border)] space-y-1 transition-all hover:border-[var(--color-primary)]/30 group">
           <div className="flex items-center gap-1.5 text-[var(--color-ink-muted)]">
-            <Calendar size={13} className="group-hover:text-[var(--color-primary)] transition-colors" />
+            <Calendar size={13} className="group-hover:text-[var(--color-primary)] transition-colors" aria-hidden="true" />
             <span className="text-[10px] font-bold uppercase tracking-wider">Model Year</span>
           </div>
           <p className="text-xs font-bold text-[var(--color-ink)] font-mono">{year}</p>
@@ -122,7 +122,7 @@ export function VehicleShowcaseWidget({ booking }: Props) {
         {/* Odometer/Mileage Node */}
         <div className="p-3.5 rounded-2xl bg-[var(--color-surface-hover)]/40 border border-[var(--color-surface-border)] space-y-1 transition-all hover:border-[var(--color-primary)]/30 group">
           <div className="flex items-center gap-1.5 text-[var(--color-ink-muted)]">
-            <Gauge size={13} className="group-hover:text-[var(--color-primary)] transition-colors" />
+            <Gauge size={13} className="group-hover:text-[var(--color-primary)] transition-colors" aria-hidden="true" />
             <span className="text-[10px] font-bold uppercase tracking-wider">Odometer</span>
           </div>
           <p className="text-xs font-bold text-[var(--color-ink)] font-mono">
@@ -133,7 +133,7 @@ export function VehicleShowcaseWidget({ booking }: Props) {
         {/* Category Node */}
         <div className="p-3.5 rounded-2xl bg-[var(--color-surface-hover)]/40 border border-[var(--color-surface-border)] space-y-1 transition-all hover:border-[var(--color-primary)]/30 group">
           <div className="flex items-center gap-1.5 text-[var(--color-ink-muted)]">
-            <KeyRound size={13} className="group-hover:text-[var(--color-primary)] transition-colors" />
+            <KeyRound size={13} className="group-hover:text-[var(--color-primary)] transition-colors" aria-hidden="true" />
             <span className="text-[10px] font-bold uppercase tracking-wider">Category</span>
           </div>
           <p className="text-xs font-bold text-[var(--color-ink)] capitalize truncate">{category}</p>
@@ -142,7 +142,7 @@ export function VehicleShowcaseWidget({ booking }: Props) {
         {/* Powertrain Node */}
         <div className="p-3.5 rounded-2xl bg-[var(--color-surface-hover)]/40 border border-[var(--color-surface-border)] space-y-1 transition-all hover:border-[var(--color-primary)]/30 group">
           <div className="flex items-center gap-1.5 text-[var(--color-ink-muted)]">
-            <Fuel size={13} className="group-hover:text-[var(--color-primary)] transition-colors" />
+            <Fuel size={13} className="group-hover:text-[var(--color-primary)] transition-colors" aria-hidden="true" />
             <span className="text-[10px] font-bold uppercase tracking-wider">Powertrain</span>
           </div>
           <p className="text-xs font-bold text-[var(--color-ink)] capitalize truncate">{fuelType}</p>
@@ -152,7 +152,7 @@ export function VehicleShowcaseWidget({ booking }: Props) {
       {/* Footer Status & Fleet CRM Link */}
       <div className="flex items-center justify-between pt-2 border-t border-[var(--color-surface-border)] text-xs">
         <div className="flex items-center gap-2">
-          <CheckCircle2 size={15} className="text-emerald-500" />
+          <CheckCircle2 size={15} className="text-emerald-500" aria-hidden="true" />
           <span className="text-[var(--color-ink-muted)] font-medium">
             Fleet Status: <strong className="text-[var(--color-ink)] capitalize">{status}</strong>
           </span>
@@ -164,7 +164,7 @@ export function VehicleShowcaseWidget({ booking }: Props) {
             className="inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded-xl shadow-md shadow-[var(--color-primary)]/10 transition-all active:scale-[0.98] group"
           >
             <span>Telemetry & Fleet Profile</span>
-            <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" aria-hidden="true" />
           </Link>
         )}
       </div>

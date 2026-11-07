@@ -7,7 +7,7 @@ import { bookingsApi } from "@/lib/api/bookings";
 import { vehiclesApi } from "@/lib/api/vehicles";
 import { useAuth } from "@/context/auth-context";
 import type { Client, Booking, Vehicle } from "@/lib/types";
-import type { LucideIcon } from "lucide-react";
+import type { Icon } from "@phosphor-icons/react";
 import {
   getPagesForRole,
   toPageResult,
@@ -63,7 +63,7 @@ export interface PageResult {
   label: string;
   description: string;
   href: string;
-  icon: LucideIcon;
+  icon: Icon;
   section: RegistrySection;
 }
 

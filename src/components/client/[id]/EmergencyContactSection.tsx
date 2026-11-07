@@ -1,7 +1,7 @@
 // src/components/client/[id]/EmergencyContactSection.tsx
 "use client";
 
-import { Phone, User as UserIcon } from "lucide-react";
+import { Phone, User as UserIcon } from "@phosphor-icons/react/ssr";
 import SectionCard from "@/components/ui/SectionCard";
 import { ProfileField } from "@/components/profile/ProfileLayout";
 import type { Client } from "@/lib/types";

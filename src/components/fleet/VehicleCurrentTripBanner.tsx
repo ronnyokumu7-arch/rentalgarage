@@ -2,7 +2,7 @@
 "use client";
 
 import Link from "next/link";
-import { Clock, Wrench, CheckCircle2, Plus, AlertTriangle } from "lucide-react";
+import { Clock, Wrench, CheckCircle as CheckCircle2, Plus, Warning as AlertTriangle } from "@phosphor-icons/react/ssr";
 import type { Vehicle } from "@/lib/types";
 import type { VehicleDerivedStats } from "@/hooks/fleet/useVehicleDetail";
 import { formatTimeRemaining } from "@/lib/fleet/time";
@@ -47,7 +47,7 @@ export default function VehicleCurrentTripBanner({
                   : "bg-emerald-500/15 text-emerald-500"
               }`}
             >
-              <Clock size={18} />
+              <Clock size={18} aria-hidden="true" />
             </div>
             <div className="min-w-0">
               <p
@@ -105,7 +105,7 @@ export default function VehicleCurrentTripBanner({
         <div className="flex items-start sm:items-center justify-between gap-3 flex-wrap">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-500 flex items-center justify-center flex-shrink-0">
-              {isMaintenance ? <Wrench size={18} /> : <AlertTriangle size={18} />}
+              {isMaintenance ? <Wrench size={18} aria-hidden="true" /> : <AlertTriangle size={18} aria-hidden="true" />}
             </div>
             <div className="min-w-0">
               <p className="text-[11px] font-extrabold uppercase tracking-wider text-amber-600 dark:text-amber-400">
@@ -146,7 +146,7 @@ export default function VehicleCurrentTripBanner({
       <div className="flex items-start sm:items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center flex-shrink-0">
-            <CheckCircle2 size={18} />
+            <CheckCircle2 size={18} aria-hidden="true" />
           </div>
           <div className="min-w-0">
             <p className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">
@@ -161,7 +161,7 @@ export default function VehicleCurrentTripBanner({
           onClick={onCreateBooking}
           className="inline-flex items-center gap-1 text-[11px] font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity flex-shrink-0"
         >
-          <Plus size={11} /> Create Booking
+          <Plus size={11} aria-hidden="true" /> Create Booking
         </button>
       </div>
     </div>

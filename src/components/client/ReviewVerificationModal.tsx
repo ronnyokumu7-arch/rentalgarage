@@ -3,18 +3,18 @@
 import { useState, useEffect } from "react";
 import {
   User,
-  Mail,
+  Envelope as Mail,
   Phone,
   CheckCircle,
   XCircle,
-  Loader2,
+  CircleNotch as Loader2,
   Eye,
   FileText,
   Car,
   CreditCard,
   UserCheck,
-  AlertTriangle,
-} from "lucide-react";
+  Warning as AlertTriangle,
+} from "@phosphor-icons/react/ssr";
 import Modal from "@/components/ui/Modal";
 import SecureImage from "@/components/ui/SecureImage";
 import SecureLightbox from "@/components/ui/SecureLightbox";
@@ -110,7 +110,7 @@ export default function ReviewVerificationModal({
     return (
       <Modal open={isOpen} onClose={onClose} title="Review Verification" size="lg">
         <div className="flex items-center justify-center py-12">
-          <Loader2 className="w-6 h-6 animate-spin text-[var(--color-primary)]" />
+          <Loader2 className="w-6 h-6 animate-spin text-[var(--color-primary)]" aria-hidden="true" />
         </div>
       </Modal>
     );
@@ -154,7 +154,7 @@ export default function ReviewVerificationModal({
           <div className="p-4 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)]">
             <div className="flex items-start gap-3">
               <div className="w-12 h-12 rounded-full bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center shrink-0">
-                <User size={20} />
+                <User size={20} aria-hidden="true" />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="font-bold text-[var(--color-ink)] truncate">
@@ -163,13 +163,13 @@ export default function ReviewVerificationModal({
                 <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5 text-sm text-[var(--color-ink-muted)]">
                   {person.email && (
                     <span className="flex items-center gap-1.5 truncate">
-                      <Mail size={14} className="shrink-0" />
+                      <Mail size={14} className="shrink-0" aria-hidden="true" />
                       <span className="truncate">{person.email}</span>
                     </span>
                   )}
                   {person.phone && (
                     <span className="flex items-center gap-1.5 truncate">
-                      <Phone size={14} className="shrink-0" />
+                      <Phone size={14} className="shrink-0" aria-hidden="true" />
                       <span className="truncate">{person.phone}</span>
                     </span>
                   )}
@@ -183,7 +183,7 @@ export default function ReviewVerificationModal({
             <div className="flex items-start gap-2 p-3 rounded-xl bg-rose-500/10 border border-rose-500/20">
               <AlertTriangle
                 size={16}
-                className="text-rose-600 dark:text-rose-400 shrink-0 mt-0.5"
+                className="text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" aria-hidden="true"
               />
               <div>
                 <p className="text-xs font-bold text-rose-700 dark:text-rose-400">
@@ -201,7 +201,7 @@ export default function ReviewVerificationModal({
             <div className="p-8 text-center rounded-xl bg-[var(--color-surface-hover)] border border-dashed border-[var(--color-surface-border)]">
               <FileText
                 size={48}
-                className="mx-auto text-[var(--color-ink-subtle)] mb-3"
+                className="mx-auto text-[var(--color-ink-subtle)] mb-3" aria-hidden="true"
               />
               <p className="text-sm text-[var(--color-ink-muted)]">
                 No documents or selfie uploaded for verification.
@@ -213,7 +213,7 @@ export default function ReviewVerificationModal({
                 {/* ID Documents - Side by Side Thumbnails */}
                 <div className="space-y-3">
                   <h4 className="text-sm font-bold text-[var(--color-ink)] flex items-center gap-2">
-                    <FileText size={16} className="text-[var(--color-primary)]" />
+                    <FileText size={16} className="text-[var(--color-primary)]" aria-hidden="true" />
                     Submitted Documents
                   </h4>
 
@@ -230,7 +230,7 @@ export default function ReviewVerificationModal({
                           className="w-full h-full object-cover"
                           fallback={
                             <div className="w-full h-full flex flex-col items-center justify-center text-[var(--color-ink-subtle)] p-2">
-                              <CreditCard size={20} className="mb-1" />
+                              <CreditCard size={20} className="mb-1" aria-hidden="true" />
                               <p className="text-[10px] text-center font-medium">
                                 ID Front
                               </p>
@@ -238,7 +238,7 @@ export default function ReviewVerificationModal({
                           }
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                          <Eye size={20} className="text-white" />
+                          <Eye size={20} className="text-white" aria-hidden="true" />
                         </div>
                       </button>
                     )}
@@ -255,7 +255,7 @@ export default function ReviewVerificationModal({
                           className="w-full h-full object-cover"
                           fallback={
                             <div className="w-full h-full flex flex-col items-center justify-center text-[var(--color-ink-subtle)] p-2">
-                              <Car size={20} className="mb-1" />
+                              <Car size={20} className="mb-1" aria-hidden="true" />
                               <p className="text-[10px] text-center font-medium">
                                 Driver's License
                               </p>
@@ -263,7 +263,7 @@ export default function ReviewVerificationModal({
                           }
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                          <Eye size={20} className="text-white" />
+                          <Eye size={20} className="text-white" aria-hidden="true" />
                         </div>
                       </button>
                     )}
@@ -282,7 +282,7 @@ export default function ReviewVerificationModal({
                 {/* Selfie - Full Height */}
                 <div className="space-y-3">
                   <h4 className="text-sm font-bold text-[var(--color-ink)] flex items-center gap-2">
-                    <User size={16} className="text-[var(--color-primary)]" />
+                    <User size={16} className="text-[var(--color-primary)]" aria-hidden="true" />
                     Identity Selfie
                   </h4>
 
@@ -300,7 +300,7 @@ export default function ReviewVerificationModal({
                         className="w-full h-full object-cover"
                         fallback={
                           <div className="w-full h-full flex flex-col items-center justify-center text-[var(--color-ink-subtle)] p-4">
-                            <User size={32} className="mb-2" />
+                            <User size={32} className="mb-2" aria-hidden="true" />
                             <p className="text-xs text-center font-medium">
                               Click to view selfie
                             </p>
@@ -308,13 +308,13 @@ export default function ReviewVerificationModal({
                         }
                       />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                        <Eye size={24} className="text-white" />
+                        <Eye size={24} className="text-white" aria-hidden="true" />
                       </div>
                     </button>
                   ) : (
                     <div className="w-full aspect-[3/4] sm:aspect-[4/5] rounded-xl bg-[var(--color-surface-hover)] border-2 border-dashed border-[var(--color-surface-border)] flex items-center justify-center">
                       <div className="text-center text-[var(--color-ink-subtle)] p-4">
-                        <User size={32} className="mx-auto mb-2" />
+                        <User size={32} className="mx-auto mb-2" aria-hidden="true" />
                         <p className="text-sm font-medium">No selfie uploaded</p>
                       </div>
                     </div>
@@ -329,7 +329,7 @@ export default function ReviewVerificationModal({
                     <h4 className="text-sm font-bold text-[var(--color-ink)] flex items-center gap-2">
                       <UserCheck
                         size={16}
-                        className="text-[var(--color-primary)]"
+                        className="text-[var(--color-primary)]" aria-hidden="true"
                       />
                       Personal Driver Documents
                     </h4>
@@ -357,7 +357,7 @@ export default function ReviewVerificationModal({
                               className="w-full h-full object-cover"
                               fallback={
                                 <div className="w-full h-full flex flex-col items-center justify-center text-[var(--color-ink-subtle)] p-2">
-                                  <CreditCard size={20} className="mb-1" />
+                                  <CreditCard size={20} className="mb-1" aria-hidden="true" />
                                   <p className="text-[10px] text-center font-medium">
                                     Driver ID Front
                                   </p>
@@ -365,7 +365,7 @@ export default function ReviewVerificationModal({
                               }
                             />
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                              <Eye size={20} className="text-white" />
+                              <Eye size={20} className="text-white" aria-hidden="true" />
                             </div>
                           </button>
                         )}
@@ -384,7 +384,7 @@ export default function ReviewVerificationModal({
                               className="w-full h-full object-cover"
                               fallback={
                                 <div className="w-full h-full flex flex-col items-center justify-center text-[var(--color-ink-subtle)] p-2">
-                                  <Car size={20} className="mb-1" />
+                                  <Car size={20} className="mb-1" aria-hidden="true" />
                                   <p className="text-[10px] text-center font-medium">
                                     Driver DL Front
                                   </p>
@@ -392,7 +392,7 @@ export default function ReviewVerificationModal({
                               }
                             />
                             <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all flex items-center justify-center opacity-0 group-hover:opacity-100">
-                              <Eye size={20} className="text-white" />
+                              <Eye size={20} className="text-white" aria-hidden="true" />
                             </div>
                           </button>
                         )}
@@ -419,7 +419,7 @@ export default function ReviewVerificationModal({
                     <div className="p-6 text-center rounded-lg bg-[var(--color-surface-hover)] border border-dashed border-[var(--color-surface-border)]">
                       <UserCheck
                         size={32}
-                        className="mx-auto text-[var(--color-ink-subtle)] mb-2"
+                        className="mx-auto text-[var(--color-ink-subtle)] mb-2" aria-hidden="true"
                       />
                       <p className="text-xs text-[var(--color-ink-muted)]">
                         This client declared a personal driver, but no driver
@@ -440,9 +440,9 @@ export default function ReviewVerificationModal({
               className="w-full sm:flex-1 py-3.5 rounded-xl text-sm font-bold text-white bg-emerald-600 hover:bg-emerald-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
             >
               {submitting ? (
-                <Loader2 size={16} className="animate-spin" />
+                <Loader2 size={16} className="animate-spin" aria-hidden="true" />
               ) : (
-                <CheckCircle size={16} />
+                <CheckCircle size={16} aria-hidden="true" />
               )}
               Approve Verification
             </button>
@@ -457,9 +457,9 @@ export default function ReviewVerificationModal({
               className="w-full sm:flex-1 py-3.5 rounded-xl text-sm font-bold text-white bg-red-600 hover:bg-red-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]"
             >
               {submitting ? (
-                <Loader2 size={16} className="animate-spin" />
+                <Loader2 size={16} className="animate-spin" aria-hidden="true" />
               ) : (
-                <XCircle size={16} />
+                <XCircle size={16} aria-hidden="true" />
               )}
               Reject Verification
             </button>

@@ -3,14 +3,14 @@
 
 import {
   Phone,
-  MessageCircle,
+  ChatCircle as MessageCircle,
   CreditCard,
   Car,
-  CheckCircle2,
+  CheckCircle as CheckCircle2,
   Circle,
-  MoreVertical,
+  DotsThreeVertical as MoreVertical,
   ShieldCheck,
-} from "lucide-react";
+} from "@phosphor-icons/react/ssr";
 import {
   getInitials,
   getAvatarStatusClasses,
@@ -65,7 +65,7 @@ export default function ClientRow({
     if (client.driving_arrangement === "own_driver") {
       return (
         <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/10 px-2 py-0.5 text-[10px] font-bold text-violet-700 dark:text-violet-300">
-          <Car size={11} className="flex-shrink-0" />
+          <Car size={11} className="flex-shrink-0" aria-hidden="true" />
           My Driver
         </span>
       );
@@ -74,7 +74,7 @@ export default function ClientRow({
     if (client.driving_arrangement === "chauffeur") {
       return (
         <span className="inline-flex items-center gap-1 rounded-full bg-sky-500/10 px-2 py-0.5 text-[10px] font-bold text-sky-700 dark:text-sky-300">
-          <Car size={11} className="flex-shrink-0" />
+          <Car size={11} className="flex-shrink-0" aria-hidden="true" />
           Chauffeur
         </span>
       );
@@ -83,7 +83,7 @@ export default function ClientRow({
     if (dl.kind === "none") {
       return (
         <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--color-ink-subtle)]">
-          <CreditCard size={11} className="flex-shrink-0" />
+          <CreditCard size={11} className="flex-shrink-0" aria-hidden="true" />
           DL not provided
         </span>
       );
@@ -92,7 +92,7 @@ export default function ClientRow({
     if (dl.kind === "valid") {
       return (
         <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-          <CreditCard size={11} className="flex-shrink-0" />
+          <CreditCard size={11} className="flex-shrink-0" aria-hidden="true" />
           {dl.label}
         </span>
       );
@@ -101,7 +101,7 @@ export default function ClientRow({
     if (dl.kind === "expired") {
       return (
         <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 dark:text-rose-400">
-          <CreditCard size={11} className="flex-shrink-0" />
+          <CreditCard size={11} className="flex-shrink-0" aria-hidden="true" />
           DL expired
         </span>
       );
@@ -110,7 +110,7 @@ export default function ClientRow({
     // expiring soon
     return (
       <span className={`inline-flex items-center gap-1 text-[11px] font-semibold ${dlToneClasses[dl.tone]}`}>
-        <CreditCard size={11} className="flex-shrink-0" />
+        <CreditCard size={11} className="flex-shrink-0" aria-hidden="true" />
         {dl.label}
       </span>
     );
@@ -153,7 +153,7 @@ export default function ClientRow({
               aria-label="Verified client"
               title="Verified client"
             >
-              <ShieldCheck size={14} strokeWidth={2} />
+              <ShieldCheck size={14} weight="regular" aria-hidden="true" />
             </span>
           )}
         </div>
@@ -161,7 +161,7 @@ export default function ClientRow({
         {isVerified ? (
           <div className="flex items-center gap-3 mt-1 flex-wrap">
             <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
-              <CreditCard size={11} className="flex-shrink-0" />
+              <CreditCard size={11} className="flex-shrink-0" aria-hidden="true" />
               ID verified
             </span>
             {renderDL()}
@@ -188,7 +188,7 @@ export default function ClientRow({
               "Verification link sent"
             ) : client.status === "pending" ? (
               <>
-                <ShieldCheck size={12} className="flex-shrink-0" />
+                <ShieldCheck size={12} className="flex-shrink-0" aria-hidden="true" />
                 Review &amp; verify client
               </>
             ) : (
@@ -205,7 +205,7 @@ export default function ClientRow({
                 onClick={(e) => e.stopPropagation()}
                 className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-border)] transition-colors text-[10px] font-bold text-[var(--color-ink)]"
               >
-                <Phone size={10} className="text-[var(--color-ink-muted)] flex-shrink-0" />
+                <Phone size={10} className="text-[var(--color-ink-muted)] flex-shrink-0" aria-hidden="true" />
                 <span className="font-mono tracking-tight whitespace-nowrap">{phone}</span>
               </a>
 
@@ -217,7 +217,7 @@ export default function ClientRow({
                   onClick={(e) => e.stopPropagation()}
                   className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-border)] transition-colors text-[10px] font-bold text-[var(--color-ink)]"
                 >
-                  <MessageCircle size={10} className="text-[var(--color-ink-muted)] flex-shrink-0" />
+                  <MessageCircle size={10} className="text-[var(--color-ink-muted)] flex-shrink-0" aria-hidden="true" />
                   Message
                 </a>
               )}
@@ -231,9 +231,9 @@ export default function ClientRow({
       {isSelecting ? (
         <div className="flex-shrink-0 self-center pl-1">
           {isSelected ? (
-            <CheckCircle2 size={22} className="text-[var(--color-primary)]" strokeWidth={2.25} />
+            <CheckCircle2 size={22} className="text-[var(--color-primary)]" weight="regular" aria-hidden="true" />
           ) : (
-            <Circle size={22} className="text-[var(--color-ink-subtle)]" strokeWidth={1.5} />
+            <Circle size={22} className="text-[var(--color-ink-subtle)]" weight="light" aria-hidden="true" />
           )}
         </div>
       ) : (
@@ -246,7 +246,7 @@ export default function ClientRow({
           aria-label={`Actions for ${displayName || "client"}`}
           className="flex-shrink-0 self-center -mr-1 w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors active:scale-95"
         >
-          <MoreVertical size={18} strokeWidth={2} />
+          <MoreVertical size={18} weight="regular" aria-hidden="true" />
         </button>
       )}
     </div>

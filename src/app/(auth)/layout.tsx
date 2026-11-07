@@ -3,7 +3,7 @@
 
 import { ReactNode } from "react";
 import Link from "next/link";
-import { ShieldCheck, Lock, Sparkles } from "lucide-react";
+import { ShieldCheck, Lock, Sparkle as Sparkles } from "@phosphor-icons/react/ssr";
 import { motion } from "framer-motion";
 
 interface AuthLayoutProps {
@@ -220,7 +220,7 @@ function TrustBadges() {
             borderColor: "rgba(167, 139, 250, 0.2)",
           }}
         >
-          <badge.icon size={14} className="text-[var(--color-primary)]" />
+          <badge.icon size={14} className="text-[var(--color-primary)]" aria-hidden="true" />
           <span className="text-[var(--color-ink-muted)] text-xs font-medium">{badge.label}</span>
         </motion.div>
       ))}

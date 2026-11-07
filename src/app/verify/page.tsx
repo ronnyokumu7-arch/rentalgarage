@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';         //added for emergencyy deploy
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CheckCircle, AlertCircle, Loader2, ArrowRight } from "lucide-react";
+import { CheckCircle, WarningCircle as AlertCircle, CircleNotch as Loader2, ArrowRight } from "@phosphor-icons/react/ssr";
 import toast from "react-hot-toast";
 import { usersApi } from "@/lib/api/users";
 
@@ -51,7 +51,7 @@ export default function VerifyPage() {
       <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center p-4">
         <div className="w-full max-w-md bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-8 text-center animate-in zoom-in-95 duration-300">
           <div className="w-16 h-16 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center mx-auto mb-6">
-            <Loader2 size={32} className="animate-spin text-[var(--color-primary)]" />
+            <Loader2 size={32} className="animate-spin text-[var(--color-primary)]" aria-hidden="true" />
           </div>
           <h2 className="text-xl font-bold text-[var(--color-ink)] mb-2">Verifying Your Account</h2>
           <p className="text-sm text-[var(--color-ink-muted)]">
@@ -68,7 +68,7 @@ export default function VerifyPage() {
       <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center p-4">
         <div className="w-full max-w-md bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-8 text-center animate-in zoom-in-95 duration-300">
           <div className="w-16 h-16 rounded-full bg-[var(--color-success-bg)] flex items-center justify-center mx-auto mb-6">
-            <CheckCircle size={32} className="text-[var(--color-success-text)]" />
+            <CheckCircle size={32} className="text-[var(--color-success-text)]" aria-hidden="true" />
           </div>
           <h2 className="text-xl font-bold text-[var(--color-ink)] mb-2">Verification Successful!</h2>
           <p className="text-sm text-[var(--color-ink-muted)] mb-8">
@@ -78,7 +78,7 @@ export default function VerifyPage() {
             onClick={() => router.push("/login")}
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition-all active:scale-[0.98]"
           >
-            Proceed to Login <ArrowRight size={16} />
+            Proceed to Login <ArrowRight size={16} aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -90,7 +90,7 @@ export default function VerifyPage() {
     <div className="min-h-screen bg-[var(--color-bg)] flex items-center justify-center p-4">
       <div className="w-full max-w-md bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-8 text-center animate-in zoom-in-95 duration-300">
         <div className="w-16 h-16 rounded-full bg-[var(--color-danger-bg)] flex items-center justify-center mx-auto mb-6">
-          <AlertCircle size={32} className="text-[var(--color-danger-text)]" />
+          <AlertCircle size={32} className="text-[var(--color-danger-text)]" aria-hidden="true" />
         </div>
         <h2 className="text-xl font-bold text-[var(--color-ink)] mb-2">Verification Failed</h2>
         <p className="text-sm text-[var(--color-ink-muted)] mb-8">
