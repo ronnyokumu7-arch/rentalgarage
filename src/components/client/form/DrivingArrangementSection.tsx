@@ -197,7 +197,7 @@ export default function DrivingArrangementSection({
 
             <div id="field-dl_issued_date">
               <label className={labelClass}>
-                Issue Date (optional)
+                Date of Issue (optional)
               </label>
               <div className="relative group">
                 <Calendar

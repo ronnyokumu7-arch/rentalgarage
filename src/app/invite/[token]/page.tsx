@@ -220,7 +220,7 @@ export default function PublicInvitePage() {
                 <span className="font-bold">1.</span> The agency will review your basic details.
               </li>
               <li className="flex items-start gap-2">
-                <span className="font-bold">2.</span> They will invite you to submit the documents and driving details needed for verification.
+                <span className="font-bold">2.</span> You will be invited to submit required documents and details for verification.
               </li>
               <li className="flex items-start gap-2">
                 <span className="font-bold">3.</span> Your account will be activated after verification is approved.

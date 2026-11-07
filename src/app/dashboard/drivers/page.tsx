@@ -843,7 +843,7 @@ export default function DriversPage() {
             </div>
 
             <div>
-              <label className={labelClass}>DL Issue Date (Optional)</label>
+              <label className={labelClass}>DL Date of Issue (Optional)</label>
               <input
                 className={inputClass}
                 type="date"

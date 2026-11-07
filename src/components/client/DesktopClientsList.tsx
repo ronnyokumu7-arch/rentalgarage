@@ -18,7 +18,8 @@ import {
   Clock,
   MessageCircle,
   PhoneCall,
-  ShieldCheck,
+  Check,
+  Shield as ShieldIcon,
 } from "lucide-react";
 import DataTable, { RowAction } from "@/components/ui/DataTable";
 import FilterDropdown from "@/components/ui/FilterDropdown";
@@ -305,11 +306,14 @@ export default function DesktopClientsList({
                               aria-label="Verified client"
                               title="Verified client"
                             >
-                              <ShieldCheck
-                                size={16}
-                                strokeWidth={2.5}
-                                className="text-white fill-blue-600 dark:fill-blue-500"
-                              />
+                              <span className="relative inline-flex text-blue-600 dark:text-blue-500">
+                                <ShieldIcon size={16} strokeWidth={1.5} fill="currentColor" />
+                                <Check
+                                  size={9}
+                                  strokeWidth={3}
+                                  className="absolute left-[3.5px] top-[3px] text-white"
+                                />
+                              </span>
                             </span>
                           )}
                         </div>

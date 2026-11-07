@@ -204,7 +204,7 @@ export default function VettingPage() {
                 <div className="space-y-3">
                   <input className={inputClass} placeholder="Driving licence number" value={driving.dl_number} onChange={(event) => updateDriving("dl_number", event.target.value)} />
                   <label className="block text-xs font-bold">
-                    Issue date (optional)
+                    Date of Issue (optional)
                     <input className={`${inputClass} mt-1`} type="date" value={driving.dl_issued_date} onChange={(event) => updateDriving("dl_issued_date", event.target.value)} />
                   </label>
                   <label className="block text-xs font-bold">
