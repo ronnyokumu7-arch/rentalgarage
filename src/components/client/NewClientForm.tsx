@@ -196,7 +196,7 @@ export default function NewClientForm({
             existingIdFront={existingIdFront}
             existingIdBack={existingIdBack}
             showIdentityUploads={mode === "edit"}
-            showIdFrontUpload={isPublicIntake}
+            showIdFrontUpload={mode !== "edit"}
           />
 
           {mode === "edit" && <DrivingArrangementSection

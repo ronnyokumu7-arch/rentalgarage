@@ -281,11 +281,11 @@ export default function ClientDetailsSection({
           {(showIdentityUploads || showIdFrontUpload) && (
             <div className="mt-4">
               <label className={labelClass}>
-                ID Document Image (optional)
+                Upload your ID or passport
               </label>
               <div className={showIdentityUploads ? "grid grid-cols-1 sm:grid-cols-2 gap-3" : ""}>
                 <DocUploadSlot
-                  label="Upload ID Front"
+                  label="Upload ID or Passport"
                   icon={FileText}
                   file={idFrontFile}
                   setFile={setIdFrontFile}

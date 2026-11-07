@@ -12,6 +12,19 @@ type VettingPreview = {
   tenant_logo_url: string | null;
   expires_at: string;
   person_first_name: string;
+  id_front_uploaded: boolean;
+  driving_arrangement: Arrangement | null;
+  dl_number: string | null;
+  dl_expiry: string | null;
+  dl_issued_date: string | null;
+  driver_full_name: string | null;
+  driver_phone: string | null;
+  driver_id_number: string | null;
+  driver_dl_number: string | null;
+  driver_dl_expiry: string | null;
+  driver_dl_issued_date: string | null;
+  uploaded_slots?: DocumentSlot[];
+  selfie_uploaded?: boolean;
 };
 
 type Step = "details" | "selfie" | "success";
@@ -27,7 +40,10 @@ const INITIAL_DOCUMENTS: Record<DocumentSlot, File | null> = {
 };
 
 const inputClass = "w-full rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] px-3 py-2.5 text-sm text-[var(--color-ink)] outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20";
-const SUPPORTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const SUPPORTED_IMAGE_TYPES = [
+  "image/jpeg", "image/png", "image/webp", "image/heic", "image/heif",
+  "image/avif", "image/bmp", "image/tiff",
+];
 
 export default function VettingPage() {
   const token = typeof window === "undefined" ? "" : window.location.pathname.split("/").pop() || "";
@@ -42,6 +58,7 @@ export default function VettingPage() {
     driver_dl_number: "", driver_dl_issued_date: "", driver_dl_expiry: "",
   });
   const [documents, setDocuments] = useState<Record<DocumentSlot, File | null>>(INITIAL_DOCUMENTS);
+  const [uploadedSlots, setUploadedSlots] = useState<Set<DocumentSlot>>(new Set());
   const [selfie, setSelfie] = useState<File | null>(null);
   const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -52,6 +69,19 @@ export default function VettingPage() {
     apiClient.get<VettingPreview>(`/vetting/preview/${token}`)
       .then(({ data }) => {
         setPreview(data);
+        if (data.driving_arrangement) setArrangement(data.driving_arrangement);
+        setDriving({
+          dl_number: data.dl_number || "",
+          dl_issued_date: data.dl_issued_date || "",
+          dl_expiry: data.dl_expiry || "",
+          driver_full_name: data.driver_full_name || "",
+          driver_phone: data.driver_phone || "",
+          driver_id_number: data.driver_id_number || "",
+          driver_dl_number: data.driver_dl_number || "",
+          driver_dl_issued_date: data.driver_dl_issued_date || "",
+          driver_dl_expiry: data.driver_dl_expiry || "",
+        });
+        setUploadedSlots(new Set(data.uploaded_slots ?? (data.id_front_uploaded ? ["id_front"] : [])));
         if (data.person_type === "driver") setStep("selfie");
       })
       .catch((requestError: { response?: { status?: number } }) => {
@@ -62,26 +92,61 @@ export default function VettingPage() {
       .finally(() => setLoading(false));
   }, [token]);
 
-  const updateDriving = (field: keyof typeof driving, value: string) =>
+  const updateDriving = (field: keyof typeof driving, value: string) => {
+    if (driving[field] === value) return;
     setDriving((current) => ({ ...current, [field]: value }));
+    const invalidatedSlots: DocumentSlot[] = field.startsWith("driver_")
+      ? ["driver_id_front", "driver_dl_front"]
+      : ["dl_front"];
+    setUploadedSlots((current) => {
+      const next = new Set(current);
+      invalidatedSlots.forEach((slot) => next.delete(slot));
+      return next;
+    });
+    setDocuments((current) => ({
+      ...current,
+      ...Object.fromEntries(invalidatedSlots.map((slot) => [slot, null])),
+    }));
+  };
 
-  const requiredSlots: DocumentSlot[] = arrangement === "self_drive"
-    ? ["id_front", "id_back", "dl_front"]
-    : arrangement === "own_driver"
-      ? ["id_front", "id_back", "driver_id_front", "driver_dl_front"]
-      : ["id_front", "id_back"];
+  const requiredSlots: DocumentSlot[] = [
+    "id_front",
+    "id_back",
+    ...(arrangement === "self_drive"
+      ? ["dl_front" as const]
+      : arrangement === "own_driver"
+        ? ["driver_id_front" as const, "driver_dl_front" as const]
+        : []),
+  ];
+
+  const selectArrangement = (nextArrangement: Arrangement) => {
+    if (nextArrangement === arrangement) return;
+    const arrangementSlots: DocumentSlot[] = ["dl_front", "driver_id_front", "driver_dl_front"];
+    setArrangement(nextArrangement);
+    setUploadedSlots((current) => {
+      const next = new Set(current);
+      arrangementSlots.forEach((slot) => next.delete(slot));
+      return next;
+    });
+    setDocuments((current) => ({
+      ...current,
+      dl_front: null,
+      driver_id_front: null,
+      driver_dl_front: null,
+    }));
+  };
 
   const selectDocument = (slot: DocumentSlot, file: File | undefined) => {
     if (!file) return;
     if (!SUPPORTED_IMAGE_TYPES.includes(file.type)) {
-      toast.error("Choose a JPG, PNG, or WEBP image.");
+      toast.error("Choose a supported image format.");
       return;
     }
     setDocuments((current) => ({ ...current, [slot]: file }));
   };
 
   const saveVerificationDetails = async () => {
-    const missing = requiredSlots.find((slot) => !documents[slot]);
+    const missing = requiredSlots.find((slot) => !uploadedSlots.has(slot) && !documents[slot]);
     if (missing) {
       toast.error("Upload every required document before continuing.");
       return;
@@ -104,6 +169,7 @@ export default function VettingPage() {
           : { driving_arrangement: arrangement };
       await apiClient.put(`/vetting/${token}/driving-details`, payload);
       for (const slot of requiredSlots) {
+        if (uploadedSlots.has(slot) && !documents[slot]) continue;
         const file = documents[slot];
         if (!file) {
           throw new Error(`Missing required document: ${slot}`);
@@ -111,6 +177,8 @@ export default function VettingPage() {
         const formData = new FormData();
         formData.append("file", file);
         await apiClient.post(`/vetting/${token}/upload-document`, formData, { params: { slot } });
+        setUploadedSlots((current) => new Set(current).add(slot));
+        setDocuments((current) => ({ ...current, [slot]: null }));
       }
       setStep("selfie");
     } catch (error) {
@@ -122,7 +190,7 @@ export default function VettingPage() {
 
   const selectSelfie = (file: File | undefined) => {
     if (!file || !SUPPORTED_IMAGE_TYPES.includes(file.type)) {
-      toast.error("Take or choose a JPG, PNG, or WEBP photo.");
+      toast.error("Take or choose a supported image format.");
       return;
     }
     if (selfiePreview) URL.revokeObjectURL(selfiePreview);
@@ -131,15 +199,17 @@ export default function VettingPage() {
   };
 
   const submitVerification = async () => {
-    if (!selfie) {
+    if (!selfie && !preview?.selfie_uploaded) {
       toast.error("Take a selfie holding your ID to continue.");
       return;
     }
     setSaving(true);
     try {
-      const formData = new FormData();
-      formData.append("file", selfie);
-      await apiClient.post(`/vetting/${token}/upload-selfie`, formData);
+      if (selfie) {
+        const formData = new FormData();
+        formData.append("file", selfie);
+        await apiClient.post(`/vetting/${token}/upload-selfie`, formData);
+      }
       await apiClient.post(`/vetting/${token}/submit`, { selfie_with_id: "uploaded" });
       setStep("success");
     } catch (error) {
@@ -156,7 +226,9 @@ export default function VettingPage() {
   const DocumentCard = ({ slot, label }: { slot: DocumentSlot; label: string }) => (
     <div className="rounded-xl border border-[var(--color-surface-border)] p-3">
       <p className="text-xs font-bold text-[var(--color-ink)]">{label}</p>
-      <p className="mt-1 truncate text-[10px] text-[var(--color-ink-muted)]">{documents[slot]?.name || "Not selected"}</p>
+      <p className="mt-1 truncate text-[10px] text-[var(--color-ink-muted)]">
+        {documents[slot]?.name || (uploadedSlots.has(slot) ? "Already uploaded" : "Not selected")}
+      </p>
       <div className="mt-3 grid grid-cols-2 gap-2">
         <label className="cursor-pointer rounded-lg bg-[var(--color-surface-hover)] px-2 py-2 text-center text-[10px] font-bold"><Upload size={12} className="mr-1 inline" />Device<input className="hidden" type="file" accept={SUPPORTED_IMAGE_TYPES.join(",")} onChange={(event) => selectDocument(slot, event.target.files?.[0])} /></label>
         <label className="cursor-pointer rounded-lg bg-[var(--color-primary)]/10 px-2 py-2 text-center text-[10px] font-bold text-[var(--color-primary)]"><Camera size={12} className="mr-1 inline" />Camera<input className="hidden" type="file" accept={SUPPORTED_IMAGE_TYPES.join(",")} capture="environment" onChange={(event) => selectDocument(slot, event.target.files?.[0])} /></label>
@@ -190,7 +262,7 @@ export default function VettingPage() {
                   <button
                     key={option}
                     type="button"
-                    onClick={() => setArrangement(option)}
+                    onClick={() => selectArrangement(option)}
                     className={`rounded-xl border p-3 text-xs font-bold ${
                       arrangement === option
                         ? "border-[var(--color-primary)] bg-[var(--color-primary)]/10"
@@ -273,7 +345,10 @@ export default function VettingPage() {
                 )}
                 <input ref={selfieInput} className="hidden" type="file" accept={SUPPORTED_IMAGE_TYPES.join(",")} capture="user" onChange={(event) => selectSelfie(event.target.files?.[0])} />
               </div>
-              <button type="button" onClick={submitVerification} disabled={saving || !selfie} className="w-full rounded-xl bg-[var(--color-primary)] py-3 text-sm font-bold text-white disabled:opacity-50">
+              {preview.selfie_uploaded && !selfie && (
+                <p className="text-center text-xs text-[var(--color-ink-muted)]">Your selfie is already uploaded.</p>
+              )}
+              <button type="button" onClick={submitVerification} disabled={saving || (!selfie && !preview.selfie_uploaded)} className="w-full rounded-xl bg-[var(--color-primary)] py-3 text-sm font-bold text-white disabled:opacity-50">
                 {saving ? "Submitting…" : "Submit verification"}
               </button>
             </>

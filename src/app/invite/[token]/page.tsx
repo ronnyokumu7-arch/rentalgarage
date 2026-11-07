@@ -100,6 +100,23 @@ export default function PublicInvitePage() {
 
       };
 
+      if (idFrontFile) {
+        const formData = new FormData();
+        formData.append("file", idFrontFile);
+        const uploadResponse = await fetch(
+          `${env.NEXT_PUBLIC_API_URL}/clients/invite/${token}/upload?field=id_front`,
+          { method: "POST", body: formData }
+        );
+        if (!uploadResponse.ok) {
+          const errorData = await uploadResponse.json();
+          toast.error(
+            getApiErrorMessageFromBody(errorData, "We could not upload your ID image. Please try again.")
+          );
+          setStatus("ready");
+          return;
+        }
+      }
+
       const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/clients/invite/${token}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
