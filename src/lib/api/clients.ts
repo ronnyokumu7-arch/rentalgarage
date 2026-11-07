@@ -1,5 +1,25 @@
 import apiClient from "@/lib/api-client";
+import { normalizePersonName } from "@/lib/client-name";
 import type { Client, ClientCreate, ClientUpdate, Booking, PaginatedResponse } from "@/lib/types";
+
+const normalizeClientNames = (data: ClientCreate | ClientUpdate) => ({
+  ...data,
+  ...("first_name" in data && typeof data.first_name === "string"
+    ? { first_name: normalizePersonName(data.first_name) }
+    : {}),
+  ...("last_name" in data && typeof data.last_name === "string"
+    ? { last_name: normalizePersonName(data.last_name) }
+    : {}),
+  ...("full_name" in data && typeof data.full_name === "string"
+    ? { full_name: normalizePersonName(data.full_name) }
+    : {}),
+  ...(typeof data.next_of_kin_name === "string"
+    ? { next_of_kin_name: normalizePersonName(data.next_of_kin_name) }
+    : {}),
+  ...(data.driver
+    ? { driver: { ...data.driver, full_name: normalizePersonName(data.driver.full_name) } }
+    : {}),
+});
 
 export const clientsApi = {
   // ── Core CRUD ──────────────────────────────────────────────────────────────
@@ -13,10 +33,10 @@ export const clientsApi = {
     apiClient.get<Client>(`/clients/${id}`).then((r) => r.data), 
     
   create: (data: ClientCreate) =>
-    apiClient.post<Client>("/clients", data).then((r) => r.data),
+    apiClient.post<Client>("/clients", normalizeClientNames(data)).then((r) => r.data),
     
   update: (id: number, data: ClientUpdate) =>
-    apiClient.patch<Client>(`/clients/${id}`, data).then((r) => r.data), 
+    apiClient.patch<Client>(`/clients/${id}`, normalizeClientNames(data)).then((r) => r.data),
     
   delete: (id: number) =>
     apiClient.delete(`/clients/${id}`), 

@@ -8,6 +8,7 @@ import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import SecureImage from "@/components/ui/SecureImage";
 import AddressAutocomplete from "@/components/ui/AddressAutocomplete";
+import { normalizePersonName } from "@/lib/client-name";
 import DocUploadSlot from "./DocUploadSlot";
 import type { SectionProps } from "./types";
 import "@/styles/phone-input.css";
@@ -128,7 +129,9 @@ export default function ClientDetailsSection({
               type="text"
               value={formData.first_name || ""}
               onChange={(e) => updateField("first_name", e.target.value)}
+              onBlur={(e) => updateField("first_name", normalizePersonName(e.target.value))}
               placeholder="e.g. Rebecca"
+              autoCapitalize="words"
               className={`${inputCls("first_name")} pl-9`}
             />
           </div>
@@ -148,7 +151,9 @@ export default function ClientDetailsSection({
               type="text"
               value={formData.last_name || ""}
               onChange={(e) => updateField("last_name", e.target.value)}
+              onBlur={(e) => updateField("last_name", normalizePersonName(e.target.value))}
               placeholder="e.g. Molly"
+              autoCapitalize="words"
               className={`${inputCls("last_name")} pl-9`}
             />
           </div>

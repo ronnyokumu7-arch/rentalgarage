@@ -4,6 +4,7 @@
 import { UserCircle, Camera } from "lucide-react";
 import Modal from "@/components/ui/Modal";
 import SecureImage from "@/components/ui/SecureImage";
+import { normalizePersonName } from "@/lib/client-name";
 import type { Client } from "@/lib/types";
 import type { ClientProfileFormData } from "@/hooks/clients/useClientProfile";
 
@@ -90,6 +91,8 @@ export default function IdentityEditModal({
             <input
               value={formData.first_name}
               onChange={(e) => updateField("first_name", e.target.value)}
+              onBlur={(e) => updateField("first_name", normalizePersonName(e.target.value))}
+              autoCapitalize="words"
               className={inputClass}
             />
           </div>
@@ -98,6 +101,8 @@ export default function IdentityEditModal({
             <input
               value={formData.last_name}
               onChange={(e) => updateField("last_name", e.target.value)}
+              onBlur={(e) => updateField("last_name", normalizePersonName(e.target.value))}
+              autoCapitalize="words"
               className={inputClass}
             />
           </div>

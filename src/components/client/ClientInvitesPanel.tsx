@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import toast from "react-hot-toast";
 import { clientInvitesApi, ClientInvite } from "@/lib/api/clientInvites";
+import { normalizePersonName } from "@/lib/client-name";
 
 const sectionClass = "bg-[var(--color-surface)] rounded-xl border border-[var(--color-surface-border)] p-4";
 
@@ -45,7 +46,7 @@ export default function ClientInvitesPanel() {
       // ✅ FIX: Reverted to positional arguments to match the API definition
       const res = await clientInvitesApi.create(
         ttl,
-        expectedName.trim() || undefined,
+        normalizePersonName(expectedName) || undefined,
         expectedPhone.trim() || undefined
       );
       setShareInvite(res.data);

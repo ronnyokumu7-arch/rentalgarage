@@ -213,7 +213,6 @@ export default function FleetPage() {
             handleTabChange={handleTabChange}
             mobileTabs={MOBILE_TABS.map((t) => ({ id: t.id, label: t.label, icon: t.icon }))}
             filteredVehicles={mobile.filteredVehicles}
-            activeRentals={activeRentals}
             setGarageVehicle={setGarageVehicle}
             setGarageModalOpen={setGarageModalOpen}
             setPricingVehicle={setPricingVehicle}

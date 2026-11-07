@@ -3,7 +3,7 @@
 
 import { ChevronDown, ChevronRight, MoreHorizontal } from "lucide-react";
 import FleetVehicleRow from "./FleetVehicleRow";
-import type { Vehicle, Booking } from "@/lib/types";
+import type { Vehicle } from "@/lib/types";
 import type { FleetSectionData } from "./types";
 
 interface FleetSectionProps {
@@ -15,7 +15,6 @@ interface FleetSectionProps {
   isDark: boolean;
   isSelecting: boolean;
   selectedIds: Set<number>;
-  activeRentals: Record<number, Booking>;
   makeHandlers: (vehicle: Vehicle) => {
     onTouchStart: (e: React.TouchEvent) => void;
     onTouchMove: (e: React.TouchEvent) => void;
@@ -35,7 +34,6 @@ export default function FleetSection({
   isDark,
   isSelecting,
   selectedIds,
-  activeRentals,
   makeHandlers,
   isFirst,
 }: FleetSectionProps) {
@@ -100,7 +98,6 @@ export default function FleetSection({
                 item={item}
                 isSelected={selectedIds.has(item.id)}
                 isSelecting={isSelecting}
-                activeRental={activeRentals[item.id]}
                 isMounted={isMounted}
                 isDark={isDark}
                 {...makeHandlers(item)}

@@ -9,6 +9,7 @@ import {
 import { QRCodeSVG } from "qrcode.react";
 import { clientInvitesApi, ClientInvite } from "@/lib/api/clientInvites";
 import { clientsApi } from "@/lib/api/clients";
+import { normalizePersonName } from "@/lib/client-name";
 import NewClientForm from "@/components/client/NewClientForm";
 import InviteLinksModal from "@/components/client/InviteLinksModal";
 import toast from "react-hot-toast";
@@ -74,7 +75,11 @@ export default function AddClientWorkspace({ onSuccess, onCancel }: AddClientWor
     e.preventDefault();
     setInviteLoading(true);
     try {
-      const res = await clientInvitesApi.create(ttl, expectedName, expectedPhone);
+      const res = await clientInvitesApi.create(
+        ttl,
+        normalizePersonName(expectedName),
+        expectedPhone
+      );
       setInvite(res.data);
       toast.success("Invite link generated!");
       window.dispatchEvent(new CustomEvent("client:invite:created"));
@@ -268,7 +273,7 @@ export default function AddClientWorkspace({ onSuccess, onCancel }: AddClientWor
                     Generate Onboarding Link
                   </h3>
                   <p className="text-xs text-[var(--color-ink-muted)] mt-0.5">
-                    The client will securely submit their details for your review.
+                    The client will submit their details for review.
                   </p>
                 </div>
               </div>

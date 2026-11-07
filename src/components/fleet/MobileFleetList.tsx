@@ -18,7 +18,7 @@ import {
   getCollections,
   type VehicleCollection,
 } from "@/lib/collections";
-import type { Vehicle, VehicleStatus, Booking } from "@/lib/types";
+import type { Vehicle, VehicleStatus } from "@/lib/types";
 
 interface MobileFleetListProps {
   loading: boolean;
@@ -31,7 +31,6 @@ interface MobileFleetListProps {
   handleTabChange: (tab: string) => void;
   mobileTabs: { id: string; label: string; icon: React.ElementType }[];
   filteredVehicles: Vehicle[];
-  activeRentals: Record<number, Booking>;
   setGarageVehicle: (v: Vehicle | null) => void;
   setGarageModalOpen: (open: boolean) => void;
   setPricingVehicle: (v: Vehicle | null) => void;
@@ -54,7 +53,6 @@ export default function MobileFleetList({
   activeTab,
   handleTabChange,
   filteredVehicles,
-  activeRentals,
   setGarageVehicle,
   setGarageModalOpen,
   setPricingVehicle,
@@ -492,7 +490,6 @@ export default function MobileFleetList({
                   isDark={isDark}
                   isSelecting={isSelecting}
                   selectedIds={selectedIds}
-                  activeRentals={activeRentals}
                   makeHandlers={makeHandlers}
                   isFirst={sIdx === 0}
                 />

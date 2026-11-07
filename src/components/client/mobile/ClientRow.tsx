@@ -15,6 +15,7 @@ import {
   getWhatsAppNumber,
   getDLStatus,
 } from "./helpers";
+import { getClientDisplayName } from "@/lib/client-name";
 import type { ClientListItem } from "./types";
 
 interface ClientRowProps {
@@ -48,6 +49,7 @@ export default function ClientRow({
     client.verification_status === "under_review" ||
     client.verification_status === "sent";
   const isSuspended = client.status === "suspended";
+  const displayName = getClientDisplayName(client.full_name);
 
   const dl = getDLStatus(client.dl_expiry);
   const hasExpiredDL = dl.kind === "expired";
@@ -81,8 +83,7 @@ export default function ClientRow({
       return (
         <span className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
           <CreditCard size={11} className="flex-shrink-0" />
-          Driving License
-          <BadgeCheck size={13} strokeWidth={2.25} className="flex-shrink-0" />
+          {dl.label}
         </span>
       );
     }
@@ -127,15 +128,23 @@ export default function ClientRow({
         <div
           className={`w-12 h-12 rounded-xl overflow-hidden flex items-center justify-center font-bold text-sm ${avatarColors}`}
         >
-          {getInitials(client.full_name)}
+          {getInitials(displayName)}
         </div>
       </div>
 
       <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1.5 flex-wrap">
+        <div className="flex items-center gap-1.5 min-w-0">
           <span className="text-sm font-bold text-[var(--color-ink)] truncate tracking-tight">
-            {client.full_name}
+            {displayName}
           </span>
+          {isVerified && (
+            <BadgeCheck
+              size={15}
+              strokeWidth={2.25}
+              className="flex-shrink-0 text-emerald-600 dark:text-emerald-400"
+              aria-label="Verified client"
+            />
+          )}
         </div>
 
         <div className="flex items-center gap-3 mt-1 flex-wrap">

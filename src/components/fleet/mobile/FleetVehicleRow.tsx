@@ -2,13 +2,13 @@
 "use client";
 
 import {
-  Gauge, Wrench, CheckCircle2, Circle, Clock, MoreVertical,
+  Gauge, Wrench, CheckCircle2, Circle, MoreVertical,
 } from "lucide-react";
 import {
   getVehicleBodyIcon,
   getVehicleBrandLogoUrl,
 } from "@/components/fleet/vehicle-avatar";
-import type { Vehicle, Booking } from "@/lib/types";
+import type { Vehicle } from "@/lib/types";
 
 const formatPlate = (plate: string) => plate.toUpperCase();
 const formatPrice = (amount: number | string) => {
@@ -22,48 +22,22 @@ const formatMileage = (km: number) => km.toString();
 
 const getStatusRing = (
   vehicle: Vehicle,
-  isDueForService: boolean,
-  isOnTrip: boolean
+  isDueForService: boolean
 ): string => {
   if (vehicle.is_archived) return "ring-slate-500/40";
   if (vehicle.status === "retired") return "ring-slate-500/40";
   if (vehicle.status === "maintenance" || isDueForService || vehicle.mileage_due)
     return "ring-amber-500/70";
   if (vehicle.status === "pending_activation") return "ring-violet-500/70";
-  if (vehicle.status === "rented") {
-    return isOnTrip ? "ring-blue-500/70" : "ring-emerald-500/70";
-  }
-  if (vehicle.status === "available") return "ring-slate-400/40";
+  if (vehicle.status === "rented") return "ring-blue-500/70";
+  if (vehicle.status === "available") return "ring-emerald-500/70";
   return "ring-slate-400/40";
-};
-
-const formatCountdown = (endDate: string): string | null => {
-  const end = new Date(endDate).getTime();
-  const diff = end - Date.now();
-  if (diff <= 0) return "Expiring";
-
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
-  const mins = Math.floor((diff / 1000 / 60) % 60);
-
-  if (days > 0) {
-    const dayStr = days === 1 ? "day" : "days";
-    const hrStr = hours === 1 ? "hr" : "hrs";
-    return `${days} ${dayStr} ${hours} ${hrStr} left`;
-  }
-  if (hours > 0) {
-    const hrStr = hours === 1 ? "hr" : "hrs";
-    const minStr = mins === 1 ? "min" : "mins";
-    return `${hours} ${hrStr} ${mins} ${minStr} left`;
-  }
-  return `${mins} mins left`;
 };
 
 interface FleetVehicleRowProps {
   item: Vehicle;
   isSelected: boolean;
   isSelecting: boolean;
-  activeRental?: Booking;
   isMounted: boolean;
   isDark: boolean;
   onTouchStart: (e: React.TouchEvent) => void;
@@ -77,7 +51,6 @@ export default function FleetVehicleRow({
   item,
   isSelected,
   isSelecting,
-  activeRental,
   isMounted,
   isDark,
   onTouchStart,
@@ -96,46 +69,16 @@ export default function FleetVehicleRow({
   const needsMileageAttention =
     isDueForService || item.mileage_due || item.status === "maintenance";
 
-  const isOnTrip = (() => {
-    if (item.status !== "rented" || !activeRental) return false;
-    const now = Date.now();
-    const start = new Date(activeRental.start_date).getTime();
-    const end = new Date(activeRental.end_date).getTime();
-    return now >= start && now <= end;
-  })();
-
-  const statusRing = getStatusRing(item, isDueForService, isOnTrip);
+  const statusRing = getStatusRing(item, isDueForService);
   const isDarkWithLogo = isMounted && isDark && Boolean(brandLogoUrl);
   const isMuted = item.is_archived || item.status === "retired";
+  const statusBadgeClass =
+    "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold";
 
   const getInlineStatus = () => {
     if (item.status === "rented") {
-      if (activeRental) {
-        const now = Date.now();
-        const start = new Date(activeRental.start_date).getTime();
-        const end = new Date(activeRental.end_date).getTime();
-
-        if (now >= start && now <= end) {
-          const countdown = formatCountdown(activeRental.end_date);
-          return (
-            <span className="flex items-center gap-1 text-[10px] font-bold text-blue-600 dark:text-blue-400 whitespace-nowrap">
-              <Clock size={10} className="flex-shrink-0" />
-              {countdown}
-            </span>
-          );
-        }
-
-        if (now < start) {
-          return (
-            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
-              Rented
-            </span>
-          );
-        }
-      }
-
       return (
-        <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400">
+        <span className={`${statusBadgeClass} bg-blue-500/10 text-blue-700 dark:text-blue-400`}>
           Rented
         </span>
       );
@@ -143,7 +86,7 @@ export default function FleetVehicleRow({
 
     if (item.status === "pending_activation") {
       return (
-        <span className="text-[10px] font-bold text-violet-600 dark:text-violet-400">
+        <span className={`${statusBadgeClass} bg-violet-500/10 text-violet-700 dark:text-violet-400`}>
           Pending
         </span>
       );
@@ -151,8 +94,16 @@ export default function FleetVehicleRow({
 
     if (item.status === "available") {
       return (
-        <span className="text-[10px] font-bold text-[var(--color-ink-muted)]">
+        <span className={`${statusBadgeClass} bg-emerald-500/10 text-emerald-700 dark:text-emerald-400`}>
           Available
+        </span>
+      );
+    }
+
+    if (item.status === "maintenance") {
+      return (
+        <span className={`${statusBadgeClass} bg-amber-500/10 text-amber-700 dark:text-amber-400`}>
+          Garage
         </span>
       );
     }
@@ -161,13 +112,13 @@ export default function FleetVehicleRow({
       return (
         <span className="flex items-center gap-1 text-[10px] font-bold text-amber-600 dark:text-amber-400 whitespace-nowrap">
           <Wrench size={10} className="flex-shrink-0" />
-          {item.status === "maintenance" ? "Garage" : "Update Mileage"}
+          Update Mileage
         </span>
       );
     }
 
     return (
-      <span className="text-[10px] font-bold text-[var(--color-ink-muted)]">
+      <span className={`${statusBadgeClass} bg-slate-500/10 text-slate-700 dark:text-slate-400`}>
         Retired
       </span>
     );

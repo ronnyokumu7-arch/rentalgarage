@@ -7,6 +7,7 @@ import toast from "react-hot-toast";
 import NewClientForm from "@/components/client/NewClientForm";
 import { env } from "@/lib/env";
 import { getApiErrorMessageFromBody } from "@/lib/api-error";
+import { normalizePersonName } from "@/lib/client-name";
 import "@/app/public.css";
 
 type PageStatus = "loading" | "ready" | "invalid" | "expired" | "submitting" | "success";
@@ -85,8 +86,8 @@ export default function PublicInvitePage() {
 
     try {
       const payload = {
-        first_name: formData.first_name?.trim() || "",
-        last_name: formData.last_name?.trim() || "",
+        first_name: normalizePersonName(formData.first_name || ""),
+        last_name: normalizePersonName(formData.last_name || ""),
         phone: formData.phone?.trim() || "",
         id_type: formData.id_type || "national_id",
         id_number: formData.id_number?.trim().toUpperCase() || "",
