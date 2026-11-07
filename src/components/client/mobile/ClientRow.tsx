@@ -7,8 +7,8 @@ import {
   CreditCard,
   CheckCircle2,
   Circle,
-  BadgeCheck,
   MoreVertical,
+  ShieldCheck,
 } from "lucide-react";
 import {
   getInitials,
@@ -61,12 +61,6 @@ export default function ClientRow({
     rose: "text-rose-600 dark:text-rose-400",
     muted: "text-[var(--color-ink-subtle)]",
   };
-
-  const idStatus = isVerified
-    ? { label: "ID verified", tone: "text-emerald-600 dark:text-emerald-400" }
-    : isPending
-      ? { label: "ID pending", tone: "text-amber-600 dark:text-amber-400" }
-      : { label: "ID missing", tone: "text-[var(--color-ink-subtle)]" };
 
   const avatarColors = getAvatarStatusClasses(client, hasExpiredDL);
 
@@ -139,23 +133,33 @@ export default function ClientRow({
             {displayName}
           </span>
           {isVerified && (
-            <BadgeCheck
-              size={15}
-              strokeWidth={2.25}
-              className="flex-shrink-0 text-emerald-600 dark:text-emerald-400"
-              aria-label="Verified client"
-            />
+            <span className="inline-flex flex-shrink-0" aria-label="Verified client" title="Verified client">
+              <ShieldCheck
+                size={16}
+                strokeWidth={2.5}
+                className="text-white fill-blue-600 dark:fill-blue-500"
+              />
+            </span>
           )}
         </div>
 
-        <div className="flex items-center gap-3 mt-1 flex-wrap">
-          <span className={`inline-flex items-center gap-1 text-[11px] font-semibold ${idStatus.tone}`}>
-            <CreditCard size={11} className="flex-shrink-0" />
-            {idStatus.label}
-          </span>
-
-          {renderDL()}
-        </div>
+        {isVerified ? (
+          <div className="flex items-center gap-3 mt-1 flex-wrap">
+            <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
+              <CreditCard size={11} className="flex-shrink-0" />
+              ID verified
+            </span>
+            {renderDL()}
+          </div>
+        ) : (
+          <div className="flex items-center gap-1 mt-1 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
+            {client.verification_status === "rejected"
+              ? "Verification rejected"
+              : isPending
+                ? "Pending verification"
+                : "Verification not started"}
+          </div>
+        )}
 
         <div className="flex items-center gap-2 mt-1.5 flex-wrap">
           {phone ? (

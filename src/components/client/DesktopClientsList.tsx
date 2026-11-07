@@ -18,12 +18,14 @@ import {
   Clock,
   MessageCircle,
   PhoneCall,
+  ShieldCheck,
 } from "lucide-react";
 import DataTable, { RowAction } from "@/components/ui/DataTable";
 import FilterDropdown from "@/components/ui/FilterDropdown";
 import AddClientButton from "@/components/client/AddClientButton";
 import SecureImage from "@/components/ui/SecureImage";
 import ReviewVerificationModal from "@/components/client/ReviewVerificationModal";
+import { getClientDisplayName } from "@/lib/client-name";
 import { useState } from "react";
 
 /* ──────────────────────────────────────────────────────────────────────
@@ -295,8 +297,21 @@ export default function DesktopClientsList({
                             }}
                             className="text-sm font-semibold text-[var(--color-ink)] truncate hover:text-[var(--color-primary)] transition-colors text-left"
                           >
-                            {client.full_name}
+                            {getClientDisplayName(client.full_name)}
                           </button>
+                          {client.verification_status === "verified" && (
+                            <span
+                              className="inline-flex flex-shrink-0"
+                              aria-label="Verified client"
+                              title="Verified client"
+                            >
+                              <ShieldCheck
+                                size={16}
+                                strokeWidth={2.5}
+                                className="text-white fill-blue-600 dark:fill-blue-500"
+                              />
+                            </span>
+                          )}
                         </div>
                         {client.email ? (
                           <a
