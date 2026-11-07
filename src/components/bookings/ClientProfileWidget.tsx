@@ -2,6 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
+import { getClientDisplayName } from "@/lib/client-name";
 import {
   User,
   Phone,
@@ -22,9 +23,10 @@ export function ClientProfileWidget({ booking }: Props) {
   const client = booking.client;
 
   // Resolve display name prioritizing full_name or combined first/last name
-  const clientName = client?.full_name
-    ? client.full_name
-    : [client?.first_name, client?.last_name].filter(Boolean).join(" ") || "Unassigned VIP Client";
+  const clientName =
+    getClientDisplayName(
+      client?.full_name || [client?.first_name, client?.last_name].filter(Boolean).join(" "),
+    ) || "Unassigned VIP Client";
 
   const clientEmail = client?.email || "No email on record";
   const clientPhone = client?.phone || "No phone on record";

@@ -15,6 +15,7 @@ import {
   Activity
 } from "lucide-react";
 import type { Vehicle, Booking, Client, BookingClientRelation } from "@/lib/types";
+import { getClientDisplayName } from "@/lib/client-name";
 
 import TimelineHeader from "./timeline/TimelineHeader";
 import { useTimelineCalendar } from "@/hooks/bookings/timeline/useTimelineCalendar";
@@ -227,7 +228,7 @@ export default function FleetTimelineCalendar({
               >
                 <option value="">-- Pick Customer --</option>
                 {normalizedClients.map((c) => (
-                  <option key={c.id} value={c.id}>{c.full_name}</option>
+                  <option key={c.id} value={c.id}>{getClientDisplayName(c.full_name)}</option>
                 ))}
               </select>
               <button
@@ -452,7 +453,7 @@ export default function FleetTimelineCalendar({
               </span>
             </div>
             <h4 className="text-sm font-bold text-[var(--color-ink)] truncate mb-1">
-              {tooltip.client?.full_name || "Unknown Client"}
+              {getClientDisplayName(tooltip.client?.full_name) || "Unknown Client"}
             </h4>
             {tooltip.client?.phone && (
               <p className="text-[11px] text-[var(--color-ink-muted)] flex items-center gap-1.5 mb-3">

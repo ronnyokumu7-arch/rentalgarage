@@ -8,6 +8,7 @@ import {
   CheckCircle2,
   Circle,
   BadgeCheck,
+  MoreVertical,
 } from "lucide-react";
 import {
   getInitials,
@@ -187,7 +188,7 @@ export default function ClientRow({
         </div>
       </div>
 
-      {isSelecting && (
+      {isSelecting ? (
         <div className="flex-shrink-0 self-center pl-1">
           {isSelected ? (
             <CheckCircle2 size={22} className="text-[var(--color-primary)]" strokeWidth={2.25} />
@@ -195,6 +196,18 @@ export default function ClientRow({
             <Circle size={22} className="text-[var(--color-ink-subtle)]" strokeWidth={1.5} />
           )}
         </div>
+      ) : (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onClick();
+          }}
+          aria-label={`Actions for ${displayName || "client"}`}
+          className="flex-shrink-0 self-center -mr-1 w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-ink-subtle)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-colors active:scale-95"
+        >
+          <MoreVertical size={18} strokeWidth={2} />
+        </button>
       )}
     </div>
   );

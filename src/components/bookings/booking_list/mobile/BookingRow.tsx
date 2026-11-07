@@ -16,6 +16,7 @@ import {
   getWhatsAppNumber,
   formatPhoneDisplay,
 } from "./helpers";
+import { getClientDisplayName } from "@/lib/client-name";
 import type { Booking, Client, Vehicle } from "@/lib/types";
 import type { BookingPaymentPill } from "./types";
 
@@ -39,7 +40,8 @@ export default function BookingRow({
   onClick,
 }: BookingRowProps) {
   const avatar = getBookingAvatarColors(item.status);
-  const clientName = client?.full_name || `Client #${item.client_id}`;
+  const clientName =
+    getClientDisplayName(client?.full_name) || `Client #${item.client_id}`;
   const waNumber = getWhatsAppNumber(client?.phone);
   const phoneDisplay = formatPhoneDisplay(client?.phone);
 

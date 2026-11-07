@@ -1,6 +1,7 @@
 "use client";
 
 import { User, UserCircle, Car, CalendarDays, DollarSign, Phone, Loader2, CreditCard } from 'lucide-react';
+import { getClientDisplayName } from '@/lib/client-name';
 import type { Client, Vehicle, DriverListItem, ServiceType, PricingResult } from '@/lib/types';
 
 interface BookingSummaryProps {
@@ -100,7 +101,7 @@ export default function BookingSummary({
         </div>
         {client ? (
           <div>
-            <div className="text-sm font-medium text-[var(--color-ink)] mb-1">{client.full_name}</div>
+            <div className="text-sm font-medium text-[var(--color-ink)] mb-1">{getClientDisplayName(client.full_name)}</div>
             <div className="flex items-center gap-1 text-xs text-[var(--color-ink-muted)]">
               <Phone size={10} />
               <span>{client.phone}</span>

@@ -4,6 +4,7 @@
 import { useRouter } from "next/navigation";
 import { CalendarDays, Phone, Check } from "lucide-react";
 import DataTable from "@/components/ui/DataTable";
+import { getClientDisplayName } from "@/lib/client-name";
 import type { Booking, Client, Vehicle } from "@/lib/types";
 import { getBookingActions, type BookingActionsContext } from "./getBookingActions";
 import { formatDateShort, statusStyles, statusLabels } from "./constants";
@@ -64,7 +65,7 @@ export default function BookingsListDesktop({
         return (
           <div className="min-w-0">
             <p className="text-sm font-semibold text-[var(--color-ink)] truncate">
-              {client?.full_name || `Client #${row.original.client_id}`}
+              {getClientDisplayName(client?.full_name) || `Client #${row.original.client_id}`}
             </p>
             {client?.phone ? (
               <p className="text-xs text-[var(--color-ink-muted)] flex items-center gap-1.5 truncate mt-0.5">

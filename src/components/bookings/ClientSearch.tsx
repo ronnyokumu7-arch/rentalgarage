@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { User, Phone, CreditCard, Car } from "lucide-react";
+import { getClientDisplayName } from "@/lib/client-name";
 import type { Client } from "@/lib/types";
 
 interface ClientSearchProps {
@@ -39,7 +40,7 @@ export default function ClientSearch({
         <User size={12} className="absolute left-2.5 top-2.5 text-[var(--color-ink-subtle)]" />
         <input
           type="text"
-          value={isOpen ? searchQuery : selectedClient ? `${selectedClient.full_name} (${selectedClient.phone})` : searchQuery}
+          value={isOpen ? searchQuery : selectedClient ? `${getClientDisplayName(selectedClient.full_name)} (${selectedClient.phone})` : searchQuery}
           onChange={(e) => {
             onSearchChange(e.target.value);
             setIsOpen(true);
@@ -83,7 +84,7 @@ export default function ClientSearch({
                 >
                   <div className="flex items-start justify-between mb-1">
                     <div className="font-semibold text-sm text-[var(--color-ink)]">
-                      {client.full_name}
+                      {getClientDisplayName(client.full_name)}
                     </div>
                     {selectedClientId === client.id.toString() && (
                       <div className="w-5 h-5 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center">
