@@ -30,7 +30,7 @@ const getStatusRing = (
     return "ring-amber-500/70";
   if (vehicle.status === "pending_activation") return "ring-violet-500/70";
   if (vehicle.status === "rented") return "ring-blue-500/70";
-  if (vehicle.status === "available") return "ring-emerald-500/70";
+  if (vehicle.status === "available") return "ring-slate-400/40";
   return "ring-slate-400/40";
 };
 

@@ -36,10 +36,10 @@ export default function UsersToolbar({
   onInvite,
 }: UsersToolbarProps) {
   return (
-    <div className="p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
+    <div className="p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
       
       {/* LEFT SIDE: Category Toggle + Metrics (Evenly Distributed) */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full xl:w-auto">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full lg:w-auto">
         
         {/* Executive vs Staff Toggle Switcher — HIDDEN ON MOBILE (<640px) */}
         <div className="hidden sm:flex items-center gap-1 p-1 bg-[var(--color-surface)] rounded-xl border border-[var(--color-surface-border)] shadow-sm h-9">
@@ -71,7 +71,7 @@ export default function UsersToolbar({
         </div>
 
         {/* Metrics Breakdown Pills - Text-only, evenly distributed */}
-        <div className="hidden sm:flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
+        <div className="hidden sm:flex lg:flex-shrink-0 items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
           <div className="flex items-center justify-center gap-1.5 min-w-0 text-center sm:flex-1">
             <span className="text-xs font-medium text-[var(--color-ink-muted)]">Team</span>
             <span className="text-xs font-bold text-[var(--color-ink)] tabular-nums">{totalUsers}</span>
@@ -90,7 +90,7 @@ export default function UsersToolbar({
       </div>
 
       {/* RIGHT SIDE: Search + Premium Filter + Add Member Dropdown */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full xl:w-auto">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full lg:w-auto">
         <div className="flex items-center gap-2 flex-1 sm:w-80">
           {/* Search Input */}
           <div className="relative flex-1">

@@ -288,8 +288,8 @@ export default function FleetList({
   return (
     <>
       {/* DESKTOP TOOLBAR — unchanged */}
-      <div className="hidden md:flex p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
-        <div className="hidden sm:flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
+      <div className="hidden md:flex p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
+        <div className="hidden sm:flex lg:flex-shrink-0 items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
           <div className="flex items-center gap-2 whitespace-nowrap">
             <span className="text-xs font-medium text-[var(--color-ink-muted)]">Available</span>
             <span className="text-xs font-bold text-blue-500 tabular-nums">{availableVehicles}</span>
@@ -315,7 +315,7 @@ export default function FleetList({
           )}
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full xl:w-auto">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full lg:w-auto">
           <div className="flex items-center gap-2 flex-1 sm:w-80">
             <div className="relative flex-1">
               <Search

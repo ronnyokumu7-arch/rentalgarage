@@ -129,10 +129,10 @@ export default function ContractsTab() {
     <>
       <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] overflow-hidden">
         {/* Toolbar */}
-        <div className="p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex flex-col xl:flex-row gap-4 items-stretch xl:items-center justify-between">
+        <div className="p-4 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between">
           
           {/* Metrics Breakdown Panel */}
-          <div className="hidden sm:flex items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
+          <div className="hidden sm:flex lg:flex-shrink-0 items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
             <div className="flex items-center gap-2 whitespace-nowrap flex-1 min-w-0">
               <span className="text-xs font-medium text-[var(--color-ink-muted)]">Draft</span>
               <span className="text-xs font-bold text-[var(--color-ink)] tabular-nums">{draftCount}</span>
