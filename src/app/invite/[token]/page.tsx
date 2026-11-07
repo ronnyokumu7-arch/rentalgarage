@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { CheckCircle2, AlertCircle, Loader2, Clock, ShieldCheck } from "lucide-react";
 import toast from "react-hot-toast";
@@ -30,20 +30,10 @@ export default function PublicInvitePage() {
     phone: "",
     id_type: "national_id",
     id_number: "",
-    dl_number: "",
-    dl_expiry: "",
-    dl_issued_date: "",
     residential_address: "",
     work_address: "",
     next_of_kin_name: "",
     next_of_kin_phone: "",
-    driving_arrangement: "self_drive",
-    driver_full_name: "",
-    driver_phone: "",
-    driver_id_number: "",
-    driver_dl_number: "",
-    driver_dl_expiry: "",
-    driver_dl_issued_date: "",
   });
 
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
@@ -51,20 +41,8 @@ export default function PublicInvitePage() {
   const [idBackFile, setIdBackFile] = useState<File | null>(null);
   const [dlFrontFile, setDlFrontFile] = useState<File | null>(null);
 
-  // ✅ Client-owned driver document files (own_driver only)
   const [driverIdFrontFile, setDriverIdFrontFile] = useState<File | null>(null);
   const [driverDlFrontFile, setDriverDlFrontFile] = useState<File | null>(null);
-
-  // ✅ Persists uploaded URLs across re-renders (retry-safe).
-  const uploadedUrlsRef = useRef<Record<string, string>>({});
-
-  // ✅ NEW: Synchronous refs to avoid stale closure bugs on submit
-  const avatarFileRef = useRef<File | null>(null);
-  const idFrontFileRef = useRef<File | null>(null);
-  const idBackFileRef = useRef<File | null>(null);
-  const dlFrontFileRef = useRef<File | null>(null);
-  const driverIdFrontFileRef = useRef<File | null>(null);
-  const driverDlFrontFileRef = useRef<File | null>(null);
 
   useEffect(() => {
     const fetchPreview = async () => {
@@ -100,122 +78,12 @@ export default function PublicInvitePage() {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
-  // ✅ Custom setters that sync state + refs instantly
-  const handleSetAvatarFile = (f: File | null) => { avatarFileRef.current = f; setAvatarFile(f); };
-  const handleSetIdFrontFile = (f: File | null) => { idFrontFileRef.current = f; setIdFrontFile(f); };
-  const handleSetIdBackFile = (f: File | null) => { idBackFileRef.current = f; setIdBackFile(f); };
-  const handleSetDlFrontFile = (f: File | null) => { dlFrontFileRef.current = f; setDlFrontFile(f); };
-  const handleSetDriverIdFrontFile = (f: File | null) => { driverIdFrontFileRef.current = f; setDriverIdFrontFile(f); };
-  const handleSetDriverDlFrontFile = (f: File | null) => { driverDlFrontFileRef.current = f; setDriverDlFrontFile(f); };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    const arrangement = formData.driving_arrangement || "self_drive";
-
-    // ✅ Slot presence = "has a new File OR already uploaded earlier"
-    const hasSlot = (field: string, file: File | null) =>
-      !!file || !!uploadedUrlsRef.current[field];
-
-    // ✅ Client ID always required (matches KYC gate for every arrangement)
-    if (!hasSlot("id_front", idFrontFileRef.current) || !hasSlot("id_back", idBackFileRef.current)) {
-      toast.error("Client ID Front and ID Back photos are required");
-      return;
-    }
-
-    // ✅ Self-drive: client DL data + image required.
-    if (arrangement === "self_drive") {
-      if (!formData.dl_number?.trim()) {
-        toast.error("Client driver's licence number is required for Self Drive");
-        return;
-      }
-      if (!formData.dl_expiry) {
-        toast.error("Client driver's licence expiry date is required for Self Drive");
-        return;
-      }
-      if (!hasSlot("dl_front", dlFrontFileRef.current)) {
-        toast.error("Client DL Front photo is required for Self Drive");
-        return;
-      }
-    }
-
-    // ✅ Own-driver: personal driver docs required.
-    if (arrangement === "own_driver") {
-      if (!hasSlot("driver_id_front", driverIdFrontFileRef.current)) {
-        toast.error("Driver ID Front photo is required for Own Driver");
-        return;
-      }
-      if (!hasSlot("driver_dl_front", driverDlFrontFileRef.current)) {
-        toast.error("Driver DL Front photo is required for Own Driver");
-        return;
-      }
-    }
 
     setStatus("submitting");
 
     try {
-      const uploadPromises: Promise<void>[] = [];
-
-      const uploadDoc = async (
-        file: File,
-        field: string,
-        clearFn: () => void,
-      ) => {
-        const uploadFormData = new FormData();
-        uploadFormData.append("file", file);
-
-        const res = await fetch(
-          `${env.NEXT_PUBLIC_API_URL}/clients/invite/${token}/upload?field=${field}`,
-          { method: "POST", body: uploadFormData }
-        );
-
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(
-            getApiErrorMessageFromBody(errorData, "Unable to upload this document.")
-          );
-        }
-
-        const data = await res.json();
-        uploadedUrlsRef.current[field] = data.url;
-        // ✅ Clear local File — the invite row already holds the URL.
-        //    A retry only uploads what's newly added.
-        clearFn();
-      };
-
-      // ✅ Use .current values here to guarantee we catch the latest files
-      // ✅ Wrapped in () => ... to satisfy the () => void type signature
-      if (avatarFileRef.current) {
-        uploadPromises.push(uploadDoc(avatarFileRef.current, "avatar", () => handleSetAvatarFile(null)));
-      }
-      if (idFrontFileRef.current) {
-        uploadPromises.push(uploadDoc(idFrontFileRef.current, "id_front", () => handleSetIdFrontFile(null)));
-      }
-      if (idBackFileRef.current) {
-        uploadPromises.push(uploadDoc(idBackFileRef.current, "id_back", () => handleSetIdBackFile(null)));
-      }
-      if (arrangement === "self_drive" && dlFrontFileRef.current) {
-        uploadPromises.push(uploadDoc(dlFrontFileRef.current, "dl_front", () => handleSetDlFrontFile(null)));
-      }
-
-      // ✅ Client-owned driver documents (own_driver only)
-      if (arrangement === "own_driver") {
-        if (driverIdFrontFileRef.current) {
-          uploadPromises.push(
-            uploadDoc(driverIdFrontFileRef.current, "driver_id_front", () => handleSetDriverIdFrontFile(null))
-          );
-        }
-        if (driverDlFrontFileRef.current) {
-          uploadPromises.push(
-            uploadDoc(driverDlFrontFileRef.current, "driver_dl_front", () => handleSetDriverDlFrontFile(null))
-          );
-        }
-      }
-
-      if (uploadPromises.length > 0) {
-        await Promise.all(uploadPromises);
-      }
-
       const payload = {
         first_name: formData.first_name?.trim() || "",
         last_name: formData.last_name?.trim() || "",
@@ -224,36 +92,11 @@ export default function PublicInvitePage() {
         id_number: formData.id_number?.trim().toUpperCase() || "",
 
         email: formData.email?.trim() || undefined,
-        dl_number: formData.dl_number?.trim().toUpperCase() || undefined,
         residential_address: formData.residential_address?.trim() || undefined,
         work_address: formData.work_address?.trim() || undefined,
         next_of_kin_name: formData.next_of_kin_name?.trim() || undefined,
         next_of_kin_phone: formData.next_of_kin_phone?.trim() || undefined,
 
-        dl_expiry: formData.dl_expiry || undefined,
-        dl_issued_date: formData.dl_issued_date || undefined,
-
-        driving_arrangement: arrangement,
-
-        driver:
-          arrangement === "own_driver"
-            ? {
-                full_name: formData.driver_full_name?.trim() || "",
-                phone: formData.driver_phone?.trim() || "",
-                id_number: formData.driver_id_number?.trim().toUpperCase() || "",
-                dl_number: formData.driver_dl_number?.trim().toUpperCase() || "",
-                dl_expiry: formData.driver_dl_expiry || undefined,
-                dl_issued_date: formData.driver_dl_issued_date || undefined,
-              }
-            : null,
-
-        // ✅ Read from the ref so retries send the real stored URLs,
-        //    not undefined/empty. Backend overwrites these from
-        //    invite.uploaded_files anyway — this is just for schema validity.
-        avatar_image: uploadedUrlsRef.current.avatar || undefined,
-        id_image_front: uploadedUrlsRef.current.id_front || "",
-        id_image_back: uploadedUrlsRef.current.id_back || "",
-        dl_image_front: uploadedUrlsRef.current.dl_front || undefined,
       };
 
       const res = await fetch(`${env.NEXT_PUBLIC_API_URL}/clients/invite/${token}`, {
@@ -373,10 +216,13 @@ export default function PublicInvitePage() {
             </h3>
             <ul className="text-xs space-y-2 text-blue-800">
               <li className="flex items-start gap-2">
-                <span className="font-bold">1.</span> The agency will review your details.
+                <span className="font-bold">1.</span> The agency will review your basic details.
               </li>
               <li className="flex items-start gap-2">
-                <span className="font-bold">2.</span> Once approved, your account will be activated.
+                <span className="font-bold">2.</span> They will invite you to submit the documents and driving details needed for verification.
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="font-bold">3.</span> Your account will be activated after verification is approved.
               </li>
             </ul>
           </div>
@@ -412,17 +258,17 @@ export default function PublicInvitePage() {
           mode="public_intake"
           tenantBranding={branding || undefined}
           avatarFile={avatarFile}
-          setAvatarFile={handleSetAvatarFile}
+          setAvatarFile={setAvatarFile}
           idFrontFile={idFrontFile}
-          setIdFrontFile={handleSetIdFrontFile}
+          setIdFrontFile={setIdFrontFile}
           idBackFile={idBackFile}
-          setIdBackFile={handleSetIdBackFile}
+          setIdBackFile={setIdBackFile}
           dlFrontFile={dlFrontFile}
-          setDlFrontFile={handleSetDlFrontFile}
+          setDlFrontFile={setDlFrontFile}
           driverIdFrontFile={driverIdFrontFile}
-          setDriverIdFrontFile={handleSetDriverIdFrontFile}
+          setDriverIdFrontFile={setDriverIdFrontFile}
           driverDlFrontFile={driverDlFrontFile}
-          setDriverDlFrontFile={handleSetDriverDlFrontFile}
+          setDriverDlFrontFile={setDriverDlFrontFile}
         />
       </div>
     </div>

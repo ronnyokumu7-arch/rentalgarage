@@ -127,25 +127,17 @@ export default function NewClientForm({
   const clientDocsUploaded =
     (hasDoc(idFrontFile, existingIdFront) ? 1 : 0) +
     (hasDoc(idBackFile, existingIdBack) ? 1 : 0);
-  const clientDocsRequired = 2;
 
   const drivingDocsUploaded = isSelfDrive
     ? hasDoc(dlFrontFile, existingDlFront)
       ? 1
       : 0
     : 0;
-  const drivingDocsRequired = isSelfDrive ? 1 : 0;
-
   const driverDocsUploaded = isOwnDriver
     ? (hasDoc(driverIdFrontFile, existingDriverIdFront) ? 1 : 0) +
       (hasDoc(driverDlFrontFile, existingDriverDlFront) ? 1 : 0)
     : 0;
-  const driverDocsRequired = isOwnDriver ? 2 : 0;
-
-  const totalDocsUploaded =
-    clientDocsUploaded + drivingDocsUploaded + driverDocsUploaded;
-  const totalDocsRequired =
-    clientDocsRequired + drivingDocsRequired + driverDocsRequired;
+  const totalDocsUploaded = clientDocsUploaded + drivingDocsUploaded + driverDocsUploaded;
 
   const sectionProps = {
     formData,
@@ -203,9 +195,10 @@ export default function NewClientForm({
             setIdBackFile={setIdBackFile}
             existingIdFront={existingIdFront}
             existingIdBack={existingIdBack}
+            showIdentityUploads={mode === "edit"}
           />
 
-          <DrivingArrangementSection
+          {mode === "edit" && <DrivingArrangementSection
             {...sectionProps}
             dlFrontFile={dlFrontFile}
             setDlFrontFile={setDlFrontFile}
@@ -217,7 +210,7 @@ export default function NewClientForm({
             // ✅ forward existing driver URLs so edit mode shows "View Document"
             existingDriverIdFront={existingDriverIdFront}
             existingDriverDlFront={existingDriverDlFront}
-          />
+          />}
         </div>
 
         {/* RIGHT COLUMN */}
@@ -229,7 +222,6 @@ export default function NewClientForm({
             avatarFile={avatarFile}
             existingAvatar={existingAvatar}
             totalDocsUploaded={totalDocsUploaded}
-            totalDocsRequired={totalDocsRequired}
           />
 
           <SubmitCard loading={loading} mode={mode} />

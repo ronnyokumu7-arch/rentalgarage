@@ -22,6 +22,7 @@ interface ClientDetailsSectionProps extends SectionProps {
   setIdBackFile: (f: File | null) => void;
   existingIdFront?: string | null;
   existingIdBack?: string | null;
+  showIdentityUploads?: boolean;
 }
 
 const labelClass =
@@ -46,6 +47,7 @@ export default function ClientDetailsSection({
   setIdBackFile,
   existingIdFront,
   existingIdBack,
+  showIdentityUploads = true,
 }: ClientDetailsSectionProps) {
   const idType = formData.id_type || "national_id";
 
@@ -287,16 +289,15 @@ export default function ClientDetailsSection({
         />
       </div>
 
-      {/* Identity document uploads */}
-      <div>
-        <label className={labelClass}>Identity Documents</label>
+      {/* Identity documents belong to verification, not public account intake. */}
+      {showIdentityUploads && <div>
+        <label className={labelClass}>Identity Documents (optional)</label>
         <div className="grid grid-cols-2 gap-3">
           <DocUploadSlot
             label="ID Front"
             icon={FileText}
             file={idFrontFile}
             setFile={setIdFrontFile}
-            required
             existingUrl={existingIdFront}
             captureMode="environment"
             error={fieldErrors["idFront"]}
@@ -307,14 +308,13 @@ export default function ClientDetailsSection({
             icon={FileText}
             file={idBackFile}
             setFile={setIdBackFile}
-            required
             existingUrl={existingIdBack}
             captureMode="environment"
             error={fieldErrors["idBack"]}
             fieldId="field-idBack"
           />
         </div>
-      </div>
+      </div>}
     </section>
   );
 }

@@ -44,16 +44,16 @@ export default function SubmitCard({ loading, mode }: SubmitCardProps) {
           ? "Changes will be saved instantly"
           : mode === "public_intake"
             ? "Your details will be reviewed by the agency before activation"
-            : "Client will be created and ready for bookings"}
+            : "Client will be added as pending. Complete verification before booking."}
       </p>
 
-      {isPublicIntake && (
+      {(isPublicIntake || mode === "create") && (
         <div className="mt-4 p-3 rounded-xl bg-blue-500/5 border border-blue-500/20 flex items-start gap-2.5">
           <Info size={14} className="text-blue-500 shrink-0 mt-0.5" />
           <p className="text-[10px] text-blue-700 leading-relaxed">
-            After submission, your profile will be in{" "}
+            After submission, the profile will be in{" "}
             <span className="font-bold">pending review</span> status. The agency
-            will verify your details and activate your account before you can
+            must complete verification and activate the account before it can
             book.
           </p>
         </div>

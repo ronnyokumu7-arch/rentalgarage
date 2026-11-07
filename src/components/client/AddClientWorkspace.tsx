@@ -1,7 +1,7 @@
 // src/components/client/AddClientWorkspace.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Link2, Loader2, Check, Copy, MessageCircle, MessageSquare,
   Mail, Clock, QrCode, User, Phone,
@@ -39,7 +39,7 @@ export default function AddClientWorkspace({ onSuccess, onCancel }: AddClientWor
     id_type: "national_id", id_number: "", dl_number: "",
     dl_expiry: "", dl_issued_date: "", residential_address: "",
     work_address: "", next_of_kin_name: "", next_of_kin_phone: "",
-    driving_arrangement: "self_drive",
+    driving_arrangement: "pending",
     driver_full_name: "", driver_phone: "", driver_id_number: "",
     driver_dl_number: "", driver_dl_expiry: "", driver_dl_issued_date: "",
   });
@@ -51,6 +51,9 @@ export default function AddClientWorkspace({ onSuccess, onCancel }: AddClientWor
   const [driverDlFrontFile, setDriverDlFrontFile] = useState<File | null>(null);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [manualLoading, setManualLoading] = useState(false);
+  const [pendingClientId, setPendingClientId] = useState<number | null>(null);
+  const [pendingArrangement, setPendingArrangement] = useState<string | null>(null);
+  const uploadedManualFiles = useRef<Record<string, File>>({});
 
   // ── Live count fetch ──
   const refreshLiveCount = () => {
@@ -117,6 +120,7 @@ export default function AddClientWorkspace({ onSuccess, onCancel }: AddClientWor
   };
 
   const updateField = (field: string, value: string) => {
+    if (pendingClientId) return;
     setFormData((prev) => ({ ...prev, [field]: value }));
     if (fieldErrors[field]) {
       setFieldErrors((prev) => {
@@ -129,83 +133,93 @@ export default function AddClientWorkspace({ onSuccess, onCancel }: AddClientWor
 
   const handleManualSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setManualLoading(true);
     setFieldErrors({});
+
+    const arrangement =
+      pendingClientId && pendingArrangement
+        ? pendingArrangement
+        : formData.driving_arrangement;
+    const isSelfDrive = arrangement === "self_drive";
+    const isOwnDriver = arrangement === "own_driver";
+
+    setManualLoading(true);
     try {
-      const arrangement = formData.driving_arrangement;
-      const isSelfDrive = arrangement === "self_drive";
-      const isOwnDriver = arrangement === "own_driver";
-
-      const payload: any = {
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        email: formData.email || undefined,
-        phone: formData.phone,
-        id_type: formData.id_type,
-        id_number: formData.id_number,
-        residential_address: formData.residential_address || undefined,
-        work_address: formData.work_address || undefined,
-        next_of_kin_name: formData.next_of_kin_name || undefined,
-        next_of_kin_phone: formData.next_of_kin_phone || undefined,
-        driving_arrangement: arrangement,
-      };
-
-      // Client DL only meaningful for self_drive
-      if (isSelfDrive) {
-        payload.dl_number = formData.dl_number || undefined;
-        payload.dl_expiry = formData.dl_expiry || undefined;
-        payload.dl_issued_date = formData.dl_issued_date || undefined;
-      }
-
-      // ✅ Client-owned driver block — only for own_driver.
-      //    Backend create path (management.py::create_client):
-      //      - driver is stripped from model_dump(exclude={"driver"})
-      //      - then applied only when driving_arrangement == "own_driver"
-      //        AND client.driver is truthy
-      //    Sending `driver: null` on other arrangements is redundant —
-      //    the field is dropped anyway. Omit it entirely.
-      if (isOwnDriver) {
-        payload.driver = {
-          full_name: formData.driver_full_name,
-          phone: formData.driver_phone,
-          id_number: formData.driver_id_number,
-          dl_number: formData.driver_dl_number,
-          dl_expiry: formData.driver_dl_expiry || undefined,
-          dl_issued_date: formData.driver_dl_issued_date || undefined,
+      let clientId = pendingClientId;
+      if (!clientId) {
+        const payload: any = {
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+          email: formData.email || undefined,
+          phone: formData.phone,
+          id_type: formData.id_type,
+          id_number: formData.id_number,
+          residential_address: formData.residential_address || undefined,
+          work_address: formData.work_address || undefined,
+          next_of_kin_name: formData.next_of_kin_name || undefined,
+          next_of_kin_phone: formData.next_of_kin_phone || undefined,
         };
+
+        const client = await clientsApi.create(payload);
+        clientId = client.id;
+        setPendingClientId(clientId);
+        setPendingArrangement(arrangement);
       }
 
-      const client = await clientsApi.create(payload);
-      const clientId = client.id;
+      const uploads: {
+        slot: string;
+        label: string;
+        file: File | null;
+        upload: (id: number, file: File) => Promise<unknown>;
+      }[] = [
+        { slot: "avatar", label: "Avatar", file: avatarFile, upload: clientsApi.uploadAvatar },
+        { slot: "idFront", label: "Client ID Front", file: idFrontFile, upload: clientsApi.uploadIdFront },
+        { slot: "idBack", label: "Client ID Back", file: idBackFile, upload: clientsApi.uploadIdBack },
+        ...(isSelfDrive
+          ? [{ slot: "dlFront", label: "Client DL Front", file: dlFrontFile, upload: clientsApi.uploadDlFront }]
+          : []),
+        ...(isOwnDriver
+          ? [
+              { slot: "driverIdFront", label: "Driver ID Front", file: driverIdFrontFile, upload: clientsApi.uploadDriverIdFront },
+              { slot: "driverDlFront", label: "Driver DL Front", file: driverDlFrontFile, upload: clientsApi.uploadDriverDlFront },
+            ]
+          : []),
+      ];
 
-      const uploadPromises: Promise<any>[] = [];
-      if (avatarFile) uploadPromises.push(clientsApi.uploadAvatar(clientId, avatarFile));
-      if (idFrontFile) uploadPromises.push(clientsApi.uploadIdFront(clientId, idFrontFile));
-      if (idBackFile) uploadPromises.push(clientsApi.uploadIdBack(clientId, idBackFile));
-      if (isSelfDrive && dlFrontFile) {
-        uploadPromises.push(clientsApi.uploadDlFront(clientId, dlFrontFile));
-      }
-      // ✅ Client-owned driver document uploads (own_driver only).
-      //    Backend guards these endpoints on client.driving_arrangement
-      //    == "own_driver" — the create above has already persisted the
-      //    arrangement, so these fire against a valid state.
-      if (isOwnDriver) {
-        if (driverIdFrontFile) {
-          uploadPromises.push(clientsApi.uploadDriverIdFront(clientId, driverIdFrontFile));
+      const failedUploads: string[] = [];
+      for (const item of uploads) {
+        if (!item.file || uploadedManualFiles.current[item.slot] === item.file) continue;
+        try {
+          await item.upload(clientId, item.file);
+          uploadedManualFiles.current[item.slot] = item.file;
+        } catch (uploadError: any) {
+          const message =
+            uploadError.response?.data?.message ||
+            uploadError.message ||
+            "Upload failed";
+          failedUploads.push(`${item.label}: ${message}`);
         }
-        if (driverDlFrontFile) {
-          uploadPromises.push(clientsApi.uploadDriverDlFront(clientId, driverDlFrontFile));
-        }
       }
 
-      if (uploadPromises.length > 0) await Promise.all(uploadPromises);
+      if (failedUploads.length > 0) {
+        toast.error(
+          `Client #${clientId} was created, but some documents were not saved. Submit again to retry: ${failedUploads.join("; ")}`
+        );
+        return;
+      }
 
+      setPendingClientId(null);
+      setPendingArrangement(null);
+      uploadedManualFiles.current = {};
       toast.success("Client created successfully!");
       window.dispatchEvent(new CustomEvent("client:created"));
       onSuccess?.();
     } catch (error: any) {
       if (error.response?.data?.field_errors) setFieldErrors(error.response.data.field_errors);
-      toast.error(error.response?.data?.message || "Failed to create client");
+      toast.error(
+        error.response?.data?.message ||
+          error.message ||
+          "Failed to create client"
+      );
     } finally {
       setManualLoading(false);
     }
@@ -446,26 +460,38 @@ export default function AddClientWorkspace({ onSuccess, onCancel }: AddClientWor
             </div>
           )
         ) : (
-          <NewClientForm
-            mode="create"
-            loading={manualLoading}
-            formData={formData}
-            avatarFile={avatarFile}
-            setAvatarFile={setAvatarFile}
-            idFrontFile={idFrontFile}
-            setIdFrontFile={setIdFrontFile}
-            idBackFile={idBackFile}
-            setIdBackFile={setIdBackFile}
-            dlFrontFile={dlFrontFile}
-            setDlFrontFile={setDlFrontFile}
-            driverIdFrontFile={driverIdFrontFile}
-            setDriverIdFrontFile={setDriverIdFrontFile}
-            driverDlFrontFile={driverDlFrontFile}
-            setDriverDlFrontFile={setDriverDlFrontFile}
-            updateField={updateField}
-            handleSubmit={handleManualSubmit}
-            fieldErrors={fieldErrors}
-          />
+          <>
+            {pendingClientId && (
+              <div
+                role="alert"
+                className="mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 text-xs text-[var(--color-ink)]"
+              >
+                Client #{pendingClientId} has been created. Some documents still
+                need to be uploaded; submit again to retry those uploads without
+                creating another client.
+              </div>
+            )}
+            <NewClientForm
+              mode="create"
+              loading={manualLoading}
+              formData={formData}
+              avatarFile={avatarFile}
+              setAvatarFile={setAvatarFile}
+              idFrontFile={idFrontFile}
+              setIdFrontFile={setIdFrontFile}
+              idBackFile={idBackFile}
+              setIdBackFile={setIdBackFile}
+              dlFrontFile={dlFrontFile}
+              setDlFrontFile={setDlFrontFile}
+              driverIdFrontFile={driverIdFrontFile}
+              setDriverIdFrontFile={setDriverIdFrontFile}
+              driverDlFrontFile={driverDlFrontFile}
+              setDriverDlFrontFile={setDriverDlFrontFile}
+              updateField={updateField}
+              handleSubmit={handleManualSubmit}
+              fieldErrors={fieldErrors}
+            />
+          </>
         )}
       </div>
 

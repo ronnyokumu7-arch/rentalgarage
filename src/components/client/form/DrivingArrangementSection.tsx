@@ -196,7 +196,9 @@ export default function DrivingArrangementSection({
             </div>
 
             <div id="field-dl_issued_date">
-              <label className={labelClass}>Issue Date</label>
+              <label className={labelClass}>
+                Issue Date (optional)
+              </label>
               <div className="relative group">
                 <Calendar
                   size={14}
@@ -217,7 +219,7 @@ export default function DrivingArrangementSection({
 
           <div>
             <label className={labelClass}>
-              Driving License Upload <span className="text-[var(--color-danger)]">*</span>
+              Driving License Upload (optional)
             </label>
             <div className="grid grid-cols-2 gap-3">
               <DocUploadSlot
@@ -225,7 +227,6 @@ export default function DrivingArrangementSection({
                 icon={Car}
                 file={dlFrontFile}
                 setFile={setDlFrontFile}
-                required
                 existingUrl={existingDlFront}
                 captureMode="environment"
                 error={fieldErrors["dlFront"]}
@@ -236,7 +237,7 @@ export default function DrivingArrangementSection({
         </div>
       )}
 
-      {/* MY DRIVER: Driver's details + required uploads */}
+      {/* MY DRIVER: Driver's details + optional uploads */}
       {isOwnDriver && (
         <div className="mt-2 p-4 rounded-xl bg-blue-500/5 border border-blue-500/20 space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
           <div className="flex items-center gap-2">
@@ -322,7 +323,9 @@ export default function DrivingArrangementSection({
             </div>
 
             <div id="field-driver_dl_issued_date">
-              <label className={labelClass}>DL Issue Date</label>
+              <label className={labelClass}>
+                DL Issue Date (optional)
+              </label>
               <Flatpickr
                 value={formData.driver_dl_issued_date}
                 onChange={(dates) => {
@@ -336,18 +339,15 @@ export default function DrivingArrangementSection({
             </div>
           </div>
 
-          {/* ✅ REQUIRED: Driver documents (backend KYC gate requires them) */}
+          {/* Driver documents can be collected during verification. */}
           <div className="pt-2 border-t border-blue-500/10">
-            <label className={labelClass}>
-              Driver Documents <span className="text-[var(--color-danger)]">*</span>
-            </label>
+            <label className={labelClass}>Driver Documents (optional)</label>
             <div className="grid grid-cols-2 gap-3">
               <DocUploadSlot
                 label="Driver ID Front"
                 icon={FileText}
                 file={driverIdFrontFile}
                 setFile={setDriverIdFrontFile}
-                required
                 existingUrl={existingDriverIdFront}
                 captureMode="environment"
                 error={fieldErrors["driverIdFront"]}
@@ -358,7 +358,6 @@ export default function DrivingArrangementSection({
                 icon={Car}
                 file={driverDlFrontFile}
                 setFile={setDriverDlFrontFile}
-                required
                 existingUrl={existingDriverDlFront}
                 captureMode="environment"
                 error={fieldErrors["driverDlFront"]}

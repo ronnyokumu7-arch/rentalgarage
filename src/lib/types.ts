@@ -85,7 +85,7 @@ export interface MessageResponse {
 // ── Clients ─────────────────────────────────────────────────────────────────
 export type ClientStatus = "pending" | "active" | "inactive" | "suspended";
 export type ClientVerificationStatus = "unverified" | "sent" | "under_review" | "verified" | "rejected";
-export type DrivingArrangement = "self_drive" | "own_driver" | "chauffeur";
+export type DrivingArrangement = "pending" | "self_drive" | "own_driver" | "chauffeur";
 
 export interface Client {
   id: number;

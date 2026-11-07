@@ -43,12 +43,11 @@ export default function ComplianceDocumentsSection({
 }: ComplianceDocumentsSectionProps) {
   const [activeDocTab, setActiveDocTab] = useState<DocTab>("idFront");
 
-  // ✅ Client DL is only required/relevant for self_drive.
-  //    Backend KYC gate (lifecycle.py::activate_client) enforces:
-  //      self_drive  → id_image_front + dl_image_front
-  //      own_driver  → id_image_front + driver_id_image_front + driver_dl_image_front
-  //      chauffeur   → id_image_front only
-  //    So the DL slot should not render for own_driver / chauffeur.
+  // ✅ My Driver is still a self-drive rental: the client supplies their own
+  //    driver, while Chauffeur means the agency assigns one.
+  //    All arrangements require the client's ID front/back. Self Drive also
+  //    requires the client's DL; My Driver requires the personal driver's ID/DL.
+  //    The client DL slot should not render for My Driver or Chauffeur.
   const showDlSlot = client.driving_arrangement === "self_drive";
 
   const docConfig = [

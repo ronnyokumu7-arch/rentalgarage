@@ -125,7 +125,7 @@ export default function DrivingEditModal({
                 />
               </div>
               <div>
-                <label className={labelClass}>Issue Date</label>
+                <label className={labelClass}>Issue Date (optional)</label>
                 <input
                   value={formData.dl_issued_date}
                   onChange={(e) => updateField("dl_issued_date", e.target.value)}
@@ -196,7 +196,7 @@ export default function DrivingEditModal({
                   />
                 </div>
                 <div>
-                  <label className={labelClass}>DL Issue Date</label>
+                  <label className={labelClass}>DL Issue Date (optional)</label>
                   <input
                     value={formData.driver_dl_issued_date}
                     onChange={(e) =>

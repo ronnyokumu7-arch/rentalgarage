@@ -12,13 +12,14 @@ interface DrivingSectionProps {
 }
 
 const ARRANGEMENT_LABELS: Record<DrivingArrangement, string> = {
+  pending: "To be selected during verification",
   self_drive: "Self Drive",
   own_driver: "Own Driver",
   chauffeur: "Chauffeur",
 };
 
 export default function DrivingSection({ client, onEdit }: DrivingSectionProps) {
-  const arrangement = client.driving_arrangement || "self_drive";
+  const arrangement = client.driving_arrangement || "pending";
   const isSelfDrive = arrangement === "self_drive";
 
   return (
@@ -57,6 +58,13 @@ export default function DrivingSection({ client, onEdit }: DrivingSectionProps) 
               icon={Calendar}
             />
           </>
+        ) : arrangement === "pending" ? (
+          <div className="mt-2 p-3 rounded-xl bg-blue-500/5 border border-blue-500/20 flex items-start gap-2">
+            <Info size={14} className="text-blue-500 shrink-0 mt-0.5" />
+            <p className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed">
+              Driving details will be collected as part of identity verification.
+            </p>
+          </div>
         ) : (
           <div className="mt-2 p-3 rounded-xl bg-amber-500/5 border border-amber-500/20 flex items-start gap-2">
             <Info size={14} className="text-amber-500 shrink-0 mt-0.5" />

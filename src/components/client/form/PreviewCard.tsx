@@ -9,7 +9,6 @@ interface PreviewCardProps {
   avatarFile: File | null;
   existingAvatar?: string | null;
   totalDocsUploaded: number;
-  totalDocsRequired: number;
 }
 
 export default function PreviewCard({
@@ -17,7 +16,6 @@ export default function PreviewCard({
   avatarFile,
   existingAvatar,
   totalDocsUploaded,
-  totalDocsRequired,
 }: PreviewCardProps) {
   const idType = formData.id_type || "national_id";
   const drivingArrangement = formData.driving_arrangement || "self_drive";
@@ -85,9 +83,9 @@ export default function PreviewCard({
           </span>
         </div>
         <div className="flex justify-between">
-          <span className="text-[var(--color-ink-muted)]">Documents</span>
+          <span className="text-[var(--color-ink-muted)]">Documents uploaded</span>
           <span className="font-semibold text-[var(--color-ink)] text-right">
-            {totalDocsUploaded}/{totalDocsRequired}
+            {totalDocsUploaded}
           </span>
         </div>
       </div>
