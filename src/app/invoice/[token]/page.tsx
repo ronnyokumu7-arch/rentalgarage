@@ -145,6 +145,16 @@ export default function PublicInvoicePage() {
         textColor: brand.colors.success.text,
       };
     }
+    if (invoice.payment_reported) {
+      return {
+        bg: brand.colors.warning.bg,
+        iconBg: brand.colors.warning.bg,
+        icon: <CheckCircle2 className="h-5 w-5 shrink-0" style={{ color: brand.colors.warning.main }} />,
+        title: "Payment Reported",
+        subtitle: "The agency will update your invoice after confirming receipt.",
+        textColor: brand.colors.warning.text,
+      };
+    }
     return {
       bg: brand.colors.info.bg,
       iconBg: brand.colors.info.bg,

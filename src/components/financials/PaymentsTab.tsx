@@ -5,10 +5,14 @@ import { useState, useMemo, useEffect } from "react";
 import {
   Search, FileText, Filter, Upload, Calendar, X, SlidersHorizontal,
 } from "lucide-react";
+import axios from "axios";
+import toast from "react-hot-toast";
 import FilterDropdown from "@/components/ui/FilterDropdown";
 import { usePayments } from "@/hooks/financials/usePayments";
 import PaymentsTable from "./payments/PaymentsTable";
 import type { PaymentStatus } from "@/lib/types";
+import { paymentsApi } from "@/lib/api/payments";
+import { confirmAction } from "@/lib/utils/confirmAction";
 
 type DateRange =
   | "all" | "today" | "yesterday" | "this_week" | "this_month"
@@ -54,6 +58,7 @@ export default function PaymentsTab() {
 
   const [dateFilter, setDateFilter] = useState<DateRange>("all");
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [confirmingPaymentId, setConfirmingPaymentId] = useState<number | null>(null);
   const pageSize = 7;
 
   const getDateRange = useMemo(() => {
@@ -135,7 +140,7 @@ export default function PaymentsTab() {
   const statusOptions = useMemo(
     () => [
       { label: "Completed", value: "completed", count: payments.filter((p) => p.status === "completed").length },
-      { label: "Pending", value: "pending", count: payments.filter((p) => p.status === "pending").length },
+      { label: "Awaiting confirmation", value: "pending", count: payments.filter((p) => p.status === "pending").length },
       { label: "Failed", value: "failed", count: payments.filter((p) => p.status === "failed").length },
     ],
     [payments],
@@ -157,6 +162,32 @@ export default function PaymentsTab() {
 
   const handleExportSingleCsv = (id: number) => {
     console.log(`Export CSV/Receipt for payment ${id}`);
+  };
+
+  const handleConfirmPayment = async (id: number) => {
+    const payment = payments.find((item) => item.id === id);
+    if (!payment || confirmingPaymentId !== null) return;
+
+    const amount = `${payment.currency_code} ${Number(payment.amount).toLocaleString()}`;
+    if (!confirmAction(`Confirm receipt of ${amount}? This will update the invoice balance.`)) return;
+
+    setConfirmingPaymentId(id);
+    try {
+      await paymentsApi.confirm(id);
+      toast.success("Payment confirmed and invoice balance updated.");
+      window.dispatchEvent(new Event("payment:updated"));
+      window.dispatchEvent(new Event("invoice:updated"));
+    } catch (error) {
+      if (axios.isAxiosError<{ detail?: { message?: string } | string; message?: string }>(error)) {
+        const detail = error.response?.data?.detail;
+        const message = typeof detail === "object" ? detail?.message : detail;
+        toast.error(message || error.response?.data?.message || "Failed to confirm payment.");
+      } else {
+        toast.error(error instanceof Error ? error.message : "Failed to confirm payment.");
+      }
+    } finally {
+      setConfirmingPaymentId(null);
+    }
   };
 
   const handleExportAllCsv = () => {
@@ -365,6 +396,8 @@ export default function PaymentsTab() {
               onExportCsv={handleExportSingleCsv}
               onDownloadPdf={handleDownloadPdf}
               onIssueRefund={handleIssueRefund}
+              onConfirmPayment={handleConfirmPayment}
+              confirmingPaymentId={confirmingPaymentId}
             />
           )}
         </div>
@@ -385,7 +418,7 @@ export default function PaymentsTab() {
             </div>
             <div className="w-px h-3 bg-[var(--color-surface-border)] flex-shrink-0" />
             <div className="flex items-center gap-2 whitespace-nowrap flex-1 min-w-0">
-              <span className="text-xs font-medium text-[var(--color-ink-muted)]">Pending</span>
+              <span className="text-xs font-medium text-[var(--color-ink-muted)]">Awaiting confirmation</span>
               <span className="text-xs font-bold text-[var(--color-warning-text)] tabular-nums">
                 {payments.filter((p) => p.status === "pending").length}
               </span>
@@ -468,6 +501,8 @@ export default function PaymentsTab() {
               onExportCsv={handleExportSingleCsv}
               onDownloadPdf={handleDownloadPdf}
               onIssueRefund={handleIssueRefund}
+              onConfirmPayment={handleConfirmPayment}
+              confirmingPaymentId={confirmingPaymentId}
             />
 
             {/* Pagination Footer */}

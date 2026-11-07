@@ -2,8 +2,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Receipt, CreditCard, Banknote, Upload, FileText, RotateCcw, ExternalLink, Download, CalendarDays, User, ChevronRight, ArrowUpRight } from "lucide-react";
+import { Receipt, CreditCard, Banknote, Upload, FileText, RotateCcw, ExternalLink, Download, CalendarDays, User, ChevronRight, ArrowUpRight, CheckCircle2 } from "lucide-react";
 import DataTable, { RowAction } from "@/components/ui/DataTable";
+import ActionMenu from "@/components/ui/ActionMenu";
 import type { Payment, PaymentMethod, PaymentStatus } from "@/lib/types";
 
 interface PaymentsTableProps {
@@ -11,6 +12,8 @@ interface PaymentsTableProps {
   onExportCsv?: (id: number) => void;
   onDownloadPdf?: (id: number) => void;
   onIssueRefund?: (id: number) => void;
+  onConfirmPayment?: (id: number) => void;
+  confirmingPaymentId?: number | null;
 }
 
 const getMethodIcon = (method: PaymentMethod) => {
@@ -49,7 +52,7 @@ const getStatusDotColor = (status: PaymentStatus) => {
 const statusLabels: Record<PaymentStatus, string> = {
   completed: "Completed",
   failed: "Failed",
-  pending: "Pending",
+  pending: "Awaiting confirmation",
   void: "Void",
 };
 
@@ -61,12 +64,24 @@ export default function PaymentsTable({
   data, 
   onExportCsv, 
   onDownloadPdf, 
-  onIssueRefund 
+  onIssueRefund,
+  onConfirmPayment,
+  confirmingPaymentId,
 }: PaymentsTableProps) {
   const router = useRouter();
 
   const getPaymentActions = (payment: Payment): RowAction<Payment>[] => {
     const actions: RowAction<Payment>[] = [];
+
+    if (payment.status === "pending" && onConfirmPayment) {
+      actions.push({
+        label: confirmingPaymentId === payment.id ? "Confirming..." : "Confirm Payment",
+        icon: CheckCircle2,
+        variant: "primary",
+        disabled: confirmingPaymentId !== null,
+        onClick: () => onConfirmPayment(payment.id),
+      });
+    }
 
     if (onExportCsv) {
       actions.push({
@@ -167,14 +182,30 @@ export default function PaymentsTable({
                     </div>
                   </div>
                   
-                  <ChevronRight size={16} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
+                  <div className="flex items-center gap-1">
+                    {item.status === "pending" && onConfirmPayment && (
+                      <div onClick={(event) => event.stopPropagation()}>
+                        <ActionMenu
+                          items={[
+                            {
+                              label: confirmingPaymentId === item.id ? "Confirming..." : "Confirm Payment",
+                              icon: CheckCircle2,
+                              onClick: () => onConfirmPayment(item.id),
+                              disabled: confirmingPaymentId !== null,
+                            },
+                          ]}
+                        />
+                      </div>
+                    )}
+                    <ChevronRight size={16} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
+                  </div>
                 </div>
 
                 {/* Body Section */}
                 <div className="flex items-start justify-between gap-3 mb-3">
                   <div className="min-w-0">
                     <p className="text-[9px] font-semibold text-[var(--color-ink-subtle)] uppercase tracking-wider mb-0.5">
-                      Amount Received
+                      {item.status === "pending" ? "Amount Reported" : "Amount Received"}
                     </p>
                     <p className="text-lg font-extrabold text-[var(--color-ink)] leading-none tabular-nums tracking-tight">
                       {item.currency_code || "KES"} {Number(item.amount).toLocaleString()}
@@ -343,7 +374,7 @@ export default function PaymentsTable({
               },
             },
             {
-              header: "Date Received",
+              header: "Date",
               accessorKey: "paid_at",
               cell: ({ row }) => {
                 const payment = row.original;

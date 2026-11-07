@@ -23,6 +23,11 @@ export const paymentsApi = {
     return res.data;
   },
 
+  confirm: async (id: number): Promise<Payment> => {
+    const res = await apiClient.post<Payment>(`/payments/${id}/confirm`);
+    return res.data;
+  },
+
   exportCsv: async (params?: { start_date?: string; end_date?: string }) => {
     return apiClient.get("/payments/export/csv", {
       params,

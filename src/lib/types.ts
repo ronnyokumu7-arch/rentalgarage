@@ -835,6 +835,7 @@ export interface PublicInvoiceView {
   doc_type: InvoiceDocType;  // ✅ LIFECYCLE: drives morphing page (quotation vs invoice mode)
   due_date: string;
   remaining_balance?: number | string | null;
+  payment_reported?: boolean;
   payment_details?: PublicPaymentDetails | null;
   created_at: string;
 

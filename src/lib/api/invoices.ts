@@ -50,7 +50,7 @@ export const invoicesApi = {
     apiClient.post(`/invoices/${invoiceId}/record-payment`, payload).then((r) => r.data),
 
   recordPaymentByToken: (token: string, payload: PublicPaymentPayload) =>
-    apiClient.post<Invoice>(`/invoices/public/${token}/pay`, payload).then((r) => r.data),
+    apiClient.post<PublicInvoiceView>(`/invoices/public/${token}/pay`, payload).then((r) => r.data),
 
   downloadPdfByToken: (token: string) =>
     apiClient.get(`/invoices/public/${token}/pdf`, { responseType: "blob" }),

@@ -35,8 +35,8 @@ export function usePublicInvoice(token: string) {
     setIsPaying(true);
     try {
       const updatedInvoice = await invoicesApi.recordPaymentByToken(token, { amount, method, reference });
-      setInvoice(updatedInvoice as unknown as PublicInvoiceView);
-      toast.success('Payment recorded successfully!');
+      setInvoice(updatedInvoice);
+      toast.success('Payment reported. It will update after the agency confirms receipt.');
     } catch (err: any) {
       toast.error(err.response?.data?.detail || 'Failed to record payment.');
     } finally {

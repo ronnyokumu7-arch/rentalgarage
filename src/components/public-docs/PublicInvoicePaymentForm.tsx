@@ -81,7 +81,7 @@ export default function PublicInvoicePaymentForm({ invoice, isPaying, onRecordPa
   return (
     <div style={containerStyle}>
       <h4 className="flex items-center gap-2" style={titleStyle}>
-        <CreditCard size={16} style={{ color: '#57534E' }} /> Record Offline Payment
+        <CreditCard size={16} style={{ color: '#57534E' }} /> Report a Payment
       </h4>
       {isPaid ? (
         <div className="text-center py-4">
@@ -90,6 +90,15 @@ export default function PublicInvoicePaymentForm({ invoice, isPaying, onRecordPa
             style={{ color: '#047857' }}
           >
             This invoice has been fully paid.
+          </p>
+        </div>
+      ) : invoice.payment_reported ? (
+        <div className="text-center py-4">
+          <p className="text-sm font-semibold" style={{ color: '#B45309' }}>
+            Payment reported — awaiting agency confirmation.
+          </p>
+          <p className="mt-1 text-xs" style={{ color: '#57534E' }}>
+            Your invoice balance will update once the agency verifies receipt.
           </p>
         </div>
       ) : (
@@ -189,7 +198,7 @@ export default function PublicInvoicePaymentForm({ invoice, isPaying, onRecordPa
               e.currentTarget.style.boxShadow = '0 4px 12px rgba(109, 40, 217, 0.25)';
             }}
           >
-            {isPaying ? (<><Loader2 className="h-4 w-4 animate-spin" /> Processing...</>) : (<><CreditCard size={16} /> Confirm Payment</>)}
+            {isPaying ? (<><Loader2 className="h-4 w-4 animate-spin" /> Submitting report...</>) : (<><CreditCard size={16} /> Report Payment</>)}
           </button>
         </form>
       )}
