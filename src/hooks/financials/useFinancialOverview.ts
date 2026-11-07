@@ -69,6 +69,7 @@ export function useFinancialOverview() {
 
       // ✅ 2. Fetch recent activity from our new activityLogsApi
       const activityResponse = await activityLogsApi.list({
+        recent_activity_only: true,
         page: 1,
         page_size: 10,
         sort_by_priority: false,

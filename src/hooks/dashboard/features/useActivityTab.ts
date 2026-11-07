@@ -50,13 +50,14 @@ export function useActivityTab(initialFilter: TimeFilter = "week") {
       const response = await activityLogsApi.list({
         start_date,
         end_date,
-        sort_by_priority: true,
+        recent_activity_only: true,
+        sort_by_priority: false,
         page: 1,
         page_size: 50,
       });
       
       // ✅ MAP the raw ActivityLog objects to ActivityData
-      const mappedActivities = (response.items || []).map((activity: any) => 
+      const mappedActivities = (response.items || []).map((activity) =>
         mapperRef.current.mapActivity(activity)
       );
       

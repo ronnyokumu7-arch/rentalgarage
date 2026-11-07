@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { Camera, Loader2, ShieldCheck, Upload } from "lucide-react";
 import toast from "react-hot-toast";
 import apiClient from "@/lib/api-client";
+import { getApiErrorMessage } from "@/lib/api-error";
 
 type VettingPreview = {
   person_type: "client" | "driver";
@@ -26,6 +27,7 @@ const INITIAL_DOCUMENTS: Record<DocumentSlot, File | null> = {
 };
 
 const inputClass = "w-full rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] px-3 py-2.5 text-sm text-[var(--color-ink)] outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20";
+const SUPPORTED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 export default function VettingPage() {
   const token = typeof window === "undefined" ? "" : window.location.pathname.split("/").pop() || "";
@@ -71,8 +73,8 @@ export default function VettingPage() {
 
   const selectDocument = (slot: DocumentSlot, file: File | undefined) => {
     if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please choose an image file.");
+    if (!SUPPORTED_IMAGE_TYPES.includes(file.type)) {
+      toast.error("Choose a JPG, PNG, or WEBP image.");
       return;
     }
     setDocuments((current) => ({ ...current, [slot]: file }));
@@ -111,16 +113,16 @@ export default function VettingPage() {
         await apiClient.post(`/vetting/${token}/upload-document`, formData, { params: { slot } });
       }
       setStep("selfie");
-    } catch {
-      toast.error("We could not save your details or upload a document. Please try again.");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "We could not save your details or upload a document. Please try again."));
     } finally {
       setSaving(false);
     }
   };
 
   const selectSelfie = (file: File | undefined) => {
-    if (!file || !file.type.startsWith("image/")) {
-      toast.error("Please take a photo using your camera.");
+    if (!file || !SUPPORTED_IMAGE_TYPES.includes(file.type)) {
+      toast.error("Take or choose a JPG, PNG, or WEBP photo.");
       return;
     }
     if (selfiePreview) URL.revokeObjectURL(selfiePreview);
@@ -140,8 +142,8 @@ export default function VettingPage() {
       await apiClient.post(`/vetting/${token}/upload-selfie`, formData);
       await apiClient.post(`/vetting/${token}/submit`, { selfie_with_id: "uploaded" });
       setStep("success");
-    } catch {
-      toast.error("Your verification could not be submitted. Please try again.");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Your verification could not be submitted. Please try again."));
     } finally {
       setSaving(false);
     }
@@ -156,8 +158,8 @@ export default function VettingPage() {
       <p className="text-xs font-bold text-[var(--color-ink)]">{label}</p>
       <p className="mt-1 truncate text-[10px] text-[var(--color-ink-muted)]">{documents[slot]?.name || "Not selected"}</p>
       <div className="mt-3 grid grid-cols-2 gap-2">
-        <label className="cursor-pointer rounded-lg bg-[var(--color-surface-hover)] px-2 py-2 text-center text-[10px] font-bold"><Upload size={12} className="mr-1 inline" />Device<input className="hidden" type="file" accept="image/*" onChange={(event) => selectDocument(slot, event.target.files?.[0])} /></label>
-        <label className="cursor-pointer rounded-lg bg-[var(--color-primary)]/10 px-2 py-2 text-center text-[10px] font-bold text-[var(--color-primary)]"><Camera size={12} className="mr-1 inline" />Camera<input className="hidden" type="file" accept="image/*" capture="environment" onChange={(event) => selectDocument(slot, event.target.files?.[0])} /></label>
+        <label className="cursor-pointer rounded-lg bg-[var(--color-surface-hover)] px-2 py-2 text-center text-[10px] font-bold"><Upload size={12} className="mr-1 inline" />Device<input className="hidden" type="file" accept={SUPPORTED_IMAGE_TYPES.join(",")} onChange={(event) => selectDocument(slot, event.target.files?.[0])} /></label>
+        <label className="cursor-pointer rounded-lg bg-[var(--color-primary)]/10 px-2 py-2 text-center text-[10px] font-bold text-[var(--color-primary)]"><Camera size={12} className="mr-1 inline" />Camera<input className="hidden" type="file" accept={SUPPORTED_IMAGE_TYPES.join(",")} capture="environment" onChange={(event) => selectDocument(slot, event.target.files?.[0])} /></label>
       </div>
     </div>
   );
@@ -269,7 +271,7 @@ export default function VettingPage() {
                     <p className="text-sm font-bold">Take selfie with ID</p>
                   </div>
                 )}
-                <input ref={selfieInput} className="hidden" type="file" accept="image/*" capture="user" onChange={(event) => selectSelfie(event.target.files?.[0])} />
+                <input ref={selfieInput} className="hidden" type="file" accept={SUPPORTED_IMAGE_TYPES.join(",")} capture="user" onChange={(event) => selectSelfie(event.target.files?.[0])} />
               </div>
               <button type="button" onClick={submitVerification} disabled={saving || !selfie} className="w-full rounded-xl bg-[var(--color-primary)] py-3 text-sm font-bold text-white disabled:opacity-50">
                 {saving ? "Submitting…" : "Submit verification"}

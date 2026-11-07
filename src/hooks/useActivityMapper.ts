@@ -22,13 +22,11 @@ export function useActivityMapper() {
     const reference = summary.reference || summary.booking_number || activity.reference || activity.transaction_ref;
 
     // ✅ 1. FINANCIAL DEEP-LINKS (Money Focus)
-    if (["payment_received", "payment_failed", "invoice_paid", "invoice_overdue", "invoice_created", "contract_signed", "void_payment", "void_invoice", "void_contract"].includes(type)) {
+    if (["payment_received", "contract_sent", "contract_signed"].includes(type)) {
       let link = "/dashboard/financials";
-      if (["payment_received", "payment_failed", "void_payment"].includes(type)) {
+      if (type === "payment_received") {
         link = `/dashboard/financials?tab=payments&payment_id=${activity.payment_id || activity.target_id || activity.id}`;
-      } else if (["invoice_paid", "invoice_overdue", "invoice_created", "void_invoice"].includes(type)) {
-        link = `/dashboard/financials?tab=invoices&invoice_id=${activity.invoice_id || activity.target_id || activity.id}&filter=${type === "invoice_overdue" ? "overdue" : ""}`;
-      } else if (["contract_signed", "void_contract"].includes(type)) {
+      } else {
         link = `/dashboard/financials?tab=contracts&contract_id=${activity.contract_id || activity.target_id || activity.id}`;
       }
 

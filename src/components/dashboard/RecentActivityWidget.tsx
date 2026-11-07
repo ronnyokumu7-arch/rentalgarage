@@ -54,7 +54,7 @@ export default function RecentActivityWidget() {
             <Activity size={24} className="text-[var(--color-ink-subtle)] mb-3" />
             <p className="text-sm font-bold text-[var(--color-ink)]">No recent activity</p>
             <p className="text-xs text-[var(--color-ink-muted)] mt-1">
-              Recent fleet moves will be logged here.
+              Payments and contract updates will appear here.
             </p>
           </div>
         ) : (

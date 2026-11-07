@@ -24,6 +24,7 @@ interface ClientDetailsSectionProps extends SectionProps {
   existingIdFront?: string | null;
   existingIdBack?: string | null;
   showIdentityUploads?: boolean;
+  showIdFrontUpload?: boolean;
 }
 
 const labelClass =
@@ -49,6 +50,7 @@ export default function ClientDetailsSection({
   existingIdFront,
   existingIdBack,
   showIdentityUploads = true,
+  showIdFrontUpload = false,
 }: ClientDetailsSectionProps) {
   const idType = formData.id_type || "national_id";
 
@@ -275,6 +277,38 @@ export default function ClientDetailsSection({
             />
           </div>
           {renderError("id_number")}
+
+          {(showIdentityUploads || showIdFrontUpload) && (
+            <div className="mt-4">
+              <label className={labelClass}>
+                ID Document Image (optional)
+              </label>
+              <div className={showIdentityUploads ? "grid grid-cols-1 sm:grid-cols-2 gap-3" : ""}>
+                <DocUploadSlot
+                  label="Upload ID Front"
+                  icon={FileText}
+                  file={idFrontFile}
+                  setFile={setIdFrontFile}
+                  existingUrl={existingIdFront}
+                  captureMode="environment"
+                  error={fieldErrors["idFront"]}
+                  fieldId="field-idFront"
+                />
+                {showIdentityUploads && (
+                  <DocUploadSlot
+                    label="Upload ID Back"
+                    icon={FileText}
+                    file={idBackFile}
+                    setFile={setIdBackFile}
+                    existingUrl={existingIdBack}
+                    captureMode="environment"
+                    error={fieldErrors["idBack"]}
+                    fieldId="field-idBack"
+                  />
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -294,32 +328,6 @@ export default function ClientDetailsSection({
         />
       </div>
 
-      {/* Identity documents belong to verification, not public account intake. */}
-      {showIdentityUploads && <div>
-        <label className={labelClass}>Identity Documents (optional)</label>
-        <div className="grid grid-cols-2 gap-3">
-          <DocUploadSlot
-            label="ID Front"
-            icon={FileText}
-            file={idFrontFile}
-            setFile={setIdFrontFile}
-            existingUrl={existingIdFront}
-            captureMode="environment"
-            error={fieldErrors["idFront"]}
-            fieldId="field-idFront"
-          />
-          <DocUploadSlot
-            label="ID Back"
-            icon={FileText}
-            file={idBackFile}
-            setFile={setIdBackFile}
-            existingUrl={existingIdBack}
-            captureMode="environment"
-            error={fieldErrors["idBack"]}
-            fieldId="field-idBack"
-          />
-        </div>
-      </div>}
     </section>
   );
 }

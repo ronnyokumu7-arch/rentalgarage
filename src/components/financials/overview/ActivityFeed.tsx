@@ -15,13 +15,9 @@ interface ActivityFeedProps {
   limit?: number;
 }
 
-// ✅ FINANCIAL TYPES ONLY: Payments, Invoices, Contracts
-const FINANCIAL_TYPES = [
+const RECENT_ACTIVITY_TYPES = [
   "payment_received",
-  "payment_failed",
-  "invoice_paid",
-  "invoice_overdue",
-  "invoice_created",
+  "contract_sent",
   "contract_signed",
 ];
 
@@ -30,7 +26,7 @@ export default function ActivityFeed({ activities, limit = 10 }: ActivityFeedPro
   const { mapActivity } = useActivityMapper(); // ✅ Use the reusable mapper hook
 
   // ✅ FIXED: Filter by activity.action (raw ActivityLog field)
-  const filteredActivities = activities.filter((activity) => FINANCIAL_TYPES.includes(activity.action));
+  const filteredActivities = activities.filter((activity) => RECENT_ACTIVITY_TYPES.includes(activity.action));
   const displayedActivities = filteredActivities.slice(0, limit);
 
   // ✅ EMPTY STATE — plain body, no wrapper (parent provides the card chrome)
@@ -40,8 +36,8 @@ export default function ActivityFeed({ activities, limit = 10 }: ActivityFeedPro
         <div className="w-14 h-14 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mb-4">
           <Zap size={22} className="text-[var(--color-ink-subtle)]" />
         </div>
-        <p className="text-sm font-semibold text-[var(--color-ink)]">No recent financial activity</p>
-        <p className="text-xs text-[var(--color-ink-muted)] mt-1">Payments, invoices, and contracts will appear here</p>
+        <p className="text-sm font-semibold text-[var(--color-ink)]">No recent activity</p>
+        <p className="text-xs text-[var(--color-ink-muted)] mt-1">Payments and contract updates will appear here</p>
       </div>
     );
   }
@@ -66,7 +62,7 @@ export default function ActivityFeed({ activities, limit = 10 }: ActivityFeedPro
               onClick={() => router.push("/dashboard/financials")}
               className="inline-flex items-center gap-1 text-xs font-bold text-[var(--color-primary)] hover:opacity-80 transition-opacity"
             >
-              View all {filteredActivities.length} financial activities
+              View all {filteredActivities.length} activities
               <ChevronRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
             </button>
           </div>

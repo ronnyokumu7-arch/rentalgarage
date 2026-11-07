@@ -23,7 +23,7 @@ export default function ActivityTabContent() {
           <Clock size={24} />
         </div>
         <p className="text-sm font-bold text-[var(--color-ink)]">No recent activity</p>
-        <p className="text-xs text-[var(--color-ink-muted)] mt-1">Recent fleet moves will be logged here.</p>
+        <p className="text-xs text-[var(--color-ink-muted)] mt-1">Payments and contract updates will appear here.</p>
       </div>
     );
   }

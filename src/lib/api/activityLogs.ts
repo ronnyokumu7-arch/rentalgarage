@@ -25,6 +25,7 @@ export interface PaginatedActivityLogs {
 export interface ActivityLogsQueryParams {
   user_id?: number;
   action?: string;
+  recent_activity_only?: boolean;
   target_type?: string;
   start_date?: string;
   end_date?: string;
@@ -40,6 +41,7 @@ export const activityLogsApi = {
     // ✅ Include all new filter parameters (backward compatible)
     if (params.user_id) queryParams.user_id = params.user_id;
     if (params.action) queryParams.action = params.action;
+    if (params.recent_activity_only) queryParams.recent_activity_only = true;
     if (params.target_type) queryParams.target_type = params.target_type;
     if (params.start_date) queryParams.start_date = params.start_date;
     if (params.end_date) queryParams.end_date = params.end_date;

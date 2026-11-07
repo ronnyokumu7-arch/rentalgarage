@@ -102,6 +102,11 @@ const apiClient = axios.create({
  */
 apiClient.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
+    if (typeof FormData !== "undefined" && config.data instanceof FormData) {
+      // Let the browser set the multipart boundary; JSON here makes Axios serialize the form.
+      config.headers.delete("Content-Type");
+    }
+
     if (typeof window !== "undefined") {
       const token = getCookie("rm_token");
       if (token) {

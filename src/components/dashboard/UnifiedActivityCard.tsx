@@ -50,6 +50,7 @@ const getActivityColor = (type: string, priority?: number) => {
     case "invoice_paid":
       return "text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20";
     case "contract_signed":
+    case "contract_sent":
       return "text-violet-600 dark:text-violet-400 bg-violet-500/10 border-violet-500/20";
     case "invoice_overdue":
     case "payment_failed":
@@ -84,6 +85,7 @@ const getActivityIcon = (type: string): LucideIcon => {
   switch (type) {
     case "payment_received": return Banknote;
     case "invoice_paid": return Banknote;
+    case "contract_sent":
     case "contract_signed": return Handshake;
     case "invoice_overdue": return AlertTriangle;
     case "booking_confirmed": return CheckCircle2;
