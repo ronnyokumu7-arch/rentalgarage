@@ -1,5 +1,5 @@
 // src/components/client/mobile/types.ts
-import type { Client } from "@/lib/types";
+import type { Client, DrivingArrangement } from "@/lib/types";
 
 export type ClientBookingState = "none" | "booked" | "on_trip";
 
@@ -22,6 +22,7 @@ export interface ClientListItem {
   email?: string | null;
   status: string;
   verification_status?: string | null;
+  driving_arrangement?: DrivingArrangement | null;
   dl_expiry?: string | null;
   /** Derived: "none" | "booked" | "on_trip" */
   booking_state?: ClientBookingState;

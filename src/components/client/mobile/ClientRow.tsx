@@ -5,11 +5,13 @@ import {
   Phone,
   MessageCircle,
   CreditCard,
+  Car,
   CheckCircle2,
   Circle,
   MoreVertical,
   Check,
   Shield,
+  ShieldCheck,
 } from "lucide-react";
 import {
   getInitials,
@@ -46,10 +48,6 @@ export default function ClientRow({
   const phone = client.phone || "";
   const waNumber = getWhatsAppNumber(client.phone);
   const isVerified = client.verification_status === "verified";
-  const isPending =
-    client.status === "pending" ||
-    client.verification_status === "under_review" ||
-    client.verification_status === "sent";
   const isSuspended = client.status === "suspended";
   const displayName = getClientDisplayName(client.full_name);
 
@@ -66,6 +64,24 @@ export default function ClientRow({
   const avatarColors = getAvatarStatusClasses(client, hasExpiredDL);
 
   const renderDL = () => {
+    if (client.driving_arrangement === "own_driver") {
+      return (
+        <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/10 px-2 py-0.5 text-[10px] font-bold text-violet-700 dark:text-violet-300">
+          <Car size={11} className="flex-shrink-0" />
+          My Driver
+        </span>
+      );
+    }
+
+    if (client.driving_arrangement === "chauffeur") {
+      return (
+        <span className="inline-flex items-center gap-1 rounded-full bg-sky-500/10 px-2 py-0.5 text-[10px] font-bold text-sky-700 dark:text-sky-300">
+          <Car size={11} className="flex-shrink-0" />
+          Chauffeur
+        </span>
+      );
+    }
+
     if (dl.kind === "none") {
       return (
         <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[var(--color-ink-subtle)]">
@@ -135,15 +151,15 @@ export default function ClientRow({
           </span>
           {isVerified && (
             <span
-              className="relative inline-flex flex-shrink-0 text-blue-600 dark:text-blue-500"
+              className="relative inline-flex flex-shrink-0 text-black dark:text-white"
               aria-label="Verified client"
               title="Verified client"
             >
-              <Shield size={16} strokeWidth={1.5} fill="currentColor" />
+              <Shield size={14} strokeWidth={1.5} fill="currentColor" />
               <Check
-                size={9}
+                size={8}
                 strokeWidth={3}
-                className="absolute left-[3.5px] top-[3px] text-white"
+                className="absolute left-[3px] top-[2.5px] text-[var(--color-primary)]"
               />
             </span>
           )}
@@ -158,12 +174,33 @@ export default function ClientRow({
             {renderDL()}
           </div>
         ) : (
-          <div className="flex items-center gap-1 mt-1 text-[11px] font-semibold text-amber-600 dark:text-amber-400">
-            {client.verification_status === "rejected"
-              ? "Verification rejected"
-              : isPending
-                ? "Pending verification"
-                : "Verification not started"}
+          <div
+            className={`flex items-center gap-1 mt-1 text-[11px] font-semibold ${
+              client.verification_status === "rejected"
+                ? "text-rose-600 dark:text-rose-400"
+                : client.verification_status === "under_review"
+                  ? "text-amber-600 dark:text-amber-400"
+                  : client.verification_status === "sent"
+                    ? "text-sky-600 dark:text-sky-400"
+                    : client.status === "pending"
+                      ? "text-violet-600 dark:text-violet-400"
+                      : "text-[var(--color-ink-subtle)]"
+            }`}
+          >
+            {client.verification_status === "rejected" ? (
+              "Verification rejected"
+            ) : client.verification_status === "under_review" ? (
+              "Verification under review"
+            ) : client.verification_status === "sent" ? (
+              "Verification link sent"
+            ) : client.status === "pending" ? (
+              <>
+                <ShieldCheck size={12} className="flex-shrink-0" />
+                Review &amp; verify client
+              </>
+            ) : (
+              "Verification not started"
+            )}
           </div>
         )}
 
