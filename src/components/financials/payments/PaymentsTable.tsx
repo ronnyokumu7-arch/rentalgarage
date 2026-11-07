@@ -2,9 +2,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Receipt, CreditCard, Banknote, Upload, FileText, RotateCcw, ExternalLink, Download, CalendarDays, User, ChevronRight, ArrowUpRight, CheckCircle2 } from "lucide-react";
+import { Receipt, CreditCard, Banknote, Upload, FileText, RotateCcw, ExternalLink, Download, CalendarDays, User, ChevronRight, CheckCircle2, Car, UserRound } from "lucide-react";
 import DataTable, { RowAction } from "@/components/ui/DataTable";
-import ActionMenu from "@/components/ui/ActionMenu";
+import CardGrid from "@/components/ui/CardGrid";
 import type { Payment, PaymentMethod, PaymentStatus } from "@/lib/types";
 
 interface PaymentsTableProps {
@@ -73,6 +73,22 @@ export default function PaymentsTable({
   const getPaymentActions = (payment: Payment): RowAction<Payment>[] => {
     const actions: RowAction<Payment>[] = [];
 
+    if (payment.booking_id) {
+      actions.push({
+        label: "View Booking",
+        icon: Car,
+        onClick: () => router.push(`/dashboard/bookings/${payment.booking_id}`),
+      });
+    }
+
+    if (payment.client_id) {
+      actions.push({
+        label: "View Client",
+        icon: UserRound,
+        onClick: () => router.push(`/dashboard/clients/${payment.client_id}`),
+      });
+    }
+
     if (payment.status === "pending" && onConfirmPayment) {
       actions.push({
         label: confirmingPaymentId === payment.id ? "Confirming..." : "Confirm Payment",
@@ -94,7 +110,7 @@ export default function PaymentsTable({
 
     if (onDownloadPdf) {
       actions.push({
-        label: "Download PDF",
+        label: "Download Receipt",
         icon: Download,
         variant: "default",
         onClick: () => onDownloadPdf(payment.id),
@@ -114,17 +130,6 @@ export default function PaymentsTable({
     return actions;
   };
 
-  const getPrimaryAction = (payment: Payment) => {
-    if (onDownloadPdf) {
-      return {
-        label: "Download Receipt",
-        icon: Download,
-        onClick: () => onDownloadPdf(payment.id),
-      };
-    }
-    return null;
-  };
-
   return (
     <div className="w-full">
       {/* ✅ MOBILE: Seamless Edge-to-Edge Pattern */}
@@ -133,11 +138,9 @@ export default function PaymentsTable({
           {data.map((item, index) => {
             const invoiceRef = (item as any).invoice?.invoice_number || (item as any).invoice_number || `Invoice #${item.invoice_id || "N/A"}`;
             const clientName = (item as any).client?.full_name || (item as any).client_name || "Unknown Client";
-            const bookingId = (item as any).booking_id || (item as any).invoice?.booking_id;
             const date = item.paid_at ? new Date(item.paid_at) : new Date(item.created_at);
             const methodStyle = getMethodStyle(item.method);
             const MethodIcon = getMethodIcon(item.method);
-            const primaryAction = getPrimaryAction(item);
             const dotColor = getStatusDotColor(item.status);
 
             return (
@@ -145,9 +148,10 @@ export default function PaymentsTable({
                 key={item.id}
                 className="relative flex flex-col w-full py-3.5 px-3 transition-colors cursor-pointer select-none hover:bg-[var(--color-surface-hover)]/40"
                 onClick={() => {
-                  if (bookingId) {
-                    router.push(`/dashboard/bookings/${bookingId}`);
-                  }
+                  const trigger = document.querySelector(
+                    `[data-card-actions="${item.id}"] button`
+                  ) as HTMLButtonElement | null;
+                  trigger?.click();
                 }}
               >
                 {/* Premium fade border - 80% width, very thin, fades at sides */}
@@ -182,23 +186,7 @@ export default function PaymentsTable({
                     </div>
                   </div>
                   
-                  <div className="flex items-center gap-1">
-                    {item.status === "pending" && onConfirmPayment && (
-                      <div onClick={(event) => event.stopPropagation()}>
-                        <ActionMenu
-                          items={[
-                            {
-                              label: confirmingPaymentId === item.id ? "Confirming..." : "Confirm Payment",
-                              icon: CheckCircle2,
-                              onClick: () => onConfirmPayment(item.id),
-                              disabled: confirmingPaymentId !== null,
-                            },
-                          ]}
-                        />
-                      </div>
-                    )}
-                    <ChevronRight size={16} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
-                  </div>
+                  <ChevronRight size={16} className="text-[var(--color-ink-subtle)] flex-shrink-0 ml-1" />
                 </div>
 
                 {/* Body Section */}
@@ -244,24 +232,29 @@ export default function PaymentsTable({
                   </span>
                 </div>
 
-                {/* Primary Action Button */}
-                {primaryAction && (
-                  <button
-                    onClick={(e) => { 
-                      e.stopPropagation(); // ✅ Prevents card click navigation
-                      primaryAction.onClick(); 
-                    }}
-                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 border border-[var(--color-primary)]/20 text-[var(--color-primary)] transition-all active:scale-[0.98] text-[11px] font-bold"
-                  >
-                    {primaryAction.icon && <primaryAction.icon size={13} />}
-                    {primaryAction.label}
-                    <ArrowUpRight size={13} className="opacity-70" />
-                  </button>
-                )}
               </div>
             );
           })}
         </div>
+      </div>
+
+      <div className="hidden">
+        <CardGrid
+          data={data}
+          getCardId={(payment) => payment.id}
+          compact
+          onCardClick={(payment) => {
+            const trigger = document.querySelector(
+              `[data-card-actions="${payment.id}"] button`
+            ) as HTMLButtonElement | null;
+            trigger?.click();
+          }}
+          cardClassName="!p-0"
+          containerClassName="!p-0"
+          renderCardHeader={() => null}
+          renderCardBody={() => null}
+          rowActions={getPaymentActions}
+        />
       </div>
 
       {/* ✅ DESKTOP: Reusable DataTable */}

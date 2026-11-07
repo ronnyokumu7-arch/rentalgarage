@@ -134,6 +134,11 @@
   color: #1C1917;
 }
 
+.auth-light .auth-brand-mark,
+.auth-light .auth-sign-in-button {
+  color: #FFFFFF !important;
+}
+
 /* But keep muted text as muted */
 .auth-light .text-ink-muted,
 .auth-light p.text-ink-muted,

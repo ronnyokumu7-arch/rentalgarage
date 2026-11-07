@@ -395,12 +395,12 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         <div className="w-full max-w-md">
           {/* Mobile Brand - FIXED: Using brand light mode colors */}
           <motion.div 
-            className="lg:hidden flex items-center gap-3 mb-8"
+            className="lg:hidden flex items-center justify-start gap-3 mb-8"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2, duration: 0.4 }}
           >
-            <div className="w-10 h-10 rounded-xl bg-gradient-brand flex items-center justify-center text-white font-bold text-sm">
+            <div className="auth-brand-mark w-10 h-10 rounded-xl bg-gradient-brand flex items-center justify-center text-white font-bold text-sm">
               RG
             </div>
             <span className="text-[#1C1917] font-bold text-xl tracking-tight">

@@ -108,6 +108,7 @@ export default function ForgotPasswordPage() {
               className="w-full h-11 rounded-xl flex items-center justify-center gap-2 text-sm font-semibold text-white disabled:opacity-50 disabled:cursor-not-allowed"
               style={{
                 background: 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)',
+                color: '#FFFFFF',
                 boxShadow: '0 2px 8px rgba(124, 58, 237, 0.30)',
                 transition: 'all 0.2s ease',
               }}

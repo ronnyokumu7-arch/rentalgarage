@@ -11,21 +11,25 @@ interface FleetTourSheetProps {
 
 const STEPS = [
   {
-    title: "Searching vehicles",
-    description: "Use the search bar to find vehicles by name, plate, or driver.",
+    title: "Add and activate vehicles",
+    description:
+      "Add a vehicle with its identity, rate, mileage, and service details. New vehicles stay Pending until activated; investor-owned vehicles need pricing reviewed first.",
   },
   {
-    title: "Filter icon",
-    description: "Tap the filter to narrow by status, type, or location.",
+    title: "Keep availability up to date",
+    description:
+      "Use the vehicle status to see what is ready, rented, awaiting activation, or in maintenance. Send available vehicles to Maintenance when they need service, then reactivate them when ready.",
     icon: SlidersHorizontal,
   },
   {
-    title: "Vehicle card actions",
-    description: "Tap a card to view details, assign, or service.",
+    title: "Find and organize your fleet",
+    description:
+      "Search by make, model, or plate. Use filters to view a status or mileage due, and collections to group vehicles for quick access.",
   },
   {
-    title: "Pull-up menu",
-    description: "Swipe up on a card to access quick actions like assign, share, or maintenance.",
+    title: "Open a vehicle or its actions",
+    description:
+      "Tap a vehicle to see its profile, bookings, and documents. Use the three-dot menu to edit details, update mileage, activate, send to maintenance, archive, or retire it.",
   },
 ];
 

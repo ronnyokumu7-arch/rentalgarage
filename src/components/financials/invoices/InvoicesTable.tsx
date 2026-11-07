@@ -2,7 +2,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FileText, Download, Copy, DollarSign, XCircle, ExternalLink, Banknote, CalendarDays, User, PenLine, Send, CheckCircle2, AlertCircle, ChevronRight, ArrowUpRight } from "lucide-react";
+import { FileText, Download, Copy, DollarSign, XCircle, ExternalLink, Banknote, CalendarDays, User, PenLine, Send, CheckCircle2, AlertCircle, ChevronRight, Car } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import DataTable, { RowAction } from "@/components/ui/DataTable";
 import CardGrid from "@/components/ui/CardGrid";
@@ -85,7 +85,7 @@ export default function InvoicesTable({
   const getInvoiceActions = (invoice: Invoice): RowAction<Invoice>[] => {
     const actions: RowAction<Invoice>[] = [
       {
-        label: "Download PDF",
+        label: "Download Invoice",
         icon: Download,
         variant: "default",
         onClick: () => onDownload(invoice.id),
@@ -97,6 +97,22 @@ export default function InvoicesTable({
         onClick: () => onCopyLink(invoice.id),
       },
     ];
+
+    if (invoice.booking_id) {
+      actions.push({
+        label: "View Booking",
+        icon: Car,
+        onClick: () => router.push(`/dashboard/bookings/${invoice.booking_id}`),
+      });
+    }
+
+    if (invoice.client_id) {
+      actions.push({
+        label: "View Client",
+        icon: User,
+        onClick: () => router.push(`/dashboard/clients/${invoice.client_id}`),
+      });
+    }
 
     if (invoice.status !== "paid" && invoice.status !== "void") {
       actions.push(
@@ -131,6 +147,12 @@ export default function InvoicesTable({
           cardClassName="!p-3 hover:!border-[var(--color-primary)]/40 hover:shadow-[0_12px_40px_rgba(0,0,0,0.1)] transition-all duration-300"
           containerClassName="px-2 pb-4"
           maxHeight="calc(100vh - 160px)"
+          onCardClick={(invoice) => {
+            const trigger = document.querySelector(
+              `[data-card-actions="${invoice.id}"] button`
+            ) as HTMLButtonElement | null;
+            trigger?.click();
+          }}
           
           renderCardHeader={({ item }) => {
             const clientName = (item as any).client?.full_name || (item as any).client_name || "Unknown Client";
@@ -138,13 +160,7 @@ export default function InvoicesTable({
             
             return (
               <div 
-                className="flex items-center justify-between w-full cursor-pointer"
-                onClick={() => {
-                  const bookingId = (item as any).booking?.id || (item as any).booking_id;
-                  if (bookingId) {
-                    router.push(`/dashboard/bookings/${bookingId}`);
-                  }
-                }}
+                className="flex items-center justify-between w-full"
               >
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   {/* Premium Icon Container with Glow */}
@@ -242,18 +258,6 @@ export default function InvoicesTable({
                   </span>
                 </div>
 
-                {/* Premium Action Button (Download) */}
-                <button
-                  onClick={(e) => { 
-                    e.stopPropagation(); 
-                    onDownload(item.id); 
-                  }}
-                  className="w-full mt-3 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/20 border border-[var(--color-primary)]/20 text-[var(--color-primary-text)] transition-all active:scale-[0.98] text-[11px] font-bold"
-                >
-                  <Download size={13} />
-                  Download Invoice
-                  <ArrowUpRight size={13} className="opacity-70" />
-                </button>
               </div>
             );
           }}

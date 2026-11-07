@@ -3,7 +3,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Eye, EyeOff, Mail, Lock, ArrowRight, ChevronRight, Zap } from "lucide-react";
+import { Eye, EyeOff, Mail, Lock, ArrowRight, ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/context/auth-context";
 import { getApiErrorMessage } from "@/lib/api-error";
@@ -47,12 +47,10 @@ export default function LoginPage() {
     },
   };
 
-  // ✅ NO self-painted background column anymore — the auth shell owns the
-  // white pane. This page renders ONLY the card, so it spreads correctly
-  // on desktop and stays perfect on mobile.
+  // The auth shell owns the page background; keep the form surface transparent.
   return (
     <motion.div 
-      className="w-full rounded-3xl p-6 sm:p-8 lg:p-10 space-y-6 bg-white/90 dark:bg-gray-900/80 border border-gray-200/60 dark:border-gray-800/50 shadow-2xl shadow-purple-500/10"
+      className="w-full space-y-6"
       initial="initial"
       animate="animate"
       variants={staggerChildren}
@@ -61,10 +59,7 @@ export default function LoginPage() {
       }}
     >
       {/* ✅ Mobile Header */}
-      <motion.div variants={fadeInUp} className="flex flex-col items-center text-center space-y-4 lg:hidden">
-        <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-500/20">
-          <Zap size={22} className="text-white" />
-        </div>
+      <motion.div variants={fadeInUp} className="flex flex-col items-start text-left space-y-4 lg:hidden">
         <div className="space-y-1.5">
           <h1 className="text-2xl font-bold tracking-tight font-display text-gray-900 dark:text-white">
             Welcome back
@@ -199,7 +194,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full h-12 rounded-2xl flex items-center justify-center gap-2 text-sm font-semibold text-white relative overflow-hidden group"
+            className="auth-sign-in-button w-full h-12 rounded-2xl flex items-center justify-center gap-2 text-sm font-semibold text-white relative overflow-hidden group"
             style={{
               background: 'linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%)',
               boxShadow: '0 4px 16px rgba(124, 58, 237, 0.30)',
@@ -227,7 +222,7 @@ export default function LoginPage() {
 
       {/* Footer */}
       <motion.div variants={fadeInUp} className="pt-2">
-        <p className="text-center text-sm text-gray-600 dark:text-gray-400">
+        <p className="text-left text-sm text-gray-600 dark:text-gray-400">
           Don't have an account?{' '}
           <Link 
             href="/register" 

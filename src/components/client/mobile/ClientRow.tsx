@@ -9,8 +9,6 @@ import {
   CheckCircle2,
   Circle,
   MoreVertical,
-  Check,
-  Shield,
   ShieldCheck,
 } from "lucide-react";
 import {
@@ -151,16 +149,11 @@ export default function ClientRow({
           </span>
           {isVerified && (
             <span
-              className="relative inline-flex flex-shrink-0 text-black dark:text-white"
+              className="inline-flex flex-shrink-0 text-[var(--color-primary)]"
               aria-label="Verified client"
               title="Verified client"
             >
-              <Shield size={14} strokeWidth={1.5} fill="currentColor" />
-              <Check
-                size={8}
-                strokeWidth={3}
-                className="absolute left-[3px] top-[2.5px] text-[var(--color-primary)]"
-              />
+              <ShieldCheck size={14} strokeWidth={2} />
             </span>
           )}
         </div>
