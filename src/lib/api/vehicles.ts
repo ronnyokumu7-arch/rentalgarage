@@ -3,11 +3,17 @@ import type {
   Vehicle,
   VehicleCreatePayload,
   VehicleUpdatePayload,
+  VehicleStatus,
   Booking,
 } from "@/lib/types";
 
+export interface VehicleListParams {
+  include_archived?: boolean;
+  status?: VehicleStatus;
+}
+
 export const vehiclesApi = {
-  list: (params?: { include_archived?: boolean }) =>
+  list: (params?: VehicleListParams) =>
   apiClient.get<Vehicle[]>("/vehicles", { params }).then((r) => r.data),
 
   listArchived: () =>

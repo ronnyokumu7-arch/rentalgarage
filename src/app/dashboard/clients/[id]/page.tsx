@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { ArrowLeft, Plus } from "lucide-react";
 import toast from "react-hot-toast";
@@ -21,7 +21,7 @@ export default function ClientProfilePage() {
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(false);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const [clientData, invoicesData] = await Promise.all([
@@ -35,11 +35,11 @@ export default function ClientProfilePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [clientId]);
 
   useEffect(() => {
     fetchData();
-  }, [clientId]);
+  }, [fetchData]);
 
   const handleStatusChange = async () => {
     if (!client) return;
@@ -80,7 +80,7 @@ export default function ClientProfilePage() {
         </button>
         <button
           onClick={() => router.push(`/dashboard/bookings/new?client_id=${client.id}`)}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-accent-dark text-white text-sm font-semibold hover:bg-accent-darker transition-colors shadow-sm"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-accent-dark text-slate text-sm font-semibold hover:bg-accent-darker transition-colors shadow-sm"
         >
           <Plus size={16} />
           New Booking

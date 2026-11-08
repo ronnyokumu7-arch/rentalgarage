@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, DragEvent, ChangeEvent } from "react";
 import { Upload, X, FileImage, AlertCircle } from "lucide-react";
+import Image from "next/image";
 
 interface FileUploadProps {
   value: File | null;
@@ -118,9 +119,12 @@ export default function FileUpload({
                 shape === "circle" ? "w-24 h-24" : "w-32 h-32"
               }`}
           >
-            <img
+            <Image
               src={previewUrl}
               alt="Preview"
+              width={128}
+              height={128}
+              unoptimized
               className="w-full h-full object-cover"
             />
           </div>

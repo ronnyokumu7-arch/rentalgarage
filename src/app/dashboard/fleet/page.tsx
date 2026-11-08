@@ -186,7 +186,7 @@ export default function FleetPage() {
     },
     {
       accessorKey: "actions",
-      header: "  ",
+      header: "Manage",
       cell: ({ row }) => {
         const v = row.original;
         return (

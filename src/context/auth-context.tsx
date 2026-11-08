@@ -18,25 +18,34 @@ interface AuthContextType extends AuthState {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// Cookie helpers
-const setAuthCookie = (token: string) => {
-  const isSecure = typeof window !== "undefined" && window.location.protocol === "https:";
-  const expires = new Date(Date.now() + 7 * 864e5).toUTCString(); // 7 days
-  document.cookie = `rm_token=${encodeURIComponent(token)}; expires=${expires}; path=/; SameSite=Lax${isSecure ? "; Secure" : ""}`;
+// ✅ Store in BOTH cookie (for middleware) and localStorage (for api-client)
+const setAuthToken = (token: string) => {
+  if (typeof window !== "undefined") {
+    localStorage.setItem("rm_token", token);
+    const isSecure = window.location.protocol === "https:";
+    const expires = new Date(Date.now() + 7 * 864e5).toUTCString();
+    document.cookie = `rm_token=${encodeURIComponent(token)}; expires=${expires}; path=/; SameSite=Lax${isSecure ? "; Secure" : ""}`;
+  }
 };
 
-const getAuthCookie = (): string | null => {
-  const match = document.cookie.match(new RegExp(`(^| )rm_token=([^;]+)`));
-  return match ? decodeURIComponent(match[2]) : null;
+const getAuthToken = (): string | null => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("rm_token");
+  }
+  return null;
 };
 
-const removeAuthCookie = () => {
-  document.cookie = "rm_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+const removeAuthToken = () => {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("rm_token");
+    document.cookie = "rm_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+  }
 };
 
+// ✅ Fixed: Use /tenants/ not /admin/tenants/
 async function fetchTenant(tenantId: number): Promise<Tenant | null> {
   try {
-    const res = await apiClient.get<Tenant>(`/admin/tenants/${tenantId}`);
+    const res = await apiClient.get<Tenant>(`/tenants/${tenantId}`);
     return res.data;
   } catch {
     return null;
@@ -53,9 +62,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isAuthenticated: false,
   });
 
-  // Restore session on mount using cookies
   useEffect(() => {
-    const token = getAuthCookie();
+    const token = getAuthToken();
     if (!token) {
       setState((s) => ({ ...s, isLoading: false }));
       return;
@@ -69,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setState({ user, tenant, token, isLoading: false, isAuthenticated: true });
       })
       .catch(() => {
-        removeAuthCookie();
+        removeAuthToken();
         setState((s) => ({ ...s, isLoading: false }));
       });
   }, []);
@@ -80,10 +88,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       password,
     });
     const { access_token, user } = res.data;
-    
-    // Store in cookie (for middleware)
-    setAuthCookie(access_token);
-    
+
+    // ✅ Store in both places
+    setAuthToken(access_token);
+
     const tenant = user.tenant_id ? await fetchTenant(user.tenant_id) : null;
 
     setState({
@@ -94,13 +102,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: true,
     });
 
-    // Role-based redirect
     if (user.role === "super_admin") router.push("/super-admin");
     else router.push("/dashboard");
   };
 
   const logout = () => {
-    removeAuthCookie();
+    removeAuthToken();
     setState({
       user: null,
       tenant: null,

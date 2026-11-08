@@ -2,6 +2,7 @@
 
 import React from "react";
 import { FileText, Download, Eye, Upload, X } from "lucide-react";
+import Image from "next/image";
 import Badge from "./Badge";
 
 interface DocumentCardProps {
@@ -52,7 +53,14 @@ export default function DocumentCard({
       {/* Image Preview */}
       {imageUrl && (
         <div className="relative aspect-video bg-surface-hover overflow-hidden">
-          <img src={imageUrl} alt={title} className="w-full h-full object-cover" />
+          <Image
+            src={imageUrl}
+            alt={title}
+            fill
+            unoptimized
+            sizes="100vw"
+            className="object-cover"
+          />
           {onRemove && (
             <button
   onClick={onRemove}

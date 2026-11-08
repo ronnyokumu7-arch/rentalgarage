@@ -11,8 +11,8 @@ interface TableToolbarProps {
   // View Toggle
   viewMode: "active" | "vault";
   onViewModeChange: (mode: "active" | "vault") => void;
-  activeCount: number;
-  vaultCount: number;
+  activeCount?: number;
+  vaultCount?: number;
 
   // Search
   searchValue: string;
@@ -62,7 +62,7 @@ export default function TableToolbar({
                   : "text-ink-muted hover:text-ink hover:bg-surface-card/50"
               }`}
             >
-              Active <span className="ml-1 text-xs opacity-70">({activeCount})</span>
+              Active {activeCount !== undefined && <span className="ml-1 text-xs opacity-70">({activeCount})</span>}
             </button>
             <button
               onClick={() => onViewModeChange("vault")}
@@ -72,7 +72,7 @@ export default function TableToolbar({
                   : "text-ink-muted hover:text-ink hover:bg-surface-card/50"
               }`}
             >
-              Vault <span className="ml-1 text-xs opacity-70">({vaultCount})</span>
+              Vault {vaultCount !== undefined && <span className="ml-1 text-xs opacity-70">({vaultCount})</span>}
             </button>
           </div>
 

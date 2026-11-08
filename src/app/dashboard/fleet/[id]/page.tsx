@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -53,7 +53,7 @@ export default function VehicleProfilePage() {
     setLoading(true);
   }, [vehicleId]);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true);
     try {
       const [vehicleData, bookingsData] = await Promise.all([
@@ -67,11 +67,11 @@ export default function VehicleProfilePage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [vehicleId]);
 
   useEffect(() => {
     if (vehicleId) fetchData();
-  }, [vehicleId]);
+  }, [fetchData, vehicleId]);
 
   const handleGarageSave = async (data: VehicleUpdatePayload) => {
     try {

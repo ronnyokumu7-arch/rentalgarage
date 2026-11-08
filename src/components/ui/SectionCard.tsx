@@ -1,5 +1,4 @@
 "use client";
-
 import React from "react";
 import { LucideIcon } from "lucide-react";
 
@@ -12,6 +11,7 @@ interface SectionCardProps {
   padding?: boolean;
   className?: string;
   variant?: "default" | "dark" | "ghost";
+  onClick?: () => void; // ✅ Added onClick prop for clickable cards
 }
 
 export default function SectionCard({
@@ -23,6 +23,7 @@ export default function SectionCard({
   padding = true,
   className = "",
   variant = "default",
+  onClick, // ✅ Destructure onClick
 }: SectionCardProps) {
   const baseStyles: Record<
     NonNullable<SectionCardProps["variant"]>,
@@ -44,7 +45,10 @@ export default function SectionCard({
 
   return (
     <div
-      className={`rounded-2xl overflow-hidden transition-shadow duration-200 ${baseStyles[variant]} ${className}`}
+      onClick={onClick} // ✅ Pass onClick to the root div
+      className={`rounded-2xl overflow-hidden transition-shadow duration-200 ${baseStyles[variant]} ${
+        onClick ? "cursor-pointer hover:shadow-lg active:scale-[0.99]" : ""
+      } ${className}`}
     >
       {hasHeader && (
         <div

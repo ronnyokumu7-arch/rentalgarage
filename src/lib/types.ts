@@ -138,24 +138,27 @@ export interface VehicleUpdatePayload {
   notes?: string | null;
 }
 
-// ─── Bookings ────────────────────────────────────────────────────────────────
+
+// ─── Bookings ─────────────────────────────────────────────────────────────────
 export type BookingStatus = "pending" | "confirmed" | "active" | "completed" | "cancelled" | "no_show";
 
 export interface Booking {
   id: number;
+  booking_number: string;
   tenant_id: number;
   client_id: number;
   vehicle_id: number;
+  destination?: string | null;
+  pickup_location?: string | null;
+  return_location?: string | null;
   start_date: string;
   end_date: string;
-  destination: string | null;
-  pickup_location: string | null;
-  return_location: string | null;
   total_amount: number;
   currency_code: string;
   status: BookingStatus;
   is_archived: boolean;
   archived_at: string | null;
+  quotation_id?: number | null; // ✅ Link to Quotation
   created_at: string;
   updated_at: string;
 }
@@ -165,22 +168,57 @@ export interface BookingCreatePayload {
   vehicle_id: number;
   start_date: string;
   end_date: string;
-  destination?: string | null;
-  pickup_location?: string | null;
-  return_location?: string | null;
+  destination?: string;
+  pickup_location?: string;
+  return_location?: string;
   total_amount: number;
   currency_code?: string;
 }
 
 export interface BookingUpdatePayload {
+  destination?: string;
   start_date?: string;
   end_date?: string;
-  destination?: string | null;
-  pickup_location?: string | null;
-  return_location?: string | null;
+  pickup_location?: string;
+  return_location?: string;
   total_amount?: number;
   currency_code?: string;
   status?: BookingStatus;
+}
+
+// ─── Quotations (NEW) ─────────────────────────────────────────────────────────
+export type QuotationStatus = "pending" | "accepted" | "expired" | "declined";
+
+export interface Quotation {
+  id: number;
+  tenant_id: number;
+  client_id: number | null;
+  vehicle_id: number | null;
+  start_date: string;
+  end_date: string;
+  destination?: string | null;
+  pickup_location?: string | null;
+  return_location?: string | null;
+  total_amount: number;
+  currency_code: string;
+  status: QuotationStatus;
+  share_token: string | null;
+  share_token_expires_at: string | null;
+  booking_id: number | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface QuotationCreatePayload {
+  client_id: number;
+  vehicle_id: number;
+  start_date: string;
+  end_date: string;
+  destination?: string;
+  pickup_location?: string;
+  return_location?: string;
+  total_amount: number;
+  currency_code?: string;
 }
 
 // ─── Contracts ───────────────────────────────────────────────────────────────
@@ -254,6 +292,7 @@ export interface InvoiceUpdatePayload {
   currency_code?: string;
   due_date?: string;
   notes?: string;
+  status?: InvoiceStatus;
 }
 
 // ─── Payments ────────────────────────────────────────────────────────────────
@@ -282,4 +321,87 @@ export interface PaymentCreatePayload {
   method: PaymentMethod;
   reference?: string;
   notes?: string;
+}
+
+// ─── PUBLIC PORTAL VIEWS (No Auth Required) ──────────────────────────────────
+
+// 1. Quotation Public View (Matches backend QuotationPublicView)
+export interface PublicQuotationView {
+  id: number;
+  tenant_name: string;
+  client_name: string;
+  client_email?: string | null;
+  client_phone?: string | null;
+  vehicle_details: string;
+  start_date: string;
+  end_date: string;
+  pickup_location: string | null;
+  return_location: string | null;
+  destination: string | null;
+  daily_rate: number;
+  total_amount: number;
+  currency_code: string;
+  terms_and_conditions: string | null;
+  status: QuotationStatus;
+  expires_at: string | null; // Maps to share_token_expires_at
+  created_at: string;
+}
+
+// 2. Invoice Public View (Matches backend InvoicePublicView)
+export interface PublicInvoiceView {
+  id: number;
+  tenant_name: string;
+  client_name: string;
+  client_email: string | null;
+  client_phone: string | null;
+  invoice_number: string;
+  created_at: string;
+  booking_ref: string | null;
+  amount_due: number;
+  amount_paid: number;
+  currency_code: string;
+  due_date: string;
+  status: InvoiceStatus;
+  notes: string | null;
+  // Optional: If your backend returns granular line items
+  line_items?: { description: string; amount: number }[]; 
+}
+
+// 3. Contract Public View (Enhancing your existing PublicContractView)
+export interface PublicContractView {
+  contract_number: string;
+  booking_id: number;
+  tenant_name: string;
+  client_name: string;
+  vehicle_make: string;
+  vehicle_model: string;
+  vehicle_plate: string;
+  start_date: string;
+  end_date: string;
+  total_amount: string;
+  currency_code: string;
+  status: ContractStatus;
+  terms_and_conditions: string | null; // Added for the UI to display T&Cs
+  signed_by_client: boolean;
+  signature_data: string | null; // Added to store/display the base64 e-signature
+  signed_at: string | null;
+  created_at: string;
+}
+
+// ─── DASHBOARD LIST ENRICHMENTS (For Data Tables) ────────────────────────────
+// These are optional but highly recommended so your DataTables don't show "undefined" for names.
+
+export interface BookingListItem extends Booking {
+  client_name: string;
+  vehicle_details: string; // e.g., "Toyota Land Cruiser"
+}
+
+export interface InvoiceListItem extends Invoice {
+  client_name: string;
+  booking_ref: string | null;
+}
+
+export interface ContractListItem extends Contract {
+  client_name: string;
+  booking_ref: string | null;
 }

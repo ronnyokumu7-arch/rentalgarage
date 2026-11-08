@@ -1,42 +1,76 @@
+// src/lib/api/contracts.ts
 import apiClient from "@/lib/api-client";
-import type { Contract } from "@/lib/types";
+import type { Contract, PublicContractView } from "@/lib/types";
+
+// ✅ Extracted helper to avoid TypeScript 'this' context errors in object literals
+const _generateShareLink = async (id: number) => {
+  const res = await apiClient.post(`/contracts/${id}/share-link`);
+  return res.data;
+};
 
 export const contractsApi = {
-  // List contracts (filter by booking_id)
-  list: (params?: { booking_id?: number }) =>
-    apiClient.get<Contract[]>("/contracts/", { params }).then((r) => r.data),
+  list: async (params?: { booking_id?: number; contract_status?: string }): Promise<Contract[]> => {
+    const res = await apiClient.get<Contract[]>("/contracts", { params });
+    return res.data;
+  },
 
-  // Get single contract
-  get: (id: number) =>
-    apiClient.get<Contract>(`/contracts/${id}`).then((r) => r.data),
+  getById: async (id: number): Promise<Contract> => {
+    const res = await apiClient.get<Contract>(`/contracts/${id}`);
+    return res.data;
+  },
 
-  // Regenerate contract for a booking
-  regenerate: (bookingId: number) =>
-    apiClient.post<Contract>(`/contracts/bookings/${bookingId}/regenerate`).then((r) => r.data),
+  publicView: async (token: string): Promise<PublicContractView> => {
+    const res = await apiClient.get<PublicContractView>(`/contracts/public/${token}`);
+    return res.data;
+  },
 
-  // Void a contract
-  void: (id: number) =>
-    apiClient.post<Contract>(`/contracts/${id}/void`).then((r) => r.data),
+  getByToken: async (token: string): Promise<PublicContractView> => {
+    return contractsApi.publicView(token);
+  },
 
-  // Generate a shareable link (returns token and URL)
-  shareLink: (id: number) =>
-    apiClient.post<{ share_token: string; share_url: string }>(`/contracts/${id}/share-link`).then((r) => r.data),
+  signByToken: async (token: string, signatureData: string): Promise<PublicContractView> => {
+    const res = await apiClient.post<PublicContractView>(
+      `/contracts/public/${token}/sign`,
+      { signature_data: signatureData }
+    );
+    return res.data;
+  },
 
-  // Send contract to client via email
-  sendToClient: (id: number) =>
-    apiClient.post<Contract>(`/contracts/${id}/send-to-client`).then((r) => r.data),
+  publicSign: async (token: string): Promise<{ message: string }> => {
+    const res = await apiClient.post(`/contracts/public/${token}/sign`);
+    return res.data;
+  },
 
-  // Download PDF (Protected)
-  downloadPdf: (id: number) =>
-    apiClient.get(`/contracts/${id}/pdf`, { responseType: 'blob' }),
+  publicDownloadPdf: async (token: string) => {
+    const res = await apiClient.get(`/contracts/public/${token}/pdf`, { responseType: "blob" });
+    return res;
+  },
 
-  // --- Public Endpoints (No Auth Required) ---
-  publicView: (token: string) =>
-    apiClient.get(`/contracts/public/${token}`).then((r) => r.data),
+  // Returns full Axios response so page.tsx can access response.data for the blob
+  downloadPdf: async (id: number) => {
+    const res = await apiClient.get(`/contracts/${id}/pdf`, { responseType: "blob" });
+    return res; 
+  },
 
-  publicSign: (token: string) =>
-    apiClient.post(`/contracts/public/${token}/sign`).then((r) => r.data),
+  void: async (id: number): Promise<Contract> => {
+    const res = await apiClient.post<Contract>(`/contracts/${id}/void`);
+    return res.data;
+  },
 
-  publicDownloadPdf: (token: string) =>
-    apiClient.get(`/contracts/public/${token}/pdf`, { responseType: 'blob' }),
+  // ✅ Now using the extracted helper directly
+  generateShareLink: _generateShareLink,
+
+  // ✅ Alias used in your page.tsx, pointing to the exact same helper
+  shareLink: _generateShareLink, 
+
+  sendToClient: async (id: number): Promise<Contract> => {
+    const res = await apiClient.post<Contract>(`/contracts/${id}/send-to-client`);
+    return res.data;
+  },
+
+  // Matches backend POST /contracts/bookings/{booking_id}/regenerate
+  regenerate: async (bookingId: number): Promise<Contract> => {
+    const res = await apiClient.post<Contract>(`/contracts/bookings/${bookingId}/regenerate`);
+    return res.data;
+  },
 };

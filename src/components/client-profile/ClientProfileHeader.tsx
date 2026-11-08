@@ -1,6 +1,7 @@
 // src/components/client-profile/ClientProfileHeader.tsx
 "use client";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Edit3, Mail, Phone, MessageCircle, UserCheck, UserX, ShieldCheck } from "lucide-react";
 import type { Client } from "@/lib/types";
 import Badge from "@/components/ui/Badge";
@@ -34,9 +35,12 @@ export default function ClientProfileHeader({ client, onStatusAction, actionLoad
       {/* Avatar - Left aligned */}
       <div className="relative flex-shrink-0 mt-1">
         {client.avatar_image ? (
-          <img
+          <Image
             src={client.avatar_image}
             alt={client.full_name}
+            width={64}
+            height={64}
+            unoptimized
             className="w-16 h-16 rounded-xl object-cover border border-surface-border shadow-sm"
           />
         ) : (

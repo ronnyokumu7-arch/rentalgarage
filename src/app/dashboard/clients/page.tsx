@@ -1,16 +1,28 @@
 "use client";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { ColumnDef } from "@tanstack/react-table";
-import { Users, Plus, Mail, Phone, User, CreditCard } from "lucide-react";
+import {
+  Users,
+  Plus,
+  Mail,
+  Phone,
+  User,
+  CreditCard,
+  ChevronRight,
+} from "lucide-react";
 import toast from "react-hot-toast";
+// API & Types
 import { clientsApi } from "@/lib/api/clients";
 import type { Client } from "@/lib/types";
+// UI Components
 import PageHeader from "@/components/ui/PageHeader";
 import SectionCard from "@/components/ui/SectionCard";
 import DataTable from "@/components/ui/DataTable";
 import Pagination from "@/components/ui/Pagination";
 import EmptyState from "@/components/ui/EmptyState";
+import { ClientStatusBadge } from "@/components/ui/Badge";
 import TableToolbar from "@/components/ui/TableToolbar";
 import ActionButtons from "@/components/ui/ActionButtons";
 
@@ -25,36 +37,42 @@ const CLIENT_FILTER_OPTIONS = [
 
 export default function ClientsPage() {
   const router = useRouter();
-  
+
+  // ── State ──────────────────────────────────────────────────────────────
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [view, setView] = useState<ViewMode>("active");
+
+  // UI State
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
 
-  const fetchClients = async () => {
+  // ── Data Fetching ──────────────────────────────────────────────────────
+  const fetchClients = useCallback(async () => {
     setLoading(true);
     try {
-      const data = view === "active" 
-        ? await clientsApi.list() 
-        : await clientsApi.listArchived();
+      const data =
+        view === "active"
+          ? await clientsApi.list()
+          : await clientsApi.listArchived();
       setClients(data);
-    } catch {
+    } catch (error) {
       toast.error("Failed to load clients");
     } finally {
       setLoading(false);
     }
-  };
+  }, [view]);
 
   useEffect(() => {
     fetchClients();
-  }, [view]);
+  }, [fetchClients]);
 
+  // ── Client-side Filtering & Pagination ─────────────────────────────────
   const filteredClients = useMemo(() => {
     let result = clients;
-    
+
     if (view === "active" && statusFilter) {
       result = result.filter((c) => c.status === statusFilter);
     }
@@ -84,134 +102,225 @@ export default function ClientsPage() {
     setCurrentPage(1);
   }, [search, statusFilter, view]);
 
-  // ✅ UPDATED COLUMNS EXACTLY AS REQUESTED
+  // ── Table Columns ──────────────────────────────────────────────────────
   const columns: ColumnDef<Client>[] = [
     {
       accessorKey: "full_name",
-      header: "Name",
+      header: "Client",
       cell: ({ row }) => {
         const c = row.original;
         return (
           <div className="flex items-center gap-3 min-w-0">
+            {/* Avatar Fallback */}
             {c.avatar_image ? (
-              <img src={c.avatar_image} alt={c.full_name} className="w-9 h-9 rounded-full object-cover border border-surface-border shadow-sm" />
+              <Image
+                src={c.avatar_image}
+                alt={c.full_name}
+                width={36}
+                height={36}
+                unoptimized
+                className="w-9 h-9 rounded-full object-cover border border-surface-border shadow-sm"
+              />
             ) : (
               <div className="w-9 h-9 rounded-full bg-surface-hover border border-surface-border flex items-center justify-center text-ink-subtle">
                 <User size={16} />
               </div>
             )}
-            <p className="text-sm font-semibold text-ink truncate">{c.full_name}</p>
+            <div className="min-w-0">
+              {/* Name */}
+              <p className="text-sm font-semibold text-ink truncate">
+                {c.full_name}
+              </p>
+              {/* Email with Icon (Moved to second row) */}
+              {c.email ? (
+                <a
+                  href={`mailto:${c.email}`}
+                  className="flex items-center gap-1.5 text-xs text-ink-muted hover:text-accent-dark transition-colors truncate"
+                  title={`Email: ${c.email}`}
+                >
+                  <Mail size={12} className="text-ink-subtle flex-shrink-0" />
+                  <span className="truncate">{c.email}</span>
+                </a>
+              ) : (
+                <p className="text-xs text-ink-muted truncate">No email provided</p>
+              )}
+            </div>
           </div>
-        );
-      },
-    },
-    {
-      accessorKey: "email",
-      header: "Email",
-      cell: ({ row }) => {
-        const email = row.original.email;
-        return email ? (
-          <a href={`mailto:${email}`} className="text-sm text-ink-muted hover:text-accent-dark transition-colors truncate block">
-            {email}
-          </a>
-        ) : (
-          <span className="text-sm text-ink-subtle italic">—</span>
         );
       },
     },
     {
       accessorKey: "phone",
-      header: "Phone",
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2 text-sm text-ink">
-          <Phone size={12} className="text-ink-subtle" />
-          <span className="font-medium">{row.original.phone}</span>
-        </div>
-      ),
+      header: "Contact",
+      cell: ({ row }) => {
+        const c = row.original;
+        return (
+          <div className="flex items-center gap-2 text-sm text-ink">
+            <Phone size={12} className="text-ink-subtle" />
+            <span className="font-medium">{c.phone}</span>
+          </div>
+        );
+      },
     },
     {
       accessorKey: "id_number",
-      header: "ID Number",
+      header: "National ID",
       cell: ({ row }) => {
-        const id = row.original.id_number;
-        return id ? (
+        const c = row.original;
+        if (!c.id_number) {
+          return (
+            <span className="text-sm text-ink-subtle italic">
+              Not provided
+            </span>
+          );
+        }
+        return (
           <div className="flex items-center gap-2">
-            <CreditCard size={14} className="text-ink-subtle" />
-            <span className="text-sm font-semibold text-ink tracking-wide">{id}</span>
+            <div className="w-8 h-8 rounded-lg bg-surface-hover border border-surface-border flex items-center justify-center text-ink-muted flex-shrink-0">
+              <CreditCard size={14} />
+            </div>
+            <span className="text-sm font-semibold text-ink tracking-wide">
+              {c.id_number}
+            </span>
           </div>
-        ) : (
-          <span className="text-sm text-ink-subtle italic">—</span>
         );
       },
     },
     {
       accessorKey: "dl_number",
-      header: "DL Number",
+      header: "Driver's License",
       cell: ({ row }) => {
-        const dl = row.original.dl_number;
-        return dl ? (
-          <span className="text-sm font-semibold text-ink tracking-wide">{dl}</span>
-        ) : (
-          <span className="text-sm text-ink-subtle italic">—</span>
+        const c = row.original;
+        if (!c.dl_number) {
+          return (
+            <span className="text-sm text-ink-subtle italic">
+              Not provided
+            </span>
+          );
+        }
+
+        // Calculate health status based on DL expiry
+        let color = "bg-ink-subtle";
+        let labelBg = "bg-surface-hover";
+        let labelText = "text-ink-muted";
+        let healthLabel = "No expiry set";
+
+        if (c.dl_expiry) {
+          const expiryDate = new Date(c.dl_expiry);
+          const today = new Date();
+          const daysUntilExpiry = Math.ceil(
+            (expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)
+          );
+
+          if (daysUntilExpiry < 0) {
+            color = "bg-danger";
+            labelBg = "bg-danger-bg";
+            labelText = "text-danger-text";
+            healthLabel = "Expired";
+          } else if (daysUntilExpiry < 30) {
+            color = "bg-danger";
+            labelBg = "bg-danger-bg";
+            labelText = "text-danger-text";
+            healthLabel = `${daysUntilExpiry}d left`;
+          } else if (daysUntilExpiry < 60) {
+            color = "bg-warning";
+            labelBg = "bg-warning-bg";
+            labelText = "text-warning-text";
+            healthLabel = `${daysUntilExpiry}d left`;
+          } else {
+            color = "bg-success";
+            labelBg = "bg-success-bg";
+            labelText = "text-success-text";
+            healthLabel = `${daysUntilExpiry}d left`;
+          }
+        }
+
+        return (
+          <div className="flex items-center gap-3">
+            <div className="min-w-0">
+              <p className="text-sm font-semibold text-ink truncate">
+                {c.dl_number}
+              </p>
+              <p className="text-xs text-ink-muted">
+                {c.dl_expiry
+                  ? new Date(c.dl_expiry).toLocaleDateString("en-US", {
+                      month: "short",
+                      year: "numeric",
+                    })
+                  : "No expiry"}
+              </p>
+            </div>
+            <div
+              className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide ${labelBg} ${labelText} flex items-center gap-1.5`}
+            >
+              <span className={`w-1.5 h-1.5 rounded-full ${color}`} />
+              {healthLabel}
+            </div>
+          </div>
         );
       },
     },
     {
-      id: "dl_status",
-      header: "DL Status",
+      accessorKey: "status",
+      header: "Status",
       cell: ({ row }) => {
-        const expiry = row.original.dl_expiry;
-        if (!expiry) return <span className="text-sm text-ink-subtle italic">Not set</span>;
-
-        const expiryDate = new Date(expiry);
-        const today = new Date();
-        const daysUntilExpiry = Math.ceil((expiryDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-        if (daysUntilExpiry < 0) {
+        const c = row.original;
+        if (c.is_archived)
           return (
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-danger-bg text-danger-text">
-              <span className="w-1.5 h-1.5 rounded-full bg-danger" /> Expired
-            </span>
+            <span className="text-xs text-ink-subtle italic">Archived</span>
           );
-        } else if (daysUntilExpiry < 30) {
-          return (
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-warning-bg text-warning-text">
-              <span className="w-1.5 h-1.5 rounded-full bg-warning" /> {daysUntilExpiry}d left
-            </span>
-          );
-        } else {
-          return (
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide bg-success-bg text-success-text">
-              <span className="w-1.5 h-1.5 rounded-full bg-success" /> Active
-            </span>
-          );
-        }
+        return <ClientStatusBadge status={c.status} />;
       },
     },
     {
-      accessorKey: "actions",
-      header: "", // ✅ No heading for actions
-      cell: ({ row }) => (
-        <ActionButtons viewUrl={`/dashboard/clients/${row.original.id}`} />
-      ),
+      id: "actions",
+      header: "Manage",
+      cell: ({ row }) => {
+        const c = row.original;
+        return (
+          <div className="flex items-center gap-1">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/dashboard/clients/${c.id}`);
+              }}
+              className="w-7 h-7 flex items-center justify-center rounded-lg bg-slate-100 text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+              title="View Client"
+            >
+              <ChevronRight size={14} />
+            </button>
+          </div>
+        );
+      },
     },
   ];
 
+  // ── Render ───────────────────────────────────────────────────────────
   return (
     <div>
       <PageHeader
         title="Clients"
         subtitle="Manage your client database and relationships"
         icon={Users}
-        breadcrumb={[{ label: "Dashboard", href: "/dashboard" }, { label: "Clients" }]}
+        breadcrumb={[
+          { label: "Dashboard", href: "/dashboard" },
+          { label: "Clients" },
+        ]}
         actions={
           view === "active"
-            ? [{ label: "New Client", icon: Plus, variant: "primary", onClick: () => router.push("/dashboard/clients/new") }]
+            ? [
+                {
+                  label: "New Client",
+                  icon: Plus,
+                  variant: "primary",
+                  onClick: () => router.push("/dashboard/clients/new"),
+                },
+              ]
             : []
         }
       />
-
       <SectionCard padding={false}>
+        {/* Unified Toolbar */}
         <TableToolbar
           viewMode={view}
           onViewModeChange={setView}
@@ -226,12 +335,17 @@ export default function ClientsPage() {
           filterPlaceholder="All Statuses"
         />
 
+        {/* Content */}
         {loading ? (
-          <div className="p-12 text-center text-ink-muted">Loading clients...</div>
+          <div className="p-12 text-center text-ink-muted">
+            Loading clients...
+          </div>
         ) : filteredClients.length === 0 ? (
           <EmptyState
             icon={Users}
-            title={view === "active" ? "No clients found" : "No archived clients"}
+            title={
+              view === "active" ? "No clients found" : "No archived clients"
+            }
             description={
               search || statusFilter
                 ? "Try adjusting your search or filters."
@@ -241,7 +355,10 @@ export default function ClientsPage() {
             }
             action={
               view === "active" && !search && !statusFilter ? (
-                <button className="btn btn-primary" onClick={() => router.push("/dashboard/clients/new")}>
+                <button
+                  className="btn btn-primary"
+                  onClick={() => router.push("/dashboard/clients/new")}
+                >
                   <Plus size={16} /> Add Client
                 </button>
               ) : null
@@ -252,7 +369,9 @@ export default function ClientsPage() {
             <DataTable
               data={paginatedClients}
               columns={columns}
-              onRowClick={(client) => router.push(`/dashboard/clients/${client.id}`)}
+              onRowClick={(client) =>
+                router.push(`/dashboard/clients/${client.id}`)
+              }
             />
             <Pagination
               currentPage={currentPage}

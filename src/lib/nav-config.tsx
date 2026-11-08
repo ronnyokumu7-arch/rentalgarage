@@ -6,10 +6,14 @@ import {
   BarChart3,
   Settings,
   CalendarDays,
+  Contact,
   Users,
   Car,
   Wallet,
   Server,
+  FileText,      // ✅ Added for Quotations
+  Receipt,       // ✅ Added for Invoices
+  FileSignature, // ✅ Added for Contracts
 } from "lucide-react";
 
 export interface NavChild {
@@ -41,17 +45,7 @@ export const superAdminNav: NavItem[] = [
     label: "System",
     icon: Server,
     children: [
-      { label: "Background Jobs", href: "/super-admin/system/jobs" },
-      { label: "System Logs", href: "/super-admin/system/logs" },
-    ],
-  },
-  {
-    label: "Settings",
-    icon: Settings,
-    children: [
-      { label: "System Config", href: "/super-admin/settings" },
-      { label: "Roles & Permissions", href: "/super-admin/settings/roles" },
-      { label: "Theme", href: "/super-admin/settings/theme" },
+      // Add system-level links here if needed
     ],
   },
 ];
@@ -60,25 +54,10 @@ export const superAdminNav: NavItem[] = [
 export const tenantAdminNav: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Bookings", href: "/dashboard/bookings", icon: CalendarDays },
-  { label: "Clients", href: "/dashboard/clients", icon: Users },
-  { label: "Fleet", href: "/dashboard/fleet", icon: Car }, // ✅ Single link, no group
-  {
-    label: "Financials",
-    icon: Wallet,
-    children: [
-      { label: "Contracts", href: "/dashboard/contracts" },
-      { label: "Invoices", href: "/dashboard/invoices" },
-      { label: "Payments", href: "/dashboard/payments" },
-    ],
-  },
+  { label: "Clients", href: "/dashboard/clients", icon: Contact },
+  { label: "Fleet", href: "/dashboard/fleet", icon: Car },
+  { label: "Users", href: "/dashboard/users", icon: Users },
+  { label: "Financials", href: "/dashboard/financials", icon: Wallet },
   { label: "Reports", href: "/dashboard/reports", icon: BarChart3 },
-  {
-    label: "Settings",
-    icon: Settings,
-    children: [
-      { label: "Business Settings", href: "/dashboard/settings" },
-      { label: "Roles & Permissions", href: "/dashboard/settings/roles" },
-      { label: "Theme", href: "/dashboard/settings/theme" },
-    ],
-  },
+  { label: "Settings", href: "/dashboard/settings", icon: Settings },
 ];

@@ -1,13 +1,15 @@
+// src/lib/api/payments.ts
 import apiClient from "@/lib/api-client";
 import type { Payment, PaymentCreatePayload } from "@/lib/types";
 
 export const paymentsApi = {
-  list: (params?: { invoice_id?: number }) =>
-    apiClient.get<Payment[]>("/payments", { params }).then((r) => r.data),
+  list: async (): Promise<Payment[]> => {
+    const res = await apiClient.get<Payment[]>("/payments");
+    return res.data;
+  },
 
-  get: (id: number) =>
-    apiClient.get<Payment>(`/payments/${id}`).then((r) => r.data),
-
-  record: (data: PaymentCreatePayload) =>
-    apiClient.post<Payment>("/payments", data).then((r) => r.data),
+  create: async (payload: PaymentCreatePayload): Promise<Payment> => {
+    const res = await apiClient.post<Payment>("/payments", payload);
+    return res.data;
+  },
 };

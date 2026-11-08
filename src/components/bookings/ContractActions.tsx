@@ -1,6 +1,6 @@
 "use client";
 import { useState } from "react";
-import { Copy, Eye, Download, Share2, CheckCircle2 } from "lucide-react";
+import { Copy, CheckCircle2, Eye, Download, Share2 } from "lucide-react";
 import toast from "react-hot-toast";
 import type { Contract } from "@/lib/types";
 
@@ -14,8 +14,10 @@ interface ContractActionsProps {
 export default function ContractActions({ contract, onView, onDownload, onShare }: ContractActionsProps) {
   const [isCopied, setIsCopied] = useState(false);
 
+  // Points to the public contract page we built
+  const url = `${window.location.origin}/contract/${contract.share_token}`;
+
   const handleCopy = async () => {
-    const url = `${window.location.origin}/contracts/view/${contract.share_token}`;
     try {
       await navigator.clipboard.writeText(url);
       setIsCopied(true);

@@ -1,26 +1,25 @@
 "use client";
-
 import { useState, useEffect } from "react";
-import { Calendar, Clock, CheckCircle2, PlayCircle } from "lucide-react";
+import { Calendar, Clock, FileText, CheckCircle2, PlayCircle, Flag } from "lucide-react";
 import { bookingsApi } from "@/lib/api/bookings";
 import type { Booking } from "@/lib/types";
 
 interface VehicleBookingTimelineProps {
   vehicleId: number;
-  currentBookingId: number;
+  currentBookingId?: number;
+  currentStatus?: string;
+  shareToken?: string | null;
   startDate: string;
   endDate: string;
-  currentStatus: string;
-  isTripEnded?: boolean;
 }
 
 export default function VehicleBookingTimeline({
   vehicleId,
   currentBookingId,
+  currentStatus = "pending",
+  shareToken,
   startDate,
   endDate,
-  currentStatus,
-  isTripEnded = false,
 }: VehicleBookingTimelineProps) {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
@@ -68,32 +67,47 @@ export default function VehicleBookingTimeline({
   const getPosition = (dateStr: string) => ((new Date(dateStr).getTime() - minTime) / totalDuration) * 100;
   const getWidth = (start: string, end: string) =>
     Math.max(((new Date(end).getTime() - new Date(start).getTime()) / totalDuration) * 100, 1.5);
+
   const currentDuration = Math.max(
     1,
     Math.ceil((new Date(endDate).getTime() - new Date(startDate).getTime()) / (1000 * 60 * 60 * 24))
   );
 
-  // --- LOGIC UPDATE ---
+  // Lifecycle Logic
   const journeySteps = [
-    { id: "pending", label: "Trip Created", icon: Clock },
+    { id: "quotation", label: "Quotation", icon: FileText },
     { id: "confirmed", label: "Confirmed", icon: CheckCircle2 },
     { id: "active", label: "In Progress", icon: PlayCircle },
-    { id: "completed", label: "Completed", icon: CheckCircle2 },
+    { id: "completed", label: "Completed", icon: Flag },
   ];
 
-  // FIX: Add +1 to the index. 
-  // This ensures "Trip Created" (index 0) is always Green (0 < 1).
-  // And the Amber node always points to the NEXT required action.
-  let currentStepIndex = journeySteps.findIndex((step) => step.id === currentStatus) + 1;
-
-  // Handle the "End Trip" intermediate state locally
-  if (currentStatus === "active" && isTripEnded) {
-    currentStepIndex = 4; // Moves the green line past "In Progress" to make "Completed" Amber
-  }
+  const getStepState = (stepId: string): 'completed' | 'current' | 'future' => {
+    if (stepId === 'quotation') {
+      if (['confirmed', 'active', 'completed'].includes(currentStatus)) return 'completed';
+      if (currentStatus === 'pending' && shareToken) return 'current';
+      return 'future';
+    }
+    if (stepId === 'confirmed') {
+      if (['confirmed', 'active', 'completed'].includes(currentStatus)) return 'completed';
+      if (currentStatus === 'pending' && shareToken) return 'current';
+      return 'future';
+    }
+    if (stepId === 'active') {
+      if (['active', 'completed'].includes(currentStatus)) return 'completed';
+      if (currentStatus === 'confirmed') return 'current';
+      return 'future';
+    }
+    if (stepId === 'completed') {
+      if (currentStatus === 'completed') return 'completed';
+      if (currentStatus === 'active') return 'current';
+      return 'future';
+    }
+    return 'future';
+  };
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-      {/* HEADER with LEGEND */}
+      {/* HEADER */}
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
         <div>
           <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
@@ -101,17 +115,6 @@ export default function VehicleBookingTimeline({
             Vehicle Utilization Timeline
           </h3>
           <p className="text-sm text-gray-500 mt-1">Visualizing booking density and availability gaps</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-4 text-xs font-medium">
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-blue-500"></span> Booked
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-slate-400"></span> Completed
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full bg-amber-500 ring-2 ring-amber-200"></span> Current
-          </div>
         </div>
       </div>
 
@@ -128,23 +131,23 @@ export default function VehicleBookingTimeline({
           const width = getWidth(booking.start_date, booking.end_date);
           let bgClass = "bg-blue-500 hover:bg-blue-600";
           if (isCurrent) bgClass = "bg-gradient-to-r from-amber-500 to-orange-500 ring-2 ring-amber-200 z-20 shadow-lg";
-          else if (booking.status === "completed" || booking.status === "cancelled")
-            bgClass = "bg-slate-400 opacity-60 hover:opacity-80";
-
+          else if (booking.status === "completed" || booking.status === "cancelled") bgClass = "bg-slate-400 opacity-60 hover:opacity-80";
+          
           return (
             <div
               key={booking.id}
-              className={`absolute top-3 h-10 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shadow-md transition-all hover:scale-y-110 cursor-pointer ${bgClass}`}
+              className={`absolute top-3 h-10 rounded-lg flex items-center justify-center text-[10px] font-bold text-white shadow-md transition-all ${bgClass}`}
               style={{ left: `${left}%`, width: `${width}%` }}
+              title={`Booking #${booking.id} - ${booking.status}`}
             >
-              {width > 5 && <span className="truncate px-2">#{booking.id}</span>}
+              #{booking.id}
             </div>
           );
         })}
       </div>
 
-      {/* DATE LABELS */}
-      <div className="relative h-6 text-[10px] text-gray-400 font-medium mb-6">
+      {/* DATES */}
+      <div className="relative h-4 text-[10px] font-medium text-gray-400 mb-6 px-1">
         <div className="absolute left-0">{minDate.toLocaleDateString()}</div>
         <div className="absolute left-1/2 -translate-x-1/2">
           {new Date((minDate.getTime() + maxDate.getTime()) / 2).toLocaleDateString()}
@@ -152,7 +155,7 @@ export default function VehicleBookingTimeline({
         <div className="absolute right-0">{maxDate.toLocaleDateString()}</div>
       </div>
 
-      {/* SPLIT BOTTOM ROW: Duration Info (Left) + Nodes (Right) */}
+      {/* SPLIT BOTTOM ROW */}
       <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 p-4 bg-slate-50 rounded-xl border border-slate-100">
         {/* Left: Booking Info */}
         <div className="flex items-start gap-3 flex-shrink-0">
@@ -176,14 +179,10 @@ export default function VehicleBookingTimeline({
         <div className="flex items-center justify-between w-full md:w-auto md:flex-1 md:pl-8 border-t md:border-t-0 md:border-l border-slate-200 pt-4 md:pt-0 md:ml-4">
           {journeySteps.map((step, index) => {
             const Icon = step.icon;
+            const state = getStepState(step.id);
+            const isCompleted = state === 'completed';
+            const isCurrent = state === 'current';
             
-            // Simple logic: 
-            // If index < currentStepIndex -> Green (Completed)
-            // If index === currentStepIndex -> Amber (Current/Next Action)
-            // Else -> Gray (Future)
-            const isCompleted = index < currentStepIndex;
-            const isCurrent = index === currentStepIndex;
-
             return (
               <div key={step.id} className="flex items-center flex-1 last:flex-none">
                 <div className="flex flex-col items-center">

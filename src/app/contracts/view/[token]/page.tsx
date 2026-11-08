@@ -1,257 +1,201 @@
+// src/app/contract/[token]/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import { 
-  FileText, 
-  Download, 
-  CheckCircle2, 
-  AlertCircle, 
-  Loader2, 
-  Calendar, 
-  Car, 
-  User, 
-  Banknote,
+import { useRef, useState } from "react";
+import {
+  FileSignature,
+  Download,
+  CheckCircle2,
+  Eraser,
+  Loader2,
+  CalendarDays,
+  Car,
+  MapPin,
 } from "lucide-react";
-import toast, { Toaster } from "react-hot-toast";
-import { contractsApi } from "@/lib/api/contracts";
+import Image from "next/image";
+
+// Logical Layer
+import { usePublicContract } from "@/hooks/public-docs/usePublicContract";
+
+// Reusable UI Kit
+import PublicDocLayout from "@/components/public-docs/PublicDocLayout";
+import PublicDocHeader from "@/components/public-docs/PublicDocHeader";
+import PublicDocParties from "@/components/public-docs/PublicDocParties";
+import PublicDocDetails from "@/components/public-docs/PublicDocDetails";
+import PublicDocFinancials from "@/components/public-docs/PublicDocFinancials";
+import PublicDocActions from "@/components/public-docs/PublicDocActions";
+import SignaturePad, { SignaturePadRef } from "@/components/public-docs/SignaturePad";
 
 export default function PublicContractPage() {
   const params = useParams();
   const token = params.token as string;
+  const signatureRef = useRef<SignaturePadRef>(null);
+  const [hasAttemptedSign, setHasAttemptedSign] = useState(false);
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [contract, setContract] = useState<any | null>(null);
-  const [signing, setSigning] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const { contract, loading, error, isSigning, handleSign } = usePublicContract(token);
 
-  useEffect(() => {
-    const fetchContract = async () => {
-      try {
-        const data = await contractsApi.publicView(token);
-        setContract(data);
-        if (data.signed_by_client) setShowSuccess(true);
-      } catch (err: any) {
-        setError(err.response?.data?.detail || "Contract not found or expired.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (token) fetchContract();
-  }, [token]);
-
-  const handleSignContract = async () => {
-    setSigning(true);
-    try {
-      await contractsApi.publicSign(token);
-      toast.success("Contract signed successfully!");
-      setShowSuccess(true);
-      setContract((prev: any) => prev ? { ...prev, signed_by_client: true, status: "signed" } : null);
-    } catch (err: any) {
-      toast.error(err.response?.data?.detail || "Failed to sign contract.");
-    } finally {
-      setSigning(false);
+  const handleSignClick = () => {
+    setHasAttemptedSign(true);
+    const signatureData = signatureRef.current?.getSignature();
+    if (!signatureData) {
+      return; // The UI will show the error state below
     }
+    handleSign(signatureData);
   };
 
-  const handleDownloadPdf = async () => {
-    try {
-      toast.loading("Downloading...", { duration: 2000 });
-      const response = await contractsApi.publicDownloadPdf(token);
-      const blob = new Blob([response.data], { type: 'application/pdf' });
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Contract-${contract?.contract_number}.pdf`;
-      link.click();
-      window.URL.revokeObjectURL(url);
-      toast.success("PDF downloaded!");
-    } catch (err: any) {
-      toast.error("Failed to download PDF");
-    }
-  };
-
+  // 1. Loading & Error States
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-10 w-10 animate-spin text-blue-600" />
-          <p className="text-slate-500 font-medium">Loading contract details...</p>
-        </div>
-      </div>
+      <PublicDocLayout>
+        <div className="p-12 text-center text-ink-muted animate-pulse">Loading Contract...</div>
+      </PublicDocLayout>
     );
   }
 
   if (error || !contract) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-50 p-6">
-        <div className="max-w-md w-full bg-white rounded-xl shadow-sm border border-slate-200 p-8 text-center">
-          <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="h-8 w-8 text-red-500" />
-          </div>
-          <h1 className="text-xl font-bold text-gray-900 mb-2">Contract Unavailable</h1>
-          <p className="text-gray-500 text-sm mb-6">{error || "This contract link is invalid or has expired."}</p>
-          <p className="text-xs text-gray-400">Please contact the rental agency for a new link.</p>
+      <PublicDocLayout>
+        <div className="p-12 text-center">
+          <p className="text-danger-text font-semibold">{error || "Contract not found."}</p>
         </div>
-      </div>
+      </PublicDocLayout>
     );
   }
 
-  return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4 sm:px-6 lg:px-8">
-      <Toaster position="top-center" />
-      <div className="max-w-4xl mx-auto">
-        
-        {/* Header */}
-        <div className="text-center mb-10">
-          <h1 className="text-3xl font-bold text-slate-900 tracking-tight">{contract.tenant_name}</h1>
-          <p className="mt-2 text-slate-500">Vehicle Rental Agreement</p>
-          <div className="mt-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-100 text-xs font-semibold text-slate-600 uppercase tracking-wide">
-            <FileText size={14} />
-            {contract.contract_number}
-          </div>
-        </div>
+  // 2. Map Data to UI Props
+  const isSigned = contract.signed_by_client;
 
-        {/* Main Card */}
-        <div className="bg-white rounded-2xl shadow-xl border border-slate-200 overflow-hidden">
-          
-          {/* Status Banner */}
-          <div className={`px-6 py-4 border-b border-slate-100 flex items-center justify-between ${
-            showSuccess ? "bg-emerald-50" : "bg-blue-50"
-          }`}>
-            <div className="flex items-center gap-3">
-              {showSuccess ? (
-                <CheckCircle2 className="h-5 w-5 text-emerald-600" />
-              ) : (
-                <FileText className="h-5 w-5 text-blue-600" />
-              )}
-              <div>
-                <p className={`text-sm font-bold ${showSuccess ? "text-emerald-900" : "text-blue-900"}`}>
-                  {showSuccess ? "Contract Signed & Executed" : "Pending Your Signature"}
-                </p>
-                <p className={`text-xs ${showSuccess ? "text-emerald-700" : "text-blue-700"}`}>
-                  {showSuccess ? "Thank you for completing your rental agreement." : "Please review the details below and sign to proceed."}
-                </p>
+  const headerProps = {
+    companyName: contract.tenant_name,
+    documentNumber: contract.contract_number,
+    docType: "contract" as const,
+    status: isSigned ? ("signed" as const) : ("sent" as const),
+  };
+
+  const partiesProps = {
+    issuerName: contract.tenant_name,
+    recipientName: contract.client_name,
+    recipientDetails: ["Primary Renter"],
+  };
+
+  const detailsProps = {
+    title: "Rental Details",
+    items: [
+      { label: "Issue Date", value: new Date(contract.created_at).toLocaleDateString(), icon: CalendarDays },
+      { label: "Return Date", value: new Date(contract.end_date).toLocaleDateString(), icon: CalendarDays },
+      { label: "Vehicle", value: `${contract.vehicle_make} ${contract.vehicle_model}`, icon: Car },
+      { label: "Plate Number", value: contract.vehicle_plate, icon: Car },
+      { label: "Pickup Date", value: new Date(contract.start_date).toLocaleDateString(), icon: MapPin },
+    ],
+  };
+
+  const financialsProps = {
+    currency: contract.currency_code || "KES",
+    rows: [
+      {
+        label: "Total Rental Agreement",
+        value: `${contract.currency_code || "KES"} ${Number(contract.total_amount).toLocaleString()}`,
+        isTotal: true,
+      },
+    ],
+  };
+
+  // 3. Render
+  return (
+    <PublicDocLayout>
+      <PublicDocHeader {...headerProps} />
+      <PublicDocParties {...partiesProps} />
+      <PublicDocDetails {...detailsProps} />
+      <PublicDocFinancials {...financialsProps} />
+
+      {/* ── SIGNATURE SECTION ──────────────────────────────────────────── */}
+      <div className="mt-8 pt-8 border-t border-surface-border">
+        <h3 className="text-lg font-bold text-ink mb-4 flex items-center gap-2">
+          <FileSignature size={20} className="text-accent-dark" />
+          Authorization & Signature
+        </h3>
+        
+        <p className="text-sm text-ink-muted mb-4">
+          By signing below, you agree to the terms and conditions of this rental agreement, 
+          including liability for the vehicle and adherence to the return date.
+        </p>
+
+        {isSigned ? (
+          /* ── ALREADY SIGNED STATE ── */
+          <div className="bg-success-bg border border-success-border rounded-xl p-6 text-center">
+            <CheckCircle2 size={48} className="mx-auto text-success mb-3" />
+            <h4 className="text-lg font-bold text-success-text mb-1">Contract Executed</h4>
+            <p className="text-sm text-success-text/80 mb-4">
+              This contract was signed on {contract.signed_at ? new Date(contract.signed_at).toLocaleString() : 'the issue date'}.
+            </p>
+            {contract.signature_data && (
+              <div className="inline-block bg-surface-card border border-surface-border rounded-lg p-4 mt-2">
+                <Image
+                  src={contract.signature_data}
+                  alt="Client Signature"
+                  width={320}
+                  height={64}
+                  unoptimized
+                  className="h-16 w-auto mx-auto"
+                />
+                <p className="text-xs text-ink-subtle mt-2 font-medium">{contract.client_name}</p>
               </div>
+            )}
+          </div>
+        ) : (
+          /* ── PENDING SIGNATURE STATE ── */
+          <div className="space-y-4">
+            <SignaturePad ref={signatureRef} />
+            
+            <div className="flex items-center justify-between">
+              <button
+                onClick={() => signatureRef.current?.clear()}
+                className="flex items-center gap-2 text-sm text-ink-muted hover:text-ink transition-colors"
+              >
+                <Eraser size={16} /> Clear Signature
+              </button>
+              
+              {hasAttemptedSign && !signatureRef.current?.getSignature() && (
+                <span className="text-xs text-danger-text font-medium animate-pulse">
+                  Please draw your signature above
+                </span>
+              )}
             </div>
+
             <button
-              onClick={handleDownloadPdf}
-              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-white border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50 transition-colors shadow-sm"
+              onClick={handleSignClick}
+              disabled={isSigning}
+              className="w-full btn btn-primary flex items-center justify-center gap-2 py-3.5 text-base shadow-lg shadow-accent-dark/10"
             >
-              <Download size={14} /> Download PDF
+              {isSigning ? (
+                <>
+                  <Loader2 size={18} className="animate-spin" /> Processing...
+                </>
+              ) : (
+                <>
+                  <FileSignature size={18} /> Sign & Execute Contract
+                </>
+              )}
             </button>
           </div>
-
-          {/* Contract Details Grid */}
-          <div className="p-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              
-              {/* Client Info */}
-              <div className="space-y-4">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Client Details</h3>
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-slate-100 rounded-lg">
-                    <User size={18} className="text-slate-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-slate-900">{contract.client_name}</p>
-                    <p className="text-xs text-slate-500">Renter</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Vehicle Info */}
-              <div className="space-y-4">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Vehicle Details</h3>
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-slate-100 rounded-lg">
-                    <Car size={18} className="text-slate-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-slate-900">{contract.vehicle_make} {contract.vehicle_model}</p>
-                    <p className="text-xs text-slate-500">Plate: {contract.vehicle_plate}</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Dates */}
-              <div className="space-y-4">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Rental Period</h3>
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-slate-100 rounded-lg">
-                    <Calendar size={18} className="text-slate-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-slate-900">
-                      {new Date(contract.start_date).toLocaleDateString()} — {new Date(contract.end_date).toLocaleDateString()}
-                    </p>
-                    <p className="text-xs text-slate-500">Agreed rental duration</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Financials */}
-              <div className="space-y-4">
-                <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Amount</h3>
-                <div className="flex items-start gap-3">
-                  <div className="p-2 bg-slate-100 rounded-lg">
-                    <Banknote size={18} className="text-slate-600" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-bold text-slate-900">
-                      {contract.currency_code} {Number(contract.total_amount).toLocaleString()}
-                    </p>
-                    <p className="text-xs text-slate-500">Total contract value</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Legal Text */}
-            <div className="mt-10 p-6 bg-slate-50 rounded-xl border border-slate-100">
-              <h4 className="text-sm font-bold text-slate-900 mb-2">Terms & Conditions</h4>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                By signing this document, you agree to the rental terms and conditions provided by {contract.tenant_name}. 
-                This includes policies regarding fuel, damage, late returns, and security deposits as outlined in the full PDF agreement. 
-                Please ensure you have downloaded and read the complete contract before signing.
-              </p>
-            </div>
-          </div>
-
-          {/* Action Footer */}
-          {!showSuccess && (
-            <div className="px-8 py-6 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-              <p className="text-xs text-slate-500">
-                By clicking sign, you confirm that you have read and agree to the terms.
-              </p>
-              <button
-                onClick={handleSignContract}
-                disabled={signing}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-blue-600 text-white text-sm font-bold hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {signing ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" /> Processing...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle2 size={16} /> Sign Contract
-                  </>
-                )}
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="mt-8 text-center">
-          <p className="text-xs text-slate-400">
-            Secured by Rental Manager • Contract generated on {new Date(contract.created_at).toLocaleDateString()}
-          </p>
-        </div>
+        )}
       </div>
-    </div>
+
+      {/* ── FOOTER ACTIONS ─────────────────────────────────────────────── */}
+      <div className="mt-8 pt-6 border-t border-surface-border">
+        <PublicDocActions
+          actions={[{
+            label: "Download Signed PDF",
+            icon: <Download size={16} />,
+            onClick: () => {
+              window.open(`/api/contracts/public/${token}/pdf`, "_blank");
+            },
+            disabled: !isSigned, // Only allow download if signed (or adjust if you allow downloading drafts)
+            variant: "primary",
+          }]}
+        />
+      </div>
+    </PublicDocLayout>
   );
 }

@@ -9,9 +9,9 @@ const nextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'rental-manager-backend-sf4k.onrender.com',
+        hostname: 'rental-manager-backend-071n.onrender.com',
         port: '',
-        pathname: '/**',
+        pathname: '/api/v1/**',
       },
       {
         protocol: 'https',
