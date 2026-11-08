@@ -268,7 +268,7 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
     <>
       <OverlayBackdrop
         onDismiss={closeDrawer}
-        zIndexClassName="z-[61]"
+        zIndexClassName="z-[60]"
         className="lg:hidden bg-black/40 backdrop-blur-sm"
         style={{
           opacity: Math.min(1, currentOffset / Math.max(travel, 1)),
@@ -279,7 +279,7 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
       />
 
       <div
-        className="lg:hidden fixed inset-x-0 z-[64] bg-[var(--color-surface)] border-t border-[var(--color-surface-border)] rounded-t-[20px] shadow-[0_-20px_60px_rgba(0,0,0,0.25)] flex flex-col overflow-hidden"
+        className="lg:hidden fixed inset-x-0 z-[61] bg-[var(--color-surface)] border-t border-[var(--color-surface-border)] rounded-t-[20px] shadow-[0_-20px_60px_rgba(0,0,0,0.25)] flex flex-col overflow-hidden"
         style={{
           bottom: `calc(${BAR_HEIGHT}px + env(safe-area-inset-bottom, 0px))`,
           height: openHeight,
