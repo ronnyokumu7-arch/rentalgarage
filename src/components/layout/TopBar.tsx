@@ -240,10 +240,12 @@ export default function Topbar({
         aria-expanded={showNotifications}
       >
         <Bell size={17} weight="light" aria-hidden="true" />
-        {/* ✅ Dynamic unread badge instead of hardcoded pulsing dot */}
+        
+        {/* ✅ UPDATED: Clean pulsing dot for unread notifications instead of a number badge */}
         {counts?.unread_count ? (
-          <span className="absolute top-1.5 right-1.5 min-w-[16px] h-4 px-1 flex items-center justify-center text-[9px] font-bold text-white bg-rose-500 rounded-full">
-            {counts.unread_count > 99 ? "99+" : counts.unread_count}
+          <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
           </span>
         ) : null}
       </button>
