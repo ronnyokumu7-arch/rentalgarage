@@ -103,7 +103,10 @@ function ShellInner({
       </div>
 
       {/* Permanent bottom bar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[62]">
+      <div
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-[62] bg-[var(--color-surface)]"
+        style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
+      >
         <BottomNav navItems={navItems} />
       </div>
 
