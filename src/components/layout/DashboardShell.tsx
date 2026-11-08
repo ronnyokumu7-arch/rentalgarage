@@ -1,4 +1,3 @@
-// src/components/layout/DashboardShell.tsx
 "use client";
 
 import { ReactNode, useState, useEffect } from "react";
@@ -102,15 +101,15 @@ function ShellInner({
         </div>
       </div>
 
-      {/* Permanent bottom bar */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[62]">
+      {/* Permanent bottom bar — bumped to z-[65] to stay above PullUpNav (z-[60]) and its backdrop (z-[59]) */}
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 z-[65]">
         <BottomNav navItems={navItems} />
       </div>
 
       {/* Pull-up drawer (behind the bar, peeks above it) */}
       <PullUpNav navItems={navItems} />
 
-      {/* Legacy mobile sidebar overlay (dormant) */}
+      {/* Legacy mobile sidebar overlay (dormant) — bumped to z-[70]/z-[71] to stay above bottom nav if ever reactivated */}
       <AnimatePresence>
         {isMobileNavOpen && (
           <>
@@ -119,7 +118,7 @@ function ShellInner({
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="fixed inset-0 z-[63] bg-black/60 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm lg:hidden"
               onClick={() => setIsMobileNavOpen(false)}
             />
             <motion.div
@@ -127,7 +126,7 @@ function ShellInner({
               animate={{ x: 0 }}
               exit={{ x: -280 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="fixed top-0 left-0 z-[64] w-72 h-full bg-surface border-r border-surface-border shadow-2xl lg:hidden"
+              className="fixed top-0 left-0 z-[71] w-72 h-full bg-surface border-r border-surface-border shadow-2xl lg:hidden"
             >
               <Sidebar
                 navItems={navItems}

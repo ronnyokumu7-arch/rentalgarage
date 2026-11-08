@@ -1,4 +1,3 @@
-// src/components/layout/TopBar.tsx
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
@@ -20,6 +19,10 @@ import TopBarBrand from "@/components/layout/topbar/TopBarBrand";
 import TopBarPageTitle from "@/components/layout/topbar/TopBarPageTitle";
 import { emitMobileHeaderExpanded } from "@/hooks/useMobileHeaderExpanded";
 import { navIconMap } from "@/lib/nav-config";
+
+// ✅ NEW: Notification imports
+import { useNotificationCounts } from "@/hooks/notifications";
+import NotificationDropdown from "@/components/notifications/NotificationDropdown";
 
 interface SearchScope {
   id: string;
@@ -46,7 +49,7 @@ const getPageIcon = (pathname: string) => {
   if (pathname.startsWith("/dashboard/clients")) return navIconMap["Clients"];
   if (pathname.startsWith("/dashboard/financials")) return navIconMap["Financials"];
   if (pathname.startsWith("/dashboard/settings")) return navIconMap["Settings"];
-  if (pathname.startsWith("/dashboard/users")) return navIconMap["Team"]; // ✅ Added Team mapping
+  if (pathname.startsWith("/dashboard/users")) return navIconMap["Team"];
   return navIconMap["Dashboard"];
 };
 
@@ -73,11 +76,17 @@ export default function Topbar({
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [desktopDropdownOpen, setDesktopDropdownOpen] = useState(false);
   const [mobileHeaderExpanded, setMobileHeaderExpanded] = useState(false);
+  
+  // ✅ NEW: Notification state
+  const [showNotifications, setShowNotifications] = useState(false);
 
   const menuRef = useRef<HTMLDivElement>(null);
   const scopeRef = useRef<HTMLDivElement>(null);
   const desktopSearchRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  // ✅ Fetch real-time notification counts
+  const { data: counts } = useNotificationCounts();
 
   const handleClickOutside = useCallback((e: MouseEvent) => {
     if (menuRef.current && !menuRef.current.contains(e.target as Node)) setShowUserMenu(false);
@@ -85,6 +94,7 @@ export default function Topbar({
     if (desktopSearchRef.current && !desktopSearchRef.current.contains(e.target as Node)) {
       setDesktopDropdownOpen(false);
     }
+    // Note: NotificationDropdown handles its own click-outside internally
   }, []);
 
   const handleEscapeKey = useCallback((e: KeyboardEvent) => {
@@ -93,6 +103,7 @@ export default function Topbar({
       setShowScopeMenu(false);
       setDesktopDropdownOpen(false);
       setMobileHeaderExpanded(false);
+      setShowNotifications(false); // ✅ Close notifications on Escape
     }
   }, []);
 
@@ -112,6 +123,7 @@ export default function Topbar({
     setMobileSearchOpen(false);
     setDesktopDropdownOpen(false);
     setMobileHeaderExpanded(false);
+    setShowNotifications(false); // ✅ Close notifications on route change
   }, [pathname]);
 
   useEffect(() => {
@@ -217,6 +229,31 @@ export default function Topbar({
   const hasPageHeader = Boolean(pageTitle && pageDescription);
   const PageIcon = getPageIcon(pathname);
 
+  // ✅ Reusable Notification Button Component to avoid duplication
+  const NotificationButton = () => (
+    <div className="relative">
+      <button
+        onClick={() => setShowNotifications(!showNotifications)}
+        className="relative flex w-9 h-9 rounded-xl items-center justify-center text-ink-muted hover:bg-surface-hover hover:text-ink transition-all duration-200 active:scale-95"
+        aria-label="Notifications"
+        aria-haspopup="true"
+        aria-expanded={showNotifications}
+      >
+        <Bell size={17} weight="light" aria-hidden="true" />
+        {/* ✅ Dynamic unread badge instead of hardcoded pulsing dot */}
+        {counts?.unread_count ? (
+          <span className="absolute top-1.5 right-1.5 min-w-[16px] h-4 px-1 flex items-center justify-center text-[9px] font-bold text-white bg-rose-500 rounded-full">
+            {counts.unread_count > 99 ? "99+" : counts.unread_count}
+          </span>
+        ) : null}
+      </button>
+      <NotificationDropdown 
+        isOpen={showNotifications} 
+        onClose={() => setShowNotifications(false)} 
+      />
+    </div>
+  );
+
   return (
     <>
       <header
@@ -243,13 +280,7 @@ export default function Topbar({
 
               <div className="flex items-center gap-1.5 flex-shrink-0">
                 <ThemeToggle />
-                <button
-                  className="relative flex w-9 h-9 rounded-xl items-center justify-center text-ink-muted hover:bg-surface-hover hover:text-ink transition-all duration-200 active:scale-95"
-                  aria-label="Notifications"
-                >
-                  <Bell size={17} weight="light" aria-hidden="true" />
-                  <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-                </button>
+                <NotificationButton /> {/* ✅ Mobile Expanded Header */}
                 <button
                   onClick={() => setMobileSearchOpen(true)}
                   className="flex items-center justify-center w-9 h-9 rounded-xl text-ink-muted hover:bg-surface-hover hover:text-ink transition-all duration-200 active:scale-95"
@@ -407,13 +438,7 @@ export default function Topbar({
 
               <div className="w-px h-6 bg-surface-border mx-0.5 sm:mx-1" />
 
-              <button
-                className="relative flex w-9 h-9 rounded-xl items-center justify-center text-ink-muted hover:bg-surface-hover hover:text-ink transition-all duration-200 active:scale-95"
-                aria-label="Notifications"
-              >
-                <Bell size={17} weight="light" aria-hidden="true" />
-                <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-rose-500 animate-pulse" />
-              </button>
+              <NotificationButton /> {/* ✅ Desktop Header */}
 
               <div className="w-px h-6 bg-surface-border mx-0.5 sm:mx-1 hidden lg:block" />
 

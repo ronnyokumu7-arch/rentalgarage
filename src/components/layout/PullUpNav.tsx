@@ -1,4 +1,3 @@
-// src/components/layout/PullUpNav.tsx
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -47,6 +46,7 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
   const dragStartY = useRef(0);
   const dragStartOffset = useRef(0);
   const hasMoved = useRef(false);
+  const isTouchDevice = useRef(false); // Prevents double-firing of tap events on mobile
 
   const reorderedItems = [...navItems].sort((a, b) => {
     const priority: Record<string, number> = {
@@ -93,9 +93,6 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
         return children.some((c) => pathname === c.href || pathname.startsWith(c.href + "/"));
       }
       if (!href) return false;
-      if (href === "/dashboard" || href === "/super-admin") {
-        return pathname === href || pathname === href + "/";
-      }
       return pathname === href || pathname.startsWith(href + "/");
     },
     [pathname],
@@ -123,6 +120,7 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
   }, [currentOffset]);
 
   const handleTouchStart = (e: React.TouchEvent) => {
+    isTouchDevice.current = true;
     const touch = e.touches[0];
     if (!touch) return;
     dragStartY.current = touch.clientY;
@@ -149,10 +147,14 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
 
     if (!hasMoved.current) {
       setCurrentOffset((prev) => (prev >= travel / 2 ? 0 : travel));
-      return;
+    } else {
+      setCurrentOffset((prev) => (prev >= travel / 2 ? travel : 0));
     }
 
-    setCurrentOffset((prev) => (prev >= travel / 2 ? travel : 0));
+    // Reset touch flag after a brief delay to allow onClick to ignore it
+    setTimeout(() => {
+      isTouchDevice.current = false;
+    }, 100);
   };
 
   const handleLogout = async () => {
@@ -199,7 +201,6 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
   } else if (parts[0] === "financials" && level === 2) {
     content = <FinancialsLeaf tabId={parts[1]} onClose={closeDrawer} />;
   } else {
-    // ✅ Default content — no duplicate title, grid starts immediately
     content = (
       <nav className="flex-1 overflow-y-auto custom-scrollbar px-4 pt-3 pb-8">
         <div className="grid grid-cols-3 gap-x-2 gap-y-6">
@@ -209,7 +210,9 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
             const href = item.href ?? (item.children?.[0]?.href || "#");
             const label = getDisplayLabel(item.label);
             const caption = (item as any).description || label;
-            const hasSubPanel = label === "Settings" || label === "Financials";
+            
+            // Fixed: use toLowerCase() to reliably match regardless of original casing
+            const hasSubPanel = item.label.toLowerCase() === "settings" || item.label.toLowerCase() === "financials";
 
             return (
               <Link
@@ -268,7 +271,7 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
     <>
       <OverlayBackdrop
         onDismiss={closeDrawer}
-        zIndexClassName="z-[63]"
+        zIndexClassName="z-[59]" // Lowered from z-[63] to sit behind BottomNav
         className="lg:hidden bg-black/40 backdrop-blur-sm"
         style={{
           opacity: Math.min(1, currentOffset / Math.max(travel, 1)),
@@ -279,7 +282,7 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
       />
 
       <div
-        className="lg:hidden fixed inset-x-0 z-[64] bg-[var(--color-surface)] border-t border-[var(--color-surface-border)] rounded-t-[20px] shadow-[0_-20px_60px_rgba(0,0,0,0.25)] flex flex-col overflow-hidden"
+        className="lg:hidden fixed inset-x-0 z-[60] bg-[var(--color-surface)] border-t border-[var(--color-surface-border)] rounded-t-[20px] shadow-[0_-20px_60px_rgba(0,0,0,0.25)] flex flex-col overflow-hidden"
         style={{
           bottom: BAR_HEIGHT,
           height: openHeight,
@@ -295,6 +298,13 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
+          onClick={() => {
+            // Prevent double-firing on touch devices where onClick fires after onTouchEnd
+            if (isTouchDevice.current) return;
+            if (!hasMoved.current) {
+              setCurrentOffset((prev) => (prev >= travel / 2 ? 0 : travel));
+            }
+          }}
         >
           <div className="absolute left-5 flex items-center gap-1.5 pointer-events-none">
             <Briefcase
