@@ -85,7 +85,7 @@ export default function BottomNav({ navItems }: BottomNavProps) {
   return (
     <div className="relative bg-[var(--color-surface)]/90 backdrop-blur-xl shadow-[0_-4px_24px_rgba(0,0,0,0.06)]">
       <nav
-        className="relative flex items-center justify-around h-[68px] px-2 pb-[env(safe-area-inset-bottom,0px)]"
+        className="relative flex items-center justify-around h-[68px] px-2"
         aria-label="Primary navigation"
       >
         {/* ✅ Feather-thin masked border — always visible, color reflects active route */}
