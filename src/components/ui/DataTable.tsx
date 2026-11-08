@@ -11,8 +11,9 @@ import {
   SortingState,
 } from "@tanstack/react-table";
 import { ArrowsDownUp as ArrowUpDown, ArrowUp, ArrowDown, Tray as Inbox, DotsThreeVertical as MoreVertical } from "@phosphor-icons/react/ssr";
-import { createPortal } from "react-dom";
 import Pagination from "./Pagination";
+import OverlayPortal from "./OverlayPortal";
+import OverlayBackdrop from "./OverlayBackdrop";
 
 export interface RowAction<T> {
   label: string;
@@ -270,9 +271,22 @@ export default function DataTable<T>({
         )}
       </div>
 
-      {mounted && openActionId !== null && dropdownPos && createPortal(
+      {mounted && openActionId !== null && dropdownPos && (
+        <OverlayPortal
+          onClose={() => {
+            setOpenActionId(null);
+            setDropdownPos(null);
+          }}
+          lockScroll={false}
+        >
         <>
-          <div className="fixed inset-0 z-[9998]" onClick={() => setOpenActionId(null)} />
+          <OverlayBackdrop
+            onDismiss={() => {
+              setOpenActionId(null);
+              setDropdownPos(null);
+            }}
+            zIndexClassName="z-[9998]"
+          />
 
           <div
             data-dropdown-menu={openActionId}
@@ -322,8 +336,8 @@ export default function DataTable<T>({
               ));
             })()}
           </div>
-        </>,
-        document.body
+        </>
+        </OverlayPortal>
       )}
     </>
   );

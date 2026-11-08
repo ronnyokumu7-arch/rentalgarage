@@ -7,6 +7,7 @@ import { Buildings as Building2, Envelope as Mail, User, Phone, CreditCard, Arch
 import type { Tenant } from "@/lib/types";
 import TenantCardGrid from "@/components/tenants/TenantCardGrid";
 import DataTable, { RowAction } from "@/components/ui/DataTable";
+import OverlayPortal from "@/components/ui/OverlayPortal";
 import { TenantsToolbar } from "@/components/tenants/TenantsToolbar";
 
 interface TenantsTableProps {
@@ -368,7 +369,8 @@ export function TenantsTable({
 
       {/* ✅ EXTEND TRIAL MODAL (per-tenant) */}
       {extendModalOpen && extendTenant && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+        <OverlayPortal onClose={() => setExtendModalOpen(false)}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-[var(--shadow-lg)] rounded-2xl max-w-md w-full animate-in slide-in-from-bottom-4 duration-300">
             <div className="flex items-center justify-between p-5 border-b border-[var(--color-surface-border)]">
               <div>
@@ -417,12 +419,14 @@ export function TenantsTable({
               </div>
             </div>
           </div>
-        </div>
+          </div>
+        </OverlayPortal>
       )}
 
       {/* ✅ BULK EXTEND MODAL (all trials) */}
       {bulkExtendOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+        <OverlayPortal onClose={() => setBulkExtendOpen(false)}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-[var(--shadow-lg)] rounded-2xl max-w-md w-full animate-in slide-in-from-bottom-4 duration-300">
             <div className="flex items-center justify-between p-5 border-b border-[var(--color-surface-border)]">
               <div>
@@ -474,7 +478,8 @@ export function TenantsTable({
               </div>
             </div>
           </div>
-        </div>
+          </div>
+        </OverlayPortal>
       )}
     </div>
   );

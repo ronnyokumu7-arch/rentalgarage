@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { UserCircle, Phone, CreditCard, Car } from "@phosphor-icons/react/ssr";
 import type { DriverListItem } from "@/lib/types";
+import OverlayBackdrop from "@/components/ui/OverlayBackdrop";
 
 interface DriverSearchProps {
   selectedDriverId: string;
@@ -140,10 +141,7 @@ export default function DriverSearch({
 
       {/* Click outside handler */}
       {isOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setIsOpen(false)}
-        />
+        <OverlayBackdrop onDismiss={() => setIsOpen(false)} />
       )}
     </div>
   );

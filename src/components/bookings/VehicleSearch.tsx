@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Car, Hash, Gauge } from "@phosphor-icons/react/ssr";
 import type { Vehicle } from "@/lib/types";
+import OverlayBackdrop from "@/components/ui/OverlayBackdrop";
 
 interface VehicleSearchProps {
   selectedVehicleId: string;
@@ -129,10 +130,7 @@ export default function VehicleSearch({
 
       {/* Click outside handler */}
       {isOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setIsOpen(false)}
-        />
+        <OverlayBackdrop onDismiss={() => setIsOpen(false)} />
       )}
     </div>
   );

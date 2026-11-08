@@ -5,6 +5,7 @@ import { useState } from "react";
 import { format, parseISO, differenceInDays } from "date-fns";
 import { Flame, DotsSixVertical as GripVertical, Calendar, Clock, Eye, Trash as Trash2 } from "@phosphor-icons/react/ssr";
 import { ScheduledTask } from "@/hooks/scheduler/useTaskSchedulerTimeline";
+import OverlayBackdrop from "@/components/ui/OverlayBackdrop";
 
 interface TaskTimelineBarProps {
   task: ScheduledTask;
@@ -174,9 +175,9 @@ export default function TaskTimelineBar({
       {/* RIGHT-CLICK CONTEXT MENU */}
       {showContextMenu && (
         <>
-          <div 
-            className="fixed inset-0 z-[60]" 
-            onClick={handleContextMenuClose}
+          <OverlayBackdrop
+            onDismiss={handleContextMenuClose}
+            zIndexClassName="z-[60]"
           />
           <div 
             className="absolute z-[70] w-48 bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-lg shadow-xl py-1 animate-in fade-in zoom-in-95 duration-150"

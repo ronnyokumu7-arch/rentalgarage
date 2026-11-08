@@ -3,6 +3,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
+import OverlayBackdrop from "@/components/ui/OverlayBackdrop";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { 
@@ -381,7 +382,10 @@ export default function Sidebar({ navItems, isMobile = false, onClose }: Sidebar
       {/* ── PORTAL: Flyout Panel (Desktop Only) ───────────────────────────── */}
       {!isMobile && mounted && openGroup && openGroupItem?.children && createPortal(
         <>
-          <div className="fixed inset-0 z-[9998]" onClick={() => setOpenGroup(null)} />
+          <OverlayBackdrop
+            onDismiss={() => setOpenGroup(null)}
+            zIndexClassName="z-[9998]"
+          />
           <div
             ref={flyoutRef}
             className="fixed z-[9999] w-[280px] overflow-y-auto animate-in slide-in-from-left-2 fade-in duration-200 custom-scrollbar"

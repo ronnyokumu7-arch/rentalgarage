@@ -1,8 +1,9 @@
 // src/components/modals/SelfDriveBookingModal.tsx
 "use client";
 
-import { X, CheckCircle } from "@phosphor-icons/react/ssr";
+import { CheckCircle } from "@phosphor-icons/react/ssr";
 import BookingForm from "./BookingForm";
+import Modal from "@/components/ui/Modal";
 
 interface SelfDriveBookingModalProps {
   isOpen: boolean;
@@ -13,49 +14,15 @@ export default function SelfDriveBookingModal({ isOpen, onClose }: SelfDriveBook
   if (!isOpen) return null;
 
   return (
-    // Outer container: Full screen bottom sheet on mobile, centered card on desktop
-    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4">
-      
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200" 
-        onClick={onClose} 
-      />
-
-      {/* Modal Content */}
-      <div className="relative w-full sm:max-w-5xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] border-b-0 sm:border-b rounded-t-2xl sm:rounded-2xl shadow-[var(--shadow-2xl)] flex flex-col max-h-[95vh] sm:max-h-[90vh] pb-[env(safe-area-inset-bottom,0px)] animate-in slide-in-from-bottom sm:zoom-in-95 sm:slide-in-from-bottom-0 duration-300 ease-out">
-        
-        {/* iOS drag handle indicator — mobile only */}
-        <div className="sm:hidden flex justify-center pt-3 -mb-1">
-          <div className="w-10 h-1 rounded-full bg-[var(--color-surface-border)]" />
-        </div>
-
-        {/* ── Sticky Header ────────────────────────────────────────── */}
-        <div className="flex-shrink-0 flex items-center justify-between px-4 sm:px-6 py-4 sm:py-5 border-b border-[var(--color-surface-border)] bg-[var(--color-surface)] rounded-t-2xl sm:rounded-t-none">
-          <div>
-            <h2 className="text-base sm:text-lg font-bold text-[var(--color-ink)] tracking-tight">
-              New Booking
-            </h2>
-            <p className="text-xs sm:text-sm text-[var(--color-ink-muted)] mt-0.5">
-              Create a new rental reservation
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            className="p-2 rounded-xl text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-ink)] transition-all duration-150 active:scale-95"
-            aria-label="Close modal"
-          >
-            <X size={18} weight="regular" aria-hidden="true" />
-          </button>
-        </div>
-
-        {/* ── Scrollable Form Content ─────────────────────────────── */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 bg-[var(--color-bg)]">
-          <BookingForm formId="selfdrive-booking-form" onClose={onClose} />
-        </div>
-
-        {/* ── Sticky Footer ────────────────────────────────────────── */}
-        <div className="flex-shrink-0 flex items-center justify-end gap-3 px-4 sm:px-6 py-4 sm:py-5 border-t border-[var(--color-surface-border)] bg-[var(--color-surface)] sm:rounded-b-2xl">
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      title="New Booking"
+      subtitle="Create a new rental reservation"
+      size="xl"
+      bodyClassName="p-4 sm:p-6 bg-[var(--color-bg)]"
+      footer={
+        <div className="flex items-center justify-end gap-3 px-4 sm:px-6 py-4 sm:py-5 bg-[var(--color-surface)]">
           <button
             type="button"
             onClick={onClose}
@@ -72,8 +39,9 @@ export default function SelfDriveBookingModal({ isOpen, onClose }: SelfDriveBook
             Create Booking
           </button>
         </div>
-        
-      </div>
-    </div>
+      }
+    >
+      <BookingForm formId="selfdrive-booking-form" onClose={onClose} />
+    </Modal>
   );
 }

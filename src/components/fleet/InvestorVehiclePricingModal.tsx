@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Car, CircleNotch as Loader2, X, CurrencyDollar as DollarSign, Note as StickyNote, Clock, FileText, Copy, Check, PencilLine as PenLine } from "@phosphor-icons/react/ssr";
+import { Car, CircleNotch as Loader2, CurrencyDollar as DollarSign, Note as StickyNote, Clock, FileText, Copy, Check, PencilLine as PenLine } from "@phosphor-icons/react/ssr";
 import apiClient from "@/lib/api-client";
+import { getApiErrorMessage } from "@/lib/api-error";
 import { investorContractsApi } from "@/lib/api/investorContracts";
 import InvestorContractSignModal from "@/components/investor/InvestorContractSignModal";
 import type { Vehicle, InvestorContract } from "@/lib/types";
 import toast from "react-hot-toast";
+import Modal from "@/components/ui/Modal";
 
 interface InvestorVehiclePricingModalProps {
   vehicle: Vehicle | null;
@@ -84,10 +86,9 @@ export default function InvestorVehiclePricingModal({
 
       toast.success(vehicle.lease_rate_locked ? "Lease rate updated successfully!" : "Vehicle activated and lease rate locked!");
       setStep('contract'); // Move to contract generation step
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("❌ PRICING ERROR:", error);
-      const errorMsg = error.response?.data?.detail || "Failed to update vehicle";
-      toast.error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+      toast.error(getApiErrorMessage(error, "Failed to update vehicle"));
     } finally {
       setLoading(false);
     }
@@ -102,10 +103,9 @@ export default function InvestorVehiclePricingModal({
       });
       setGeneratedContract(contract);
       toast.success("Contract generated successfully!");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("❌ CONTRACT GENERATION ERROR:", error);
-      const errorMsg = error.response?.data?.detail || "Failed to generate contract";
-      toast.error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+      toast.error(getApiErrorMessage(error, "Failed to generate contract"));
     } finally {
       setLoading(false);
     }
@@ -115,26 +115,28 @@ export default function InvestorVehiclePricingModal({
   const labelClass = "block text-xs font-semibold text-[var(--color-ink-muted)] mb-1";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-2xl shadow-2xl w-full max-w-md overflow-y-auto animate-in zoom-in-95 duration-200">
-        
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-[var(--color-surface-border)]">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
-              {step === 'pricing' ? <DollarSign size={20} aria-hidden="true" /> : <FileText size={20} aria-hidden="true" />}
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-[var(--color-ink)]">
-                {step === 'pricing' ? (vehicle.lease_rate_locked ? 'Edit Lease Agreement' : 'Set Pricing & Activate') : 'Generate Lease Contract'}
-              </h3>
-              <p className="text-xs text-[var(--color-ink-muted)]">{vehicle.make} {vehicle.model} ({vehicle.plate_number})</p>
-            </div>
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      size="md"
+      bodyClassName="p-0"
+      ariaLabel={step === 'pricing'
+        ? (vehicle.lease_rate_locked ? 'Edit Lease Agreement' : 'Set Pricing & Activate')
+        : 'Generate Lease Contract'}
+      header={
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
+            {step === 'pricing' ? <DollarSign size={20} aria-hidden="true" /> : <FileText size={20} aria-hidden="true" />}
           </div>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] transition-colors">
-            <X size={20} aria-hidden="true" />
-          </button>
+          <div className="min-w-0">
+            <h3 className="text-lg font-bold text-[var(--color-ink)]">
+              {step === 'pricing' ? (vehicle.lease_rate_locked ? 'Edit Lease Agreement' : 'Set Pricing & Activate') : 'Generate Lease Contract'}
+            </h3>
+            <p className="text-xs text-[var(--color-ink-muted)]">{vehicle.make} {vehicle.model} ({vehicle.plate_number})</p>
+          </div>
         </div>
+      }
+    >
 
         {/* Step 1: Pricing Form */}
         {step === 'pricing' && (
@@ -343,7 +345,6 @@ onChange={e => setFormData({...formData, lease_rate_type: e.target.value as "dai
             />
           </div>
         )}
-      </div>
-    </div>
+    </Modal>
   );
 }

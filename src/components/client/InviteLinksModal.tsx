@@ -3,11 +3,13 @@
 
 import { useEffect, useState } from "react";
 import {
-  X, Copy, Check, Trash as Trash2, ArrowSquareOut as ExternalLink, LinkSimple as Link2, CircleNotch as Loader2, WarningCircle as AlertCircle, Clock,
+  Copy, Check, Trash as Trash2, ArrowSquareOut as ExternalLink, LinkSimple as Link2, CircleNotch as Loader2, WarningCircle as AlertCircle, Clock,
 } from "@phosphor-icons/react/ssr";
 import toast from "react-hot-toast";
 import { clientInvitesApi, ClientInvite } from "@/lib/api/clientInvites";
-import { createPortal } from "react-dom";
+import { getApiErrorMessage } from "@/lib/api-error";
+import ConfirmDialog from "@/components/ui/ConfirmDialog";
+import Modal from "@/components/ui/Modal";
 
 interface InviteLinksModalProps {
   isOpen: boolean;
@@ -15,30 +17,19 @@ interface InviteLinksModalProps {
 }
 
 export default function InviteLinksModal({ isOpen, onClose }: InviteLinksModalProps) {
-  const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [invites, setInvites] = useState<ClientInvite[]>([]);
   const [copiedId, setCopiedId] = useState<number | null>(null);
   const [revokingId, setRevokingId] = useState<number | null>(null);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // Lock scroll while modal is open
-  useEffect(() => {
-    if (!isOpen) return;
-    const original = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = original;
-    };
-  }, [isOpen]);
+  const [inviteToRevoke, setInviteToRevoke] = useState<ClientInvite | null>(null);
 
   // Fetch active invites when modal opens
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      setInviteToRevoke(null);
+      return;
+    }
     let cancelled = false;
 
     setLoading(true);
@@ -86,18 +77,22 @@ export default function InviteLinksModal({ isOpen, onClose }: InviteLinksModalPr
   };
 
   const handleRevoke = async (invite: ClientInvite) => {
-    if (!confirm("Revoke this invite link? The client won't be able to use it.")) return;
-
     setRevokingId(invite.id);
     try {
       await clientInvitesApi.revoke(invite.id);
       setInvites((prev) => prev.filter((i) => i.id !== invite.id));
       toast.success("Invite revoked");
-    } catch {
-      toast.error("Failed to revoke invite");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Failed to revoke invite"));
     } finally {
       setRevokingId(null);
     }
+  };
+
+  const confirmRevoke = async () => {
+    if (!inviteToRevoke) return;
+    await handleRevoke(inviteToRevoke);
+    setInviteToRevoke(null);
   };
 
   const formatExpiry = (dateStr: string) => {
@@ -113,37 +108,21 @@ export default function InviteLinksModal({ isOpen, onClose }: InviteLinksModalPr
     return `Expires in ${diffDays} days`;
   };
 
-  if (!mounted || !isOpen) return null;
+  if (!isOpen) return null;
 
-  return createPortal(
-    <>
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 z-[9998] bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
-        onClick={(e) => {
-          e.stopPropagation();
-          onClose();
-        }}
-        onTouchStart={(e) => {
-          e.stopPropagation();
-          onClose();
-        }}
-      />
-
-      {/* Modal */}
-      <div
-        className="fixed left-0 right-0 bottom-0 sm:inset-0 sm:m-auto sm:max-w-lg sm:h-fit sm:max-h-[85vh] z-[9999] bg-[var(--color-surface)] rounded-t-[28px] sm:rounded-2xl border-t sm:border border-[var(--color-surface-border)] shadow-[0_-20px_60px_rgba(0,0,0,0.3)] flex flex-col overflow-hidden animate-in slide-in-from-bottom sm:zoom-in-95 duration-300"
-        onClick={(e) => e.stopPropagation()}
-        onTouchStart={(e) => e.stopPropagation()}
-        style={{ maxHeight: "85vh" }}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--color-surface-border)] flex-shrink-0">
-          <div className="flex items-center gap-2.5">
+  return (
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      size="md"
+      ariaLabel="Live Invite Links"
+      bodyClassName="p-0"
+      header={
+        <div className="flex min-w-0 items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
               <Link2 size={16} aria-hidden="true" />
             </div>
-            <div>
+            <div className="min-w-0">
               <h2 className="text-base font-bold text-[var(--color-ink)]">
                 Live Invite Links
               </h2>
@@ -151,18 +130,10 @@ export default function InviteLinksModal({ isOpen, onClose }: InviteLinksModalPr
                 {invites.length} {invites.length === 1 ? "active link" : "active links"}
               </p>
             </div>
-          </div>
-          <button
-            onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] transition-colors"
-            aria-label="Close"
-          >
-            <X size={18} aria-hidden="true" />
-          </button>
         </div>
-
-        {/* Body */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar p-4">
+      }
+    >
+        <div className="p-4">
           {loading ? (
             <div className="flex items-center justify-center gap-2 py-12 text-[var(--color-ink-muted)]">
               <Loader2 size={18} className="animate-spin" aria-hidden="true" />
@@ -242,7 +213,7 @@ export default function InviteLinksModal({ isOpen, onClose }: InviteLinksModalPr
                       </a>
 
                       <button
-                        onClick={() => handleRevoke(invite)}
+                        onClick={() => setInviteToRevoke(invite)}
                         disabled={isRevoking}
                         className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-danger)] bg-[var(--color-danger-bg)] hover:bg-[var(--color-danger)]/15 transition-colors disabled:opacity-50"
                         aria-label="Revoke invite"
@@ -260,8 +231,15 @@ export default function InviteLinksModal({ isOpen, onClose }: InviteLinksModalPr
             </div>
           )}
         </div>
-      </div>
-    </>,
-    document.body,
+        <ConfirmDialog
+          open={Boolean(inviteToRevoke)}
+          onClose={() => setInviteToRevoke(null)}
+          onConfirm={confirmRevoke}
+          loading={revokingId === inviteToRevoke?.id}
+          title="Revoke invite link?"
+          message={`Revoke the invite link${inviteToRevoke?.expected_name ? ` for ${inviteToRevoke.expected_name}` : ""}? The client won't be able to use it.`}
+          confirmLabel="Revoke link"
+        />
+    </Modal>
   );
 }

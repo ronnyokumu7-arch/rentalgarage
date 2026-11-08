@@ -7,6 +7,7 @@ import {
 } from "@phosphor-icons/react/ssr";
 import { useTaskForm } from "@/hooks/tasks/useTaskForm";
 import type { Task } from "@/lib/types";
+import OverlayPortal from "@/components/ui/OverlayPortal";
 
 interface TaskProfileModalProps {
   open: boolean;
@@ -131,8 +132,9 @@ export default function TaskProfileModal({ open, onClose, editingTask, onSaveSuc
   const selectedUser = form.users.find(u => u.id === form.userId);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+    <OverlayPortal onClose={onClose}>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 animate-in fade-in duration-200">
+      <div className="absolute inset-0 bg-black/40" onClick={onClose} />
 
       <div className="relative w-full max-w-2xl bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-xl)] overflow-hidden flex flex-col max-h-[90vh]">
         
@@ -330,5 +332,6 @@ export default function TaskProfileModal({ open, onClose, editingTask, onSaveSuc
         </div>
       )}
     </div>
+    </OverlayPortal>
   );
 }

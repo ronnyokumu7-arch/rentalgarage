@@ -8,6 +8,7 @@ import {
 import toast from "react-hot-toast";
 import { clientInvitesApi, ClientInvite } from "@/lib/api/clientInvites";
 import { normalizePersonName } from "@/lib/client-name";
+import OverlayPortal from "@/components/ui/OverlayPortal";
 
 const sectionClass = "bg-[var(--color-surface)] rounded-xl border border-[var(--color-surface-border)] p-4";
 
@@ -259,8 +260,15 @@ export default function ClientInvitesPanel() {
       )}
 
       {shareInvite && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-          <div className="bg-[var(--color-surface)] rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-md border border-[var(--color-surface-border)] p-5">
+        <OverlayPortal onClose={() => setShareInvite(null)}>
+        <div
+          className="fixed inset-0 bg-black/60 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4"
+          onClick={() => setShareInvite(null)}
+        >
+          <div
+            className="bg-[var(--color-surface)] rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-md border border-[var(--color-surface-border)] p-5"
+            onClick={(event) => event.stopPropagation()}
+          >
             <div className="flex items-center justify-between mb-4">
               <h4 className="text-sm font-bold text-[var(--color-ink)]">Share Onboarding Link</h4>
               <button type="button" onClick={() => setShareInvite(null)}
@@ -298,6 +306,7 @@ export default function ClientInvitesPanel() {
             </p>
           </div>
         </div>
+        </OverlayPortal>
       )}
     </section>
   );

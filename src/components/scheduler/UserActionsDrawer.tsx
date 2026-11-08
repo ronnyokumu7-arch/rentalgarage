@@ -3,6 +3,7 @@ import { confirmAction } from "@/lib/utils/confirmAction";
 
 import { X, Plus, Gear as Settings, Trash as Trash2 } from "@phosphor-icons/react/ssr";
 import { TeamMember } from "@/hooks/scheduler/useTaskSchedulerTimeline";
+import OverlayPortal from "@/components/ui/OverlayPortal";
 
 interface UserActionsDrawerProps {
   isOpen: boolean;
@@ -24,11 +25,12 @@ export default function UserActionsDrawer({
   if (!isOpen || !user) return null;
 
   return (
-    <div className="fixed inset-0 z-[200] overflow-hidden">
+    <OverlayPortal onClose={onClose}>
+    <div className="fixed inset-0 z-[9999] overflow-hidden">
       {/* Backdrop */}
       <div
         onClick={onClose}
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
+        className="absolute inset-0 bg-black/40 transition-opacity animate-in fade-in duration-200"
       />
 
       {/* Drawer */}
@@ -132,5 +134,6 @@ export default function UserActionsDrawer({
         </div>
       </div>
     </div>
+    </OverlayPortal>
   );
 }

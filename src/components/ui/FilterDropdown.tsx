@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Funnel as Filter, Check } from "@phosphor-icons/react/ssr";
+import OverlayBackdrop from "./OverlayBackdrop";
 
 export interface FilterOption {
   label: string;
@@ -79,7 +80,7 @@ export default function FilterDropdown({
 
       {isOpen && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+          <OverlayBackdrop onDismiss={() => setIsOpen(false)} />
 
           <div className="absolute right-0 top-[calc(100%+8px)] w-48 bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-xl shadow-[var(--shadow-dropdown)] z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
             <div className="py-1">

@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react";
 import { LinkSimple as Link2, CircleNotch as Loader2, Check, Copy, Chat as MessageSquare, Phone, UserPlus } from "@phosphor-icons/react/ssr";
 import apiClient from "@/lib/api-client";
+import { getApiErrorMessage } from "@/lib/api-error";
 import toast from "react-hot-toast";
+import Modal from "@/components/ui/Modal";
 
 interface InviteInvestorModalProps {
   isOpen: boolean;
@@ -41,9 +43,8 @@ export default function InviteInvestorModal({ isOpen, onClose }: InviteInvestorM
 
       setInviteLink(res.data.invite_link);
       toast.success("Investor invite created successfully!");
-    } catch (error: any) {
-      const errorMsg = error.response?.data?.detail || "Failed to send invite";
-      toast.error(errorMsg);
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Failed to send invite"));
     } finally {
       setLoading(false);
     }
@@ -67,23 +68,30 @@ export default function InviteInvestorModal({ isOpen, onClose }: InviteInvestorM
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-2xl shadow-2xl w-full max-w-md overflow-y-auto max-h-[90vh] animate-in zoom-in-95 duration-200">
-        
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      size="md"
+      ariaLabel={inviteLink ? "Invite Link Ready" : "Invite Investor"}
+      bodyClassName="p-5 sm:p-6"
+      header={
+        <div className="flex min-w-0 items-center gap-3">
+          <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${inviteLink ? "bg-emerald-500/10 text-emerald-500" : "bg-emerald-500/10 text-emerald-500"}`}>
+            {inviteLink ? <Check size={20} aria-hidden="true" /> : <UserPlus size={20} aria-hidden="true" />}
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-lg font-bold text-[var(--color-ink)]">{inviteLink ? "Invite Link Ready!" : "Invite Investor"}</h3>
+            <p className="text-xs text-[var(--color-ink-muted)]">
+              {inviteLink
+                ? "Share this secure link with the investor."
+                : "They'll complete their profile, payout details, and set a password via a secure link."}
+            </p>
+          </div>
+        </div>
+      }
+    >
         {!inviteLink ? (
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
-                <UserPlus size={20} aria-hidden="true" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-[var(--color-ink)]">Invite Investor</h3>
-                <p className="text-xs text-[var(--color-ink-muted)]">
-                  They'll complete their profile, payout details, and set a password via a secure link.
-                </p>
-              </div>
-            </div>
-            
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-3">
               <div>
                 <label className="block text-xs font-semibold text-[var(--color-ink-muted)] mb-1">
@@ -144,11 +152,7 @@ export default function InviteInvestorModal({ isOpen, onClose }: InviteInvestorM
             </div>
           </form>
         ) : (
-          <div className="p-6 space-y-4 text-center">
-            <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto text-emerald-600 dark:text-emerald-400">
-              <Check size={32} aria-hidden="true" />
-            </div>
-            <h3 className="text-lg font-bold text-[var(--color-ink)]">Invite Link Ready!</h3>
+          <div className="space-y-4 text-center">
             <p className="text-sm text-[var(--color-ink-muted)]">
               Share this link with <span className="font-bold text-[var(--color-ink)]">{formData.full_name}</span>. 
               The link expires in 7 days.
@@ -191,7 +195,6 @@ export default function InviteInvestorModal({ isOpen, onClose }: InviteInvestorM
             </button>
           </div>
         )}
-      </div>
-    </div>
+    </Modal>
   );
 }

@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { X, ArrowSquareOut as ExternalLink, CircleNotch as Loader2, Warning as AlertTriangle, ArrowsClockwise as RefreshCw, FileText } from "@phosphor-icons/react/ssr";
 import { fetchSignedUrl } from "@/components/ui/SecureImage";
+import OverlayPortal from "./OverlayPortal";
 
 interface SecureLightboxProps {
   url: string | null;   // stored API URL; null = closed
@@ -62,8 +63,9 @@ export default function SecureLightbox({ url, title = "Document", onClose }: Sec
   const retry = () => setAttempt((a) => a + 1);
 
   return (
+    <OverlayPortal onClose={onClose} closeOnEscape={false}>
     <div
-      className="fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm flex items-center justify-center p-4"
+      className="fixed inset-0 z-[9999] bg-black/70 flex items-center justify-center p-4"
       onClick={onClose}
     >
       <div
@@ -155,5 +157,6 @@ export default function SecureLightbox({ url, title = "Document", onClose }: Sec
         </div>
       </div>
     </div>
+    </OverlayPortal>
   );
 }

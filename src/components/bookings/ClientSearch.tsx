@@ -4,6 +4,7 @@ import { useState } from "react";
 import { User, Phone, CreditCard, Car } from "@phosphor-icons/react/ssr";
 import { getClientDisplayName } from "@/lib/client-name";
 import type { Client } from "@/lib/types";
+import OverlayBackdrop from "@/components/ui/OverlayBackdrop";
 
 interface ClientSearchProps {
   selectedClientId: string;
@@ -119,10 +120,7 @@ export default function ClientSearch({
 
       {/* Click outside handler */}
       {isOpen && (
-        <div 
-          className="fixed inset-0 z-40" 
-          onClick={() => setIsOpen(false)}
-        />
+        <OverlayBackdrop onDismiss={() => setIsOpen(false)} />
       )}
     </div>
   );

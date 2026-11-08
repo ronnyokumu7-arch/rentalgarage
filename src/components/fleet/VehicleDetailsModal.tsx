@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { X, CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
 import { vehiclesApi } from "@/lib/api/vehicles";
 import type { Vehicle } from "@/lib/types";
+import OverlayPortal from "@/components/ui/OverlayPortal";
 
 interface VehicleDetailsModalProps {
   vehicle: Vehicle | null;
@@ -142,8 +143,9 @@ export default function VehicleDetailsModal({
     `relative w-9 h-5 rounded-full transition-colors ${on ? "bg-[var(--color-primary)]" : "bg-[var(--color-surface-border)]"}`;
 
   return (
+    <OverlayPortal onClose={onClose}>
     <div
-      className="fixed inset-0 z-[9990] flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/60 animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
@@ -381,5 +383,6 @@ export default function VehicleDetailsModal({
         </div>
       </div>
     </div>
+    </OverlayPortal>
   );
 }

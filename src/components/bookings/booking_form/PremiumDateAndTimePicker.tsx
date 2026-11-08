@@ -5,6 +5,7 @@ import { CalendarDots as CalendarDays, X, Check } from "@phosphor-icons/react/ss
 import Flatpickr from "react-flatpickr";
 import "flatpickr/dist/flatpickr.min.css";
 import { inputClass, labelClass } from "./constants";
+import OverlayPortal from "@/components/ui/OverlayPortal";
 
 /**
  * ✅ MODAL-BASED DATE+TIME PICKER — 12-hour clock with AM/PM.
@@ -149,8 +150,15 @@ export default function PremiumDateAndTimePicker({
 
       {/* ── MODAL ── */}
       {isOpen && (
-        <div className="fixed inset-0 z-[10000] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-          <div className="relative w-full max-w-md bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-2xl shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+        <OverlayPortal onClose={cancelAndClose}>
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50"
+          onClick={cancelAndClose}
+        >
+          <div
+            className="relative w-full max-w-md bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-2xl shadow-2xl animate-in fade-in zoom-in-95 duration-200"
+            onClick={(event) => event.stopPropagation()}
+          >
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-[var(--color-surface-border)]">
               <h3 className="text-base font-bold text-[var(--color-ink)]">{label}</h3>
@@ -262,6 +270,7 @@ export default function PremiumDateAndTimePicker({
             </div>
           </div>
         </div>
+        </OverlayPortal>
       )}
     </div>
   );

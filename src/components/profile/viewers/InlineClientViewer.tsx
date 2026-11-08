@@ -7,6 +7,7 @@ import {
 import { useInlineClient } from "@/hooks/profile/useInlineClient";
 import type { Client, Task } from "@/lib/types";
 import TaskContextBar from "../TaskContextBar";
+import OverlayPortal from "@/components/ui/OverlayPortal";
 
 interface InlineClientViewerProps {
   client: Client;
@@ -34,8 +35,15 @@ export default function InlineClientViewer({ client, taskId, task, onRefresh:_on
       
       {/* 1. LIGHTBOX */}
       {viewingImage && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-3 sm:p-4 animate-in fade-in duration-200">
-          <div className="relative max-w-5xl w-full max-h-[90vh] flex flex-col items-center">
+        <OverlayPortal onClose={() => setViewingImage(null)}>
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 p-3 sm:p-4 animate-in fade-in duration-200"
+          onClick={() => setViewingImage(null)}
+        >
+          <div
+            className="relative max-w-5xl w-full max-h-[90vh] flex flex-col items-center"
+            onClick={(event) => event.stopPropagation()}
+          >
             <button 
               onClick={() => setViewingImage(null)} 
               className="absolute top-2 right-2 sm:-top-12 sm:right-0 p-2 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors z-10"
@@ -52,6 +60,7 @@ export default function InlineClientViewer({ client, taskId, task, onRefresh:_on
             </p>
           </div>
         </div>
+        </OverlayPortal>
       )}
 
       {/* 2. UNIFIED HEADER WITH ACTIONS */}

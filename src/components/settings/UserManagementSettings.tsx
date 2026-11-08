@@ -8,6 +8,7 @@ import {
 } from "@phosphor-icons/react/ssr";
 import toast from "react-hot-toast";
 import { usersApi, type UserCreatePayload } from "@/lib/api/users";
+import OverlayPortal from "@/components/ui/OverlayPortal";
 
 interface User {
   id: number;
@@ -297,7 +298,8 @@ export default function UserManagementSettings() {
 
       {/* ─── Invite Modal ───────────────────────────────────────── */}
       {showInviteModal && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4">
+        <OverlayPortal onClose={() => setShowInviteModal(false)}>
+          <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm p-0 sm:p-4">
           <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-t-2xl sm:rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in slide-in-from-bottom sm:zoom-in-95 duration-200">
             {!inviteLink ? (
               <form onSubmit={handleInvite} className="p-5 sm:p-6 space-y-4">
@@ -408,6 +410,7 @@ export default function UserManagementSettings() {
             )}
           </div>
         </div>
+        </OverlayPortal>
       )}
     </div>
   );

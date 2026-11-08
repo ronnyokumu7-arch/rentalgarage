@@ -18,6 +18,8 @@ export interface ClientProfileFormData {
   last_name: string;
   email: string;
   phone: string;
+  next_of_kin_name: string;
+  next_of_kin_phone: string;
   id_type: "national_id" | "passport";
   id_number: string;
 
@@ -38,7 +40,7 @@ export interface ClientProfileFormData {
   driver_dl_issued_date: string;
 }
 
-export type EditModalKind = "identity" | "driving" | null;
+export type EditModalKind = "identity" | "driving" | "emergency" | null;
 
 export type ClientStatusBucket = "active" | "suspended" | "pending";
 
@@ -53,6 +55,8 @@ const emptyForm: ClientProfileFormData = {
   last_name: "",
   email: "",
   phone: "",
+  next_of_kin_name: "",
+  next_of_kin_phone: "",
   id_type: "national_id",
   id_number: "",
   dl_number: "",
@@ -72,6 +76,8 @@ export const buildFormDataFromClient = (data: Client): ClientProfileFormData => 
   last_name: data.last_name || "",
   email: data.email || "",
   phone: data.phone || "",
+  next_of_kin_name: data.next_of_kin_name || "",
+  next_of_kin_phone: data.next_of_kin_phone || "",
   id_type: data.id_type || "national_id",
   id_number: data.id_number || "",
   dl_number: data.dl_number || "",
@@ -236,6 +242,11 @@ export function useClientProfile(clientId: number) {
             dl_issued_date: formData.driver_dl_issued_date || null,
           };
         }
+      } else if (editModal === "emergency") {
+        Object.assign(payload, {
+          next_of_kin_name: formData.next_of_kin_name || null,
+          next_of_kin_phone: formData.next_of_kin_phone || null,
+        });
       }
 
       if (Object.keys(payload).length > 0) {
@@ -259,7 +270,8 @@ export function useClientProfile(clientId: number) {
 
       await loadClient();
       toast.success("Saved successfully!");
-      closeModal();
+      setEditModal(null);
+      clearAllFiles();
     } catch (error: any) {
       toast.error(error.response?.data?.detail || "Failed to save");
     } finally {

@@ -6,6 +6,8 @@ import { CaretLeft as ChevronLeft, CaretRight as ChevronRight, Calendar as Calen
 import { useCalendar } from "@/hooks/bookings/useCalendar";
 import CalendarGrid from "@/components/calendar/CalendarGrid";
 import type { Booking } from "@/lib/types";
+import OverlayPortal from "@/components/ui/OverlayPortal";
+import OverlayBackdrop from "@/components/ui/OverlayBackdrop";
 
 export default function FleetCalendar() {
   const {
@@ -51,17 +53,18 @@ export default function FleetCalendar() {
 
       {/* ─── MOBILE: Filter Drawer Overlay ─── */}
       {showFilter && (
+        <OverlayPortal onClose={() => setShowFilter(false)}>
         <>
-          {/* Backdrop */}
-          <div
-            className="lg:hidden fixed inset-0 z-[9998] bg-black/40 backdrop-blur-sm animate-in fade-in duration-200"
-            onClick={() => setShowFilter(false)}
+          <OverlayBackdrop
+            onDismiss={() => setShowFilter(false)}
+            zIndexClassName="z-[9998]"
           />
           {/* Slide-in Drawer */}
           <div className="lg:hidden fixed top-0 left-0 bottom-0 z-[9999] w-[85%] max-w-[320px] flex flex-col animate-in slide-in-from-left duration-300">
             {renderSidebar(true)}
           </div>
         </>
+        </OverlayPortal>
       )}
 
       {/* ─── DESKTOP: Pinned Sidebar (hidden on mobile unless drawer is open) ─── */}

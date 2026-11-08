@@ -3,6 +3,7 @@ import { MagnifyingGlass as Search, Funnel as Filter, Archive, X, Download, Care
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import FilterDropdown, { FilterOption } from "@/components/ui/FilterDropdown";
+import OverlayBackdrop from "@/components/ui/OverlayBackdrop";
 
 interface TenantsToolbarProps {
   searchQuery: string;
@@ -123,7 +124,7 @@ export function TenantsToolbar({
             
             {showExportMenu && (
               <>
-                <div className="fixed inset-0 z-40" onClick={() => setShowExportMenu(false)} />
+                <OverlayBackdrop onDismiss={() => setShowExportMenu(false)} />
                 <div className="absolute right-0 top-[calc(100%+8px)] w-56 bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-xl shadow-[var(--shadow-dropdown)] z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
                   <button
                     type="button"

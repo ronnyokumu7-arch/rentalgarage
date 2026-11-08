@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import { CarProfile as CarFront } from "@phosphor-icons/react/ssr";
+import OverlayBackdrop from "./OverlayBackdrop";
 
 /* ──────────────────────────────────────────────────────────────────────
    Types
@@ -104,7 +105,7 @@ export default function MobileFloatingSegment({
     <div className="md:hidden">
       <div
         ref={containerRef}
-        className="fixed right-4 z-40"
+        className={`fixed right-4 ${isOpen ? "z-[64]" : "z-40"}`}
         style={{
           bottom: "calc(env(safe-area-inset-bottom, 0px) + 5rem)",
         }}
@@ -125,10 +126,9 @@ export default function MobileFloatingSegment({
         {!isToggle && isOpen && (
           <>
             {/* Touch backdrop for reliable outside-tap on mobile */}
-            <div
-              className="fixed inset-0 -z-10"
-              onClick={() => setIsOpen(false)}
-              aria-hidden="true"
+            <OverlayBackdrop
+              onDismiss={() => setIsOpen(false)}
+              zIndexClassName="z-40"
             />
 
             <div

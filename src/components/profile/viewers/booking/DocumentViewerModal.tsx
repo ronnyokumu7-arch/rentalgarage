@@ -2,6 +2,7 @@
 "use client";
 
 import { X, Download, ArrowSquareOut as ExternalLink } from "@phosphor-icons/react/ssr";
+import OverlayPortal from "@/components/ui/OverlayPortal";
 
 interface DocumentViewerModalProps {
   title: string;
@@ -16,6 +17,7 @@ export default function DocumentViewerModal({
 }: DocumentViewerModalProps) {
   
   return (
+    <OverlayPortal onClose={onClose}>
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-200">
       <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] w-full max-w-6xl h-[90vh] flex flex-col shadow-2xl overflow-hidden ring-1 ring-white/10">
         
@@ -71,5 +73,6 @@ export default function DocumentViewerModal({
         </div>
       </div>
     </div>
+    </OverlayPortal>
   );
 }

@@ -3,6 +3,7 @@
 
 import { useState } from "react";
 import { X, SlidersHorizontal } from "@phosphor-icons/react/ssr";
+import OverlayPortal from "@/components/ui/OverlayPortal";
 
 interface FleetTourSheetProps {
   isOpen: boolean;
@@ -39,19 +40,18 @@ export default function FleetTourSheet({ isOpen, onClose }: FleetTourSheetProps)
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[100]">
-      {/* ✅ Backdrop — sibling, not parent, so its blur doesn't affect the sheet */}
-      <div
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm animate-in fade-in duration-300"
-        onClick={() => onClose(false)}
-      />
-
-      {/* ✅ Sheet — anchored to bottom, NOT blurred */}
-      <div className="absolute inset-x-0 bottom-0 flex justify-center">
+    <OverlayPortal onClose={() => onClose(false)}>
+      <div className="fixed inset-0 z-[100]">
         <div
-          className="bg-[var(--color-surface)] w-full max-w-md rounded-t-[24px] shadow-2xl animate-in slide-in-from-bottom duration-300 flex flex-col max-h-[85vh]"
-          onClick={(e) => e.stopPropagation()}
-        >
+          className="absolute inset-0 bg-black/40 animate-in fade-in duration-300"
+          onClick={() => onClose(false)}
+        />
+
+        <div className="absolute inset-x-0 bottom-0 flex justify-center">
+          <div
+            className="bg-[var(--color-surface)] w-full max-w-md rounded-t-[24px] shadow-2xl animate-in slide-in-from-bottom duration-300 flex flex-col max-h-[85vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
           <div className="flex justify-center pt-3 pb-2">
             <div className="w-12 h-1.5 rounded-full bg-[var(--color-surface-border-strong)]" />
           </div>
@@ -110,8 +110,9 @@ export default function FleetTourSheet({ isOpen, onClose }: FleetTourSheetProps)
               Got it
             </button>
           </div>
+          </div>
         </div>
       </div>
-    </div>
+    </OverlayPortal>
   );
 }

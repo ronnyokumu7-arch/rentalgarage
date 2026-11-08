@@ -2,8 +2,9 @@
 "use client";
 
 import { useState } from "react";
-import { X, Calendar, CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
+import { Calendar, CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
 import type { PublicInvoiceView } from "@/lib/types";
+import Modal from "@/components/ui/Modal";
 
 interface PublicRescheduleModalProps {
   invoice: PublicInvoiceView;
@@ -82,46 +83,22 @@ export default function PublicRescheduleModal({
   };
 
   return (
-    <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      style={{ background: 'rgba(0, 0, 0, 0.50)' }}
-      onClick={onClose}
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      size="md"
+      title="Reschedule Booking"
+      closeDisabled={isSubmitting}
+      bodyClassName="p-6"
     >
-      <div
-        className="rounded-2xl max-w-md w-full p-6"
-        style={{
-          background: '#FFFFFF',
-          boxShadow: '0 25px 50px -12px rgba(28, 25, 23, 0.20)',
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4">
           <div className="flex items-center gap-2">
-            <Calendar size={18} style={{ color: '#6D28D9' }} aria-hidden="true" />
-            <h3 className="text-base font-bold" style={{ color: '#1C1917' }}>Reschedule Booking</h3>
+            <Calendar size={18} className="text-[var(--color-primary)]" aria-hidden="true" />
+            <p className="text-xs text-[var(--color-ink-muted)]">
+              Propose a new schedule. The quotation will be re-priced and you'll need to confirm again.
+            </p>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isSubmitting}
-            className="p-1 rounded-lg transition-colors disabled:opacity-50"
-            style={{ cursor: isSubmitting ? 'not-allowed' : 'pointer', opacity: isSubmitting ? 0.5 : 1 }}
-            onMouseEnter={(e) => {
-              if (!isSubmitting) {
-                e.currentTarget.style.background = '#F5F3F0';
-              }
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent';
-            }}
-          >
-            <X size={18} style={{ color: '#57534E' }} aria-hidden="true" />
-          </button>
         </div>
-
-        <p className="text-xs mb-4" style={{ color: '#57534E' }}>
-          Propose a new schedule. The quotation will be re-priced and you'll need to confirm again.
-        </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -232,7 +209,6 @@ export default function PublicRescheduleModal({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

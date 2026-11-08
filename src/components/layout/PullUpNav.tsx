@@ -8,6 +8,7 @@ import type { Icon } from "@phosphor-icons/react";
 import { CaretUp as ChevronUp, CaretRight as ChevronRight, SignOut as LogOut, Briefcase } from "@phosphor-icons/react/ssr";
 import type { NavItem } from "@/lib/nav-config";
 import { useAuth } from "@/context/auth-context";
+import OverlayBackdrop from "@/components/ui/OverlayBackdrop";
 
 import {
   SettingsPanel,
@@ -265,19 +266,20 @@ export default function PullUpNav({ navItems }: PullUpNavProps) {
 
   return (
     <>
-      <div
-        className="lg:hidden fixed inset-0 z-[58] bg-black/40 backdrop-blur-[2px]"
+      <OverlayBackdrop
+        onDismiss={closeDrawer}
+        zIndexClassName="z-[63]"
+        className="lg:hidden bg-black/40 backdrop-blur-sm"
         style={{
           opacity: Math.min(1, currentOffset / Math.max(travel, 1)),
           pointerEvents: isOpen ? "auto" : "none",
           transition: "opacity 200ms ease-out",
         }}
-        onClick={closeDrawer}
-        aria-hidden={!isOpen}
+        hiddenFromAssistiveTech={!isOpen}
       />
 
       <div
-        className="lg:hidden fixed inset-x-0 z-[60] bg-[var(--color-surface)] border-t border-[var(--color-surface-border)] rounded-t-[20px] shadow-[0_-20px_60px_rgba(0,0,0,0.25)] flex flex-col overflow-hidden"
+        className="lg:hidden fixed inset-x-0 z-[64] bg-[var(--color-surface)] border-t border-[var(--color-surface-border)] rounded-t-[20px] shadow-[0_-20px_60px_rgba(0,0,0,0.25)] flex flex-col overflow-hidden"
         style={{
           bottom: BAR_HEIGHT,
           height: openHeight,

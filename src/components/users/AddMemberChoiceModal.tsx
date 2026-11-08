@@ -1,6 +1,7 @@
 // src/components/users/AddMemberChoiceModal.tsx
 import { useRouter } from "next/navigation";
-import { X, UserPlus, Link } from "@phosphor-icons/react/ssr";
+import { UserPlus, Link } from "@phosphor-icons/react/ssr";
+import Modal from "@/components/ui/Modal";
 
 interface AddMemberChoiceModalProps {
   isOpen: boolean;
@@ -14,16 +15,7 @@ export default function AddMemberChoiceModal({ isOpen, onClose, onInvite }: AddM
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
-        <div className="p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h3 className="text-lg font-bold text-[var(--color-ink)]">Add New Member</h3>
-            <button onClick={onClose} className="text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] transition-colors">
-              <X size={20} aria-hidden="true" />
-            </button>
-          </div>
-          
+    <Modal open={isOpen} onClose={onClose} title="Add New Member" size="md">
           <p className="text-sm text-[var(--color-ink-muted)] mb-6">
             How would you like to add this team member?
           </p>
@@ -55,8 +47,6 @@ export default function AddMemberChoiceModal({ isOpen, onClose, onInvite }: AddM
               </div>
             </button>
           </div>
-        </div>
-      </div>
-    </div>
+    </Modal>
   );
 }

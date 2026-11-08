@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Plus, Trash as Trash2 } from "@phosphor-icons/react/ssr";
+import { Plus, Trash as Trash2 } from "@phosphor-icons/react/ssr";
 import {
   getCollections,
   createCollection,
@@ -10,6 +10,7 @@ import {
   deleteCollection,
 } from "@/lib/collections";
 import type { Vehicle } from "@/lib/types";
+import Modal from "@/components/ui/Modal";
 
 interface CollectionsModalProps {
   open: boolean;
@@ -80,24 +81,41 @@ export default function CollectionsModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[9999] bg-black/50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="w-full sm:max-w-md max-h-[90vh] flex flex-col bg-[var(--color-surface)] rounded-t-3xl sm:rounded-2xl shadow-xl">
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[var(--color-surface-border)]">
-          <h2 className="text-sm font-bold text-[var(--color-ink)]">
-            {isEditing ? "Edit Collection" : "New Collection"}
-          </h2>
+    <Modal
+      open={open}
+      onClose={onClose}
+      title={isEditing ? "Edit Collection" : "New Collection"}
+      size="md"
+      bodyClassName="p-4"
+      footer={
+        <div className="p-3 flex items-center gap-2">
+          {isEditing && (
+            <button
+              onClick={handleDelete}
+              className="h-10 px-3 rounded-xl text-xs font-bold text-rose-600 bg-rose-500/10 hover:bg-rose-500/20 flex items-center gap-1.5"
+            >
+              <Trash2 size={14} aria-hidden="true" />
+              Delete
+            </button>
+          )}
           <button
             onClick={onClose}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)]"
-            aria-label="Close"
+            className="flex-1 h-10 rounded-xl text-xs font-bold text-[var(--color-ink-muted)] bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-border)]"
           >
-            <X size={16} aria-hidden="true" />
+            Cancel
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={!name.trim()}
+            className="flex-1 h-10 rounded-xl text-xs font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] disabled:opacity-50 flex items-center justify-center gap-1.5"
+          >
+            <Plus size={14} aria-hidden="true" />
+            {isEditing ? "Save" : "Create"}
           </button>
         </div>
-
-        {/* Body */}
-        <div className="p-4 space-y-3 flex-1 overflow-y-auto">
+      }
+    >
+        <div className="space-y-3">
           <div>
             <label className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)]">
               Collection Name
@@ -172,34 +190,6 @@ export default function CollectionsModal({
             </div>
           </div>
         </div>
-
-        {/* Footer */}
-        <div className="p-3 border-t border-[var(--color-surface-border)] flex items-center gap-2">
-          {isEditing && (
-            <button
-              onClick={handleDelete}
-              className="h-10 px-3 rounded-xl text-xs font-bold text-rose-600 bg-rose-500/10 hover:bg-rose-500/20 flex items-center gap-1.5"
-            >
-              <Trash2 size={14} aria-hidden="true" />
-              Delete
-            </button>
-          )}
-          <button
-            onClick={onClose}
-            className="flex-1 h-10 rounded-xl text-xs font-bold text-[var(--color-ink-muted)] bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-border)]"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={!name.trim()}
-            className="flex-1 h-10 rounded-xl text-xs font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] disabled:opacity-50 flex items-center justify-center gap-1.5"
-          >
-            <Plus size={14} aria-hidden="true" />
-            {isEditing ? "Save" : "Create"}
-          </button>
-        </div>
-      </div>
-    </div>
+    </Modal>
   );
 }

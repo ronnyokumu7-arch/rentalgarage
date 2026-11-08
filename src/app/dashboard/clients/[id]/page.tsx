@@ -13,6 +13,7 @@ import IdentitySection from "@/components/client/[id]/IdentitySection";
 import DrivingSection from "@/components/client/[id]/DrivingSection";
 import ClientDriverSection from "@/components/client/[id]/ClientDriverSection";
 import EmergencyContactSection from "@/components/client/[id]/EmergencyContactSection";
+import EmergencyContactEditModal from "@/components/client/[id]/EmergencyContactEditModal";
 import ComplianceDocumentsSection from "@/components/client/[id]/ComplianceDocumentsSection";
 import IdentityEditModal from "@/components/client/[id]/IdentityEditModal";
 import DrivingEditModal from "@/components/client/[id]/DrivingEditModal";
@@ -104,7 +105,10 @@ export default function ClientProfilePage() {
           </div>
 
           <div className="lg:col-span-5 space-y-6">
-            <EmergencyContactSection client={c} />
+            <EmergencyContactSection
+              client={c}
+              onEdit={() => profile.setEditModal("emergency")}
+            />
             <ComplianceDocumentsSection
               client={c}
               files={{
@@ -146,6 +150,15 @@ export default function ClientProfilePage() {
         setDriverIdFrontFile={profile.setDriverIdFrontFile}
         driverDlFrontFile={profile.driverDlFrontFile}
         setDriverDlFrontFile={profile.setDriverDlFrontFile}
+        loading={profile.loading}
+        onClose={profile.closeModal}
+        onSave={profile.handleSaveModal}
+      />
+
+      <EmergencyContactEditModal
+        open={profile.editModal === "emergency"}
+        formData={profile.formData}
+        updateField={profile.updateField}
         loading={profile.loading}
         onClose={profile.closeModal}
         onSave={profile.handleSaveModal}

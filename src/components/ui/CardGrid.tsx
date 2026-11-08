@@ -3,7 +3,7 @@
 
 import { Fragment, useState, useEffect, useRef, useCallback } from "react";
 import { DotsThreeVertical as MoreVertical, X } from "@phosphor-icons/react/ssr";
-import { createPortal } from "react-dom";
+import OverlayPortal from "./OverlayPortal";
 
 export interface RowAction<T> {
   label: string;
@@ -81,16 +81,6 @@ export default function CardGrid<T>({
     window.addEventListener("resize", checkMobile);
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
-
-  // ✅ Lock body scroll while action sheet is open
-  useEffect(() => {
-    if (openActionId === null) return;
-    const original = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = original;
-    };
-  }, [openActionId]);
 
   useEffect(() => {
     if (!openActionId) return;
@@ -414,11 +404,18 @@ export default function CardGrid<T>({
         if (actions.length === 0) return null;
 
         if (isMobile) {
-          return createPortal(
+          return (
+            <OverlayPortal
+              onClose={() => {
+                setOpenActionId(null);
+                setDropdownPos(null);
+                setTouchAnchor(null);
+              }}
+            >
             <>
               {/* ✅ Mobile backdrop: stops propagation on BOTH click and touchstart */}
               <div
-                className="fixed inset-0 z-[9990] bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+                className="fixed inset-0 z-[9990] bg-black/60 animate-in fade-in duration-200"
                 onClick={(e) => {
                   e.stopPropagation();
                   e.preventDefault();
@@ -485,13 +482,20 @@ export default function CardGrid<T>({
                   100% { transform: translateY(0) scale(1); opacity: 1; }
                 }
               `}</style>
-            </>,
-            document.body
+            </>
+            </OverlayPortal>
           );
         }
 
         if (dropdownPos) {
-          return createPortal(
+          return (
+            <OverlayPortal
+              onClose={() => {
+                setOpenActionId(null);
+                setDropdownPos(null);
+              }}
+              lockScroll={false}
+            >
             <>
               {/* ✅ Desktop backdrop: stops propagation on click */}
               <div
@@ -525,8 +529,8 @@ export default function CardGrid<T>({
               >
                 {renderActionItems(item, false)}
               </div>
-            </>,
-            document.body
+            </>
+            </OverlayPortal>
           );
         }
 

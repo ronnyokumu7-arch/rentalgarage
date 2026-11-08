@@ -1,6 +1,7 @@
 // src/components/users/QuickInviteModal.tsx
 import { useState, useEffect } from "react";
 import { UserPlus, CircleNotch as Loader2, Check, Copy, Envelope as Mail, Chat as MessageSquare, Phone, Shield, Briefcase } from "@phosphor-icons/react/ssr";
+import Modal from "@/components/ui/Modal";
 
 const ADMIN_TITLES = ["Director", "Manager", "HR"];
 const STAFF_DEPARTMENTS: Record<string, string[]> = {
@@ -105,21 +106,28 @@ export default function QuickInviteModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-2xl shadow-2xl w-full max-w-lg overflow-y-auto max-h-[90vh] animate-in zoom-in-95 duration-200">
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      size="md"
+      ariaLabel={successMessage ? "Account Created" : "Add Member Manually"}
+      bodyClassName="p-5 sm:p-6"
+      header={
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
+            {successMessage ? <Check size={20} aria-hidden="true" /> : <UserPlus size={20} aria-hidden="true" />}
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-lg font-bold text-[var(--color-ink)]">{successMessage ? "Account Created!" : "Add Member Manually"}</h3>
+            <p className="text-xs text-[var(--color-ink-muted)]">
+              {successMessage || "Create an account and share their credentials."}
+            </p>
+          </div>
+        </div>
+      }
+    >
         {!successMessage ? (
-          <form onSubmit={handleSubmit} className="p-6 space-y-4">
-            {/* Header */}
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
-                <UserPlus size={20} aria-hidden="true" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold text-[var(--color-ink)]">Add Member Manually</h3>
-                <p className="text-xs text-[var(--color-ink-muted)]">Create an account and share their credentials.</p>
-              </div>
-            </div>
-
+          <form onSubmit={handleSubmit} className="space-y-4">
             {/* STEP 1: Access Level Selection */}
             <div>
               <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)] mb-2">
@@ -283,13 +291,7 @@ export default function QuickInviteModal({
             </div>
           </form>
         ) : (
-          <div className="p-6 space-y-4 text-center">
-            <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto text-emerald-600 dark:text-emerald-400">
-              <Check size={32} aria-hidden="true" />
-            </div>
-            <h3 className="text-lg font-bold text-[var(--color-ink)]">Account Created!</h3>
-            <p className="text-sm text-[var(--color-ink-muted)]">{successMessage}</p>
-            
+          <div className="space-y-4 text-center">
             {/* Unified Share Buttons */}
             <div className="space-y-2 pt-2">
               <button 
@@ -332,7 +334,6 @@ export default function QuickInviteModal({
             </button>
           </div>
         )}
-      </div>
-    </div>
+    </Modal>
   );
 }

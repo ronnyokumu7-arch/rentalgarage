@@ -20,6 +20,7 @@ import UserSettingsDrawer, { UserPermissions } from "./UserSettingsDrawer";
 
 import { usersApi } from "@/lib/api/users";
 import { tasksApi } from "@/lib/api/tasks";
+import OverlayPortal from "@/components/ui/OverlayPortal";
 
 export default function UserTaskScheduler() {
   // --- Data State ---
@@ -350,8 +351,15 @@ const handleSaveUserSettings = useCallback(async (updatedUser: TeamMember, _perm
 
       {/* Task Creation Modal */}
       {schedulingStep === "assign-details" && (
-         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-            <div className="bg-[var(--color-surface)] p-6 rounded-2xl w-full max-w-sm border border-[var(--color-surface-border)] shadow-2xl">
+        <OverlayPortal onClose={handleToggleCreateMode}>
+         <div
+           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 p-4"
+           onClick={handleToggleCreateMode}
+         >
+            <div
+              className="bg-[var(--color-surface)] p-6 rounded-2xl w-full max-w-sm border border-[var(--color-surface-border)] shadow-2xl"
+              onClick={(event) => event.stopPropagation()}
+            >
                 <h3 className="text-sm font-bold mb-4">Schedule Task</h3>
                 <input 
                   type="text" 
@@ -368,6 +376,7 @@ const handleSaveUserSettings = useCallback(async (updatedUser: TeamMember, _perm
                 </div>
             </div>
          </div>
+        </OverlayPortal>
       )}
       
       {/* Drawers */}

@@ -12,6 +12,7 @@ import {
   Trash as Trash2,
 } from "@phosphor-icons/react/ssr";
 import { TeamMember } from "@/hooks/scheduler/useTaskSchedulerTimeline";
+import OverlayPortal from "@/components/ui/OverlayPortal";
 
 export interface UserPermissions {
   canAssignTasks: boolean;
@@ -141,11 +142,12 @@ export default function UserSettingsDrawer({
   );
 
   return (
-    <div className="fixed inset-0 z-50 overflow-hidden antialiased">
+    <OverlayPortal onClose={onClose}>
+    <div className="fixed inset-0 z-[9999] overflow-hidden antialiased">
       {/* Backdrop */}
       <div
         onClick={onClose}
-        className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity animate-in fade-in duration-200"
+        className="absolute inset-0 bg-black/40 transition-opacity animate-in fade-in duration-200"
       />
 
       <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
@@ -419,5 +421,6 @@ export default function UserSettingsDrawer({
         </div>
       </div>
     </div>
+    </OverlayPortal>
   );
 }

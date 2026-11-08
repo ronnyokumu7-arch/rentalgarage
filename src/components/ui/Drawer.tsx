@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useEffect } from "react";
-import { createPortal } from "react-dom";
+import React from "react";
 import { X } from "@phosphor-icons/react/ssr";
+import OverlayPortal from "./OverlayPortal";
 
 type DrawerSize = "sm" | "md" | "lg" | "xl" | "full";
 
@@ -41,39 +41,22 @@ export default function Drawer({
   showCloseButton = true,
   className:_className = "",
 }: DrawerProps) {
-  // ESC key handler
-  useEffect(() => {
-    if (!open || !closeOnEsc) return;
-    function handleEsc(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    document.addEventListener("keydown", handleEsc);
-    return () => document.removeEventListener("keydown", handleEsc);
-  }, [open, closeOnEsc, onClose]);
-
-  // Lock body scroll when open
-  useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
-
   if (!open) return null;
 
   const hasHeader = title || subtitle || showCloseButton;
 
-  const content = (
+  return (
+    <OverlayPortal
+      onClose={onClose}
+      closeOnEscape={closeOnEsc}
+      lockScroll
+    >
     <div
-      className="fixed inset-0 z-50 flex justify-end animate-fade-in"
+      className="fixed inset-0 z-[9999] flex justify-end animate-fade-in"
       onClick={closeOnBackdrop ? onClose : undefined}
     >
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+      <div className="absolute inset-0 bg-black/40" />
 
       {/* Drawer panel */}
       <div
@@ -123,9 +106,6 @@ export default function Drawer({
         )}
       </div>
     </div>
+    </OverlayPortal>
   );
-
-  // Render via portal
-  if (typeof document === "undefined") return null;
-  return createPortal(content, document.body);
 }

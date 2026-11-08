@@ -2,10 +2,12 @@
 
 import { useState, useRef, useEffect } from "react";
 import SignatureCanvas from "react-signature-canvas";
-import { CheckCircle, WarningCircle as AlertCircle, CircleNotch as Loader2, PencilLine as PenLine, ArrowCounterClockwise as RotateCcw, X, Download } from "@phosphor-icons/react/ssr";
+import { CheckCircle, WarningCircle as AlertCircle, CircleNotch as Loader2, PencilLine as PenLine, ArrowCounterClockwise as RotateCcw, Download } from "@phosphor-icons/react/ssr";
 import { investorContractsApi } from "@/lib/api/investorContracts";
+import { getApiErrorMessage } from "@/lib/api-error";
 import type { InvestorContract } from "@/lib/types";
 import toast from "react-hot-toast";
+import Modal from "@/components/ui/Modal";
 
 interface InvestorContractSignModalProps {
   contract: InvestorContract;
@@ -70,8 +72,8 @@ export default function InvestorContractSignModal({
       toast.success("Contract signed successfully!");
       onSuccess();
       onClose();
-    } catch (error: any) {
-      toast.error(error.response?.data?.detail || "Failed to sign contract.");
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, "Failed to sign contract."));
     } finally {
       setIsSigning(false);
     }
@@ -82,27 +84,15 @@ export default function InvestorContractSignModal({
   const pdfUrl = `${apiBaseUrl}/investor-contracts/${contract.id}/pdf`;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-2xl shadow-2xl w-full max-w-2xl overflow-y-auto animate-in zoom-in-95 duration-200">
-        
-        <div className="flex items-center justify-between p-6 border-b border-[var(--color-surface-border)]">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
-              <PenLine size={20} aria-hidden="true" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-[var(--color-ink)]">
-                {signerRole === "agency" ? "Sign as Agency Representative" : "Sign Lease Agreement"}
-              </h3>
-              <p className="text-xs text-[var(--color-ink-muted)]">Contract #{contract.contract_number}</p>
-            </div>
-          </div>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] transition-colors">
-            <X size={20} aria-hidden="true" />
-          </button>
-        </div>
-
-        <div className="p-6 space-y-6">
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      title={signerRole === "agency" ? "Sign as Agency Representative" : "Sign Lease Agreement"}
+      subtitle={`Contract #${contract.contract_number}`}
+      size="lg"
+      bodyClassName="p-6"
+    >
+        <div className="space-y-6">
           {/* Contract Summary */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)]">
             <div>
@@ -224,7 +214,6 @@ export default function InvestorContractSignModal({
             </button>
           </div>
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }

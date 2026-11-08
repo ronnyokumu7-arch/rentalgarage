@@ -4,6 +4,7 @@
 import { useState } from "react";
 import { MagnifyingGlass as Search, Download, CaretDown as ChevronDown, X, Funnel as Filter } from "@phosphor-icons/react/ssr";
 import FilterDropdown, { FilterOption } from "./FilterDropdown";
+import OverlayBackdrop from "./OverlayBackdrop";
 
 interface TableToolbarProps {
   // View Toggle
@@ -109,7 +110,7 @@ export default function TableToolbar({
             
             {showExportMenu && (
               <>
-                <div className="fixed inset-0 z-40" onClick={() => setShowExportMenu(false)} />
+                <OverlayBackdrop onDismiss={() => setShowExportMenu(false)} />
                 <div className="absolute right-0 top-[calc(100%+8px)] w-56 bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-xl shadow-[var(--shadow-dropdown)] z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-100">
                   <button
                     type="button"

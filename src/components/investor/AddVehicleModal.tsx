@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Car, CircleNotch as Loader2, X, Hash, Calendar, Gauge, CurrencyDollar as DollarSign, Info } from "@phosphor-icons/react/ssr";
+import { Car, CircleNotch as Loader2, Hash, Calendar, Gauge, CurrencyDollar as DollarSign, Info } from "@phosphor-icons/react/ssr";
 import { vehiclesApi } from "@/lib/api/vehicles";
+import { getApiErrorMessage } from "@/lib/api-error";
 import toast from "react-hot-toast";
+import Modal from "@/components/ui/Modal";
 
 interface AddVehicleModalProps {
   isOpen: boolean;
@@ -53,12 +55,12 @@ export default function AddVehicleModal({ isOpen, onClose, onSuccess }: AddVehic
       toast.success("Vehicle submitted for agency approval!");
       onSuccess();
       onClose();
-    } catch (error: any) {
+    } catch (error: unknown) {
       // ✅ CRITICAL: This will print the exact error to the browser console
       console.error("❌ VEHICLE SUBMISSION ERROR:", error); 
       
-      const errorMsg = error.response?.data?.detail || error.message || "Failed to submit vehicle";
-      toast.error(typeof errorMsg === 'string' ? errorMsg : JSON.stringify(errorMsg));
+      const fallback = error instanceof Error ? error.message : "Failed to submit vehicle";
+      toast.error(getApiErrorMessage(error, fallback));
     } finally {
       setLoading(false);
     }
@@ -68,25 +70,25 @@ export default function AddVehicleModal({ isOpen, onClose, onSuccess }: AddVehic
   const labelClass = "block text-xs font-semibold text-[var(--color-ink-muted)] mb-1";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-2xl shadow-2xl w-full max-w-lg overflow-y-auto max-h-[90vh] animate-in zoom-in-95 duration-200">
-        
-        <div className="flex items-center justify-between p-6 border-b border-[var(--color-surface-border)]">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
-              <Car size={20} aria-hidden="true" />
-            </div>
-            <div>
-              <h3 className="text-lg font-bold text-[var(--color-ink)]">Submit Vehicle</h3>
-              <p className="text-xs text-[var(--color-ink-muted)]">Provide basic details. Agency will set final rates upon approval.</p>
-            </div>
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      size="md"
+      header={
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]">
+            <Car size={20} aria-hidden="true" />
           </div>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)] transition-colors">
-            <X size={20} aria-hidden="true" />
-          </button>
+          <div>
+            <h3 className="text-lg font-bold text-[var(--color-ink)]">Submit Vehicle</h3>
+            <p className="text-xs text-[var(--color-ink-muted)]">Provide basic details. Agency will set final rates upon approval.</p>
+          </div>
         </div>
-
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+      }
+      ariaLabel="Submit Vehicle"
+      bodyClassName="p-5 sm:p-6"
+    >
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="flex gap-3 p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
             <Info size={16} className="text-blue-500 flex-shrink-0 mt-0.5" aria-hidden="true" />
             <p className="text-xs text-blue-400 leading-relaxed">
@@ -151,7 +153,6 @@ export default function AddVehicleModal({ isOpen, onClose, onSuccess }: AddVehic
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

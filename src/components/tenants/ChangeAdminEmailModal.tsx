@@ -1,9 +1,11 @@
 // src/components/tenants/ChangeAdminEmailModal.tsx
 import { useState } from 'react';
-import { Shield, Envelope as Mail, Phone, UserCheck, CircleNotch as Loader2, Warning as AlertTriangle, X, Eye, EyeSlash as EyeOff } from "@phosphor-icons/react/ssr";
+import { Shield, Envelope as Mail, Phone, UserCheck, CircleNotch as Loader2, Warning as AlertTriangle, Eye, EyeSlash as EyeOff } from "@phosphor-icons/react/ssr";
 import toast from 'react-hot-toast';
 import { tenantsApi } from '@/lib/api/tenants';
 import type { ChangeAdminEmailPayload } from '@/lib/api/tenants';
+import { getApiErrorMessage } from '@/lib/api-error';
+import Modal from '@/components/ui/Modal';
 
 interface ChangeAdminEmailModalProps {
   tenantId: number | string;
@@ -53,24 +55,23 @@ export function ChangeAdminEmailModal({
       toast.success('Admin email updated successfully');
       onSuccess();
       onClose();
-    } catch (error: any) {
-      toast.error(error?.response?.data?.detail || 'Failed to update admin email');
+    } catch (error: unknown) {
+      toast.error(getApiErrorMessage(error, 'Failed to update admin email'));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 backdrop-blur-md flex items-center justify-center z-50 p-4">
-      {/* ✅ Removed max-h-[90vh] and overflow-hidden to prevent internal scrolling */}
-      <div className="bg-[var(--color-surface)] rounded-2xl shadow-2xl w-full max-w-lg border border-[var(--color-surface-border)] flex flex-col">
-        
-        {/* Premium Security Header */}
-        <div className="relative px-6 py-4 border-b border-indigo-500/10 bg-gradient-to-br from-indigo-500/5 via-transparent to-transparent shrink-0">
-          <button onClick={onClose} className="absolute top-3 right-3 p-1.5 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] transition-colors">
-            <X size={18} aria-hidden="true" />
-          </button>
-          
+    <Modal
+      open
+      onClose={onClose}
+      size="md"
+      ariaLabel="Change Admin Email"
+      headerClassName="p-0 border-0"
+      bodyClassName="p-0"
+      header={
+        <div className="relative px-6 py-4 bg-gradient-to-br from-indigo-500/5 via-transparent to-transparent">
           <div className="flex items-start gap-4">
             <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shadow-sm shrink-0">
               <Shield size={20} aria-hidden="true" />
@@ -83,8 +84,29 @@ export function ChangeAdminEmailModal({
             </div>
           </div>
         </div>
-
-        {/* Modal Body - NO SCROLLBAR ON DESKTOP */}
+      }
+      footer={
+        <div className="flex items-center justify-end gap-3 px-6 py-4 bg-[var(--color-surface-hover)]/30">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={isLoading}
+            className="px-5 py-2.5 rounded-xl text-sm font-semibold text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] transition-colors disabled:opacity-50"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={handleSubmit}
+            disabled={!canSubmit}
+            className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/20"
+          >
+            {isLoading ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Shield size={16} aria-hidden="true" />}
+            {isLoading ? 'Processing...' : 'Confirm Change'}
+          </button>
+        </div>
+      }
+    >
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           
           {/* Current vs New Email */}
@@ -199,28 +221,6 @@ export function ChangeAdminEmailModal({
             </p>
           </div>
         </form>
-
-        {/* Footer */}
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/30 shrink-0">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={isLoading}
-            className="px-5 py-2.5 rounded-xl text-sm font-semibold text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] transition-colors disabled:opacity-50"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={!canSubmit}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-sm font-bold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-indigo-500/20"
-          >
-            {isLoading ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Shield size={16} aria-hidden="true" />}
-            {isLoading ? 'Processing...' : 'Confirm Change'}
-          </button>
-        </div>
-      </div>
-    </div>
+    </Modal>
   );
 }

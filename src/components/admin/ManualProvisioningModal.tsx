@@ -3,8 +3,10 @@
 
 import React, { useState } from "react";
 import apiClient from "@/lib/api-client";
+import { getApiErrorMessage } from "@/lib/api-error";
 import toast from "react-hot-toast";
-import { Hash, CurrencyDollar as DollarSign, X, ShieldCheck, CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
+import { Hash, CurrencyDollar as DollarSign, ShieldCheck, CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
+import Modal from "@/components/ui/Modal";
 
 interface ManualProvisioningModalProps {
   tenantId: number;
@@ -53,38 +55,35 @@ export function ManualProvisioningModal({
       toast.success(`Plan successfully provisioned for ${tenantName}!`);
       if (onSuccess) onSuccess();
       onClose();
-    } catch (err: any) {
-      toast.error(err.response?.data?.detail || "Failed to provision subscription.");
+    } catch (err: unknown) {
+      toast.error(getApiErrorMessage(err, "Failed to provision subscription."));
     } finally {
       setIsSubmitting(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-2xl w-full max-w-lg shadow-xl overflow-hidden">
-        {/* Header */}
-        <div className="flex items-center justify-between p-5 border-b border-[var(--color-surface-border)]">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
-              <ShieldCheck size={20} aria-hidden="true" />
-            </div>
-            <div>
-              <h3 className="text-base font-bold text-[var(--color-ink)]">Manual Provisioning</h3>
-              <p className="text-xs text-[var(--color-ink-muted)]">
-                Tenant: <span className="font-semibold text-[var(--color-primary)]">{tenantName}</span> (ID: #{tenantId})
-              </p>
-            </div>
+    <Modal
+      open={isOpen}
+      onClose={onClose}
+      size="md"
+      ariaLabel="Manual Provisioning"
+      bodyClassName="p-0"
+      headerClassName="px-5 py-5"
+      header={
+        <div className="flex items-center gap-2.5">
+          <div className="w-9 h-9 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center">
+            <ShieldCheck size={20} aria-hidden="true" />
           </div>
-          <button
-            onClick={onClose}
-            className="p-1 rounded-lg hover:bg-[var(--color-surface-hover)] text-[var(--color-ink-muted)]"
-          >
-            <X size={18} aria-hidden="true" />
-          </button>
+          <div>
+            <h3 className="text-base font-bold text-[var(--color-ink)]">Manual Provisioning</h3>
+            <p className="text-xs text-[var(--color-ink-muted)]">
+              Tenant: <span className="font-semibold text-[var(--color-primary)]">{tenantName}</span> (ID: #{tenantId})
+            </p>
+          </div>
         </div>
-
-        {/* Form Body */}
+      }
+    >
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           {/* Plan & Billing Cycle */}
           <div className="grid grid-cols-2 gap-3">
@@ -204,7 +203,6 @@ export function ManualProvisioningModal({
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

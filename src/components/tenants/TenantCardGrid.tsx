@@ -3,7 +3,7 @@
 
 import { Fragment, useState, useEffect, useRef, useCallback } from "react";
 import { DotsThreeVertical as MoreVertical, X } from "@phosphor-icons/react/ssr";
-import { createPortal } from "react-dom";
+import OverlayPortal from "@/components/ui/OverlayPortal";
 
 export interface RowAction<T> {
   label: string;
@@ -429,10 +429,17 @@ export default function TenantCardGrid<T>({
         if (actions.length === 0) return null;
         
         if (isMobile) {
-          return createPortal(
+          return (
+            <OverlayPortal
+              onClose={() => {
+                setOpenActionId(null);
+                setDropdownPos(null);
+                setTouchAnchor(null);
+              }}
+            >
             <>
               <div 
-                className="fixed inset-0 z-[9990] bg-black/60 backdrop-blur-sm animate-in fade-in duration-200"
+                className="fixed inset-0 z-[9990] bg-black/60 animate-in fade-in duration-200"
                 onClick={() => {
                   setOpenActionId(null);
                   setDropdownPos(null);
@@ -498,13 +505,20 @@ export default function TenantCardGrid<T>({
                   }
                 }
               `}</style>
-            </>,
-            document.body
+            </>
+            </OverlayPortal>
           );
         }
         
         if (dropdownPos) {
-          return createPortal(
+          return (
+            <OverlayPortal
+              onClose={() => {
+                setOpenActionId(null);
+                setDropdownPos(null);
+              }}
+              lockScroll={false}
+            >
             <>
               <div 
                 className="fixed inset-0 z-[9990]" 
@@ -535,8 +549,8 @@ export default function TenantCardGrid<T>({
               >
                 {renderActionItems(item, false)}
               </div>
-            </>,
-            document.body
+            </>
+            </OverlayPortal>
           );
         }
         

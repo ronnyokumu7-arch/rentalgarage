@@ -16,6 +16,7 @@ import {
   ArrowUpRight,
 } from "@phosphor-icons/react/ssr";
 import { useGlobalSearch, type SearchScope } from "@/hooks/useGlobalSearch";
+import OverlayPortal from "@/components/ui/OverlayPortal";
 
 /* ──────────────────────────────────────────────────────────────────────
    Config
@@ -238,6 +239,7 @@ export default function MobileSearchModal({ open, onClose }: MobileSearchModalPr
   };
 
   return (
+    <OverlayPortal onClose={onClose}>
     <div className="fixed inset-0 z-[9999] bg-bg flex flex-col sm:hidden animate-in fade-in duration-200">
       {/* ── Header: input + cancel ──────────────────────────────── */}
       <div className="flex items-center gap-2 px-3 pt-3 pb-2 flex-shrink-0">
@@ -479,6 +481,7 @@ export default function MobileSearchModal({ open, onClose }: MobileSearchModalPr
         )}
       </div>
     </div>
+    </OverlayPortal>
   );
 }
 
