@@ -31,7 +31,10 @@ export default function BottomNav({ navItems }: BottomNavProps) {
   });
 
   return (
-    <nav className="flex items-center justify-around h-16 px-2 bg-surface-card/90 backdrop-blur-xl border-t border-surface-border shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+    <nav
+      aria-label="Mobile navigation"
+      className="flex h-16 w-full items-center justify-start gap-1 overflow-x-auto overscroll-x-contain px-2 bg-surface-card/90 backdrop-blur-xl border-t border-surface-border shadow-[0_-4px_20px_rgba(0,0,0,0.05)]"
+    >
       {mobileItems.map((item) => {
         const active = isActive(item.href);
         const Icon = item.icon as LucideIcon;
@@ -40,14 +43,14 @@ export default function BottomNav({ navItems }: BottomNavProps) {
           <Link
             key={item.label}
             href={item.href || "#"}
-            className={`flex flex-col items-center justify-center w-16 h-full rounded-xl transition-all duration-200 ${
+            className={`flex h-full w-16 shrink-0 flex-col items-center justify-center rounded-xl px-1 transition-all duration-200 ${
               active 
                 ? "text-accent-dark bg-accent-bg/50" 
                 : "text-ink-muted hover:text-ink"
             }`}
           >
             <Icon size={20} strokeWidth={active ? 2.2 : 1.8} className="mb-1" />
-            <span className={`text-[10px] font-medium ${active ? "font-semibold" : ""}`}>
+            <span className={`whitespace-nowrap text-[10px] font-medium ${active ? "font-semibold" : ""}`}>
               {item.label}
             </span>
           </Link>
