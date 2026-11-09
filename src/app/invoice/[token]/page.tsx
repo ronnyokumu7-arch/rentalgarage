@@ -266,7 +266,42 @@ export default function PublicInvoicePage() {
                 onOpenReschedule={() => setRescheduleOpen(true)}
                 onCancel={handleCancel}
               />
+            ) : invoice.payment_reported ? (
+              // ✅ LOCKED STATE: Hide payment form when a payment is already reported
+              <div 
+                className="mt-8 p-6 rounded-xl text-center border"
+                style={{ 
+                  backgroundColor: brand.colors.warning.bg, 
+                  borderColor: brand.colors.warning.border || brand.colors.warning.main 
+                }}
+              >
+                <CheckCircle2 size={32} className="mx-auto mb-3" style={{ color: brand.colors.warning.main }} weight="fill" />
+                <h3 className="text-sm font-bold mb-1" style={{ color: brand.colors.warning.text }}>
+                  Payment Proof Submitted
+                </h3>
+                <p className="text-xs max-w-md mx-auto" style={{ color: brand.colors.warning.text }}>
+                  We have received your payment proof. Please wait for the agency to confirm it.
+                </p>
+                
+                {/* ✅ DYNAMIC PARTIAL PAYMENT MESSAGE (TypeScript Safe) */}
+                {invoice.remaining_balance !== undefined && 
+                 invoice.remaining_balance !== null && 
+                 Number(invoice.remaining_balance) > 0 && (
+                  <div className="mt-4 pt-4 border-t" style={{ borderColor: brand.colors.warning.border || brand.colors.warning.main }}>
+                    <p className="text-xs font-semibold" style={{ color: brand.colors.warning.text }}>
+                      Next Step:
+                    </p>
+                    <p className="text-xs mt-1" style={{ color: brand.colors.warning.text }}>
+                      Once this payment is confirmed, you will be able to submit the remaining balance of{" "}
+                      <span className="font-bold">
+                        {invoice.currency_code} {Number(invoice.remaining_balance).toLocaleString()}
+                      </span>.
+                    </p>
+                  </div>
+                )}
+              </div>
             ) : (
+              // ✅ UNLOCKED STATE: Show payment channels and form
               <>
                 <PublicInvoicePaymentChannels invoice={invoice} />
                 <PublicInvoicePaymentForm
