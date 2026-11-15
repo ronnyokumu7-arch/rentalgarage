@@ -1,0 +1,11 @@
+-- Keep the OLDEST pending payment for each invoice, void the newer duplicates
+UPDATE payments p1
+SET status = 'void', notes = 'Auto-voided duplicate pending payment'
+WHERE status = 'pending'
+AND id NOT IN (
+    SELECT MIN(id) 
+    FROM payments p2 
+    WHERE p2.invoice_id = p1.invoice_id 
+    AND p2.status = 'pending'
+    GROUP BY p2.invoice_id
+);

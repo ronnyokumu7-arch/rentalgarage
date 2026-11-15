@@ -47,7 +47,8 @@ export interface GetNotificationsParams {
  * Fetch unread and total notification counts (for the TopBar badge).
  */
 export const getNotificationCounts = async (): Promise<NotificationCountResponse> => {
-  const { data } = await api.get('/api/v1/notifications/counts');
+  // ✅ FIX: Removed /api/v1 to prevent duplicated baseURL paths (e.g., /api/v1/api/v1/...)
+  const { data } = await api.get('/notifications/counts');
   return data;
 };
 
@@ -57,7 +58,8 @@ export const getNotificationCounts = async (): Promise<NotificationCountResponse
 export const getNotifications = async (
   params: GetNotificationsParams = {}
 ): Promise<NotificationListResponse> => {
-  const { data } = await api.get('/api/v1/notifications/', { params });
+  // ✅ FIX: Removed /api/v1 to prevent duplicated baseURL paths
+  const { data } = await api.get('/notifications/', { params });
   return data;
 };
 
@@ -65,7 +67,8 @@ export const getNotifications = async (
  * Mark a specific notification as read.
  */
 export const markNotificationAsRead = async (notificationId: number): Promise<Notification> => {
-  const { data } = await api.patch(`/api/v1/notifications/${notificationId}/read`);
+  // ✅ FIX: Removed /api/v1 to prevent duplicated baseURL paths
+  const { data } = await api.patch(`/notifications/${notificationId}/read`);
   return data;
 };
 
@@ -73,7 +76,8 @@ export const markNotificationAsRead = async (notificationId: number): Promise<No
  * Mark all unread notifications as read.
  */
 export const markAllNotificationsAsRead = async (): Promise<void> => {
-  await api.patch('/api/v1/notifications/read-all');
+  // ✅ FIX: Removed /api/v1 to prevent duplicated baseURL paths
+  await api.patch('/notifications/read-all');
 };
 
 /**
@@ -81,5 +85,6 @@ export const markAllNotificationsAsRead = async (): Promise<void> => {
  * Used by the "Clear read" button in the UI to keep the inbox clean.
  */
 export const clearReadNotifications = async (): Promise<void> => {
-  await api.post('/api/v1/notifications/clear-read');
+  // ✅ FIX: Removed /api/v1 to prevent duplicated baseURL paths
+  await api.post('/notifications/clear-read');
 };
