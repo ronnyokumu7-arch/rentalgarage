@@ -1,4 +1,3 @@
-// src/hooks/fleet/useFleetList.ts
 import { confirmAction } from "@/lib/utils/confirmAction";
 import { useState, useEffect, useMemo, useCallback } from "react";
 import toast from "react-hot-toast";
@@ -20,7 +19,8 @@ export function useFleetList() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<FleetFilter>("");
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 7;
+  // ✅ MODEL A: Desktop gets 10 rows. Mobile will consume the un-sliced filteredVehicles.
+  const pageSize = 10;
 
   const [garageVehicle, setGarageVehicle] = useState<Vehicle | null>(null);
   const [garageModalOpen, setGarageModalOpen] = useState(false);
@@ -63,6 +63,7 @@ export function useFleetList() {
     setCurrentPage(1);
   }, [search, statusFilter]);
 
+  // ✅ SINGLE SOURCE OF TRUTH: all filtering (search + status + mileage_due) happens once.
   const filteredVehicles = useMemo(() => {
     return vehicles.filter((v) => {
       const searchLower = search.toLowerCase();
@@ -71,7 +72,6 @@ export function useFleetList() {
         v.model.toLowerCase().includes(searchLower) ||
         v.plate_number.toLowerCase().includes(searchLower);
 
-      // ✅ Handle mileage_due pseudo-filter + normal status filter
       let matchesStatus = true;
       if (statusFilter === "mileage_due") {
         matchesStatus = v.mileage_due;
@@ -83,12 +83,15 @@ export function useFleetList() {
     });
   }, [vehicles, search, statusFilter]);
 
+  // ✅ Desktop slicing (mobile ignores this and uses filteredVehicles directly).
   const paginatedVehicles = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
     return filteredVehicles.slice(start, start + pageSize);
-  }, [filteredVehicles, currentPage]);
+  }, [filteredVehicles, currentPage, pageSize]);
 
-  const totalPages = Math.ceil(filteredVehicles.length / pageSize);
+  // ✅ Guard against 0/0 on empty results.
+  const totalPages = Math.max(1, Math.ceil(filteredVehicles.length / pageSize));
+
   const totalVehicles = vehicles.length;
   const availableVehicles = vehicles.filter((v) => v.status === "available").length;
   const rentedVehicles = vehicles.filter((v) => v.status === "rented").length;
@@ -204,8 +207,8 @@ export function useFleetList() {
     handleArchive,
     handleRetire,
     handleGarageSave,
-    filteredVehicles,
-    paginatedVehicles,
+    filteredVehicles,    // ✅ full filtered list → mobile + dropdown counts
+    paginatedVehicles,   // ✅ sliced to 10 → desktop table
     totalPages,
     totalVehicles,
     availableVehicles,

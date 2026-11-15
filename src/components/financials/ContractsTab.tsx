@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { MagnifyingGlass as Search, FileText, Funnel as Filter, Signature as FileSignature } from "@phosphor-icons/react/ssr";
 import { useSearchParams, useRouter } from "next/navigation";
 import FilterDropdown from "@/components/ui/FilterDropdown";
@@ -14,7 +14,8 @@ export default function ContractsTab() {
   const searchParams = useSearchParams();
 
   const {
-    contracts,
+    filteredContracts,   // ✅ Used for mobile and metrics
+    paginatedContracts,  // ✅ Used for desktop table
     loading,
     search,
     setSearch,
@@ -22,17 +23,17 @@ export default function ContractsTab() {
     setStatusFilter,
     currentPage,
     setCurrentPage,
+    totalPages,
+    totalItems,
     handleDownload,
     handleCopyLink,
     handleSend,
     handleVoid,
-    refetch,
+    refetch,             // ✅ handleGenerate removed (was unused)
   } = useContracts();
 
   const [showGenerateModal, setShowGenerateModal] = useState(false);
   const [_generateForId, setGenerateForId] = useState<number | null>(null);
-
-  const pageSize = 7;
 
   // ✅ Sync statusFilter with URL query parameter
   useEffect(() => {
@@ -43,11 +44,7 @@ export default function ContractsTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
-  // ✅ NEW (deep-link): hydrate the search box from ?search= — e.g. when a
-  //    "Contract Signed" notification links to
-  //    /dashboard/financials?tab=contracts&search=C202611001.
-  //    Runs only when the URL's search value CHANGES, so the user typing in
-  //    the box is never overwritten by this effect.
+  // ✅ Sync search with URL query parameter (for deep-linking from notifications)
   const searchFromUrl = searchParams.get("search");
   useEffect(() => {
     if (searchFromUrl !== null && searchFromUrl !== search) {
@@ -56,21 +53,12 @@ export default function ContractsTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchFromUrl]);
 
-  // ✅ FIXED: Update URL when statusFilter changes — ONLY while the contracts
-  //    tab is active. Depends on the tab param (a plain string), NOT the router
-  //    object, and skips the write if the URL already matches. This stops it from
-  //    fighting the parent's tab navigation (previously it rewrote ?tab=contracts
-  //    over ?tab=invoices and broke tab switching).
-  //    ✅ NEW: preserve ?search= so the status rewrite no longer strips the
-  //    deep-link query (which previously emptied the box on mount).
+  // ✅ Update URL when statusFilter changes (preserving search)
   useEffect(() => {
     if ((searchParams.get("tab") || "overview") !== "contracts") return;
 
     const existingSearch = searchParams.get("search");
-    let targetSearch =
-      statusFilter !== "all"
-        ? `tab=contracts&status=${statusFilter}`
-        : "tab=contracts";
+    let targetSearch = statusFilter !== "all" ? `tab=contracts&status=${statusFilter}` : "tab=contracts";
     if (existingSearch) {
       targetSearch += `&search=${encodeURIComponent(existingSearch)}`;
     }
@@ -81,14 +69,14 @@ export default function ContractsTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [statusFilter, searchParams]);
 
-  // ✅ FRESHNESS: refetch on window focus (cross-tab changes)
+  // ✅ FRESHNESS: refetch on window focus
   useEffect(() => {
     const handleFocus = () => refetch();
     window.addEventListener("focus", handleFocus);
     return () => window.removeEventListener("focus", handleFocus);
   }, [refetch]);
 
-  // ✅ FRESHNESS: refetch when tab becomes visible (switching browser tabs)
+  // ✅ FRESHNESS: refetch when tab becomes visible
   useEffect(() => {
     const handleVisibility = () => {
       if (document.visibilityState === "visible") refetch();
@@ -97,7 +85,6 @@ export default function ContractsTab() {
     return () => window.removeEventListener("visibilitychange", handleVisibility);
   }, [refetch]);
 
-  // ✅ FRESHNESS: wrap send/void to refetch after mutation
   const sendAndRefetch = useCallback(
     async (contractId: number) => {
       await handleSend(contractId);
@@ -114,35 +101,10 @@ export default function ContractsTab() {
     [handleVoid, refetch]
   );
 
-  const searchFilteredContracts = useMemo(() => {
-    const searchLower = search.trim().toLowerCase();
-    if (!searchLower) return contracts;
-    return contracts.filter((contract) => {
-      const contractNum = contract.contract_number?.toLowerCase() || "";
-      const bookingRef = "booking_ref" in contract ? String((contract as any).booking_ref).toLowerCase() : "";
-      const clientName = "client_name" in contract ? String((contract as any).client_name).toLowerCase() : "";
-      return contractNum.includes(searchLower) || bookingRef.includes(searchLower) || clientName.includes(searchLower);
-    });
-  }, [contracts, search]);
-
-  const displayedContracts = useMemo(() => {
-    if (statusFilter === "all") return searchFilteredContracts;
-    return searchFilteredContracts.filter((contract) => contract.status === statusFilter);
-  }, [searchFilteredContracts, statusFilter]);
-
-  const draftCount = useMemo(() => searchFilteredContracts.filter((c) => c.status === "draft").length, [searchFilteredContracts]);
-  const sentCount = useMemo(() => searchFilteredContracts.filter((c) => c.status === "sent").length, [searchFilteredContracts]);
-  const signedCount = useMemo(() => searchFilteredContracts.filter((c) => c.status === "signed").length, [searchFilteredContracts]);
-
-  const totalPages = Math.max(1, Math.ceil(displayedContracts.length / pageSize));
-  const paginatedContracts = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return displayedContracts.slice(start, start + pageSize);
-  }, [displayedContracts, currentPage]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, statusFilter, setCurrentPage]);
+  // ✅ Metrics calculated from the fully filtered list (not paginated)
+  const draftCount = filteredContracts.filter((c) => c.status === "draft").length;
+  const sentCount = filteredContracts.filter((c) => c.status === "sent").length;
+  const signedCount = filteredContracts.filter((c) => c.status === "signed").length;
 
   return (
     <>
@@ -217,7 +179,7 @@ export default function ContractsTab() {
             <div className="w-5 h-5 rounded-full border-2 border-[var(--color-primary)] border-t-transparent animate-spin" />
             Loading contracts...
           </div>
-        ) : displayedContracts.length === 0 ? (
+        ) : filteredContracts.length === 0 ? (
           <div className="p-12 text-center">
             <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
               <FileText size={24} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
@@ -231,9 +193,10 @@ export default function ContractsTab() {
           </div>
         ) : (
           <>
+            {/* ✅ MOBILE: Uses filteredContracts (ALL items, no pagination slicing) */}
             <ContractsTable
               data={paginatedContracts as any}
-              allData={displayedContracts as any}
+              allData={filteredContracts as any}
               onDownload={handleDownload}
               onCopyLink={handleCopyLink}
               onSend={sendAndRefetch}
@@ -244,32 +207,35 @@ export default function ContractsTab() {
               }}
             />
 
-            <div className="hidden md:flex p-4 border-t border-[var(--color-surface-border)] flex-col sm:flex-row items-center justify-between gap-3">
-              <p className="text-xs text-[var(--color-ink-muted)] text-center sm:text-left">
-                Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, displayedContracts.length)} of {displayedContracts.length} contracts
-              </p>
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] disabled:opacity-30 transition-all active:scale-95"
-                >
-                  Previous
-                </button>
-                <span className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--color-primary)] text-white">
-                  {currentPage} / {totalPages}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage >= totalPages}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] disabled:opacity-30 transition-all active:scale-95"
-                >
-                  Next
-                </button>
+            {/* ✅ DESKTOP PAGINATION: Only shows if totalItems > 10 */}
+            {totalItems > 10 && (
+              <div className="hidden md:flex p-4 border-t border-[var(--color-surface-border)] flex-col sm:flex-row items-center justify-between gap-3">
+                <p className="text-xs text-[var(--color-ink-muted)] text-center sm:text-left">
+                  Showing {(currentPage - 1) * 10 + 1} to {Math.min(currentPage * 10, totalItems)} of {totalItems} contracts
+                </p>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] disabled:opacity-30 transition-all active:scale-95"
+                  >
+                    Previous
+                  </button>
+                  <span className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--color-primary)] text-white">
+                    {currentPage} / {totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={currentPage >= totalPages}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] disabled:opacity-30 transition-all active:scale-95"
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </>
         )}
       </div>

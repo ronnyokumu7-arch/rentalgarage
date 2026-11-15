@@ -1,5 +1,5 @@
-// src/app/dashboard/bookings/page.tsx
 "use client";
+
 import { useSearchParams, useRouter } from "next/navigation";
 import { useEffect, useMemo } from "react";
 import { Rows as LayoutList, CalendarDots as CalendarDays } from "@phosphor-icons/react/ssr";
@@ -72,19 +72,21 @@ export default function BookingsPage() {
 
   useSetPageHeader(currentTabInfo.mobileTitle, currentTabInfo.description);
 
-  const bookingsArray = bookingsData.bookings || [];
-  const statusOptions = useMemo(
-    () => [
-      { label: "Pending", value: "pending", count: bookingsData.upcomingCount },
-      { label: "Confirmed", value: "confirmed" },
-      { label: "Active", value: "active", count: bookingsData.activeTripsCount },
-      { label: "Completed", value: "completed", count: bookingsData.completedCount },
-      { label: "Cancelled", value: "cancelled" },
-      { label: "No Show", value: "no_show" },
-      { label: "Awaiting Mileage", value: "awaiting_mileage" },
-    ],
-    [bookingsData.upcomingCount, bookingsData.activeTripsCount, bookingsData.completedCount]
-  );
+  // ✅ MODEL A: Derive status counts from the SINGLE filtered list.
+  // This ensures dropdown counts instantly update when the user searches or filters.
+  const statusOptions = useMemo(() => {
+    const filtered = bookingsData.filteredBookings || [];
+    return [
+      { label: "Pending", value: "pending", count: filtered.filter((b) => b.status === "pending").length },
+      { label: "Confirmed", value: "confirmed", count: filtered.filter((b) => b.status === "confirmed").length },
+      { label: "Active", value: "active", count: filtered.filter((b) => b.status === "active").length },
+      { label: "Completed", value: "completed", count: filtered.filter((b) => b.status === "completed").length },
+      { label: "Cancelled", value: "cancelled", count: filtered.filter((b) => b.status === "cancelled").length },
+      // ✅ FIX: Cast to string to satisfy TypeScript for pseudo-statuses
+      { label: "No Show", value: "no_show", count: filtered.filter((b) => (b.status as string) === "no_show").length },
+      { label: "Awaiting Mileage", value: "awaiting_mileage", count: filtered.filter((b) => (b.status as string) === "awaiting_mileage").length },
+    ];
+  }, [bookingsData.filteredBookings]);
 
   return (
     <div className="space-y-4 sm:space-y-6">
@@ -138,7 +140,7 @@ export default function BookingsPage() {
         </div>
       ) : (
         <FleetTimelineCalendar
-          bookings={bookingsArray as Booking[]}
+          bookings={bookingsData.bookings as Booking[]}
           vehicleMap={vehicleMap}
           clientMap={clientMap}
           onExtendBooking={openExtendModal}

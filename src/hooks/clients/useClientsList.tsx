@@ -1,4 +1,3 @@
-// src/hooks/clients/useClientsList.tsx
 "use client";
 
 import { confirmAction } from "@/lib/utils/confirmAction";
@@ -22,7 +21,8 @@ export function useClientsList() {
   const [openDropdownId, setOpenDropdownId] = useState<number | null>(null);
   const pathname = usePathname();
 
-  const pageSize = 7;
+  // ✅ MODEL A: Desktop gets 10 rows. Mobile will use the un-sliced filtered list.
+  const pageSize = 10;
 
   const fetchClients = useCallback(async () => {
     setLoading(true);
@@ -64,6 +64,7 @@ export function useClientsList() {
     };
   }, [pathname, fetchClients]);
 
+  // ✅ SINGLE SOURCE OF TRUTH: All filtering happens here, exactly once.
   const filteredClients = useMemo(() => {
     let result = clients;
     if (view === "active" && statusFilter) {
@@ -85,11 +86,12 @@ export function useClientsList() {
     return result;
   }, [clients, view, statusFilter, search]);
 
-  const totalPages = Math.ceil(filteredClients.length / pageSize);
-  const paginatedClients = filteredClients.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+  // ✅ Desktop pagination slicing
+  const totalPages = Math.max(1, Math.ceil(filteredClients.length / pageSize));
+  const paginatedClients = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredClients.slice(start, start + pageSize);
+  }, [filteredClients, currentPage, pageSize]);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -104,7 +106,6 @@ export function useClientsList() {
     setActionLoadingId(clientId);
     try {
       const result = await clientsApi.startVerification(clientId);
-      
       toast.success(
         (t) => (
           <div className="flex flex-col gap-2">
@@ -126,7 +127,6 @@ export function useClientsList() {
         ),
         { duration: 6000 }
       );
-      
       await fetchClients();
     } catch (error: any) {
       toast.error(error.response?.data?.message || error.response?.data?.detail || "Failed to start verification");
@@ -199,8 +199,8 @@ export function useClientsList() {
     currentPage,
     setCurrentPage,
     pageSize,
-    filteredClients,
-    paginatedClients,
+    filteredClients,    // ✅ Full filtered list (for mobile & metrics)
+    paginatedClients,   // ✅ Sliced to 10 (for desktop)
     totalPages,
     totalClients,
     activeClients,

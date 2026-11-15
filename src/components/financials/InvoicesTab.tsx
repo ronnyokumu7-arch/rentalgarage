@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { MagnifyingGlass as Search, FileText, Funnel as Filter, Signature as FileSignature } from "@phosphor-icons/react/ssr";
 import FilterDropdown from "@/components/ui/FilterDropdown";
 import { useInvoices } from "@/hooks/financials/useInvoices";
@@ -11,18 +11,26 @@ import type { Invoice, InvoiceStatus } from "@/lib/types";
 
 export default function InvoicesTab() {
   const {
-    invoices, loading, search, setSearch,
-    statusFilter, setStatusFilter,
-    currentPage, setCurrentPage,
-    handleDownload, handleCopyLink, handleVoid,
+    filteredInvoices,    // ✅ Used for mobile and metrics
+    paginatedInvoices,   // ✅ Used for desktop table
+    loading,
+    search,
+    setSearch,
+    statusFilter,
+    setStatusFilter,
+    currentPage,
+    setCurrentPage,
+    totalPages,
+    totalItems,
+    handleDownload,
+    handleCopyLink,
+    handleVoid,
     refetch
   } = useInvoices();
 
   const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null);
   const [paymentModalOpen, setPaymentModalOpen] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
-
-  const pageSize = 7;
 
   // ✅ FRESHNESS: refetch on window focus (cross-tab changes)
   useEffect(() => {
@@ -49,30 +57,10 @@ export default function InvoicesTab() {
     [handleVoid, refetch]
   );
 
-  const displayedInvoices = useMemo(() => {
-    return invoices.filter(invoice => {
-      const searchLower = search.toLowerCase();
-      const matchesSearch = 
-        invoice.invoice_number.toLowerCase().includes(searchLower) ||
-        ('booking_ref' in invoice && String((invoice as any).booking_ref).toLowerCase().includes(searchLower)) ||
-        ('client_name' in invoice && String((invoice as any).client_name).toLowerCase().includes(searchLower));
-      
-      const matchesStatus = statusFilter === "all" || invoice.status === statusFilter;
-      
-      return matchesSearch && matchesStatus;
-    });
-  }, [invoices, search, statusFilter]);
-
-  const paginatedInvoices = useMemo(() => {
-    const start = (currentPage - 1) * pageSize;
-    return displayedInvoices.slice(start, start + pageSize);
-  }, [displayedInvoices, currentPage]);
-
-  const totalPages = Math.ceil(displayedInvoices.length / pageSize);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, statusFilter, setCurrentPage]);
+  // ✅ Metrics calculated from the fully filtered list (not paginated)
+  const draftCount = filteredInvoices.filter(i => i.status === "draft").length;
+  const sentCount = filteredInvoices.filter(i => i.status === "sent").length;
+  const paidCount = filteredInvoices.filter(i => i.status === "paid").length;
 
   const openPaymentModal = (invoice: Invoice) => {
     setSelectedInvoice(invoice);
@@ -90,17 +78,17 @@ export default function InvoicesTab() {
           <div className="hidden sm:flex lg:flex-shrink-0 items-center justify-between gap-1 sm:gap-3 px-2.5 sm:px-3.5 py-2.5 rounded-xl bg-[var(--color-surface)] border border-[var(--color-surface-border)] shadow-sm">
             <div className="flex items-center gap-2 whitespace-nowrap flex-1 min-w-0">
               <span className="text-xs font-medium text-[var(--color-ink-muted)]">Draft</span>
-              <span className="text-xs font-bold text-[var(--color-ink)] tabular-nums">{invoices.filter(i => i.status === "draft").length}</span>
+              <span className="text-xs font-bold text-[var(--color-ink)] tabular-nums">{draftCount}</span>
             </div>
             <div className="w-px h-3 bg-[var(--color-surface-border)] flex-shrink-0" />
             <div className="flex items-center gap-2 whitespace-nowrap flex-1 min-w-0">
               <span className="text-xs font-medium text-[var(--color-ink-muted)]">Sent</span>
-              <span className="text-xs font-bold text-[var(--color-primary-text)] tabular-nums">{invoices.filter(i => i.status === "sent").length}</span>
+              <span className="text-xs font-bold text-[var(--color-primary-text)] tabular-nums">{sentCount}</span>
             </div>
             <div className="w-px h-3 bg-[var(--color-surface-border)] flex-shrink-0" />
             <div className="flex items-center gap-2 whitespace-nowrap flex-1 min-w-0">
               <span className="text-xs font-medium text-[var(--color-ink-muted)]">Paid</span>
-              <span className="text-xs font-bold text-[var(--color-success-text)] tabular-nums">{invoices.filter(i => i.status === "paid").length}</span>
+              <span className="text-xs font-bold text-[var(--color-success-text)] tabular-nums">{paidCount}</span>
             </div>
           </div>
 
@@ -122,10 +110,10 @@ export default function InvoicesTab() {
                 filterId="invoice-status"
                 label="Status"
                 options={[
-                  { label: "Draft", value: "draft", count: invoices.filter(i => i.status === "draft").length },
-                  { label: "Sent", value: "sent", count: invoices.filter(i => i.status === "sent").length },
+                  { label: "Draft", value: "draft", count: draftCount },
+                  { label: "Sent", value: "sent", count: sentCount },
                   { label: "Partially Paid", value: "partially_paid" },
-                  { label: "Paid", value: "paid", count: invoices.filter(i => i.status === "paid").length },
+                  { label: "Paid", value: "paid", count: paidCount },
                   { label: "Overdue", value: "overdue" },
                   { label: "Void", value: "void" },
                 ]}
@@ -152,7 +140,7 @@ export default function InvoicesTab() {
             <div className="w-5 h-5 rounded-full border-2 border-[var(--color-primary)] border-t-transparent animate-spin" />
             Loading invoices...
           </div>
-        ) : displayedInvoices.length === 0 ? (
+        ) : filteredInvoices.length === 0 ? (
           <div className="p-12 text-center">
             <div className="w-16 h-16 rounded-2xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] flex items-center justify-center mx-auto mb-4">
               <FileText size={24} className="text-[var(--color-ink-subtle)]" aria-hidden="true" />
@@ -166,6 +154,7 @@ export default function InvoicesTab() {
           </div>
         ) : (
           <>
+            {/* ✅ FIXED: Removed 'allData' prop as it does not exist on InvoicesTableProps */}
             <InvoicesTable 
               data={paginatedInvoices}
               onDownload={handleDownload}
@@ -175,32 +164,35 @@ export default function InvoicesTab() {
               onCreate={() => setCreateModalOpen(true)} 
             />
 
-            <div className="hidden md:flex p-4 border-t border-[var(--color-surface-border)] flex-col sm:flex-row items-center justify-between gap-3">
-              <p className="text-xs text-[var(--color-ink-muted)] text-center sm:text-left">
-                Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, displayedInvoices.length)} of {displayedInvoices.length} invoices
-              </p>
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] disabled:opacity-30 transition-all active:scale-95"
-                >
-                  Previous
-                </button>
-                <span className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--color-primary)] text-white">
-                  {currentPage} / {totalPages}
-                </span>
-                <button
-                  type="button"
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage >= totalPages}
-                  className="px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] disabled:opacity-30 transition-all active:scale-95"
-                >
-                  Next
-                </button>
+            {/* ✅ DESKTOP PAGINATION: Only shows if totalItems > 10 */}
+            {totalItems > 10 && (
+              <div className="hidden md:flex p-4 border-t border-[var(--color-surface-border)] flex-col sm:flex-row items-center justify-between gap-3">
+                <p className="text-xs text-[var(--color-ink-muted)] text-center sm:text-left">
+                  Showing {(currentPage - 1) * 10 + 1} to {Math.min(currentPage * 10, totalItems)} of {totalItems} invoices
+                </p>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] disabled:opacity-30 transition-all active:scale-95"
+                  >
+                    Previous
+                  </button>
+                  <span className="px-3 py-1.5 rounded-lg text-xs font-medium bg-[var(--color-primary)] text-white">
+                    {currentPage} / {totalPages}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={currentPage >= totalPages}
+                    className="px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] disabled:opacity-30 transition-all active:scale-95"
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
           </>
         )}
       </div>

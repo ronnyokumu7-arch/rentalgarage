@@ -1,9 +1,8 @@
-import { confirmAction } from "@/lib/utils/confirmAction";
-// src/hooks/financials/useInvoices.ts
 import { useState, useEffect, useMemo, useCallback } from "react";
 import toast from "react-hot-toast";
 import { invoicesApi } from "@/lib/api/invoices";
 import type { Invoice, InvoiceStatus } from "@/lib/types";
+import { confirmAction } from "@/lib/utils/confirmAction";
 
 export function useInvoices() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
@@ -11,21 +10,19 @@ export function useInvoices() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<InvoiceStatus | "all">("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 7;
+  
+  // ✅ MODEL A: Desktop gets 10 rows. Mobile will use the un-sliced filtered list.
+  const pageSize = 10;
 
   const fetchInvoices = useCallback(async () => {
     setLoading(true);
     try {
-      // ✅ FIXED: Backend enforces page_size <= 200 (le=200).
-      // 200 covers client-side search/filter/pagination for current tenant volumes.
       const params = {
-        page_size: 200,
+        page_size: 200, // Fetch enough to cover client-side filtering
         ...(statusFilter !== "all" && { status: statusFilter })
       };
       
       const data = await invoicesApi.list(params);
-      
-      // ✅ FIXED: Added safe fallback to guarantee 'invoices' state is always an array
       setInvoices(data || []);
     } catch (error) {
       console.error("Failed to load invoices", error);
@@ -39,7 +36,7 @@ export function useInvoices() {
     fetchInvoices();
   }, [fetchInvoices]);
 
-  // Client-side filtering
+  // ✅ SINGLE SOURCE OF TRUTH: All filtering happens here, exactly once.
   const filteredInvoices = useMemo(() => {
     let result = invoices;
     
@@ -61,8 +58,12 @@ export function useInvoices() {
     return result;
   }, [invoices, search, statusFilter]);
 
-  const totalPages = Math.ceil(filteredInvoices.length / pageSize);
-  const paginatedInvoices = filteredInvoices.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  // ✅ Desktop pagination slicing
+  const totalPages = Math.max(1, Math.ceil(filteredInvoices.length / pageSize));
+  const paginatedInvoices = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredInvoices.slice(start, start + pageSize);
+  }, [filteredInvoices, currentPage, pageSize]);
 
   // Reset to page 1 when filters change
   useEffect(() => { 
@@ -94,9 +95,6 @@ export function useInvoices() {
   const handleCopyLink = async (id: number) => {
     try {
       const res = await invoicesApi.generateShareLink(id);
-      
-      // ✅ BULLETPROOF URL CONSTRUCTION (ENVIRONMENT AGNOSTIC):
-      // Uses current browser origin to guarantee it works on localhost AND Vercel.
       const fullUrl = `${window.location.origin}/invoice/${res.share_token}`;
 
       await navigator.clipboard.writeText(fullUrl); 
@@ -115,9 +113,7 @@ export function useInvoices() {
     if (!confirmAction("Are you sure you want to void this invoice? This action cannot be undone.")) return;
     try {
       const updated = await invoicesApi.void(id);
-      
       setInvoices(prev => prev.map(i => i.id === id ? updated : i));
-      
       toast.success("Invoice voided successfully");
     } catch (error: any) {
       toast.error(error.response?.data?.detail || "Failed to void invoice");
@@ -125,7 +121,9 @@ export function useInvoices() {
   };
 
   return {
-    invoices: paginatedInvoices,
+    // ✅ Return BOTH lists so the component can choose based on screen size
+    filteredInvoices,    // For mobile cards and metric counts
+    paginatedInvoices,   // For desktop table (sliced to 10)
     loading,
     search, 
     setSearch,

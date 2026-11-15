@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Bell } from "@phosphor-icons/react";
 import { useClickOutside } from "@/hooks/useClickOutside";
+import { confirmAction } from "@/lib/utils/confirmAction"; // ✅ SAFETY IMPORT
 import {
   useNotifications,
   useNotificationCounts,
@@ -29,20 +30,16 @@ export default function NotificationDropdown() {
   const sheetRef = useRef<HTMLDivElement>(null);
   const refs = useMemo(() => [containerRef, sheetRef], []);
 
-  // 1. Global counts (for tabs and badge)
   const { data: countsData } = useNotificationCounts();
   const unreadCount = countsData?.unread_count ?? 0;
   const globalTotalCount = countsData?.total_count ?? 0;
   const readCount = globalTotalCount - unreadCount;
 
-  // 2. Filtered list (TanStack Query handles caching per filter)
   const { data: listData, isLoading } = useNotifications({ filter, page: 1, per_page: 50 });
   const notifications = listData?.items ?? [];
 
-  // 3. Selection state
   const selection = useNotificationSelection();
 
-  // 4. Mutations
   const markAsReadMutation = useMarkNotificationAsRead();
   const markAllAsReadMutation = useMarkAllNotificationsAsRead();
   const clearReadMutation = useClearReadNotifications();
@@ -58,6 +55,7 @@ export default function NotificationDropdown() {
 
   useClickOutside(close, refs);
 
+  // ✅ SINGLE ITEM: Tap opens detail view AND marks as read.
   const handleItemTap = (n: Notification) => {
     setSelectedNotification(n);
     if (!n.is_read) {
@@ -65,6 +63,7 @@ export default function NotificationDropdown() {
     }
   };
 
+  // ✅ SINGLE ITEM: Long press enters selection mode.
   const handleItemLongPress = (id: number) => {
     if (!selection.isSelected(id)) {
       selection.toggle(id);
@@ -75,6 +74,7 @@ export default function NotificationDropdown() {
     selection.selectAll(notifications.map((n) => n.id));
   };
 
+  // ✅ MULTIPLE ITEMS: Strictly marks as read. NO deletion.
   const handleMarkSelectedRead = () => {
     const ids = Array.from(selection.selectedIds);
     if (ids.length > 0) {
@@ -84,9 +84,17 @@ export default function NotificationDropdown() {
     }
   };
 
+  // ✅ MULTIPLE ITEMS: Strictly deletes, but ONLY after explicit confirmation.
   const handleArchiveSelected = () => {
     const ids = Array.from(selection.selectedIds);
-    if (ids.length > 0) {
+    if (ids.length === 0) return;
+    
+    // ✅ SAFETY NET: Prevents accidental permanent deletion
+    const confirmed = confirmAction(
+      `Are you sure you want to permanently delete ${ids.length} notification(s)? This cannot be undone.`
+    );
+    
+    if (confirmed) {
       bulkDeleteMutation.mutate(ids, {
         onSuccess: () => selection.clearAll(),
       });
@@ -94,7 +102,14 @@ export default function NotificationDropdown() {
   };
 
   const handleClearRead = () => {
-    clearReadMutation.mutate();
+    // ✅ SAFETY NET: Prevents accidental mass wipe
+    const confirmed = confirmAction(
+      "Are you sure you want to permanently delete all read notifications? This cannot be undone."
+    );
+    
+    if (confirmed) {
+      clearReadMutation.mutate();
+    }
   };
 
   const handleActionClick = () => {
@@ -118,14 +133,8 @@ export default function NotificationDropdown() {
         <Bell size={20} weight={unreadCount > 0 ? "fill" : "regular"} />
         {unreadCount > 0 && (
           <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
-            <span
-              className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-              style={{ backgroundColor: "var(--status-cancelled)" }}
-            />
-            <span
-              className="relative inline-flex rounded-full h-2.5 w-2.5"
-              style={{ backgroundColor: "var(--status-cancelled)" }}
-            />
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 bg-[var(--status-cancelled)]" />
+            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[var(--status-cancelled)]" />
           </span>
         )}
       </button>
@@ -173,7 +182,6 @@ export default function NotificationDropdown() {
           >
             <div className="absolute inset-0" onClick={close} />
             <div className="relative mt-auto w-full max-h-[90dvh] rounded-t-3xl overflow-hidden flex flex-col shadow-2xl animate-in slide-in-from-bottom duration-300 bg-[var(--color-surface)] pb-24">
-              {/* Drag Handle */}
               <div className="w-full flex justify-center pt-3 pb-1">
                 <div className="w-12 h-1.5 rounded-full bg-[var(--color-ink-subtle)] opacity-40" />
               </div>
@@ -202,7 +210,7 @@ export default function NotificationDropdown() {
                   onMarkSelectedRead={handleMarkSelectedRead}
                   onItemTap={handleItemTap}
                   onItemLongPress={handleItemLongPress}
-                  onToggleSelect={selection.toggle}
+              onToggleSelect={selection.toggle}
                   onSelectAll={handleSelectAll}
                   onCancelSelection={selection.clearAll}
                   isMobile

@@ -1,4 +1,3 @@
-// src/app/dashboard/fleet/page.tsx
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
@@ -6,8 +5,7 @@ import {
   Car, ChartBar as BarChart3, Wrench, CarProfile as CarFront, ChartLine as LineChart, Wrench as WrenchIcon,
 } from "@phosphor-icons/react/ssr";
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { useMobileFleet } from "@/hooks/fleet/useMobileFleet";
-import { useDesktopFleet } from "@/hooks/fleet/useDesktopFleet";
+import { useFleetList } from "@/hooks/fleet/useFleetList"; // ✅ SINGLE HOOK
 import { useFleetTour } from "@/hooks/fleet/useFleetTour";
 import { useSetPageHeader } from "@/context/page-header-context";
 import QuickGarageModal from "@/components/ui/QuickGarageModal";
@@ -45,21 +43,15 @@ export default function FleetPage() {
   const searchParams = useSearchParams();
 
   const tabFromUrl = searchParams.get("tab") as TabMode | null;
-  const initialTab: TabMode =
-    tabFromUrl && VALID_TABS.has(tabFromUrl) ? tabFromUrl : "fleet";
+  const initialTab: TabMode = tabFromUrl && VALID_TABS.has(tabFromUrl) ? tabFromUrl : "fleet";
   const [activeTab, setActiveTab] = useState<TabMode>(initialTab);
 
   const [activeRentals, setActiveRentals] = useState<Record<number, Booking>>({});
-
-  const [garageVehicle, setGarageVehicle] = useState<Vehicle | null>(null);
-  const [garageModalOpen, setGarageModalOpen] = useState(false);
-  const [pricingVehicle, setPricingVehicle] = useState<Vehicle | null>(null);
-  const [isPricingModalOpen, setIsPricingModalOpen] = useState(false);
   const [editVehicle, setEditVehicle] = useState<Vehicle | null>(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const mobile = useMobileFleet();
-  const desktop = useDesktopFleet();
+  // ✅ SINGLE INSTANCE of the base hook (fixes double-fetch / out-of-sync bug)
+  const fleet = useFleetList();
   const tour = useFleetTour();
 
   useEffect(() => {
@@ -98,20 +90,35 @@ export default function FleetPage() {
     fetchActiveRentals();
   }, []);
 
+  // ✅ Derived status options computed ONCE from the single filtered list
+  const statusOptions = useMemo(() => {
+    const opts = [
+      { value: "pending_activation", label: "Pending Activation" },
+      { value: "available", label: "Available" },
+      { value: "rented", label: "Rented" },
+      { value: "maintenance", label: "Maintenance" },
+      { value: "retired", label: "Retired" },
+    ];
+    return opts.map((o) => ({
+      ...o,
+      count: fleet.filteredVehicles.filter((v) => v.status === o.value).length,
+    }));
+  }, [fleet.filteredVehicles]);
+
   const handleGarageSave = useCallback(
     async (payload: { current_mileage: number; next_service_km?: number | null }) => {
-      if (!garageVehicle) return;
+      if (!fleet.garageVehicle) return;
       try {
-        if (garageVehicle.mileage_due) {
-          await vehiclesApi.updateMileage(garageVehicle.id, payload);
+        if (fleet.garageVehicle.mileage_due) {
+          await vehiclesApi.updateMileage(fleet.garageVehicle.id, payload);
           toast.success("Mileage updated and vehicle is now available!");
         } else {
-          await vehiclesApi.update(garageVehicle.id, payload);
+          await vehiclesApi.update(fleet.garageVehicle.id, payload);
           toast.success("Vehicle mileage updated!");
         }
-        setGarageModalOpen(false);
-        setGarageVehicle(null);
-        await Promise.all([mobile.refetch(), desktop.refetch()]);
+        fleet.setGarageModalOpen(false);
+        fleet.setGarageVehicle(null);
+        await fleet.refetch();
       } catch (error: unknown) {
         const err = error as { response?: { data?: { detail?: string; message?: string } } };
         toast.error(
@@ -122,21 +129,20 @@ export default function FleetPage() {
         throw error;
       }
     },
-    [garageVehicle, mobile, desktop]
+    [fleet]
   );
 
   const handleStatusAction = useCallback(
     async (id: number, action: string) => {
-      const vehicle = mobile.filteredVehicles.find((v) => v.id === id);
+      const vehicle = fleet.filteredVehicles.find((v) => v.id === id);
       if (action === "activate" && vehicle?.owner_id) {
-        setPricingVehicle(vehicle);
-        setIsPricingModalOpen(true);
+        fleet.setPricingVehicle(vehicle);
+        fleet.setIsPricingModalOpen(true);
         return;
       }
-      await mobile.handleStatusAction(id, action);
-      await desktop.refetch();
+      await fleet.handleStatusAction(id, action);
     },
-    [mobile, desktop]
+    [fleet]
   );
 
   const currentTabInfo = useMemo(() => {
@@ -144,8 +150,7 @@ export default function FleetPage() {
       return {
         title: "Fleet Management",
         mobileTitle: "Manage Fleet",
-        description:
-          "Oversee your vehicles, track performance statuses, and manage your garage pipelines.",
+        description: "Oversee your vehicles, track performance statuses, and manage your garage pipelines.",
         icon: <CarFront size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
       };
     }
@@ -153,26 +158,19 @@ export default function FleetPage() {
       return {
         title: "Performance Analytics",
         mobileTitle: "Performance",
-        description:
-          "Deep insights into your fleet's performance, utilization, and profitability.",
+        description: "Deep insights into your fleet's performance, utilization, and profitability.",
         icon: <LineChart size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
       };
     }
     return {
       title: "Garage Operations",
       mobileTitle: "Garage",
-      description:
-        "Onboard new vehicles, manage maintenance, and track service schedules.",
+      description: "Onboard new vehicles, manage maintenance, and track service schedules.",
       icon: <WrenchIcon size={28} weight="light" className="text-[var(--color-primary)]" aria-hidden="true" />,
     };
   }, [activeTab]);
 
-  // ✅ Drive the mobile top bar title + description + tour trigger
-  useSetPageHeader(
-    currentTabInfo.mobileTitle,
-    currentTabInfo.description,
-    tour.open
-  );
+  useSetPageHeader(currentTabInfo.mobileTitle, currentTabInfo.description, tour.open);
 
   return (
     <div className="space-y-6">
@@ -203,52 +201,52 @@ export default function FleetPage() {
       {activeTab === "fleet" && (
         <>
           <MobileFleetList
-            loading={mobile.loading}
-            search={mobile.search}
-            setSearch={mobile.setSearch}
-            statusFilter={mobile.statusFilter}
-            setStatusFilter={mobile.setStatusFilter}
-            statusOptions={mobile.statusOptions}
+            loading={fleet.loading}
+            search={fleet.search}
+            setSearch={fleet.setSearch}
+            statusFilter={fleet.statusFilter}
+            setStatusFilter={fleet.setStatusFilter}
+            statusOptions={statusOptions}
             activeTab={activeTab}
             handleTabChange={handleTabChange}
             mobileTabs={MOBILE_TABS.map((t) => ({ id: t.id, label: t.label, icon: t.icon }))}
-            filteredVehicles={mobile.filteredVehicles}
-            setGarageVehicle={setGarageVehicle}
-            setGarageModalOpen={setGarageModalOpen}
-            setPricingVehicle={setPricingVehicle}
-            setIsPricingModalOpen={setIsPricingModalOpen}
+            filteredVehicles={fleet.filteredVehicles} // ✅ Full list for mobile (no pagination)
+            setGarageVehicle={fleet.setGarageVehicle}
+            setGarageModalOpen={fleet.setGarageModalOpen}
+            setPricingVehicle={fleet.setPricingVehicle}
+            setIsPricingModalOpen={fleet.setIsPricingModalOpen}
             setEditVehicle={setEditVehicle}
             setIsEditModalOpen={setIsEditModalOpen}
             handleStatusAction={handleStatusAction}
-            handleArchive={mobile.handleArchive}
-            handleRetire={mobile.handleRetire}
+            handleArchive={fleet.handleArchive}
+            handleRetire={fleet.handleRetire}
             onAddVehicle={() => router.push("/dashboard/fleet/new")}
           />
 
           <DesktopFleetList
-            loading={desktop.loading}
-            search={desktop.search}
-            setSearch={desktop.setSearch}
-            statusFilter={desktop.statusFilter}
-            setStatusFilter={desktop.setStatusFilter}
-            currentPage={desktop.currentPage}
-            setCurrentPage={desktop.setCurrentPage}
-            pageSize={desktop.pageSize}
-            totalPages={desktop.totalPages}
-            filteredVehicles={desktop.filteredVehicles}
-            paginatedVehicles={desktop.paginatedVehicles}
-            totalVehicles={desktop.totalVehicles}
-            availableVehicles={desktop.availableVehicles}
-            rentedVehicles={desktop.rentedVehicles}
-            mileageDueCount={desktop.mileageDueCount}
+            loading={fleet.loading}
+            search={fleet.search}
+            setSearch={fleet.setSearch}
+            statusFilter={fleet.statusFilter}
+            setStatusFilter={fleet.setStatusFilter}
+            currentPage={fleet.currentPage}
+            setCurrentPage={fleet.setCurrentPage}
+            pageSize={fleet.pageSize}
+            totalPages={fleet.totalPages}
+            filteredVehicles={fleet.filteredVehicles}
+            paginatedVehicles={fleet.paginatedVehicles} // ✅ Sliced to 10 for desktop
+            totalVehicles={fleet.totalVehicles}
+            availableVehicles={fleet.availableVehicles}
+            rentedVehicles={fleet.rentedVehicles}
+            mileageDueCount={fleet.mileageDueCount}
             activeRentals={activeRentals}
-            setGarageVehicle={setGarageVehicle}
-            setGarageModalOpen={setGarageModalOpen}
-            setPricingVehicle={setPricingVehicle}
-            setIsPricingModalOpen={setIsPricingModalOpen}
+            setGarageVehicle={fleet.setGarageVehicle}
+            setGarageModalOpen={fleet.setGarageModalOpen}
+            setPricingVehicle={fleet.setPricingVehicle}
+            setIsPricingModalOpen={fleet.setIsPricingModalOpen}
             handleStatusAction={handleStatusAction}
-            handleArchive={desktop.handleArchive}
-            handleRetire={desktop.handleRetire}
+            handleArchive={fleet.handleArchive}
+            handleRetire={fleet.handleRetire}
             onAddVehicle={() => router.push("/dashboard/fleet/new")}
           />
         </>
@@ -273,12 +271,12 @@ export default function FleetPage() {
             <div
               className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] shadow-[var(--shadow-card)] p-4 sm:p-6 group cursor-pointer hover:border-[var(--color-primary)]/30 transition-all flex flex-row sm:flex-col items-start gap-3.5 sm:gap-0"
               onClick={() => {
-                const awaitingVehicle = mobile.filteredVehicles.find(
+                const awaitingVehicle = fleet.filteredVehicles.find(
                   (v) => v.mileage_due === true
                 );
                 if (awaitingVehicle) {
-                  setGarageVehicle(awaitingVehicle);
-                  setGarageModalOpen(true);
+                  fleet.setGarageVehicle(awaitingVehicle);
+                  fleet.setGarageModalOpen(true);
                 }
               }}
             >
@@ -294,7 +292,7 @@ export default function FleetPage() {
                 </p>
                 <div className="flex items-center gap-2 text-xs font-semibold text-[var(--color-primary)]">
                   <span>
-                    {mobile.filteredVehicles.filter((v) => v.mileage_due).length} vehicles pending mileage
+                    {fleet.filteredVehicles.filter((v) => v.mileage_due).length} vehicles pending mileage
                   </span>
                   <span className="group-hover:translate-x-1 transition-transform">→</span>
                 </div>
@@ -314,7 +312,7 @@ export default function FleetPage() {
                 </p>
                 <div className="flex items-center gap-2 text-xs font-semibold text-[var(--color-primary)]">
                   <span>
-                    {mobile.filteredVehicles.filter((v) => v.status === "maintenance").length} in maintenance
+                    {fleet.filteredVehicles.filter((v) => v.status === "maintenance").length} in maintenance
                   </span>
                   <span className="group-hover:translate-x-1 transition-transform">→</span>
                 </div>
@@ -364,29 +362,29 @@ export default function FleetPage() {
           setEditVehicle(null);
         }}
         onSuccess={async () => {
-          await Promise.all([mobile.refetch(), desktop.refetch()]);
+          await fleet.refetch();
         }}
       />
 
       <QuickGarageModal
-        vehicle={garageVehicle}
-        open={garageModalOpen}
+        vehicle={fleet.garageVehicle}
+        open={fleet.garageModalOpen}
         onClose={() => {
-          setGarageModalOpen(false);
-          setGarageVehicle(null);
+          fleet.setGarageModalOpen(false);
+          fleet.setGarageVehicle(null);
         }}
         onSave={handleGarageSave}
       />
 
       <InvestorVehiclePricingModal
-        vehicle={pricingVehicle}
-        isOpen={isPricingModalOpen}
+        vehicle={fleet.pricingVehicle}
+        isOpen={fleet.isPricingModalOpen}
         onClose={() => {
-          setIsPricingModalOpen(false);
-          setPricingVehicle(null);
+          fleet.setIsPricingModalOpen(false);
+          fleet.setPricingVehicle(null);
         }}
         onSuccess={async () => {
-          await Promise.all([mobile.refetch(), desktop.refetch()]);
+          await fleet.refetch();
         }}
       />
 

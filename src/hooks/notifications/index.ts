@@ -50,11 +50,56 @@ export const useNotifications = (params: GetNotificationsParams = {}) => {
 // ============================================================================
 // MUTATIONS
 // ============================================================================
+
+// ✅ UPDATED: Added optimistic updates for instant UI feedback (live bell & dot removal)
 export const useMarkNotificationAsRead = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (notificationId: number) => markNotificationAsRead(notificationId),
-    onSuccess: () => {
+    
+    // 1. Optimistically update UI before the server responds
+    onMutate: async (notificationId) => {
+      await queryClient.cancelQueries({ queryKey: notificationKeys.lists() });
+      await queryClient.cancelQueries({ queryKey: notificationKeys.counts() });
+
+      const previousCounts = queryClient.getQueryData<NotificationCountResponse>(notificationKeys.counts());
+
+      // Mark as read in the list instantly
+      queryClient.setQueriesData<NotificationListResponse>(
+        { queryKey: notificationKeys.lists() },
+        (old) =>
+          old
+            ? {
+                ...old,
+                items: old.items.map((n) =>
+                  n.id === notificationId ? { ...n, is_read: true } : n
+                ),
+              }
+            : old
+      );
+
+      // Drop the bell count instantly
+      if (previousCounts && previousCounts.unread_count > 0) {
+        queryClient.setQueryData(notificationKeys.counts(), {
+          ...previousCounts,
+          unread_count: previousCounts.unread_count - 1,
+        });
+      }
+
+      return { previousCounts };
+    },
+
+    // 2. Rollback if the server request fails
+    // ✅ FIXED: Prefixed unused 'err' and 'notificationId' with '_' to satisfy TS
+    onError: (_err, _notificationId, context) => {
+      if (context?.previousCounts) {
+        queryClient.setQueryData(notificationKeys.counts(), context.previousCounts);
+      }
+      queryClient.invalidateQueries({ queryKey: notificationKeys.lists() });
+    },
+
+    // 3. Always sync with the server after to ensure absolute truth
+    onSettled: () => {
       queryClient.invalidateQueries({ queryKey: notificationKeys.counts() });
       queryClient.invalidateQueries({ queryKey: notificationKeys.lists() });
     },

@@ -1,4 +1,3 @@
-// src/hooks/financials/useContracts.ts
 import { useState, useEffect, useMemo, useCallback } from "react";
 import toast from "react-hot-toast";
 import { contractsApi } from "@/lib/api/contracts";
@@ -11,15 +10,15 @@ export function useContracts() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<ContractStatus | "all">("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 7;
+  
+  // ✅ MODEL A: Desktop gets 10 rows. Mobile will use the un-sliced filtered list.
+  const pageSize = 10; 
 
   const fetchContracts = useCallback(async () => {
     setLoading(true);
     try {
-      // ✅ FIXED: Backend enforces page_size <= 200 (le=200).
-      // 200 covers client-side search/filter/pagination for current tenant volumes.
       const params = {
-        page_size: 200,
+        page_size: 200, // Fetch enough to cover client-side filtering
         ...(statusFilter !== "all" && { contract_status: statusFilter })
       };
       
@@ -45,7 +44,7 @@ export function useContracts() {
     fetchContracts();
   }, [fetchContracts]);
 
-  // Client-side filtering
+  // ✅ SINGLE SOURCE OF TRUTH: All filtering happens here, exactly once.
   const filteredContracts = useMemo(() => {
     let result = contracts;
     
@@ -67,9 +66,14 @@ export function useContracts() {
     return result;
   }, [contracts, search, statusFilter]);
 
-  const totalPages = Math.ceil(filteredContracts.length / pageSize);
-  const paginatedContracts = filteredContracts.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  // ✅ Desktop pagination slicing
+  const totalPages = Math.max(1, Math.ceil(filteredContracts.length / pageSize));
+  const paginatedContracts = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredContracts.slice(start, start + pageSize);
+  }, [filteredContracts, currentPage, pageSize]);
 
+  // Reset to page 1 when filters change
   useEffect(() => { 
     setCurrentPage(1); 
   }, [search, statusFilter]);
@@ -80,8 +84,6 @@ export function useContracts() {
       toast.loading("Generating PDF...");
       const res = await contractsApi.downloadPdf(id);
       
-      // ✅ CRITICAL: Axios wraps backend errors (like 500s) in Blobs when responseType is "blob".
-      // If the backend crashed, res.data is a JSON error, not a PDF.
       if (res.data.type === "application/json") {
         const text = await res.data.text();
         const errorData = JSON.parse(text);
@@ -101,21 +103,16 @@ export function useContracts() {
       toast.success("PDF downloaded");
     } catch (error: any) {
       toast.dismiss();
-      
-      // ✅ Decode the backend's real error message from the Blob (if present)
       let message = "Failed to download PDF";
       const blob = error?.response?.data;
       if (blob instanceof Blob) {
         try {
           const parsed = JSON.parse(await blob.text());
           message = parsed.detail || message;
-        } catch {
-          /* keep default message */
-        }
+        } catch { /* keep default message */ }
       } else if (error?.message) {
         message = error.message;
       }
-      
       toast.error(message);
     }
   };
@@ -123,15 +120,7 @@ export function useContracts() {
   const handleCopyLink = async (id: number) => {
     try {
       const res = await contractsApi.generateShareLink(id);
-      
-      // ✅ BULLETPROOF URL CONSTRUCTION (ENVIRONMENT AGNOSTIC):
-      // We completely ignore the backend's `share_url` for the clipboard.
-      // Why? Because the backend's FRONTEND_URL is set to localhost for your 
-      // local testing, which breaks the link when copied from the live Vercel site.
-      // `window.location.origin` is the absolute truth: it dynamically resolves 
-      // to localhost locally, and your Vercel domain in production.
       const fullUrl = `${window.location.origin}/contracts/view/${res.share_token}`;
-
       await navigator.clipboard.writeText(fullUrl); 
       
       setContracts(prev => prev.map(c => {
@@ -188,10 +177,7 @@ export function useContracts() {
       
       toast.dismiss();
       toast.success("Contract generated successfully!");
-      
-      // ✅ FIXED: Force a full refetch to ensure the list is in sync with backend
       await fetchContracts();
-      
       return true;
     } catch (error: any) {
       toast.dismiss();
@@ -201,7 +187,9 @@ export function useContracts() {
   };
 
   return {
-    contracts: paginatedContracts,
+    // ✅ Return BOTH lists so the component can choose based on screen size
+    filteredContracts,   // For mobile cards and metric counts
+    paginatedContracts,  // For desktop table (sliced to 10)
     loading,
     search, 
     setSearch,

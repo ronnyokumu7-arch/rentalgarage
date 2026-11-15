@@ -1,4 +1,3 @@
-// src/hooks/bookings/useBookingsList.ts
 "use client";
 
 import { confirmAction } from "@/lib/utils/confirmAction";
@@ -12,7 +11,8 @@ import { useLiveRefresh } from "@/hooks/useLiveRefresh";
 
 export type ViewMode = "active" | "vault";
 
-const pageSize = 7;
+// ✅ MODEL A: Desktop gets 10 rows. Mobile consumes the un-sliced filteredBookings.
+const pageSize = 10;
 
 const getErrorMessage = (error: unknown, fallback: string) => {
   const err = error as { response?: { data?: { detail?: string } } };
@@ -51,20 +51,20 @@ export function useBookingsList() {
           contractsApi.list(),
           invoicesApi.list({ page: 1, page_size: 200 }),
         ]);
-        
+
         setContractBookingIds(
           new Set((contracts ?? []).map((c: any) => c.booking_id).filter((id: any): id is number => id !== null)),
         );
 
         const invMap = new Map<number, { id: number; share_token: string | null }>();
-        
-        const invoiceList = Array.isArray(invoices) 
-          ? invoices 
+
+        const invoiceList = Array.isArray(invoices)
+          ? invoices
           : (invoices as any)?.items || (invoices as any)?.data || [];
 
         invoiceList.forEach((inv: any) => {
           if (!inv.booking_id) return;
-          
+
           if (!invMap.has(inv.booking_id)) {
             invMap.set(inv.booking_id, {
               id: inv.id,
@@ -72,7 +72,7 @@ export function useBookingsList() {
             });
           }
         });
-        
+
         setInvoiceByBooking(invMap);
       } catch {
         // Non-fatal: dropdown degrades gracefully (toasts instead of links)
@@ -140,6 +140,7 @@ export function useBookingsList() {
     [bookings],
   );
 
+  // ✅ SINGLE SOURCE OF TRUTH: view → status → search → sort, all in one pass.
   const filteredBookings = useMemo(() => {
     let result = bookings;
 
@@ -189,12 +190,14 @@ export function useBookingsList() {
     });
   }, [bookings, view, statusFilter, search]);
 
+  // ✅ Desktop slicing (mobile ignores this and uses filteredBookings directly).
   const paginatedBookings = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
     return filteredBookings.slice(start, start + pageSize);
   }, [filteredBookings, currentPage]);
 
-  const totalPages = Math.ceil(filteredBookings.length / pageSize);
+  // ✅ Guard against 0/0 on empty results.
+  const totalPages = Math.max(1, Math.ceil(filteredBookings.length / pageSize));
 
   useEffect(() => {
     setCurrentPage(1);
@@ -352,8 +355,8 @@ export function useBookingsList() {
     currentPage,
     setCurrentPage,
     pageSize,
-    filteredBookings,
-    paginatedBookings,
+    filteredBookings,    // ✅ full filtered list → mobile + dropdown counts
+    paginatedBookings,   // ✅ sliced to 10 → desktop table
     totalPages,
     activeCount,
     vaultCount,

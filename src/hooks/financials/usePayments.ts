@@ -1,9 +1,12 @@
-// src/hooks/financials/usePayments.ts
 import { useState, useEffect, useMemo, useCallback } from "react";
 import toast from "react-hot-toast";
 import { paymentsApi } from "@/lib/api/payments";
 import type { Payment, PaymentMethod, PaymentStatus } from "@/lib/types";
 import { useLiveRefresh } from "@/hooks/useLiveRefresh";
+
+type DateRange =
+  | "all" | "today" | "yesterday" | "this_week" | "this_month"
+  | "last_month" | "last_3_months" | "last_6_months" | "last_year";
 
 export function usePayments() {
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -11,15 +14,15 @@ export function usePayments() {
   const [search, setSearch] = useState("");
   const [methodFilter, setMethodFilter] = useState<PaymentMethod | "all">("all");
   const [statusFilter, setStatusFilter] = useState<PaymentStatus | "all">("all");
+  const [dateFilter, setDateFilter] = useState<DateRange>("all");
   const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 7;
+  
+  // ✅ MODEL A: Desktop gets 10 rows. Mobile will use the un-sliced filtered list.
+  const pageSize = 10;
 
   const fetchPayments = useCallback(async () => {
     setLoading(true);
     try {
-      // ✅ FIXED: Backend enforces page_size <= 200 (le=200).
-      // 200 covers client-side search/filter/pagination for current tenant volumes.
-      // We also pass the filters to the server to reduce payload size.
       const params = {
         page_size: 200,
         ...(statusFilter !== "all" && { status: statusFilter }),
@@ -27,8 +30,6 @@ export function usePayments() {
       };
       
       const data = await paymentsApi.list(params);
-      
-      // ✅ FIXED: Added safe fallback to guarantee 'payments' state is always an array
       setPayments(data || []);
     } catch (error) {
       console.error("Failed to load payments", error);
@@ -38,14 +39,12 @@ export function usePayments() {
     }
   }, [statusFilter, methodFilter]);
 
-  // ✅ LIVE REFRESH: focus + visibility listeners for cross-tab changes
   useLiveRefresh(fetchPayments);
 
   useEffect(() => {
     fetchPayments();
   }, [fetchPayments]);
 
-  // ✅ AUTO-REFRESH: listen for payment creation + updates from modals / public pages
   useEffect(() => {
     const handlePaymentEvent = () => fetchPayments();
     window.addEventListener('payment:created', handlePaymentEvent);
@@ -57,10 +56,54 @@ export function usePayments() {
     };
   }, [fetchPayments]);
 
+  // ✅ Date range calculation (moved from component)
+  const getDateRange = useMemo(() => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    switch (dateFilter) {
+      case "today":
+        return { start: today, end: new Date(today.getTime() + 24 * 60 * 60 * 1000) };
+      case "yesterday": {
+        const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+        return { start: yesterday, end: today };
+      }
+      case "this_week": {
+        const weekStart = new Date(today.getTime() - today.getDay() * 24 * 60 * 60 * 1000);
+        return { start: weekStart, end: new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000) };
+      }
+      case "this_month": {
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+        return { start: monthStart, end: monthEnd };
+      }
+      case "last_month": {
+        const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 1);
+        return { start: lastMonthStart, end: lastMonthEnd };
+      }
+      case "last_3_months": {
+        const threeMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 3, 1);
+        return { start: threeMonthsAgo, end: now };
+      }
+      case "last_6_months": {
+        const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 6, 1);
+        return { start: sixMonthsAgo, end: now };
+      }
+      case "last_year": {
+        const lastYearStart = new Date(now.getFullYear() - 1, 0, 1);
+        const lastYearEnd = new Date(now.getFullYear(), 0, 1);
+        return { start: lastYearStart, end: lastYearEnd };
+      }
+      default:
+        return null;
+    }
+  }, [dateFilter]);
+
+  // ✅ SINGLE SOURCE OF TRUTH: All filtering happens here, exactly once.
   const filteredPayments = useMemo(() => {
     let result = payments;
     
-    // Client-side filtering acts as a safety net, though the server handles the bulk of it now
     if (methodFilter !== "all") {
       result = result.filter(p => p.method === methodFilter);
     }
@@ -79,19 +122,34 @@ export function usePayments() {
           ((p as any).invoice_number && String((p as any).invoice_number).toLowerCase().includes(q))
       );
     }
+
+    // ✅ Date filtering
+    if (dateFilter !== "all" && getDateRange) {
+      result = result.filter((p) => {
+        const paymentDate = new Date(p.paid_at || p.created_at);
+        return paymentDate >= getDateRange.start && paymentDate < getDateRange.end;
+      });
+    }
     
     return result;
-  }, [payments, search, methodFilter, statusFilter]);
+  }, [payments, search, methodFilter, statusFilter, dateFilter, getDateRange]);
 
-  const totalPages = Math.ceil(filteredPayments.length / pageSize);
-  const paginatedPayments = filteredPayments.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  // ✅ Desktop pagination slicing
+  const totalPages = Math.max(1, Math.ceil(filteredPayments.length / pageSize));
+  const paginatedPayments = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredPayments.slice(start, start + pageSize);
+  }, [filteredPayments, currentPage, pageSize]);
 
+  // Reset to page 1 when filters change
   useEffect(() => { 
     setCurrentPage(1); 
-  }, [search, methodFilter, statusFilter]);
+  }, [search, methodFilter, statusFilter, dateFilter]);
 
   return {
-    payments: paginatedPayments,
+    // ✅ Return BOTH lists so the component can choose based on screen size
+    filteredPayments,    // For mobile cards, metrics, and CSV export
+    paginatedPayments,   // For desktop table (sliced to 10)
     loading,
     search, 
     setSearch,
@@ -99,6 +157,8 @@ export function usePayments() {
     setMethodFilter,
     statusFilter, 
     setStatusFilter,
+    dateFilter,
+    setDateFilter,
     currentPage, 
     setCurrentPage,
     totalPages,
