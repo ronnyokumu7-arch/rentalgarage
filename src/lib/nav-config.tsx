@@ -34,7 +34,6 @@ export interface NavItem {
 
 // ── PREMIUM PHOSPHOR ICON COMPONENTS ─────────────────────────────────────────
 
-// ✅ Dashboard: House icon (matches the "Home" label in bottom nav)
 const PremiumDashboardIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
   <House size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} aria-hidden="true" />
 );
@@ -43,12 +42,10 @@ const PremiumCalendarIcon = ({ size = 20, weight = "regular", className = "" }: 
   <Calendar size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} aria-hidden="true" />
 );
 
-// ✅ Clients: Two-heads icon
 const PremiumContactIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
   <Users size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} aria-hidden="true" />
 );
 
-// ✅ Team (formerly Users): Three-heads icon for internal community
 const PremiumTeamIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
   <UsersThree size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} aria-hidden="true" />
 );
@@ -89,7 +86,6 @@ const PremiumDriversIcon = ({ size = 20, weight = "regular", className = "" }: a
   <UserCircle size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} aria-hidden="true" />
 );
 
-// ✅ Fleet: Front-facing car
 const PremiumFleetIcon = ({ size = 20, weight = "regular", className = "" }: any) => (
   <Car size={size} weight={weight} className={`transition-transform duration-200 group-hover/nav:scale-110 ${className}`} aria-hidden="true" />
 );
@@ -130,7 +126,8 @@ export const tenantAdminNav: NavItem[] = [
   { label: "Clients", href: "/dashboard/clients", icon: PremiumContactIcon },
   { label: "Fleet", href: "/dashboard/fleet", icon: PremiumFleetIcon },
   { label: "Drivers", href: "/dashboard/drivers", icon: PremiumDriversIcon },
-  { label: "Investors", href: "/dashboard/investors", icon: PremiumContactIcon },
+  // ✅ RENAMED: "Investors" → "Partners" (route remains /dashboard/investors to preserve deep links)
+  { label: "Partners", href: "/dashboard/investors", icon: PremiumContactIcon },
   { label: "Team", href: "/dashboard/users", icon: PremiumTeamIcon },
   { label: "Financials", href: "/dashboard/financials", icon: PremiumWalletIcon },
   { label: "Reports", href: "/dashboard/reports", icon: PremiumBarChartIcon },
