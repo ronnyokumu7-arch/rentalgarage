@@ -1,17 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import {
   Bell, Checks, FileText, CreditCard, User, Car, Warning,
   X, ArrowLeft, ArrowRight,
 } from "@phosphor-icons/react";
-import { brand } from "@/lib/brand";
 import { useClickOutside } from "@/hooks/useClickOutside";
 import { useNotifications } from "@/hooks/useNotifications";
 import type { Notification } from "@/lib/api/notifications";
 
-// --- Helpers ---
 const getTimeAgo = (dateString: string) => {
   const date = new Date(dateString);
   const now = new Date();
@@ -44,24 +43,29 @@ const getActionLabel = (url?: string) => {
   return "View Details";
 };
 
-// ✅ Theme-independent brand fill: purple bg + white content is legible in BOTH light & dark.
-const brandFill = { backgroundColor: brand.colors.primary, color: "#ffffff" } as const;
+// ✅ Theme-aware primary fill style using CSS variables
+const primaryFill = { backgroundColor: 'var(--color-primary)', color: '#ffffff' } as const;
 
-// --- Main Component ---
 export default function NotificationDropdown() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const sheetRef = useRef<HTMLDivElement>(null);
+  const refs = useMemo(() => [containerRef, sheetRef], []);
 
   const {
     notifications, unreadCount, isLoading,
     fetchNotifications, handleMarkAsRead, handleMarkAllAsRead,
   } = useNotifications();
 
-  const containerRef = useClickOutside(() => {
+  const close = () => {
     setIsOpen(false);
     setSelectedNotification(null);
-  });
+  };
+
+  useClickOutside(close, refs);
 
   useEffect(() => {
     if (isOpen && !selectedNotification) {
@@ -77,32 +81,33 @@ export default function NotificationDropdown() {
   };
 
   const handleActionClick = () => {
-    if (selectedNotification?.action_url) {
-      setIsOpen(false);
-      setSelectedNotification(null);
-      router.push(selectedNotification.action_url);
+    const url = selectedNotification?.action_url;
+    if (url && typeof url === "string" && url.startsWith("/")) {
+      close();
+      router.push(url);
+    } else {
+      close();
     }
   };
 
   return (
     <div className="relative" ref={containerRef}>
-      {/* ✅ TRIGGER: plain bell when 0 unread, pinging red dot when >0 */}
+      {/* ✅ TRIGGER */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="relative flex w-9 h-9 rounded-xl items-center justify-center text-ink-muted hover:bg-surface-hover hover:text-ink transition-all duration-200 active:scale-95"
         aria-label="Notifications"
       >
         <Bell size={20} weight={unreadCount > 0 ? "fill" : "regular"} />
-
         {unreadCount > 0 && (
           <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
             <span
               className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-              style={{ backgroundColor: brand.colors.danger.main || "#f43f5e" }}
+              style={{ backgroundColor: 'var(--status-cancelled)' }}
             />
             <span
               className="relative inline-flex rounded-full h-2.5 w-2.5"
-              style={{ backgroundColor: brand.colors.danger.main || "#f43f5e" }}
+              style={{ backgroundColor: 'var(--status-cancelled)' }}
             />
           </span>
         )}
@@ -129,40 +134,48 @@ export default function NotificationDropdown() {
         </div>
       )}
 
-      {/* ✅ MOBILE BOTTOM SHEET */}
-      {isOpen && (
-        <div className="md:hidden fixed inset-0 z-50 flex flex-col bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="relative mt-auto w-full max-h-[90vh] rounded-t-3xl overflow-hidden flex flex-col shadow-2xl animate-in slide-in-from-bottom duration-300 bg-surface">
-            <div className="w-full flex justify-center pt-3 pb-1">
-              <div className="w-12 h-1.5 rounded-full bg-ink-subtle/30" />
-            </div>
+      {/* ✅ MOBILE BOTTOM SHEET — Portaled & Theme-Aware */}
+      {isOpen &&
+        createPortal(
+          <div
+            ref={sheetRef}
+            // 🔄 z-[9999] matches your Drawer/Modal to sit above the bottom nav
+            className="md:hidden fixed inset-0 z-[9999] flex flex-col bg-black/50 backdrop-blur-sm animate-in fade-in duration-200"
+          >
+            <div className="absolute inset-0" onClick={close} />
 
-            {selectedNotification ? (
-              <FocusModeView
-                notification={selectedNotification}
-                onBack={() => setSelectedNotification(null)}
-                onAction={handleActionClick}
-                isMobile
-              />
-            ) : (
-              <ListView
-                notifications={notifications}
-                unreadCount={unreadCount}
-                isLoading={isLoading}
-                onMarkAllRead={handleMarkAllAsRead}
-                onItemTap={handleNotificationTap}
-                isMobile
-                onClose={() => setIsOpen(false)}
-              />
-            )}
-          </div>
-        </div>
-      )}
+            {/* 🔄 max-h-[90dvh] for mobile browser safety, pb-24 to clear bottom nav */}
+            <div className="relative mt-auto w-full max-h-[90dvh] rounded-t-3xl overflow-hidden flex flex-col shadow-2xl animate-in slide-in-from-bottom duration-300 bg-surface pb-24">
+              <div className="w-full flex justify-center pt-3 pb-1">
+                <div className="w-12 h-1.5 rounded-full" style={{ backgroundColor: 'var(--color-ink-subtle)', opacity: 0.4 }} />
+              </div>
+
+              {selectedNotification ? (
+                <FocusModeView
+                  notification={selectedNotification}
+                  onBack={() => setSelectedNotification(null)}
+                  onAction={handleActionClick}
+                  isMobile
+                />
+              ) : (
+                <ListView
+                  notifications={notifications}
+                  unreadCount={unreadCount}
+                  isLoading={isLoading}
+                  onMarkAllRead={handleMarkAllAsRead}
+                  onItemTap={handleNotificationTap}
+                  isMobile
+                  onClose={close}
+                />
+              )}
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
 
-// --- List View ---
 function ListView({ notifications, unreadCount, isLoading, onMarkAllRead, onItemTap, isMobile = false, onClose }: any) {
   return (
     <>
@@ -203,23 +216,23 @@ function ListView({ notifications, unreadCount, isLoading, onMarkAllRead, onItem
                 <button
                   onClick={() => onItemTap(n)}
                   className="w-full text-left p-4 flex gap-3 transition-colors hover:bg-surface-hover"
-                  style={!n.is_read ? { borderLeft: `3px solid ${brand.colors.primary}` } : undefined}
+                  // 🔄 Theme-aware unread border
+                  style={!n.is_read ? { borderLeft: '3px solid var(--color-primary)' } : undefined}
                 >
-                  {/* ✅ Icon circle: brand fill when unread (visible in BOTH themes) */}
                   <div
                     className={`mt-1 w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
                       n.is_read ? "bg-surface-hover text-ink-muted" : ""
                     }`}
-                    style={!n.is_read ? brandFill : undefined}
+                    // 🔄 Theme-aware unread icon background
+                    style={!n.is_read ? primaryFill : undefined}
                   >
                     {getIcon(n.type)}
                   </div>
-
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
                       <p className="text-sm font-bold truncate text-ink">{n.title}</p>
                       {!n.is_read && (
-                        <span className="w-2 h-2 rounded-full shrink-0 mt-1.5" style={{ backgroundColor: brand.colors.primary }} />
+                        <span className="w-2 h-2 rounded-full shrink-0 mt-1.5" style={{ backgroundColor: 'var(--color-primary)' }} />
                       )}
                     </div>
                     <p className="text-xs mt-1 line-clamp-2 text-ink-muted">{n.message}</p>
@@ -237,7 +250,6 @@ function ListView({ notifications, unreadCount, isLoading, onMarkAllRead, onItem
   );
 }
 
-// --- Focus Mode ---
 function FocusModeView({ notification, onBack, onAction, isMobile = false }: { notification: Notification; onBack: () => void; onAction: () => void; isMobile?: boolean }) {
   return (
     <div className="flex flex-col h-full" style={{ minHeight: isMobile ? "60vh" : "400px" }}>
@@ -250,7 +262,7 @@ function FocusModeView({ notification, onBack, onAction, isMobile = false }: { n
           <p className="text-xs text-ink-subtle">{getTimeAgo(notification.created_at)}</p>
         </div>
         {!notification.is_read && (
-          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: brand.colors.primary }} />
+          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--color-primary)' }} />
         )}
       </div>
 
@@ -279,11 +291,10 @@ function FocusModeView({ notification, onBack, onAction, isMobile = false }: { n
 
       {notification.action_url && (
         <div className="p-4 border-t border-surface-border">
-          {/* ✅ CTA: brand fill + white text = visible in BOTH themes */}
           <button
             onClick={onAction}
             className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all shadow-sm hover:opacity-90 active:scale-[0.98]"
-            style={brandFill}
+            style={primaryFill}
           >
             {getActionLabel(notification.action_url)} <ArrowRight size={16} weight="bold" />
           </button>
