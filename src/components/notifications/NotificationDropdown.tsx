@@ -1,264 +1,294 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Bell,
-  CheckCircle,
-  Clock,
-  Warning,
-  Users,
-  Car,
-  Gear,
-  CreditCard,
-  Calendar,
-  X,
+  Bell, Checks, FileText, CreditCard, User, Car, Warning,
+  X, ArrowLeft, ArrowRight,
 } from "@phosphor-icons/react";
-import {
-  useNotificationCounts,
-  useNotifications,
-  useMarkNotificationAsRead,
-  useMarkAllNotificationsAsRead,
-  useClearReadNotifications,
-  notificationKeys,
-} from "@/hooks/notifications";
-import { useQueryClient } from "@tanstack/react-query";
-import { formatDistanceToNow } from "date-fns";
+import { brand } from "@/lib/brand";
+import { useClickOutside } from "@/hooks/useClickOutside";
+import { useNotifications } from "@/hooks/useNotifications";
 import type { Notification } from "@/lib/api/notifications";
 
-// ⚠️ IMPORTANT: Update this import path to match where your Modal component actually lives!
-import Modal from "@/components/ui/Modal"; 
-
-// ============================================================================
-// TYPE HELPERS
-// ============================================================================
-
-const notificationIcons: Record<string, React.ElementType> = {
-  booking: Calendar,
-  payment: CreditCard,
-  client: Users,
-  vehicle: Car,
-  system: Gear,
-  alert: Warning,
+// --- Helpers ---
+const getTimeAgo = (dateString: string) => {
+  const date = new Date(dateString);
+  const now = new Date();
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+  if (seconds < 60) return "Just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  return date.toLocaleDateString();
 };
 
-const notificationColors: Record<string, string> = {
-  booking: "bg-blue-500/10 text-blue-500",
-  payment: "bg-emerald-500/10 text-emerald-500",
-  client: "bg-purple-500/10 text-purple-500",
-  vehicle: "bg-orange-500/10 text-orange-500",
-  system: "bg-gray-500/10 text-gray-500",
-  alert: "bg-rose-500/10 text-rose-500",
+const getIcon = (type: string) => {
+  switch (type) {
+    case "payment": return <CreditCard size={20} weight="fill" />;
+    case "booking": return <FileText size={20} weight="fill" />;
+    case "client": return <User size={20} weight="fill" />;
+    case "vehicle": return <Car size={20} weight="fill" />;
+    case "alert": return <Warning size={20} weight="fill" />;
+    default: return <Bell size={20} weight="fill" />;
+  }
 };
 
-const priorityColors: Record<string, string> = {
-  low: "border-l-gray-400",
-  normal: "border-l-blue-500",
-  high: "border-l-rose-500",
+const getActionLabel = (url?: string) => {
+  if (!url) return "View Details";
+  if (url.includes("booking")) return "View Booking";
+  if (url.includes("invoice")) return "View Invoice";
+  if (url.includes("client")) return "View Client";
+  if (url.includes("vehicle")) return "View Vehicle";
+  return "View Details";
 };
 
-// ============================================================================
-// COMPONENT
-// ============================================================================
+// ✅ Theme-independent brand fill: purple bg + white content is legible in BOTH light & dark.
+const brandFill = { backgroundColor: brand.colors.primary, color: "#ffffff" } as const;
 
-interface NotificationDropdownProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-export default function NotificationDropdown({
-  isOpen,
-  onClose,
-}: NotificationDropdownProps) {
+// --- Main Component ---
+export default function NotificationDropdown() {
   const router = useRouter();
-  const queryClient = useQueryClient();
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
 
-  const [activeTab, setActiveTab] = useState<"all" | "unread">("all");
-  const [page, setPage] = useState(1);
+  const {
+    notifications, unreadCount, isLoading,
+    fetchNotifications, handleMarkAsRead, handleMarkAllAsRead,
+  } = useNotifications();
 
-  const { data: counts } = useNotificationCounts();
-  const { data: notificationsData, isLoading: isLoadingList } = useNotifications({
-    page,
-    per_page: 20,
-    unread_only: activeTab === "unread",
+  const containerRef = useClickOutside(() => {
+    setIsOpen(false);
+    setSelectedNotification(null);
   });
 
-  const markAsReadMutation = useMarkNotificationAsRead();
-  const markAllAsReadMutation = useMarkAllNotificationsAsRead();
-  const clearReadMutation = useClearReadNotifications();
+  useEffect(() => {
+    if (isOpen && !selectedNotification) {
+      fetchNotifications();
+    }
+  }, [isOpen, selectedNotification, fetchNotifications]);
 
-  const handleNotificationClick = (notification: Notification) => {
+  const handleNotificationTap = async (notification: Notification) => {
+    setSelectedNotification(notification);
     if (!notification.is_read) {
-      markAsReadMutation.mutate(notification.id);
-    }
-
-    if (notification.action_url) {
-      router.push(notification.action_url);
-      onClose();
+      await handleMarkAsRead(notification.id);
     }
   };
 
-  const handleMarkAllAsRead = async () => {
-    await markAllAsReadMutation.mutateAsync();
-    queryClient.setQueryData(notificationKeys.counts(), {
-      unread_count: 0,
-      total_count: counts?.total_count || 0,
-    });
+  const handleActionClick = () => {
+    if (selectedNotification?.action_url) {
+      setIsOpen(false);
+      setSelectedNotification(null);
+      router.push(selectedNotification.action_url);
+    }
   };
 
-  const handleClearRead = async () => {
-    await clearReadMutation.mutateAsync();
-    queryClient.setQueryData(notificationKeys.counts(), {
-      unread_count: 0,
-      total_count: 0,
-    });
-  };
+  return (
+    <div className="relative" ref={containerRef}>
+      {/* ✅ TRIGGER: plain bell when 0 unread, pinging red dot when >0 */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="relative flex w-9 h-9 rounded-xl items-center justify-center text-ink-muted hover:bg-surface-hover hover:text-ink transition-all duration-200 active:scale-95"
+        aria-label="Notifications"
+      >
+        <Bell size={20} weight={unreadCount > 0 ? "fill" : "regular"} />
 
-  const unreadCount = counts?.unread_count || 0;
-  const totalCount = counts?.total_count || 0;
-  const notifications = notificationsData?.items || [];
-  const hasMore = notificationsData?.has_more || false;
+        {unreadCount > 0 && (
+          <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
+            <span
+              className="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+              style={{ backgroundColor: brand.colors.danger.main || "#f43f5e" }}
+            />
+            <span
+              className="relative inline-flex rounded-full h-2.5 w-2.5"
+              style={{ backgroundColor: brand.colors.danger.main || "#f43f5e" }}
+            />
+          </span>
+        )}
+      </button>
 
-  // ============================================================================
-  // MODAL FOOTER (Action Buttons)
-  // ============================================================================
-  const footerActions = (
-    <div className="w-full flex justify-end">
-      {unreadCount > 0 ? (
-        <button
-          onClick={handleMarkAllAsRead}
-          disabled={markAllAsReadMutation.isPending}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--color-primary)] bg-[var(--color-primary)]/10 rounded-xl hover:bg-[var(--color-primary)]/20 transition-colors disabled:opacity-50"
-        >
-          <CheckCircle size={16} weight="regular" />
-          Mark all as read
-        </button>
-      ) : totalCount > 0 ? (
-        <button
-          onClick={handleClearRead}
-          disabled={clearReadMutation.isPending}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--color-ink-muted)] bg-[var(--color-surface-hover)] rounded-xl hover:bg-[var(--color-surface-hover)]/80 transition-colors disabled:opacity-50"
-        >
-          <X size={16} weight="regular" />
-          Clear read notifications
-        </button>
-      ) : null}
+      {/* ✅ DESKTOP POPOVER */}
+      {isOpen && (
+        <div className="hidden md:block absolute right-0 mt-2 w-96 rounded-xl shadow-2xl border z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200 bg-surface border-surface-border">
+          {selectedNotification ? (
+            <FocusModeView
+              notification={selectedNotification}
+              onBack={() => setSelectedNotification(null)}
+              onAction={handleActionClick}
+            />
+          ) : (
+            <ListView
+              notifications={notifications}
+              unreadCount={unreadCount}
+              isLoading={isLoading}
+              onMarkAllRead={handleMarkAllAsRead}
+              onItemTap={handleNotificationTap}
+            />
+          )}
+        </div>
+      )}
+
+      {/* ✅ MOBILE BOTTOM SHEET */}
+      {isOpen && (
+        <div className="md:hidden fixed inset-0 z-50 flex flex-col bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative mt-auto w-full max-h-[90vh] rounded-t-3xl overflow-hidden flex flex-col shadow-2xl animate-in slide-in-from-bottom duration-300 bg-surface">
+            <div className="w-full flex justify-center pt-3 pb-1">
+              <div className="w-12 h-1.5 rounded-full bg-ink-subtle/30" />
+            </div>
+
+            {selectedNotification ? (
+              <FocusModeView
+                notification={selectedNotification}
+                onBack={() => setSelectedNotification(null)}
+                onAction={handleActionClick}
+                isMobile
+              />
+            ) : (
+              <ListView
+                notifications={notifications}
+                unreadCount={unreadCount}
+                isLoading={isLoading}
+                onMarkAllRead={handleMarkAllAsRead}
+                onItemTap={handleNotificationTap}
+                isMobile
+                onClose={() => setIsOpen(false)}
+              />
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
+}
 
-  // ============================================================================
-  // RENDER
-  // ============================================================================
+// --- List View ---
+function ListView({ notifications, unreadCount, isLoading, onMarkAllRead, onItemTap, isMobile = false, onClose }: any) {
   return (
-    <Modal
-      open={isOpen}
-      onClose={onClose}
-      title="Notifications"
-      subtitle={unreadCount > 0 ? `${unreadCount} unread` : "You're all caught up"}
-      presentation="responsive" // ✅ Bottom sheet on mobile, centered modal on desktop
-      size="md"
-      showCloseButton={true}
-      footer={footerActions}
-    >
-      {/* Tabs */}
-      <div className="flex border-b border-[var(--color-surface-border)] mb-4 -mx-4 sm:-mx-6 px-4 sm:px-6">
-        <button
-          onClick={() => {
-            setActiveTab("all");
-            setPage(1);
-          }}
-          className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors ${
-            activeTab === "all"
-              ? "text-[var(--color-primary)] border-b-2 border-[var(--color-primary)]"
-              : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
-          }`}
-        >
-          All ({totalCount})
-        </button>
-        <button
-          onClick={() => {
-            setActiveTab("unread");
-            setPage(1);
-          }}
-          className={`flex-1 px-4 py-3 text-sm font-semibold transition-colors ${
-            activeTab === "unread"
-              ? "text-[var(--color-primary)] border-b-2 border-[var(--color-primary)]"
-              : "text-[var(--color-ink-muted)] hover:text-[var(--color-ink)]"
-          }`}
-        >
-          Unread ({unreadCount})
-        </button>
+    <>
+      <div className="flex items-center justify-between p-4 border-b border-surface-border">
+        <h3 className="font-bold text-base text-ink">
+          Notifications {unreadCount > 0 && <span className="text-xs font-normal text-ink-muted">({unreadCount} new)</span>}
+        </h3>
+        <div className="flex items-center gap-2">
+          {unreadCount > 0 && (
+            <button
+              onClick={onMarkAllRead}
+              className="text-xs font-semibold flex items-center gap-1 px-2 py-1 rounded-md text-primary hover:bg-surface-hover transition-colors"
+            >
+              <Checks size={14} weight="bold" /> Mark all read
+            </button>
+          )}
+          {isMobile && (
+            <button onClick={onClose} className="p-1 rounded-md text-ink-muted hover:bg-surface-hover transition-colors">
+              <X size={20} />
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Content */}
-      {isLoadingList ? (
-        <div className="flex flex-col items-center justify-center py-16">
-          <Clock size={32} className="text-[var(--color-ink-muted)] animate-spin" weight="regular" />
-          <p className="mt-3 text-sm text-[var(--color-ink-muted)]">Loading notifications...</p>
-        </div>
-      ) : notifications.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16">
-          <Bell size={48} className="text-[var(--color-ink-subtle)] mb-3" weight="regular" />
-          <p className="text-sm font-medium text-[var(--color-ink)]">No notifications</p>
-          <p className="mt-1 text-xs text-[var(--color-ink-muted)] text-center">
-            {activeTab === "unread"
-              ? "You're all caught up!"
-              : "When you get notifications, they'll appear here."}
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-2">
-          {notifications.map((notification) => {
-            const Icon = notificationIcons[notification.type] || Bell;
-            const colorClass = notificationColors[notification.type];
-            const borderClass = priorityColors[notification.priority];
-
-            return (
-              <button
-                key={notification.id}
-                onClick={() => handleNotificationClick(notification)}
-                className={`w-full text-left p-3 rounded-xl hover:bg-[var(--color-surface-hover)] transition-colors border-l-4 ${borderClass} ${
-                  !notification.is_read ? "bg-[var(--color-primary)]/[0.02]" : ""
-                }`}
-              >
-                <div className="flex gap-3">
-                  <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${colorClass}`}>
-                    <Icon size={18} weight="regular" />
+      <div className="overflow-y-auto max-h-[60vh] md:max-h-[500px]">
+        {isLoading ? (
+          <div className="p-8 text-center text-sm text-ink-muted">Loading...</div>
+        ) : notifications.length === 0 ? (
+          <div className="p-12 text-center">
+            <Bell size={40} className="mx-auto mb-3 opacity-30 text-ink-muted" />
+            <p className="text-sm font-semibold text-ink">All caught up!</p>
+            <p className="text-xs mt-1 text-ink-muted">No new notifications.</p>
+          </div>
+        ) : (
+          <ul>
+            {notifications.map((n: Notification) => (
+              <li key={n.id} className="border-b border-surface-border last:border-0">
+                <button
+                  onClick={() => onItemTap(n)}
+                  className="w-full text-left p-4 flex gap-3 transition-colors hover:bg-surface-hover"
+                  style={!n.is_read ? { borderLeft: `3px solid ${brand.colors.primary}` } : undefined}
+                >
+                  {/* ✅ Icon circle: brand fill when unread (visible in BOTH themes) */}
+                  <div
+                    className={`mt-1 w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${
+                      n.is_read ? "bg-surface-hover text-ink-muted" : ""
+                    }`}
+                    style={!n.is_read ? brandFill : undefined}
+                  >
+                    {getIcon(n.type)}
                   </div>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
-                      <h4 className={`text-sm font-semibold text-[var(--color-ink)] truncate ${!notification.is_read ? "font-bold" : ""}`}>
-                        {notification.title}
-                      </h4>
-                      <span className="flex-shrink-0 text-xs text-[var(--color-ink-subtle)] whitespace-nowrap">
-                        {formatDistanceToNow(new Date(notification.created_at), { addSuffix: true })}
-                      </span>
+                      <p className="text-sm font-bold truncate text-ink">{n.title}</p>
+                      {!n.is_read && (
+                        <span className="w-2 h-2 rounded-full shrink-0 mt-1.5" style={{ backgroundColor: brand.colors.primary }} />
+                      )}
                     </div>
-                    <p className="mt-1 text-xs text-[var(--color-ink-muted)] line-clamp-2">
-                      {notification.message}
+                    <p className="text-xs mt-1 line-clamp-2 text-ink-muted">{n.message}</p>
+                    <p className="text-[10px] mt-2 font-medium uppercase tracking-wide text-ink-subtle">
+                      {getTimeAgo(n.created_at)}
                     </p>
-                    {!notification.is_read && (
-                      <span className="inline-block mt-2 w-2 h-2 rounded-full bg-rose-500" />
-                    )}
                   </div>
-                </div>
-              </button>
-            );
-          })}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </>
+  );
+}
 
-          {hasMore && (
-            <div className="pt-2">
-              <button
-                onClick={() => setPage((p) => p + 1)}
-                className="w-full py-3 text-sm font-medium text-[var(--color-primary)] bg-[var(--color-primary)]/10 rounded-xl hover:bg-[var(--color-primary)]/20 transition-colors"
-              >
-                Load more
-              </button>
-            </div>
-          )}
+// --- Focus Mode ---
+function FocusModeView({ notification, onBack, onAction, isMobile = false }: { notification: Notification; onBack: () => void; onAction: () => void; isMobile?: boolean }) {
+  return (
+    <div className="flex flex-col h-full" style={{ minHeight: isMobile ? "60vh" : "400px" }}>
+      <div className="flex items-center gap-3 p-4 border-b border-surface-border">
+        <button onClick={onBack} className="p-1 rounded-md hover:bg-surface-hover transition-colors text-ink-muted">
+          <ArrowLeft size={20} weight="bold" />
+        </button>
+        <div className="flex-1">
+          <p className="text-[10px] font-bold uppercase tracking-wider text-primary">{notification.type}</p>
+          <p className="text-xs text-ink-subtle">{getTimeAgo(notification.created_at)}</p>
+        </div>
+        {!notification.is_read && (
+          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: brand.colors.primary }} />
+        )}
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex items-start gap-4 mb-6">
+          <div className="w-12 h-12 rounded-full flex items-center justify-center shrink-0 bg-surface-hover text-primary">
+            {getIcon(notification.type)}
+          </div>
+          <h2 className="text-xl font-bold leading-tight text-ink">{notification.title}</h2>
+        </div>
+
+        <p className="text-sm leading-relaxed whitespace-pre-wrap text-ink">{notification.message}</p>
+
+        {notification.payload && Object.keys(notification.payload).length > 0 && (
+          <div className="mt-6 p-4 rounded-lg border border-surface-border bg-surface-hover">
+            <p className="font-bold mb-2 uppercase tracking-wide text-ink-subtle text-xs">Details</p>
+            {Object.entries(notification.payload).map(([key, value]) => (
+              <div key={key} className="flex justify-between py-1.5 border-b border-surface-border last:border-0">
+                <span className="capitalize text-xs text-ink-muted">{key.replace(/_/g, " ")}:</span>
+                <span className="text-xs font-semibold text-ink">{String(value)}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {notification.action_url && (
+        <div className="p-4 border-t border-surface-border">
+          {/* ✅ CTA: brand fill + white text = visible in BOTH themes */}
+          <button
+            onClick={onAction}
+            className="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all shadow-sm hover:opacity-90 active:scale-[0.98]"
+            style={brandFill}
+          >
+            {getActionLabel(notification.action_url)} <ArrowRight size={16} weight="bold" />
+          </button>
         </div>
       )}
-    </Modal>
+    </div>
   );
 }

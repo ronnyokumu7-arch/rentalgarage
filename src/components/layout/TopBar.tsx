@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  MagnifyingGlass as Search, User, Bell,
+  MagnifyingGlass as Search, User,
   SignOut as LogOut, CaretRight as ChevronRight, Command,
   Sparkle as Sparkles, Question as HelpCircle,
   CreditCard, Users, CalendarDots as CalendarDays, Car, CaretDown as ChevronDown,
@@ -21,7 +21,6 @@ import { emitMobileHeaderExpanded } from "@/hooks/useMobileHeaderExpanded";
 import { navIconMap } from "@/lib/nav-config";
 
 // ✅ NEW: Notification imports
-import { useNotificationCounts } from "@/hooks/notifications";
 import NotificationDropdown from "@/components/notifications/NotificationDropdown";
 
 interface SearchScope {
@@ -76,17 +75,11 @@ export default function Topbar({
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const [desktopDropdownOpen, setDesktopDropdownOpen] = useState(false);
   const [mobileHeaderExpanded, setMobileHeaderExpanded] = useState(false);
-  
-  // ✅ NEW: Notification state
-  const [showNotifications, setShowNotifications] = useState(false);
 
   const menuRef = useRef<HTMLDivElement>(null);
   const scopeRef = useRef<HTMLDivElement>(null);
   const desktopSearchRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-
-  // ✅ Fetch real-time notification counts
-  const { data: counts } = useNotificationCounts();
 
   const handleClickOutside = useCallback((e: MouseEvent) => {
     if (menuRef.current && !menuRef.current.contains(e.target as Node)) setShowUserMenu(false);
@@ -103,7 +96,6 @@ export default function Topbar({
       setShowScopeMenu(false);
       setDesktopDropdownOpen(false);
       setMobileHeaderExpanded(false);
-      setShowNotifications(false); // ✅ Close notifications on Escape
     }
   }, []);
 
@@ -123,7 +115,6 @@ export default function Topbar({
     setMobileSearchOpen(false);
     setDesktopDropdownOpen(false);
     setMobileHeaderExpanded(false);
-    setShowNotifications(false); // ✅ Close notifications on route change
   }, [pathname]);
 
   useEffect(() => {
@@ -229,33 +220,6 @@ export default function Topbar({
   const hasPageHeader = Boolean(pageTitle && pageDescription);
   const PageIcon = getPageIcon(pathname);
 
-  // ✅ Reusable Notification Button Component to avoid duplication
-  const NotificationButton = () => (
-    <div className="relative">
-      <button
-        onClick={() => setShowNotifications(!showNotifications)}
-        className="relative flex w-9 h-9 rounded-xl items-center justify-center text-ink-muted hover:bg-surface-hover hover:text-ink transition-all duration-200 active:scale-95"
-        aria-label="Notifications"
-        aria-haspopup="true"
-        aria-expanded={showNotifications}
-      >
-        <Bell size={17} weight="light" aria-hidden="true" />
-        
-        {/* ✅ UPDATED: Clean pulsing dot for unread notifications instead of a number badge */}
-        {counts?.unread_count ? (
-          <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500"></span>
-          </span>
-        ) : null}
-      </button>
-      <NotificationDropdown 
-        isOpen={showNotifications} 
-        onClose={() => setShowNotifications(false)} 
-      />
-    </div>
-  );
-
   return (
     <>
       <header
@@ -282,7 +246,7 @@ export default function Topbar({
 
               <div className="flex items-center gap-1.5 flex-shrink-0">
                 <ThemeToggle />
-                <NotificationButton /> {/* ✅ Mobile Expanded Header */}
+                <NotificationDropdown /> {/* ✅ Mobile Expanded Header */}
                 <button
                   onClick={() => setMobileSearchOpen(true)}
                   className="flex items-center justify-center w-9 h-9 rounded-xl text-ink-muted hover:bg-surface-hover hover:text-ink transition-all duration-200 active:scale-95"
@@ -440,7 +404,7 @@ export default function Topbar({
 
               <div className="w-px h-6 bg-surface-border mx-0.5 sm:mx-1" />
 
-              <NotificationButton /> {/* ✅ Desktop Header */}
+              <NotificationDropdown /> {/* ✅ Desktop Header */}
 
               <div className="w-px h-6 bg-surface-border mx-0.5 sm:mx-1 hidden lg:block" />
 
