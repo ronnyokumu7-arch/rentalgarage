@@ -18,6 +18,12 @@ export const paymentsApi = {
     return res.data.items;
   },
 
+  // ✅ NEW: Single payment lookup — powers the notification detail view (live fetch)
+  get: async (id: number): Promise<Payment> => {
+    const res = await apiClient.get<Payment>(`/payments/${id}`);
+    return res.data;
+  },
+
   void: async (id: number, payload: PaymentVoidPayload): Promise<Payment> => {
     const res = await apiClient.post<Payment>(`/payments/${id}/void`, payload);
     return res.data;

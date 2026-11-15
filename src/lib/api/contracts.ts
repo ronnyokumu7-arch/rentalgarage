@@ -11,7 +11,8 @@ export const contractsApi = {
   generateForBooking: (bookingId: number) =>
     apiClient.post<Contract>(`/contracts/bookings/${bookingId}/regenerate`, {}, { timeout: 60000 }).then((r) => r.data),
 
-  getById: (id: number) =>
+  // ✅ RENAMED: getById -> get (for consistency with other API files)
+  get: (id: number) =>
     apiClient.get<Contract>(`/contracts/${id}`).then((r) => r.data),
 
   void: (id: number) =>

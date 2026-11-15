@@ -42,29 +42,6 @@ const MOBILE_TABS: { id: TabId; label: string; icon: React.ElementType }[] = [
 
 const VALID_TABS = new Set<TabId>(["overview", "invoices", "contracts", "payments"]);
 
-const TAB_STATS: Record<TabId, { label: string; value: string; change: string; positive: boolean }[]> = {
-  overview: [
-    { label: "Total Revenue", value: "KES 48,000", change: "+12.5%", positive: true },
-    { label: "Pending Invoices", value: "KES 72,000", change: "-8.3%", positive: false },
-    { label: "Active Contracts", value: "12", change: "+3", positive: true },
-  ],
-  invoices: [
-    { label: "Total Invoices", value: "24", change: "+4", positive: true },
-    { label: "Paid", value: "16", change: "+2", positive: true },
-    { label: "Overdue", value: "3", change: "-1", positive: true },
-  ],
-  contracts: [
-    { label: "Active", value: "12", change: "+3", positive: true },
-    { label: "Pending Signature", value: "4", change: "-2", positive: true },
-    { label: "Expiring Soon", value: "2", change: "+1", positive: false },
-  ],
-  payments: [
-    { label: "This Month", value: "KES 32,000", change: "+8.2%", positive: true },
-    { label: "Pending", value: "KES 16,000", change: "-5.1%", positive: true },
-    { label: "Failed", value: "KES 2,000", change: "-2", positive: true },
-  ],
-};
-
 /* ──────────────────────────────────────────────────────────────────────
    Component
 ────────────────────────────────────────────────────────────────────── */
@@ -94,11 +71,6 @@ export default function FinancialsPage() {
     setActiveTab(next);
     router.push(`/dashboard/financials?tab=${next}`, { scroll: false });
   };
-
-  const currentStats = useMemo(
-    () => TAB_STATS[activeTab] ?? TAB_STATS.overview,
-    [activeTab],
-  );
 
   const currentTabInfo = useMemo(
     () =>
@@ -143,9 +115,13 @@ export default function FinancialsPage() {
 
   return (
     <div className="space-y-6 antialiased">
-      {/* ── Header — Desktop only (mobile uses TopBar) ───────────── */}
-      <div className="hidden sm:flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-        <div>
+      {/* ── Header — Desktop only (mobile uses TopBar) ─────────────
+          ✅ FIXED: aligned to the standard pattern (Bookings/Fleet/Clients).
+          Title block on the left, PremiumTabSwitcher parked in the right slot.
+          The redundant top-right stats block was removed (Overview already
+          renders these numbers in its own card). */}
+      <div className="hidden sm:flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+        <div className="min-w-0 flex-1">
           <div className="flex items-center gap-3">
             <span className="hidden sm:inline-flex">{currentTabInfo.icon}</span>
             <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-ink)] tracking-tight">
@@ -157,37 +133,13 @@ export default function FinancialsPage() {
           </p>
         </div>
 
-        {/* Quick stats — desktop only */}
-        <div className="hidden lg:flex items-center gap-6">
-          {currentStats.map((stat, index) => (
-            <div key={index} className="text-right">
-              <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-muted)]">
-                {stat.label}
-              </p>
-              <p className="text-base font-extrabold text-[var(--color-ink)] tabular-nums">
-                {stat.value}
-              </p>
-              <p
-                className={`text-[10px] font-bold ${
-                  stat.positive
-                    ? "text-emerald-600 dark:text-emerald-400"
-                    : "text-rose-600 dark:text-rose-400"
-                }`}
-              >
-                {stat.change}
-              </p>
-            </div>
-          ))}
+        <div className="hidden md:block">
+          <PremiumTabSwitcher
+            tabs={TABS}
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+          />
         </div>
-      </div>
-
-      {/* ─── Desktop tab switcher ───────────────────────────────── */}
-      <div className="hidden md:block">
-        <PremiumTabSwitcher
-          tabs={TABS}
-          activeTab={activeTab}
-          onTabChange={handleTabChange}
-        />
       </div>
 
       {/* ─── Tab content ─────────────────────────────────────────── */}

@@ -63,7 +63,6 @@ export default function PaymentsTab() {
     setCurrentPage,
     totalPages,
     totalItems,
-    // ✅ refetch removed (was unused)
   } = usePayments();
 
   const [filtersOpen, setFiltersOpen] = useState(false);
@@ -72,9 +71,12 @@ export default function PaymentsTab() {
   const hasActiveFilter = statusFilter !== "all" || dateFilter !== "all" || methodFilter !== "all";
 
   // ✅ Metrics calculated from the fully filtered list
+  // ✅ FIX: "Awaiting confirmation" → "Pending" (shorter label prevents the
+  // desktop metrics panel's whitespace-nowrap blocks from overflowing/colliding,
+  // and matches the canonical enum value while keeping value: "pending" intact).
   const statusOptions = [
     { label: "Completed", value: "completed", count: filteredPayments.filter((p) => p.status === "completed").length },
-    { label: "Awaiting confirmation", value: "pending", count: filteredPayments.filter((p) => p.status === "pending").length },
+    { label: "Pending", value: "pending", count: filteredPayments.filter((p) => p.status === "pending").length },
     { label: "Failed", value: "failed", count: filteredPayments.filter((p) => p.status === "failed").length },
   ];
 
@@ -170,7 +172,7 @@ export default function PaymentsTab() {
                     >
                       <X size={12} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
                     </button>
-                )}
+                  )}
                 </div>
 
                 <div className="pr-1.5">
@@ -286,8 +288,9 @@ export default function PaymentsTab() {
               <span className="text-xs font-bold text-[var(--color-success-text)] tabular-nums">{statusOptions[0].count}</span>
             </div>
             <div className="w-px h-3 bg-[var(--color-surface-border)] flex-shrink-0" />
+            {/* ✅ FIX: label shortened to "Pending" to stop the nowrap overflow collision */}
             <div className="flex items-center gap-2 whitespace-nowrap flex-1 min-w-0">
-              <span className="text-xs font-medium text-[var(--color-ink-muted)]">Awaiting confirmation</span>
+              <span className="text-xs font-medium text-[var(--color-ink-muted)]">Pending</span>
               <span className="text-xs font-bold text-[var(--color-warning-text)] tabular-nums">{statusOptions[1].count}</span>
             </div>
             <div className="w-px h-3 bg-[var(--color-surface-border)] flex-shrink-0" />
