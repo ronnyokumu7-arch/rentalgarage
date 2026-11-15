@@ -1,42 +1,19 @@
-import api from '@/lib/api-client'; // ⚠️ Adjust this import to match your actual API client setup (e.g., axios instance)
+import api from '@/lib/api-client'; // ⚠️ Adjust this import to match your actual API client setup
+import type { 
+  Notification, 
+  NotificationCountResponse, 
+  NotificationListResponse, 
+  BulkNotificationAction 
+} from '@/lib/types';
 
 // ============================================================================
-// TYPES (Matching Backend Pydantic Schemas)
+// REQUEST PARAMS
 // ============================================================================
-
-export type NotificationType = 'booking' | 'payment' | 'client' | 'vehicle' | 'system' | 'alert';
-export type NotificationPriority = 'low' | 'normal' | 'high';
-
-export interface Notification {
-  id: number;
-  type: NotificationType;
-  priority: NotificationPriority;
-  title: string;
-  message: string;
-  payload?: Record<string, any>; // ✅ FIXED: Renamed from 'metadata'
-  action_url?: string;
-  is_read: boolean;
-  created_at: string; // ISO date string
-  updated_at?: string;
-}
-
-export interface NotificationCountResponse {
-  unread_count: number;
-  total_count: number;
-}
-
-export interface NotificationListResponse {
-  items: Notification[];
-  total: number;
-  page: number;
-  per_page: number;
-  has_more: boolean;
-}
 
 export interface GetNotificationsParams {
   page?: number;
   per_page?: number;
-  unread_only?: boolean;
+  filter?: 'all' | 'unread' | 'read'; // ✅ UPDATED: Replaced unread_only with filter
 }
 
 // ============================================================================
@@ -47,7 +24,6 @@ export interface GetNotificationsParams {
  * Fetch unread and total notification counts (for the TopBar badge).
  */
 export const getNotificationCounts = async (): Promise<NotificationCountResponse> => {
-  // ✅ FIX: Removed /api/v1 to prevent duplicated baseURL paths (e.g., /api/v1/api/v1/...)
   const { data } = await api.get('/notifications/counts');
   return data;
 };
@@ -58,7 +34,6 @@ export const getNotificationCounts = async (): Promise<NotificationCountResponse
 export const getNotifications = async (
   params: GetNotificationsParams = {}
 ): Promise<NotificationListResponse> => {
-  // ✅ FIX: Removed /api/v1 to prevent duplicated baseURL paths
   const { data } = await api.get('/notifications/', { params });
   return data;
 };
@@ -67,7 +42,6 @@ export const getNotifications = async (
  * Mark a specific notification as read.
  */
 export const markNotificationAsRead = async (notificationId: number): Promise<Notification> => {
-  // ✅ FIX: Removed /api/v1 to prevent duplicated baseURL paths
   const { data } = await api.patch(`/notifications/${notificationId}/read`);
   return data;
 };
@@ -76,8 +50,23 @@ export const markNotificationAsRead = async (notificationId: number): Promise<No
  * Mark all unread notifications as read.
  */
 export const markAllNotificationsAsRead = async (): Promise<void> => {
-  // ✅ FIX: Removed /api/v1 to prevent duplicated baseURL paths
   await api.patch('/notifications/read-all');
+};
+
+/**
+ * ✅ NEW: Mark multiple specific notifications as read (for multi-select UI).
+ */
+export const markMultipleNotificationsAsRead = async (ids: number[]): Promise<void> => {
+  const payload: BulkNotificationAction = { ids };
+  await api.post('/notifications/bulk-read', payload);
+};
+
+/**
+ * ✅ NEW: Delete multiple specific notifications (for 'Archive' in multi-select UI).
+ */
+export const deleteMultipleNotifications = async (ids: number[]): Promise<void> => {
+  const payload: BulkNotificationAction = { ids };
+  await api.post('/notifications/bulk-delete', payload);
 };
 
 /**
@@ -85,6 +74,5 @@ export const markAllNotificationsAsRead = async (): Promise<void> => {
  * Used by the "Clear read" button in the UI to keep the inbox clean.
  */
 export const clearReadNotifications = async (): Promise<void> => {
-  // ✅ FIX: Removed /api/v1 to prevent duplicated baseURL paths
   await api.post('/notifications/clear-read');
 };

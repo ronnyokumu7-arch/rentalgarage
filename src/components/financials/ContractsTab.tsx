@@ -43,18 +43,37 @@ export default function ContractsTab() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
+  // ✅ NEW (deep-link): hydrate the search box from ?search= — e.g. when a
+  //    "Contract Signed" notification links to
+  //    /dashboard/financials?tab=contracts&search=C202611001.
+  //    Runs only when the URL's search value CHANGES, so the user typing in
+  //    the box is never overwritten by this effect.
+  const searchFromUrl = searchParams.get("search");
+  useEffect(() => {
+    if (searchFromUrl !== null && searchFromUrl !== search) {
+      setSearch(searchFromUrl);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchFromUrl]);
+
   // ✅ FIXED: Update URL when statusFilter changes — ONLY while the contracts
-  // tab is active. Depends on the tab param (a plain string), NOT the router
-  // object, and skips the write if the URL already matches. This stops it from
-  // fighting the parent's tab navigation (previously it rewrote ?tab=contracts
-  // over ?tab=invoices and broke tab switching).
+  //    tab is active. Depends on the tab param (a plain string), NOT the router
+  //    object, and skips the write if the URL already matches. This stops it from
+  //    fighting the parent's tab navigation (previously it rewrote ?tab=contracts
+  //    over ?tab=invoices and broke tab switching).
+  //    ✅ NEW: preserve ?search= so the status rewrite no longer strips the
+  //    deep-link query (which previously emptied the box on mount).
   useEffect(() => {
     if ((searchParams.get("tab") || "overview") !== "contracts") return;
 
-    const targetSearch =
+    const existingSearch = searchParams.get("search");
+    let targetSearch =
       statusFilter !== "all"
         ? `tab=contracts&status=${statusFilter}`
         : "tab=contracts";
+    if (existingSearch) {
+      targetSearch += `&search=${encodeURIComponent(existingSearch)}`;
+    }
 
     if (searchParams.toString() !== targetSearch) {
       router.replace(`/dashboard/financials?${targetSearch}`, { scroll: false });

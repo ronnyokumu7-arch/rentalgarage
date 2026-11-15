@@ -5,9 +5,17 @@ import {
   markNotificationAsRead,
   markAllNotificationsAsRead,
   clearReadNotifications,
+  markMultipleNotificationsAsRead,
+  deleteMultipleNotifications,
   type GetNotificationsParams,
-  type NotificationCountResponse,
 } from '@/lib/api/notifications';
+
+// ✅ FIXED: Import types from the single source of truth
+import type {
+  Notification,
+  NotificationCountResponse,
+  NotificationListResponse,
+} from '@/lib/types';
 
 // ============================================================================
 // QUERY KEYS
@@ -20,14 +28,13 @@ export const notificationKeys = {
 };
 
 // ============================================================================
-// HOOKS
+// QUERIES
 // ============================================================================
-
 export const useNotificationCounts = () => {
   return useQuery<NotificationCountResponse>({
     queryKey: notificationKeys.counts(),
     queryFn: getNotificationCounts,
-    refetchInterval: 60 * 1000, 
+    refetchInterval: 60 * 1000,
     staleTime: 30 * 1000,
   });
 };
@@ -40,9 +47,11 @@ export const useNotifications = (params: GetNotificationsParams = {}) => {
   });
 };
 
+// ============================================================================
+// MUTATIONS
+// ============================================================================
 export const useMarkNotificationAsRead = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: (notificationId: number) => markNotificationAsRead(notificationId),
     onSuccess: () => {
@@ -54,7 +63,6 @@ export const useMarkNotificationAsRead = () => {
 
 export const useMarkAllNotificationsAsRead = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: markAllNotificationsAsRead,
     onSuccess: () => {
@@ -66,12 +74,65 @@ export const useMarkAllNotificationsAsRead = () => {
 
 export const useClearReadNotifications = () => {
   const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: clearReadNotifications,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: notificationKeys.counts() });
       queryClient.invalidateQueries({ queryKey: notificationKeys.lists() });
+    },
+  });
+};
+
+// ✅ NEW: Bulk mark-as-read (multi-select "Mark as read")
+export const useBulkMarkAsRead = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (ids: number[]) => markMultipleNotificationsAsRead(ids),
+    onMutate: async (ids) => {
+      await queryClient.cancelQueries({ queryKey: notificationKeys.lists() });
+      const idSet = new Set(ids);
+      
+      // ✅ FIXED: Explicitly typed 'old' and 'n' parameters
+      queryClient.setQueriesData<NotificationListResponse>(
+        { queryKey: notificationKeys.lists() },
+        (old: NotificationListResponse | undefined) =>
+          old
+            ? { ...old, items: old.items.map((n: Notification) => (idSet.has(n.id) ? { ...n, is_read: true } : n)) }
+            : old,
+      );
+      return { ids };
+    },
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: notificationKeys.lists() });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: notificationKeys.counts() });
+    },
+  });
+};
+
+// ✅ NEW: Bulk delete / archive (multi-select "Archive")
+export const useBulkDelete = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (ids: number[]) => deleteMultipleNotifications(ids),
+    onMutate: async (ids) => {
+      await queryClient.cancelQueries({ queryKey: notificationKeys.lists() });
+      const idSet = new Set(ids);
+      
+      // ✅ FIXED: Explicitly typed 'old' and 'n' parameters
+      queryClient.setQueriesData<NotificationListResponse>(
+        { queryKey: notificationKeys.lists() },
+        (old: NotificationListResponse | undefined) => 
+          (old ? { ...old, items: old.items.filter((n: Notification) => !idSet.has(n.id)) } : old),
+      );
+      return { ids };
+    },
+    onError: () => {
+      queryClient.invalidateQueries({ queryKey: notificationKeys.lists() });
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: notificationKeys.counts() });
     },
   });
 };

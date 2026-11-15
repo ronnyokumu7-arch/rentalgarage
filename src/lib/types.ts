@@ -1217,3 +1217,50 @@ export interface InvestorContract {
   vehicle_plate?: string;
   investor_name?: string;
 }
+
+
+// ─── Notifications ───────────────────────────────────────────────────────────
+
+export type NotificationType = 
+  | "booking" 
+  | "payment" 
+  | "client" 
+  | "vehicle" 
+  | "system" 
+  | "alert" 
+  | "contract" 
+  | "invoice";
+
+export type NotificationPriority = "low" | "normal" | "high";
+
+export interface Notification {
+  id: number;
+  tenant_id: number;
+  user_id: number;
+  type: NotificationType;
+  priority: NotificationPriority;
+  title: string;
+  message: string;
+  payload?: Record<string, any> | null;
+  action_url?: string | null;
+  is_read: boolean;
+  created_at: string;
+  updated_at?: string | null;
+}
+
+export interface NotificationListResponse {
+  items: Notification[];
+  total: number;
+  page: number;
+  per_page: number;
+  has_more: boolean;
+}
+
+export interface NotificationCountResponse {
+  unread_count: number;
+  total_count: number;
+}
+
+export interface BulkNotificationAction {
+  ids: number[];
+}
