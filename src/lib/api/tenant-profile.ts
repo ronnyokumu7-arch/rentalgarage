@@ -11,7 +11,8 @@ export interface TenantProfilePayload {
   website?: string;
   kra_pin?: string;           // Maps to DB 'tax_number'
   logo_url?: string;
-  contract_terms?: string;    // Maps to DB 'contract_footer'
+  contract_terms?: string;    // Maps to DB 'contract_terms'
+  contract_footer?: string;   // Maps to DB 'contract_footer'
 }
 
 export const tenantProfileApi = {

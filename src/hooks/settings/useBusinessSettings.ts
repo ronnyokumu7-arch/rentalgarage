@@ -16,7 +16,8 @@ export interface BusinessFormValues {
   website: string;
   business_location: string;
   kra_pin: string;
-  footer_text: string;
+  contract_terms: string;
+  contract_footer: string;
 }
 
 export interface AdminFormValues {
@@ -52,7 +53,6 @@ function fileToDataUrl(file: File, maxDim = 512): Promise<string> {
 }
 
 export function useBusinessSettings() {
-  // ✅ FIXED: pull refreshTenant (light) in addition to refresh (heavy token rotation)
   const { refresh, refreshTenant } = useAuth();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -81,7 +81,8 @@ export function useBusinessSettings() {
       website: "",
       business_location: "",
       kra_pin: "",
-      footer_text: "",
+      contract_terms: "",
+      contract_footer: "",
     },
   });
 
@@ -135,7 +136,8 @@ export function useBusinessSettings() {
           website: profile.website || "",
           business_location: profile.address || "",
           kra_pin: profile.tax_number || "",
-          footer_text: profile.contract_footer || "",
+          contract_terms: profile.contract_terms || "",
+          contract_footer: profile.contract_footer || "",
         });
         const logo = profile.logo_url || null;
         savedLogoRef.current = logo;
@@ -192,7 +194,8 @@ export function useBusinessSettings() {
         website: data.website,
         business_location: data.business_location,
         kra_pin: data.kra_pin,
-        contract_terms: data.footer_text,
+        contract_terms: data.contract_terms,
+        contract_footer: data.contract_footer,
         ...(logoPreview ? { logo_url: logoPreview } : {}),
       };
 
@@ -205,14 +208,14 @@ export function useBusinessSettings() {
         website: updatedProfile.website || "",
         business_location: updatedProfile.address || "",
         kra_pin: updatedProfile.tax_number || "",
-        footer_text: updatedProfile.contract_footer || "",
+        contract_terms: updatedProfile.contract_terms || "",
+        contract_footer: updatedProfile.contract_footer || "",
       });
 
       savedLogoRef.current = updatedProfile.logo_url || null;
       setLogoPreview(updatedProfile.logo_url || null);
       setIsLogoDirty(false);
 
-      // ✅ FIXED: Refresh tenant context so topbar + contract preview reflect the new company name instantly
       await refreshTenant();
 
       toast.success("Company profile updated successfully");
@@ -245,8 +248,6 @@ export function useBusinessSettings() {
         phone_number: updatedUser.phone_number || "",
       });
 
-      // ✅ Kept as full token rotation: admin name/email lives inside the JWT user object,
-      //    so a full /auth/refresh is needed to refresh topbar greeting + user context.
       await refresh();
       toast.success("Administrator details updated successfully");
     } catch (error: any) {

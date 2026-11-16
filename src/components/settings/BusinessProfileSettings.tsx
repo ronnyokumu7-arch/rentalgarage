@@ -168,11 +168,11 @@ export default function BusinessProfileSettings() {
               </div>
             </Section>
 
-            {/* Receipts & Document Footer */}
+            {/* ✅ UPDATED: Contract Terms & Footer */}
             <Section
               icon={FileText}
-              title="Receipts & Document Footer"
-              subtitle="Terms printed at the bottom of receipts"
+              title="Contract Terms & Footer"
+              subtitle="Default terms and footer text for rental agreements"
               isEditing={editingSection === "footer"}
               onEdit={() => toggleSection("footer")}
               onCancel={() => toggleSection("footer")}
@@ -181,24 +181,58 @@ export default function BusinessProfileSettings() {
               isDirty={s.isDirty}
             >
               {editingSection === "footer" ? (
-                <div>
-                  <textarea
-                    {...s.register("footer_text")}
-                    rows={4}
-                    className="w-full p-3 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all resize-y min-h-[120px]"
-                    placeholder="e.g. Vehicles must be returned with full tank..."
-                  />
-                  {s.errors.footer_text && (
-                    <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1">
-                      <AlertCircle className="w-3 h-3" aria-hidden="true" /> {s.errors.footer_text.message}
-                    </p>
-                  )}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)] mb-1.5">
+                      Contract Terms (Markdown supported)
+                    </label>
+                    <textarea
+                      {...s.register("contract_terms")}
+                      rows={6}
+                      className="w-full p-3 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all resize-y min-h-[120px]"
+                      placeholder="e.g. **1. Fuel Policy:** Return the car with the same fuel level..."
+                    />
+                    {s.errors.contract_terms && (
+                      <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" aria-hidden="true" /> {s.errors.contract_terms.message}
+                      </p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)] mb-1.5">
+                      Document Footer
+                    </label>
+                    <textarea
+                      {...s.register("contract_footer")}
+                      rows={3}
+                      className="w-full p-3 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all resize-y min-h-[80px]"
+                      placeholder="e.g. Thank you for choosing us. Drive safely!"
+                    />
+                    {s.errors.contract_footer && (
+                      <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1">
+                        <AlertCircle className="w-3 h-3" aria-hidden="true" /> {s.errors.contract_footer.message}
+                      </p>
+                    )}
+                  </div>
                 </div>
               ) : (
-                <div className="p-3.5 rounded-xl bg-[var(--color-surface-hover)]/50 border border-[var(--color-surface-border)] text-sm text-[var(--color-ink-muted)] leading-relaxed whitespace-pre-wrap">
-                  {s.businessData.footer_text || (
-                    <span className="italic text-[var(--color-ink-subtle)]">No footer text configured.</span>
-                  )}
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)] mb-1.5">Contract Terms</p>
+                    <div className="p-3.5 rounded-xl bg-[var(--color-surface-hover)]/50 border border-[var(--color-surface-border)] text-sm text-[var(--color-ink-muted)] leading-relaxed whitespace-pre-wrap">
+                      {s.businessData.contract_terms || (
+                        <span className="italic text-[var(--color-ink-subtle)]">No contract terms configured.</span>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)] mb-1.5">Document Footer</p>
+                    <div className="p-3.5 rounded-xl bg-[var(--color-surface-hover)]/50 border border-[var(--color-surface-border)] text-sm text-[var(--color-ink-muted)] leading-relaxed whitespace-pre-wrap">
+                      {s.businessData.contract_footer || (
+                        <span className="italic text-[var(--color-ink-subtle)]">No footer text configured.</span>
+                      )}
+                    </div>
+                  </div>
                 </div>
               )}
             </Section>
@@ -265,7 +299,7 @@ export default function BusinessProfileSettings() {
 }
 
 /* ─── Section wrapper with inline edit controls ───────────────────── */
-
+// (Keep the existing Section and Field components exactly as they were)
 function Section({
   icon: Icon,
   title,
@@ -291,7 +325,6 @@ function Section({
 }) {
   return (
     <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-2xl shadow-sm overflow-hidden">
-      {/* Header with inline pencil */}
       <div className="flex items-center gap-3 px-4 sm:px-5 py-3.5 border-b border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/30">
         <div className="w-9 h-9 rounded-xl bg-[var(--color-primary)]/10 text-[var(--color-primary)] flex items-center justify-center shrink-0">
           <Icon className="w-4 h-4" aria-hidden="true" />
@@ -314,7 +347,6 @@ function Section({
 
       <div className="p-4 sm:p-5">{children}</div>
 
-      {/* Inline save/cancel actions when editing */}
       {isEditing && (
         <div className="flex items-center justify-end gap-2 px-4 sm:px-5 py-3 border-t border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50">
           <button
@@ -345,7 +377,6 @@ function Section({
 }
 
 /* ─── Field component ─────────────────────────────────────────────── */
-
 function Field({
   label, icon: Icon, editing, display, register, error,
   type = "text", placeholder = "", mono = false, link = false, className = "",
