@@ -695,7 +695,6 @@ export interface Contract {
   share_token_expires_at?: string | null;
   signed_by_client: boolean;
   client_signed_at: string | null;  // ✅ set on public sign
-  // ✅ REMOVED: signed_at (legacy/stale — backend only sets client_signed_at)
   created_at: string;
   updated_at: string;
 
@@ -717,7 +716,7 @@ export interface PublicContractView {
   tenant_email?: string | null;
 
   client_name: string;
-  id_number: string;
+  id_number?: string | null; // ✅ Made optional to match backend
   vehicle_make: string;
   vehicle_model: string;
   vehicle_plate: string;
@@ -733,6 +732,18 @@ export interface PublicContractView {
   driver_name?: string | null;
   driver_phone?: string | null;
   driver_dl_number?: string | null;
+
+  // ✅ TERMS & POLICIES: Dynamic content for the public signing page
+  contract_terms?: string | null;
+  contract_footer?: string | null;
+  effective_policies?: Array<{
+    category: string;
+    clause_key?: string | null;
+    title: string;
+    content: string;
+    is_active: boolean;
+    display_order: number;
+  }> | null;
 }
 
 // ─── Invoices ────────────────────────────────────────────────────────────────
@@ -835,6 +846,13 @@ export interface PublicInvoiceView {
   doc_type: InvoiceDocType;  // ✅ LIFECYCLE: drives morphing page (quotation vs invoice mode)
   due_date: string;
   remaining_balance?: number | string | null;
+
+  // ✅ NEW: The exact amount of the pending payment awaiting confirmation.
+  // Backend always returns this (defaults to Decimal("0")), so it's required here.
+  // Use it to render honest copy: "KES {pending_amount} awaiting confirmation"
+  // and "remaining balance after confirmation will be {remaining_balance - pending_amount}".
+  pending_amount: number | string;
+
   payment_reported?: boolean;
   payment_details?: PublicPaymentDetails | null;
   created_at: string;

@@ -44,7 +44,10 @@ export default function PublicContractSigningPage() {
     if (token) fetchContract();
   }, [token]);
 
-  const handleClear = () => { sigCanvasRef.current?.clear(); setIsEmpty(true); };
+  const handleClear = () => { 
+    sigCanvasRef.current?.clear(); 
+    setIsEmpty(true); 
+  };
 
   const handleSign = async () => {
     if (isEmpty || !agreed) {
@@ -70,23 +73,49 @@ export default function PublicContractSigningPage() {
     }
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" aria-hidden="true" /></div>;
-  if (!contract) return <div className="min-h-screen flex items-center justify-center p-4 text-center"><AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" aria-hidden="true" /><h1 className="text-xl font-bold mb-2">Invalid or Expired Link</h1></div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--color-surface)]">
+        <Loader2 className="w-8 h-8 animate-spin text-[var(--color-primary)]" aria-hidden="true" />
+      </div>
+    );
+  }
+
+  if (!contract) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[var(--color-surface)] p-4 text-center">
+        <AlertCircle className="w-12 h-12 text-[var(--color-danger)] mx-auto mb-4" aria-hidden="true" />
+        <h1 className="text-xl font-bold mb-2 text-[var(--color-ink-primary)]">Invalid or Expired Link</h1>
+        <p className="text-sm text-[var(--color-ink-muted)]">Please contact the agency for a new contract link.</p>
+      </div>
+    );
+  }
 
   if (contract.signed_by_investor) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-[var(--color-surface)] p-4">
         <div className="bg-white border border-[var(--color-surface-border)] rounded-2xl shadow-xl p-8 max-w-md w-full text-center space-y-6">
-          <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto"><CheckCircle className="w-8 h-8 text-emerald-500" aria-hidden="true" /></div>
+          <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto">
+            <CheckCircle className="w-8 h-8 text-emerald-500" aria-hidden="true" />
+          </div>
           <div>
-            <h1 className="text-xl font-bold mb-2">Contract Fully Executed</h1>
+            <h1 className="text-xl font-bold mb-2 text-[var(--color-ink-primary)]">Contract Fully Executed</h1>
             <p className="text-[var(--color-ink-muted)]">You have successfully signed contract <strong>{contract.contract_number}</strong>.</p>
           </div>
           <div className="flex flex-col gap-3">
-            <a href={`${process.env.NEXT_PUBLIC_API_URL}/investor-contracts/${contract.id}/pdf`} target="_blank" className="w-full px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition-all flex items-center justify-center gap-2">
+            <a 
+              href={`${process.env.NEXT_PUBLIC_API_URL}/investor-contracts/${contract.id}/pdf`} 
+              target="_blank" 
+              className="w-full px-4 py-2.5 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition-all flex items-center justify-center gap-2"
+            >
               <Download size={16} aria-hidden="true" /> Download Signed PDF
             </a>
-            <button onClick={() => window.close()} className="w-full px-4 py-2.5 rounded-xl text-sm font-bold text-[var(--color-ink)] bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-hover)]/80 transition-all">Close Window</button>
+            <button 
+              onClick={() => window.close()} 
+              className="w-full px-4 py-2.5 rounded-xl text-sm font-bold text-[var(--color-ink)] bg-[var(--color-surface-hover)] hover:bg-[var(--color-surface-hover)]/80 transition-all"
+            >
+              Close Window
+            </button>
           </div>
         </div>
       </div>
@@ -96,46 +125,128 @@ export default function PublicContractSigningPage() {
   return (
     <div className="min-h-screen bg-[var(--color-surface)] py-8 px-4 sm:px-6">
       <div className="max-w-2xl mx-auto space-y-6">
-        <div className="bg-white border border-[var(--color-surface-border)] rounded-2xl p-6 shadow-sm space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)]"><FileText size={20} aria-hidden="true" /></div>
-            <div><h1 className="text-lg font-bold">Lease Agreement</h1><p className="text-xs text-[var(--color-ink-muted)]">Contract #{contract.contract_number}</p></div>
+        
+        {/* ✅ Card 1: Premium Letterhead + Key Details */}
+        <div className="bg-white border border-[var(--color-surface-border)] rounded-2xl shadow-sm overflow-hidden">
+          {/* Letterhead: Agency Left, Contract Meta Right */}
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 p-6 border-b border-[var(--color-surface-border)]">
+            <div className="flex items-start gap-3 min-w-0">
+              <div className="w-14 h-14 rounded-xl bg-[var(--color-primary)]/10 flex items-center justify-center text-[var(--color-primary)] shrink-0">
+                <FileText size={24} aria-hidden="true" />
+              </div>
+              <div className="min-w-0">
+                <h1 className="text-lg font-bold tracking-tight text-[var(--color-ink-primary)]">
+                  {contract.tenant_name || "Rental Agency"}
+                </h1>
+                <p className="text-xs text-[var(--color-ink-muted)] mt-1">Investor Lease Agreement</p>
+              </div>
+            </div>
+            <div className="text-left sm:text-right shrink-0">
+              <p className="text-xl font-bold uppercase tracking-[0.14em] text-[var(--color-ink-primary)]">
+                Contract
+              </p>
+              <p className="mt-1 text-xs font-mono text-[var(--color-ink-muted)]">
+                {contract.contract_number}
+              </p>
+            </div>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
-            <div><p className="text-xs font-semibold text-[var(--color-ink-muted)] uppercase mb-1">Investor</p><p className="font-medium">{contract.investor_name}</p></div>
-            <div><p className="text-xs font-semibold text-[var(--color-ink-muted)] uppercase mb-1">Vehicle</p><p className="font-medium">{contract.vehicle_details}</p></div>
-            <div><p className="text-xs font-semibold text-[var(--color-ink-muted)] uppercase mb-1">Lease Rate</p><p className="font-medium">KES {Number(contract.lease_rate).toLocaleString()} / {contract.lease_rate_type}</p></div>
-            <div><p className="text-xs font-semibold text-[var(--color-ink-muted)] uppercase mb-1">Duration</p><p className="font-medium">{contract.duration_months ? `${contract.duration_months} Month(s)` : 'Per Active Rental Day'}</p></div>
+
+          {/* Body: Key Details Grid */}
+          <div className="p-6 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+              <div>
+                <p className="text-xs font-semibold text-[var(--color-ink-muted)] uppercase mb-1">Investor</p>
+                <p className="font-medium text-[var(--color-ink-primary)]">{contract.investor_name}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-[var(--color-ink-muted)] uppercase mb-1">Vehicle</p>
+                <p className="font-medium text-[var(--color-ink-primary)]">{contract.vehicle_details}</p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-[var(--color-ink-muted)] uppercase mb-1">Lease Rate</p>
+                <p className="font-medium text-[var(--color-ink-primary)]">
+                  KES {Number(contract.lease_rate).toLocaleString()} / {contract.lease_rate_type}
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold text-[var(--color-ink-muted)] uppercase mb-1">Duration</p>
+                <p className="font-medium text-[var(--color-ink-primary)]">
+                  {contract.duration_months ? `${contract.duration_months} Month(s)` : 'Per Active Rental Day'}
+                </p>
+              </div>
+            </div>
+            
+            <a 
+              href={`${process.env.NEXT_PUBLIC_API_URL}/investor-contracts/${contract.id}/pdf`} 
+              target="_blank" 
+              className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--color-primary)] hover:underline transition-colors"
+            >
+              <Download size={14} aria-hidden="true" /> View / Download Contract PDF
+            </a>
           </div>
-          <a href={`${process.env.NEXT_PUBLIC_API_URL}/investor-contracts/${contract.id}/pdf`} target="_blank" className="inline-flex items-center gap-2 text-xs font-semibold text-[var(--color-primary)] hover:underline transition-colors">
-            <Download size={14} aria-hidden="true" /> View / Download Contract PDF
-          </a>
         </div>
 
+        {/* ✅ Card 2: Signature & Agreement */}
         <div className="bg-white border border-[var(--color-surface-border)] rounded-2xl p-6 shadow-sm space-y-4">
-          <h2 className="text-base font-bold flex items-center gap-2"><PenLine size={18} className="text-[var(--color-primary)]" aria-hidden="true" /> Investor Signature</h2>
+          <h2 className="text-base font-bold flex items-center gap-2 text-[var(--color-ink-primary)]">
+            <PenLine size={18} className="text-[var(--color-primary)]" aria-hidden="true" /> Investor Signature
+          </h2>
+          
           <div ref={containerRef} className="w-full h-[200px] relative mb-2">
             <SignatureCanvas
-              ref={sigCanvasRef} penColor="#0f172a" minWidth={0.5} maxWidth={2.5} dotSize={1} throttle={0} velocityFilterWeight={0.1}
+              ref={sigCanvasRef} 
+              penColor="#0f172a" 
+              minWidth={0.5} 
+              maxWidth={2.5} 
+              dotSize={1} 
+              throttle={0} 
+              velocityFilterWeight={0.1}
               canvasProps={{
-                width: canvasSize.width, height: canvasSize.height,
+                width: canvasSize.width, 
+                height: canvasSize.height,
                 className: "w-full h-full border-2 border-dashed border-[var(--color-surface-border)] rounded-xl bg-white cursor-crosshair",
                 style: { touchAction: "none" } // ✅ CRITICAL MOBILE FIX
               }}
               onBegin={() => setIsEmpty(false)}
               onEnd={() => { if (sigCanvasRef.current?.isEmpty()) setIsEmpty(true); }}
             />
-            <button type="button" onClick={handleClear} className="absolute top-2 right-2 p-1.5 rounded-lg bg-[var(--color-surface-hover)] hover:bg-red-500/10 text-[var(--color-ink-muted)] hover:text-red-500 transition-colors"><RotateCcw size={16} aria-hidden="true" /></button>
+            <button 
+              type="button" 
+              onClick={handleClear} 
+              className="absolute top-2 right-2 p-1.5 rounded-lg bg-[var(--color-surface-hover)] hover:bg-red-500/10 text-[var(--color-ink-muted)] hover:text-red-500 transition-colors"
+            >
+              <RotateCcw size={16} aria-hidden="true" />
+            </button>
           </div>
-          {isEmpty && <p className="text-xs text-[var(--color-ink-subtle)] text-center -mt-2">Please draw your signature in the box above.</p>}
           
-          <label className="flex items-start gap-3 p-3 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] cursor-pointer">
-            <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mt-0.5 w-4 h-4 rounded border-[var(--color-surface-border)] text-[var(--color-primary)] focus:ring-[var(--color-primary)]/20" />
-            <span className="text-xs text-[var(--color-ink)] leading-relaxed">By checking this box and signing above, I acknowledge that I have read, understood, and agree to be legally bound by the terms of this lease agreement.</span>
+          {isEmpty && (
+            <p className="text-xs text-[var(--color-ink-subtle)] text-center -mt-2">
+              Please draw your signature in the box above.
+            </p>
+          )}
+          
+          <label className="flex items-start gap-3 p-3 rounded-xl bg-[var(--color-surface-hover)] border border-[var(--color-surface-border)] cursor-pointer transition-colors hover:bg-[var(--color-surface-hover)]/80">
+            <input 
+              type="checkbox" 
+              checked={agreed} 
+              onChange={(e) => setAgreed(e.target.checked)} 
+              className="mt-0.5 w-4 h-4 rounded border-[var(--color-surface-border)] text-[var(--color-primary)] focus:ring-[var(--color-primary)]/20" 
+            />
+            <span className="text-xs text-[var(--color-ink)] leading-relaxed">
+              By checking this box and signing above, I acknowledge that I have read, understood, and agree to be legally bound by the terms of this lease agreement.
+            </span>
           </label>
 
-          <button onClick={handleSign} disabled={signing || isEmpty || !agreed} className="w-full px-4 py-3 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-            {signing ? <Loader2 size={18} className="animate-spin" aria-hidden="true" /> : <CheckCircle size={18} aria-hidden="true" />}
+          <button 
+            onClick={handleSign} 
+            disabled={signing || isEmpty || !agreed} 
+            className="w-full px-4 py-3 rounded-xl text-sm font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {signing ? (
+              <Loader2 size={18} className="animate-spin" aria-hidden="true" />
+            ) : (
+              <CheckCircle size={18} aria-hidden="true" />
+            )}
             {signing ? "Securing Signature..." : "Sign Contract"}
           </button>
         </div>

@@ -11,7 +11,8 @@ import { vehiclesApi } from "@/lib/api/vehicles";
 import { clientsApi } from "@/lib/api/clients";
 import { contractsApi } from "@/lib/api/contracts";
 import { bookingsApi } from "@/lib/api/bookings";
-import type { Notification, Vehicle, Client, Contract, Booking } from "@/lib/types";
+import { paymentsApi } from "@/lib/api/payments";
+import type { Notification, Vehicle, Client, Contract, Booking, Payment } from "@/lib/types";
 
 interface NotificationFocusViewProps {
   notification: Notification;
@@ -28,38 +29,53 @@ export default function NotificationFocusView({
 }: NotificationFocusViewProps) {
   const { label: ctaLabel, icon: ctaIcon } = getContextualActionLabel(notification);
   
-  const [entity, setEntity] = useState<Vehicle | Client | Contract | Booking | null>(null);
+  const [entity, setEntity] = useState<Vehicle | Client | Contract | Booking | Payment | null>(null);
   const [loading, setLoading] = useState(false);
 
   // Fetch live entity data when notification opens
   useEffect(() => {
+    let isMounted = true;
+    
     const fetchEntity = async () => {
       const { type, payload } = notification;
-      if (!payload) return;
+      if (!payload) {
+        if (isMounted) setLoading(false);
+        return;
+      }
 
-      setLoading(true);
+      if (isMounted) setLoading(true);
       try {
         if (type === "vehicle" && payload.vehicle_id) {
           const vehicle = await vehiclesApi.get(payload.vehicle_id);
-          setEntity(vehicle);
+          if (isMounted) setEntity(vehicle);
         } else if (type === "client" && payload.client_id) {
           const client = await clientsApi.get(payload.client_id);
-          setEntity(client);
+          if (isMounted) setEntity(client);
         } else if (type === "contract" && payload.contract_id) {
           const contract = await contractsApi.get(payload.contract_id);
-          setEntity(contract);
+          if (isMounted) setEntity(contract);
         } else if (type === "booking" && payload.booking_id) {
           const booking = await bookingsApi.get(payload.booking_id);
-          setEntity(booking);
+          if (isMounted) setEntity(booking);
+        } else if (type === "payment" && payload.payment_id) {
+          const payment = await paymentsApi.get(payload.payment_id);
+          if (isMounted) setEntity(payment);
+        } else {
+          if (isMounted) setLoading(false);
         }
       } catch (error) {
         console.error("Failed to fetch entity details:", error);
+        // Graceful fallback: just don't show the details section
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     fetchEntity();
+    
+    return () => {
+      isMounted = false; // Prevent state updates if component unmounts early
+    };
   }, [notification]);
 
   // Render vehicle-specific details
@@ -68,8 +84,8 @@ export default function NotificationFocusView({
       <DetailRow label="Vehicle" value={`${vehicle.make} ${vehicle.model}`} />
       <DetailRow label="Plate" value={vehicle.plate_number} />
       <DetailRow label="YOM" value={vehicle.year} />
-      <DetailRow label="Daily Rate" value={`KES ${vehicle.daily_rate.toLocaleString()}`} />
-      <DetailRow label="Status" value={vehicle.status.replace(/_/g, " ")} />
+      <DetailRow label="Daily Rate" value={`KES ${Number(vehicle.daily_rate).toLocaleString()}`} />
+      <DetailRow label="Status" value={vehicle.status ? vehicle.status.replace(/_/g, " ") : "Unknown"} />
       <DetailRow label="Ownership" value={vehicle.owner_id ? "Investor-owned" : "Agency-owned"} />
       {vehicle.mileage_due && (
         <DetailRow label="Mileage" value="Update due" highlight />
@@ -128,7 +144,7 @@ export default function NotificationFocusView({
       />
       <DetailRow 
         label="Amount" 
-        value={`${booking.currency_code} ${booking.total_amount.toLocaleString()}`} 
+        value={`${booking.currency_code || 'KES'} ${Number(booking.total_amount).toLocaleString()}`} 
       />
       <DetailRow label="Status" value={booking.status} />
       {booking.service_type && (
@@ -137,22 +153,22 @@ export default function NotificationFocusView({
     </>
   );
 
-  // Render payment details from payload (already rich)
-  const renderPaymentDetails = (payload: any) => (
+  // Render payment-specific details (Live Fetch)
+  const renderPaymentDetails = (payment: Payment) => (
     <>
-      {payload.invoice_number && <DetailRow label="Invoice #" value={payload.invoice_number} />}
-      {payload.reference && <DetailRow label="Reference" value={payload.reference} />}
-      {payload.amount && (
-        <DetailRow 
-          label="Amount" 
-          value={`${payload.currency_code || "KES"} ${Number(payload.amount).toLocaleString()}`} 
-        />
-      )}
-      {payload.method && <DetailRow label="Method" value={payload.method} />}
-      {payload.recorded_at && (
+      {payment.invoice_number && <DetailRow label="Invoice #" value={payment.invoice_number} />}
+      {payment.reference && <DetailRow label="Reference" value={payment.reference} />}
+      <DetailRow 
+        label="Amount" 
+        value={`${payment.currency_code || 'KES'} ${Number(payment.amount).toLocaleString()}`} 
+      />
+      <DetailRow label="Method" value={payment.method} />
+      <DetailRow label="Status" value={payment.status} />
+      {payment.client_name && <DetailRow label="Client" value={payment.client_name} />}
+      {payment.paid_at && (
         <DetailRow 
           label="Recorded" 
-          value={new Date(payload.recorded_at).toLocaleString()} 
+          value={new Date(payment.paid_at).toLocaleString()} 
         />
       )}
     </>
@@ -168,21 +184,14 @@ export default function NotificationFocusView({
       );
     }
 
-    const { type, payload } = notification;
+    const { type } = notification;
 
-    if (type === "vehicle" && entity) {
-      return renderVehicleDetails(entity as Vehicle);
-    } else if (type === "client" && entity) {
-      return renderClientDetails(entity as Client);
-    } else if (type === "contract" && entity) {
-      return renderContractDetails(entity as Contract);
-    } else if (type === "booking" && entity) {
-      return renderBookingDetails(entity as Booking);
-    } else if (type === "payment" && payload) {
-      return renderPaymentDetails(payload);
-    }
+    if (type === "vehicle" && entity) return renderVehicleDetails(entity as Vehicle);
+    if (type === "client" && entity) return renderClientDetails(entity as Client);
+    if (type === "contract" && entity) return renderContractDetails(entity as Contract);
+    if (type === "booking" && entity) return renderBookingDetails(entity as Booking);
+    if (type === "payment" && entity) return renderPaymentDetails(entity as Payment);
 
-    // Fallback for other types or if fetch failed
     return null;
   };
 

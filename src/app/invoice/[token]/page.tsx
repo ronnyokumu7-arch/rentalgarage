@@ -52,8 +52,8 @@ export default function PublicInvoicePage() {
 
   if (loading) {
     return (
-      <div 
-        className="min-h-screen flex items-center justify-center p-4 force-light" 
+      <div
+        className="min-h-screen flex items-center justify-center p-4 force-light"
         style={{ backgroundColor: brand.colors.light.bg }}
       >
         <div className="flex flex-col items-center gap-4 text-center">
@@ -68,11 +68,11 @@ export default function PublicInvoicePage() {
 
   if (error || !invoice) {
     return (
-      <div 
-        className="min-h-screen flex items-center justify-center p-4 sm:p-6 force-light" 
+      <div
+        className="min-h-screen flex items-center justify-center p-4 sm:p-6 force-light"
         style={{ backgroundColor: brand.colors.light.bg }}
       >
-        <div 
+        <div
           className="max-w-md w-full rounded-xl p-6 sm:p-8 text-center"
           style={{
             background: brand.colors.light.surface,
@@ -80,26 +80,26 @@ export default function PublicInvoicePage() {
             border: `1px solid ${brand.colors.light.surfaceBorder}`,
           }}
         >
-          <div 
+          <div
             className="w-14 h-14 sm:w-16 sm:h-16 rounded-full flex items-center justify-center mx-auto mb-4"
             style={{ backgroundColor: brand.colors.danger.bg }}
           >
             <AlertCircle className="h-7 w-7 sm:h-8 sm:w-8" style={{ color: brand.colors.danger.main }} aria-hidden="true" />
           </div>
-          <h1 
-            className="text-lg sm:text-xl font-bold mb-2" 
+          <h1
+            className="text-lg sm:text-xl font-bold mb-2"
             style={{ color: brand.colors.ink.primary }}
           >
             Unavailable
           </h1>
-          <p 
-            className="text-xs sm:text-sm mb-6" 
+          <p
+            className="text-xs sm:text-sm mb-6"
             style={{ color: brand.colors.ink.muted }}
           >
             {error || "This link is invalid or has expired."}
           </p>
-          <p 
-            className="text-xs" 
+          <p
+            className="text-xs"
             style={{ color: brand.colors.ink.subtle }}
           >
             Please contact the rental agency for a new link.
@@ -113,7 +113,12 @@ export default function PublicInvoicePage() {
   const isPaid = invoice.status === "paid";
   const isVoid = invoice.status === "void";
 
-  // Banner state — uses brand semantic colors for consistency
+  // ✅ Honest math: pending proof total + the balance still UNREPORTED.
+  const pendingAmount = Number(invoice.pending_amount || 0);
+  const remainingAmount = Number(invoice.remaining_balance || 0);
+  const unreportedAmount = Math.max(0, remainingAmount - pendingAmount);
+  const fmt = (n: number) => `${invoice.currency_code} ${n.toLocaleString()}`;
+
   const bannerState = (() => {
     if (isVoid) {
       return {
@@ -151,7 +156,10 @@ export default function PublicInvoicePage() {
         iconBg: brand.colors.warning.bg,
         icon: <CheckCircle2 className="h-5 w-5 shrink-0" style={{ color: brand.colors.warning.main }} aria-hidden="true" />,
         title: "Payment Reported",
-        subtitle: "The agency will update your invoice after confirming receipt.",
+        subtitle:
+          unreportedAmount > 0
+            ? `${fmt(pendingAmount)} awaiting confirmation. You can still report the remaining ${fmt(unreportedAmount)} below.`
+            : `${fmt(pendingAmount)} awaiting confirmation. The agency will update your invoice after confirming receipt.`,
         textColor: brand.colors.warning.text,
       };
     }
@@ -166,16 +174,14 @@ export default function PublicInvoicePage() {
   })();
 
   return (
-    <div 
-      className="min-h-screen py-6 sm:py-12 px-3 sm:px-6 lg:px-8 force-light" 
+    <div
+      className="min-h-screen py-6 sm:py-12 px-3 sm:px-6 lg:px-8 force-light"
       style={{ backgroundColor: brand.colors.light.bg }}
     >
       <div className="max-w-4xl mx-auto">
-        {/* ✅ Header OUTSIDE main card — matches contract page layout */}
-        <PublicInvoiceHeader invoice={invoice} />
-
+        
         {/* ✅ Main document card */}
-        <div 
+        <div
           className="rounded-xl sm:rounded-2xl overflow-hidden"
           style={{
             background: brand.colors.light.surface,
@@ -183,45 +189,40 @@ export default function PublicInvoicePage() {
             border: `1px solid ${brand.colors.light.surfaceBorder}`,
           }}
         >
-          {/* Status Banner — mobile stacks, desktop side-by-side */}
-          <div 
+          {/* ✅ Letterhead is now the top of the document */}
+          <PublicInvoiceHeader invoice={invoice} />
+
+          {/* Status Banner */}
+          <div
             className="p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b"
             style={{
               borderColor: brand.colors.light.surfaceBorder,
               backgroundColor: bannerState.bg,
             }}
           >
-            {/* Left: Status icon + text */}
             <div className="flex items-center gap-3">
-              <div 
+              <div
                 className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
                 style={{ backgroundColor: bannerState.iconBg }}
               >
                 {bannerState.icon}
               </div>
               <div>
-                <h3 
-                  className="text-sm font-bold"
-                  style={{ color: bannerState.textColor }}
-                >
+                <h3 className="text-sm font-bold" style={{ color: bannerState.textColor }}>
                   {bannerState.title}
                 </h3>
-                <p 
-                  className="text-xs"
-                  style={{ color: bannerState.textColor }}
-                >
+                <p className="text-xs" style={{ color: bannerState.textColor }}>
                   {bannerState.subtitle}
                 </p>
               </div>
             </div>
 
-            {/* Right: Download button */}
             <button
               type="button"
               onClick={handleDownloadPdf}
               disabled={isDownloadingPdf}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-lg 
-                        text-xs font-semibold transition-all shrink-0 
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-lg
+                        text-xs font-semibold transition-all shrink-0
                         disabled:opacity-60 disabled:cursor-not-allowed"
               style={{
                 backgroundColor: brand.colors.light.surface,
@@ -266,42 +267,8 @@ export default function PublicInvoicePage() {
                 onOpenReschedule={() => setRescheduleOpen(true)}
                 onCancel={handleCancel}
               />
-            ) : invoice.payment_reported ? (
-              // ✅ LOCKED STATE: Hide payment form when a payment is already reported
-              <div 
-                className="mt-8 p-6 rounded-xl text-center border"
-                style={{ 
-                  backgroundColor: brand.colors.warning.bg, 
-                  borderColor: brand.colors.warning.border || brand.colors.warning.main 
-                }}
-              >
-                <CheckCircle2 size={32} className="mx-auto mb-3" style={{ color: brand.colors.warning.main }} weight="fill" />
-                <h3 className="text-sm font-bold mb-1" style={{ color: brand.colors.warning.text }}>
-                  Payment Proof Submitted
-                </h3>
-                <p className="text-xs max-w-md mx-auto" style={{ color: brand.colors.warning.text }}>
-                  We have received your payment proof. Please wait for the agency to confirm it.
-                </p>
-                
-                {/* ✅ DYNAMIC PARTIAL PAYMENT MESSAGE (TypeScript Safe) */}
-                {invoice.remaining_balance !== undefined && 
-                 invoice.remaining_balance !== null && 
-                 Number(invoice.remaining_balance) > 0 && (
-                  <div className="mt-4 pt-4 border-t" style={{ borderColor: brand.colors.warning.border || brand.colors.warning.main }}>
-                    <p className="text-xs font-semibold" style={{ color: brand.colors.warning.text }}>
-                      Next Step:
-                    </p>
-                    <p className="text-xs mt-1" style={{ color: brand.colors.warning.text }}>
-                      Once this payment is confirmed, you will be able to submit the remaining balance of{" "}
-                      <span className="font-bold">
-                        {invoice.currency_code} {Number(invoice.remaining_balance).toLocaleString()}
-                      </span>.
-                    </p>
-                  </div>
-                )}
-              </div>
-            ) : (
-              // ✅ UNLOCKED STATE: Show payment channels and form
+            ) : !isPaid && !isVoid && unreportedAmount > 0 ? (
+              // ✅ Form always available while there's an unreported balance.
               <>
                 <PublicInvoicePaymentChannels invoice={invoice} />
                 <PublicInvoicePaymentForm
@@ -310,16 +277,13 @@ export default function PublicInvoicePage() {
                   onRecordPayment={handleRecordPayment}
                 />
               </>
-            )}
+            ) : null}
           </div>
         </div>
 
-        {/* ✅ Footer — matches contract page */}
+        {/* ✅ Footer */}
         <div className="mt-6 sm:mt-8 text-center">
-          <p 
-            className="text-xs"
-            style={{ color: brand.colors.ink.faint }}
-          >
+          <p className="text-xs" style={{ color: brand.colors.ink.faint }}>
             Secured by Rental Garage • {isQuotation ? "Quotation" : "Invoice"} generated on{" "}
             {invoice.created_at ? new Date(invoice.created_at).toLocaleDateString() : "—"}
           </p>

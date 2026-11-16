@@ -1,3 +1,4 @@
+// src/app/contracts/view/[token]/page.tsx
 "use client";
 
 import { useParams } from "next/navigation";
@@ -42,9 +43,6 @@ export default function PublicContractViewPage() {
     business_location: contract.tenant_address || "",
     phone: contract.tenant_phone || "",
     email: contract.tenant_email || "",
-    website: "",
-    kra_pin: "",
-    contract_terms: "",
   };
 
   return (
@@ -54,11 +52,7 @@ export default function PublicContractViewPage() {
     >
       <div className="max-w-4xl mx-auto">
         
-        <PublicContractCompanyHeader 
-          tenant={tenant}
-          bookingNumber={contract.booking_number || `BK-${contract.booking_id}`}
-        />
-
+        {/* ✅ Main document card */}
         <div 
           className="rounded-xl sm:rounded-2xl overflow-hidden"
           style={{
@@ -67,7 +61,13 @@ export default function PublicContractViewPage() {
             boxShadow: brand.colors.shadows.xl,
           }}
         >
-          
+          {/* ✅ Letterhead is now the top of the document */}
+          <PublicContractCompanyHeader 
+            tenant={tenant}
+            contractNumber={contract.contract_number}
+          />
+
+          {/* Status Banner */}
           <div 
             className="p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b"
             style={{
@@ -144,7 +144,13 @@ export default function PublicContractViewPage() {
 
           <PublicContractDetails contract={contract} />
           
-          <PublicContractTermsSection tenantName={tenant.company_name} />
+          {/* ✅ WIRED: Pass all dynamic terms and policies from the backend */}
+          <PublicContractTermsSection 
+            tenantName={tenant.company_name} 
+            contractTerms={contract.contract_terms}
+            contractFooter={contract.contract_footer}
+            effectivePolicies={contract.effective_policies}
+          />
           
           {!signed && (
             <PublicContractSignTab 

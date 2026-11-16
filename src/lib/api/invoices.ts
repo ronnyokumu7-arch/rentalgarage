@@ -1,3 +1,4 @@
+// src/lib/api/invoices.ts
 import apiClient from "@/lib/api-client";
 import type { Invoice, InvoiceCreate, InvoiceUpdate, InvoiceStatus, PaymentMethod, PaginatedResponse, PublicInvoiceView } from "@/lib/types";
 
@@ -43,8 +44,9 @@ export const invoicesApi = {
       `/invoices/${id}/share-link`
     ).then((r) => r.data),
 
+  // ✅ UPDATED: Explicitly type the return as PublicInvoiceView
   getByToken: (token: string) =>
-    apiClient.get(`/invoices/public/${token}`).then((r) => r.data),
+    apiClient.get<PublicInvoiceView>(`/invoices/public/${token}`).then((r) => r.data),
 
   recordPayment: (invoiceId: number, payload: RecordPaymentPayload) =>
     apiClient.post(`/invoices/${invoiceId}/record-payment`, payload).then((r) => r.data),
