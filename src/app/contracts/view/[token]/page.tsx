@@ -46,8 +46,13 @@ export default function PublicContractViewPage() {
     email: contract.tenant_email || "",
   };
 
+  // ✅ NEW: 3-State Execution Logic
   const isHandoverSigned = !!contract.handover_signed_at;
-  const showHandoverTab = signed && contract.handover_items && contract.handover_items.length > 0;
+  const requiresHandover = !!(contract.handover_items && contract.handover_items.length > 0);
+  const showHandoverTab = signed && requiresHandover;
+  
+  const fullyExecuted = signed && (!requiresHandover || isHandoverSigned);
+  const pendingHandover = signed && requiresHandover && !isHandoverSigned;
 
   return (
     <div 
@@ -71,16 +76,16 @@ export default function PublicContractViewPage() {
             contractNumber={contract.contract_number}
           />
 
-          {/* Status Banner */}
+          {/* ✅ Status Banner: 3 States (Green = Fully Executed, Amber = Pending Handover, Blue = Pending Terms) */}
           <div 
             className="p-4 sm:p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b"
             style={{
-              backgroundColor: signed ? brand.colors.success.bg : brand.colors.info.bg,
-              borderColor: signed ? brand.colors.success.border : brand.colors.info.border,
+              backgroundColor: fullyExecuted ? brand.colors.success.bg : pendingHandover ? brand.colors.warning.bg : brand.colors.info.bg,
+              borderColor: fullyExecuted ? brand.colors.success.border : pendingHandover ? brand.colors.warning.border : brand.colors.info.border,
             }}
           >
             <div className="flex items-center gap-3">
-              {signed ? (
+              {fullyExecuted ? (
                 <div 
                   className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
                   style={{ backgroundColor: brand.colors.success.bg }}
@@ -90,25 +95,27 @@ export default function PublicContractViewPage() {
               ) : (
                 <div 
                   className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-                  style={{ backgroundColor: brand.colors.info.bg }}
+                  style={{ backgroundColor: pendingHandover ? brand.colors.warning.bg : brand.colors.info.bg }}
                 >
-                  <FileText className="h-5 w-5" style={{ color: brand.colors.info.main }} aria-hidden="true" />
+                  <FileText className="h-5 w-5" style={{ color: pendingHandover ? brand.colors.warning.main : brand.colors.info.main }} aria-hidden="true" />
                 </div>
               )}
               <div>
                 <h3 
                   className="text-sm font-bold"
-                  style={{ color: signed ? brand.colors.success.text : brand.colors.info.text }}
+                  style={{ color: fullyExecuted ? brand.colors.success.text : pendingHandover ? brand.colors.warning.text : brand.colors.info.text }}
                 >
-                  {signed ? "Contract Signed & Executed" : "Pending Your Signature"}
+                  {fullyExecuted ? "Contract Fully Executed" 
+                   : pendingHandover ? "Pending Handover Signature" 
+                   : "Pending Your Signature"}
                 </h3>
                 <p 
                   className="text-xs"
-                  style={{ color: signed ? brand.colors.success.text : brand.colors.info.text }}
+                  style={{ color: fullyExecuted ? brand.colors.success.text : pendingHandover ? brand.colors.warning.text : brand.colors.info.text }}
                 >
-                  {signed 
-                    ? "This agreement is fully executed." 
-                    : "Please review details and sign to proceed."}
+                  {fullyExecuted ? "All required signatures are complete." 
+                   : pendingHandover ? "Terms signed — please confirm the vehicle handover checklist below." 
+                   : "Please review details and sign to proceed."}
                 </p>
               </div>
             </div>
