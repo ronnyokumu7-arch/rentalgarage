@@ -1043,6 +1043,8 @@ export interface TenantProfile {
   contract_terms?: string | null;
   contract_prefix?: string;
   contract_footer?: string | null;
+  // ✅ NEW: Agency Default Signature for Contracts
+  company_signature_path?: string | null;
 }
 
 export interface Tenant {

@@ -1,4 +1,3 @@
-// src/lib/api/tenant-profile.ts
 import apiClient from "@/lib/api-client";
 import type { TenantProfile } from "@/lib/types";
 
@@ -13,6 +12,7 @@ export interface TenantProfilePayload {
   logo_url?: string;
   contract_terms?: string;    // Maps to DB 'contract_terms'
   contract_footer?: string;   // Maps to DB 'contract_footer'
+  company_signature_path?: string; // ✅ NEW: Direct mapping. Data URL or storage URL (same pattern as logo_url)
 }
 
 export const tenantProfileApi = {

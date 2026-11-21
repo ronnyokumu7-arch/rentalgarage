@@ -1,4 +1,3 @@
-// src/hooks/settings/useBusinessSettings.ts
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
@@ -18,6 +17,7 @@ export interface BusinessFormValues {
   kra_pin: string;
   contract_terms: string;
   contract_footer: string;
+  company_signature_path: string; // ✅ NEW: Agency default contract signature
 }
 
 export interface AdminFormValues {
@@ -72,6 +72,7 @@ export function useBusinessSettings() {
     handleSubmit,
     reset,
     watch,
+    setValue, // ✅ NEW: Exposed for manual signature pad updates
     formState: { errors, isDirty },
   } = useForm<BusinessFormValues>({
     defaultValues: {
@@ -83,6 +84,7 @@ export function useBusinessSettings() {
       kra_pin: "",
       contract_terms: "",
       contract_footer: "",
+      company_signature_path: "", // ✅ NEW
     },
   });
 
@@ -138,6 +140,7 @@ export function useBusinessSettings() {
           kra_pin: profile.tax_number || "",
           contract_terms: profile.contract_terms || "",
           contract_footer: profile.contract_footer || "",
+          company_signature_path: profile.company_signature_path || "", // ✅ NEW
         });
         const logo = profile.logo_url || null;
         savedLogoRef.current = logo;
@@ -196,6 +199,7 @@ export function useBusinessSettings() {
         kra_pin: data.kra_pin,
         contract_terms: data.contract_terms,
         contract_footer: data.contract_footer,
+        company_signature_path: data.company_signature_path || undefined, // ✅ NEW
         ...(logoPreview ? { logo_url: logoPreview } : {}),
       };
 
@@ -210,6 +214,7 @@ export function useBusinessSettings() {
         kra_pin: updatedProfile.tax_number || "",
         contract_terms: updatedProfile.contract_terms || "",
         contract_footer: updatedProfile.contract_footer || "",
+        company_signature_path: updatedProfile.company_signature_path || "", // ✅ NEW
       });
 
       savedLogoRef.current = updatedProfile.logo_url || null;
@@ -279,6 +284,7 @@ export function useBusinessSettings() {
     register,
     handleSubmit,
     reset,
+    setValue, // ✅ NEW: Exposed for signature pad
     errors,
     isDirty,
     registerAdmin,

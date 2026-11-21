@@ -1,19 +1,27 @@
-// src/components/settings/BusinessProfileSettings.tsx
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
   Buildings as Building2, Upload, Globe, Envelope as Mail, Phone, MapPin, Hash, Shield,
-  FileText, User, FloppyDisk as Save, CircleNotch as Loader2, CheckCircle as CheckCircle2, PencilSimple as Pencil, X, WarningCircle as AlertCircle,
+  FileText, User, FloppyDisk as Save, CircleNotch as Loader2, CheckCircle as CheckCircle2,
+  PencilSimple as Pencil, X, WarningCircle as AlertCircle, Eraser, Image as ImageIcon,
 } from "@phosphor-icons/react/ssr";
 import { useBusinessSettings } from "@/hooks/settings/useBusinessSettings";
+import SignaturePad, { SignaturePadRef } from "@/components/public-docs/SignaturePad";
 
-type SectionKey = "company" | "footer" | "admin";
+type SectionKey = "company" | "footer" | "signature" | "admin";
 
 export default function BusinessProfileSettings() {
   const [editingSection, setEditingSection] = useState<SectionKey | null>(null);
+  const [sigDirty, setSigDirty] = useState(false);
   const hadInvalid = useRef(false);
+  const signatureRef = useRef<SignaturePadRef>(null);
   const s = useBusinessSettings();
+
+  // Leaving the signature editor always resets its dirty flag (covers cancel + save)
+  useEffect(() => {
+    if (editingSection !== "signature") setSigDirty(false);
+  }, [editingSection]);
 
   const toggleSection = (section: SectionKey) => {
     if (editingSection === section) {
@@ -36,9 +44,19 @@ export default function BusinessProfileSettings() {
       await s.handleSubmit(s.onSubmit, onInvalid)(e);
     } else if (editingSection === "footer" && s.isDirty) {
       await s.handleSubmit(s.onSubmit, onInvalid)(e);
+    } else if (editingSection === "signature" && sigDirty) {
+      // Pull the drawn signature (or empty if cleared) into the form, then submit.
+      const sigData = signatureRef.current?.getSignature() ?? "";
+      s.setValue("company_signature_path", sigData, { shouldDirty: true });
+      await s.handleSubmit(s.onSubmit, onInvalid)(e);
     }
 
     if (!hadInvalid.current) setEditingSection(null);
+  };
+
+  const handleClearSignature = () => {
+    signatureRef.current?.clear();
+    setSigDirty(true); // clearing is a change too
   };
 
   if (s.isLoading) {
@@ -68,107 +86,59 @@ export default function BusinessProfileSettings() {
               isDirty={s.isDirty || s.isLogoDirty}
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Field
-                  label="Company Name"
-                  icon={Building2}
-                  editing={editingSection === "company"}
-                  display={s.businessData.company_name}
-                  register={s.register("company_name")}
-                  error={s.errors.company_name}
-                  placeholder="e.g. Nairobi Car Rentals"
-                  className="md:col-span-2"
-                />
-                <Field
-                  label="Email Address"
-                  icon={Mail}
-                  editing={editingSection === "company"}
-                  type="email"
-                  display={s.businessData.email}
-                  register={s.register("email")}
-                  error={s.errors.email}
-                  placeholder="contact@agency.com"
-                />
-                <Field
-                  label="Phone Number"
-                  icon={Phone}
-                  editing={editingSection === "company"}
-                  type="tel"
-                  display={s.businessData.phone}
-                  register={s.register("phone")}
-                  error={s.errors.phone}
-                  placeholder="+254 700 000 000"
-                />
-                <Field
-                  label="Website"
-                  icon={Globe}
-                  editing={editingSection === "company"}
-                  type="url"
-                  link
-                  display={s.businessData.website}
-                  register={s.register("website")}
-                  error={s.errors.website}
-                  placeholder="website.com or https://www.website.com"
-                  className="md:col-span-2"
-                />
-                <Field
-                  label="Business Location"
-                  icon={MapPin}
-                  editing={editingSection === "company"}
-                  display={s.businessData.business_location}
-                  register={s.register("business_location")}
-                  error={s.errors.business_location}
-                  placeholder="e.g. Westlands, Nairobi"
-                  className="md:col-span-2"
-                />
-                <Field
-                  label="KRA PIN / Tax ID"
-                  icon={Hash}
-                  editing={editingSection === "company"}
-                  mono
-                  display={s.businessData.kra_pin}
-                  register={s.register("kra_pin")}
-                  error={s.errors.kra_pin}
-                  placeholder="A000000000Z"
-                  className="md:col-span-2"
-                />
+                <Field label="Company Name" icon={Building2} editing={editingSection === "company"} display={s.businessData.company_name} register={s.register("company_name")} error={s.errors.company_name} placeholder="e.g. Nairobi Car Rentals" className="md:col-span-2" />
+                <Field label="Email Address" icon={Mail} editing={editingSection === "company"} type="email" display={s.businessData.email} register={s.register("email")} error={s.errors.email} placeholder="contact@agency.com" />
+                <Field label="Phone Number" icon={Phone} editing={editingSection === "company"} type="tel" display={s.businessData.phone} register={s.register("phone")} error={s.errors.phone} placeholder="+254 700 000 000" />
+                <Field label="Website" icon={Globe} editing={editingSection === "company"} type="url" link display={s.businessData.website} register={s.register("website")} error={s.errors.website} placeholder="website.com or https://www.website.com" className="md:col-span-2" />
+                <Field label="Business Location" icon={MapPin} editing={editingSection === "company"} display={s.businessData.business_location} register={s.register("business_location")} error={s.errors.business_location} placeholder="e.g. Westlands, Nairobi" className="md:col-span-2" />
+                <Field label="KRA PIN / Tax ID" icon={Hash} editing={editingSection === "company"} mono display={s.businessData.kra_pin} register={s.register("kra_pin")} error={s.errors.kra_pin} placeholder="A000000000Z" className="md:col-span-2" />
               </div>
 
-              {/* Logo sub-section */}
+              {/* ✅ REDESIGNED: clickable logo tile (one affordance, hover overlay) */}
               <div className="mt-5 pt-5 border-t border-[var(--color-surface-border)]/60">
-                <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)] mb-2">
+                <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)] mb-2.5">
                   Company Logo
                 </label>
-                <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 rounded-xl border-2 border-dashed border-[var(--color-surface-border)] flex items-center justify-center bg-[var(--color-surface-hover)]/50 shrink-0 overflow-hidden">
-                    {s.logoPreview ? (
-                      <img src={s.logoPreview} alt="Company Logo" className="w-full h-full object-cover" />
-                    ) : (
-                      <Building2 className="w-7 h-7 text-[var(--color-ink-subtle)]" aria-hidden="true" />
-                    )}
-                  </div>
-                  {editingSection === "company" ? (
-                    <div className="space-y-2">
-                      <label className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-bold text-[var(--color-primary)] bg-[var(--color-primary)]/10 hover:bg-[var(--color-primary)]/15 border border-[var(--color-primary)]/20 cursor-pointer transition-all active:scale-95">
-                        <Upload className="w-3.5 h-3.5" aria-hidden="true" /> Upload Logo
-                        <input
-                          type="file"
-                          accept="image/*"
-                          onChange={s.handleLogoChange}
-                          className="hidden"
-                        />
-                      </label>
-                      <p className="text-[10px] text-[var(--color-ink-subtle)]">PNG, JPG, or SVG · Max 2MB</p>
+                {editingSection === "company" ? (
+                  <label className="group flex items-center gap-4 cursor-pointer">
+                    <div className="relative w-24 h-24 rounded-xl border-2 border-dashed border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 overflow-hidden shrink-0 transition-all group-hover:border-[var(--color-primary)]/60 group-hover:shadow-sm">
+                      {s.logoPreview ? (
+                        <img src={s.logoPreview} alt="Company Logo" className="w-full h-full object-contain p-1.5" />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center text-[var(--color-ink-subtle)]">
+                          <ImageIcon size={20} weight="light" aria-hidden="true" />
+                          <span className="text-[9px] font-semibold mt-1">No logo</span>
+                        </div>
+                      )}
+                      <div className="absolute inset-0 flex flex-col items-center justify-center gap-1 bg-[var(--color-ink)]/70 text-white opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Upload size={16} aria-hidden="true" />
+                        <span className="text-[9px] font-bold uppercase tracking-wide">Change</span>
+                      </div>
                     </div>
-                  ) : (
+                    <input type="file" accept="image/*" onChange={s.handleLogoChange} className="hidden" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-[var(--color-ink)]">Click the logo to upload</p>
+                      <p className="text-[10px] text-[var(--color-ink-subtle)] mt-0.5">PNG, JPG, or SVG · Max 2MB · Auto-resized</p>
+                    </div>
+                  </label>
+                ) : (
+                  <div className="flex items-center gap-4">
+                    <div className="w-20 h-20 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50 flex items-center justify-center shrink-0 overflow-hidden">
+                      {s.logoPreview ? (
+                        <img src={s.logoPreview} alt="Company Logo" className="w-full h-full object-contain p-1.5" />
+                      ) : (
+                        <Building2 className="w-7 h-7 text-[var(--color-ink-subtle)]" aria-hidden="true" />
+                      )}
+                    </div>
                     <p className="text-xs text-[var(--color-ink-muted)]">
-                      {s.logoPreview ? "Logo active and visible on invoices." : "No logo uploaded yet."}
+                      {s.logoPreview ? "Logo active and visible on invoices and contracts." : "No logo uploaded yet."}
                     </p>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             </Section>
 
-            {/* ✅ UPDATED: Contract Terms & Footer */}
+            {/* Contract Terms & Footer */}
             <Section
               icon={FileText}
               title="Contract Terms & Footer"
@@ -183,36 +153,14 @@ export default function BusinessProfileSettings() {
               {editingSection === "footer" ? (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)] mb-1.5">
-                      Contract Terms (Markdown supported)
-                    </label>
-                    <textarea
-                      {...s.register("contract_terms")}
-                      rows={6}
-                      className="w-full p-3 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all resize-y min-h-[120px]"
-                      placeholder="e.g. **1. Fuel Policy:** Return the car with the same fuel level..."
-                    />
-                    {s.errors.contract_terms && (
-                      <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1">
-                        <AlertCircle className="w-3 h-3" aria-hidden="true" /> {s.errors.contract_terms.message}
-                      </p>
-                    )}
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)] mb-1.5">Contract Terms (Markdown supported)</label>
+                    <textarea {...s.register("contract_terms")} rows={6} className="w-full p-3 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all resize-y min-h-[120px]" placeholder="e.g. **1. Fuel Policy:** Return the car with the same fuel level..." />
+                    {s.errors.contract_terms && <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" aria-hidden="true" /> {s.errors.contract_terms.message}</p>}
                   </div>
                   <div>
-                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)] mb-1.5">
-                      Document Footer
-                    </label>
-                    <textarea
-                      {...s.register("contract_footer")}
-                      rows={3}
-                      className="w-full p-3 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all resize-y min-h-[80px]"
-                      placeholder="e.g. Thank you for choosing us. Drive safely!"
-                    />
-                    {s.errors.contract_footer && (
-                      <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1">
-                        <AlertCircle className="w-3 h-3" aria-hidden="true" /> {s.errors.contract_footer.message}
-                      </p>
-                    )}
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)] mb-1.5">Document Footer</label>
+                    <textarea {...s.register("contract_footer")} rows={3} className="w-full p-3 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all resize-y min-h-[80px]" placeholder="e.g. Thank you for choosing us. Drive safely!" />
+                    {s.errors.contract_footer && <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" aria-hidden="true" /> {s.errors.contract_footer.message}</p>}
                   </div>
                 </div>
               ) : (
@@ -220,18 +168,64 @@ export default function BusinessProfileSettings() {
                   <div>
                     <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)] mb-1.5">Contract Terms</p>
                     <div className="p-3.5 rounded-xl bg-[var(--color-surface-hover)]/50 border border-[var(--color-surface-border)] text-sm text-[var(--color-ink-muted)] leading-relaxed whitespace-pre-wrap">
-                      {s.businessData.contract_terms || (
-                        <span className="italic text-[var(--color-ink-subtle)]">No contract terms configured.</span>
-                      )}
+                      {s.businessData.contract_terms || <span className="italic text-[var(--color-ink-subtle)]">No contract terms configured.</span>}
                     </div>
                   </div>
                   <div>
                     <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)] mb-1.5">Document Footer</p>
                     <div className="p-3.5 rounded-xl bg-[var(--color-surface-hover)]/50 border border-[var(--color-surface-border)] text-sm text-[var(--color-ink-muted)] leading-relaxed whitespace-pre-wrap">
-                      {s.businessData.contract_footer || (
-                        <span className="italic text-[var(--color-ink-subtle)]">No footer text configured.</span>
-                      )}
+                      {s.businessData.contract_footer || <span className="italic text-[var(--color-ink-subtle)]">No footer text configured.</span>}
                     </div>
+                  </div>
+                </div>
+              )}
+            </Section>
+
+            {/* ✅ FIXED: Contract Signature (now actually savable) */}
+            <Section
+              icon={FileText}
+              title="Contract Signature"
+              subtitle="Default signature for the agency representative"
+              isEditing={editingSection === "signature"}
+              onEdit={() => toggleSection("signature")}
+              onCancel={() => toggleSection("signature")}
+              onSave={handleSaveSection}
+              isSaving={s.isSaving}
+              isDirty={sigDirty}
+            >
+              {editingSection === "signature" ? (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)]">Draw Signature</label>
+                    <button
+                      type="button"
+                      onClick={handleClearSignature}
+                      className="flex items-center gap-1.5 text-xs font-semibold px-2 py-1 rounded-lg text-[var(--color-ink-muted)] hover:text-[var(--color-danger)] hover:bg-[var(--color-danger-bg)] transition-colors active:scale-95"
+                    >
+                      <Eraser size={12} aria-hidden="true" /> Clear
+                    </button>
+                  </div>
+                  {/* onPointerDown marks the form dirty the moment the user strokes the canvas */}
+                  <div
+                    className="border-2 border-dashed border-[var(--color-surface-border)] rounded-xl overflow-hidden bg-white"
+                    onPointerDown={() => setSigDirty(true)}
+                  >
+                    <SignaturePad ref={signatureRef} />
+                  </div>
+                  <input type="hidden" {...s.register("company_signature_path")} />
+                  <p className="text-[10px] text-[var(--color-ink-subtle)]">
+                    This signature will appear as the "Company Representative" on all generated rental contracts.
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)] mb-1.5">Agency Signature</p>
+                  <div className="p-4 rounded-xl bg-[var(--color-surface-hover)]/50 border border-[var(--color-surface-border)] flex flex-col items-center justify-center min-h-[110px]">
+                    {s.businessData.company_signature_path ? (
+                      <img src={s.businessData.company_signature_path} alt="Agency Signature" className="max-h-[80px] max-w-full object-contain" />
+                    ) : (
+                      <span className="text-sm italic text-[var(--color-ink-subtle)]">No signature configured.</span>
+                    )}
                   </div>
                 </div>
               )}
@@ -240,7 +234,6 @@ export default function BusinessProfileSettings() {
 
           {/* ─── RIGHT COLUMN ─────────────────────────────────────── */}
           <div className="lg:col-span-5 space-y-5 lg:space-y-6">
-            {/* Administrator Account */}
             <Section
               icon={Shield}
               title="Administrator Account"
@@ -253,37 +246,10 @@ export default function BusinessProfileSettings() {
               isDirty={s.isAdminDirty}
             >
               <div className="space-y-4">
-                <Field
-                  label="Full Name"
-                  icon={User}
-                  editing={editingSection === "admin"}
-                  display={s.adminData.full_name}
-                  register={s.registerAdmin("full_name")}
-                  error={s.adminErrors.full_name}
-                  placeholder="Full name"
-                />
-                <Field
-                  label="Email Address"
-                  icon={Mail}
-                  editing={editingSection === "admin"}
-                  type="email"
-                  display={s.adminData.email}
-                  register={s.registerAdmin("email")}
-                  error={s.adminErrors.email}
-                  placeholder="admin@agency.com"
-                />
-                <Field
-                  label="Phone Number"
-                  icon={Phone}
-                  editing={editingSection === "admin"}
-                  type="tel"
-                  display={s.adminData.phone_number}
-                  register={s.registerAdmin("phone_number")}
-                  error={s.adminErrors.phone_number}
-                  placeholder="+254 700 000 000"
-                />
+                <Field label="Full Name" icon={User} editing={editingSection === "admin"} display={s.adminData.full_name} register={s.registerAdmin("full_name")} error={s.adminErrors.full_name} placeholder="Full name" />
+                <Field label="Email Address" icon={Mail} editing={editingSection === "admin"} type="email" display={s.adminData.email} register={s.registerAdmin("email")} error={s.adminErrors.email} placeholder="admin@agency.com" />
+                <Field label="Phone Number" icon={Phone} editing={editingSection === "admin"} type="tel" display={s.adminData.phone_number} register={s.registerAdmin("phone_number")} error={s.adminErrors.phone_number} placeholder="+254 700 000 000" />
               </div>
-
               {s.adminUser && editingSection !== "admin" && (
                 <div className="pt-3 mt-3 border-t border-[var(--color-surface-border)]/60 flex items-center justify-between text-xs">
                   <span className="text-[var(--color-ink-subtle)]">Tenant ID</span>
@@ -299,29 +265,12 @@ export default function BusinessProfileSettings() {
 }
 
 /* ─── Section wrapper with inline edit controls ───────────────────── */
-// (Keep the existing Section and Field components exactly as they were)
 function Section({
-  icon: Icon,
-  title,
-  subtitle,
-  isEditing,
-  onEdit,
-  onCancel,
-  onSave,
-  isSaving,
-  isDirty,
-  children,
+  icon: Icon, title, subtitle, isEditing, onEdit, onCancel, isSaving, isDirty, children,
 }: {
-  icon: React.ElementType;
-  title: string;
-  subtitle: string;
-  isEditing: boolean;
-  onEdit: () => void;
-  onCancel: () => void;
-  onSave: (e: React.FormEvent) => void;
-  isSaving: boolean;
-  isDirty: boolean;
-  children: React.ReactNode;
+  icon: React.ElementType; title: string; subtitle: string; isEditing: boolean;
+  onEdit: () => void; onCancel: () => void; onSave: (e: React.FormEvent) => void;
+  isSaving: boolean; isDirty: boolean; children: React.ReactNode;
 }) {
   return (
     <div className="bg-[var(--color-surface)] border border-[var(--color-surface-border)] rounded-2xl shadow-sm overflow-hidden">
@@ -334,41 +283,19 @@ function Section({
           <p className="text-[11px] text-[var(--color-ink-muted)] truncate">{subtitle}</p>
         </div>
         {!isEditing && (
-          <button
-            type="button"
-            onClick={onEdit}
-            className="p-2 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-primary)] transition-colors active:scale-95 shrink-0"
-            aria-label={`Edit ${title}`}
-          >
+          <button type="button" onClick={onEdit} className="p-2 rounded-lg text-[var(--color-ink-muted)] hover:bg-[var(--color-surface-hover)] hover:text-[var(--color-primary)] transition-colors active:scale-95 shrink-0" aria-label={`Edit ${title}`}>
             <Pencil className="w-4 h-4" aria-hidden="true" />
           </button>
         )}
       </div>
-
       <div className="p-4 sm:p-5">{children}</div>
-
       {isEditing && (
         <div className="flex items-center justify-end gap-2 px-4 sm:px-5 py-3 border-t border-[var(--color-surface-border)] bg-[var(--color-surface-hover)]/50">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-all active:scale-95"
-          >
+          <button type="button" onClick={onCancel} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] hover:bg-[var(--color-surface-hover)] transition-all active:scale-95">
             <X className="w-3.5 h-3.5" aria-hidden="true" /> Cancel
           </button>
-          <button
-            type="submit"
-            onClick={onSave}
-            disabled={!isDirty || isSaving}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm"
-          >
-            {isSaving ? (
-              <><Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" /> Saving</>
-            ) : isDirty ? (
-              <><Save className="w-3.5 h-3.5" aria-hidden="true" /> Save</>
-            ) : (
-              <><CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" /> Saved</>
-            )}
+          <button type="submit" disabled={!isDirty || isSaving} className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold text-white bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm">
+            {isSaving ? (<><Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" /> Saving</>) : isDirty ? (<><Save className="w-3.5 h-3.5" aria-hidden="true" /> Save</>) : (<><CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" /> Saved</>)}
           </button>
         </div>
       )}
@@ -378,60 +305,30 @@ function Section({
 
 /* ─── Field component ─────────────────────────────────────────────── */
 function Field({
-  label, icon: Icon, editing, display, register, error,
-  type = "text", placeholder = "", mono = false, link = false, className = "",
+  label, icon: Icon, editing, display, register, error, type = "text", placeholder = "", mono = false, link = false, className = "",
 }: {
-  label: string;
-  icon: React.ElementType;
-  editing: boolean;
-  display: string;
-  register: any;
-  error?: any;
-  type?: string;
-  placeholder?: string;
-  mono?: boolean;
-  link?: boolean;
-  className?: string;
+  label: string; icon: React.ElementType; editing: boolean; display: string; register: any; error?: any;
+  type?: string; placeholder?: string; mono?: boolean; link?: boolean; className?: string;
 }) {
   return (
     <div className={className}>
-      <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)] mb-1.5">
-        {label}
-      </label>
+      <label className="block text-[11px] font-bold uppercase tracking-wider text-[var(--color-ink-subtle)] mb-1.5">{label}</label>
       {editing ? (
         <>
           <div className="relative">
             <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-ink-subtle)]" aria-hidden="true" />
-            <input
-              type={type}
-              placeholder={placeholder}
-              className="w-full h-11 pl-10 pr-3.5 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all"
-              {...register}
-            />
+            <input type={type} placeholder={placeholder} className="w-full h-11 pl-10 pr-3.5 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-sm text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] outline-none transition-all" {...register} />
           </div>
-          {error && (
-            <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1">
-              <AlertCircle className="w-3 h-3" aria-hidden="true" /> {error.message}
-            </p>
-          )}
+          {error && <p className="text-xs text-rose-500 mt-1.5 flex items-center gap-1"><AlertCircle className="w-3 h-3" aria-hidden="true" /> {error.message}</p>}
         </>
       ) : (
         <div className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-[var(--color-surface-hover)]/50 border border-[var(--color-surface-border)] min-h-[44px]">
           <Icon className="w-4 h-4 text-[var(--color-ink-subtle)] shrink-0" aria-hidden="true" />
           {display ? (
             link ? (
-              <a
-                href={`https://${display.replace(/^https?:\/\//i, "")}`}
-                target="_blank"
-                rel="noreferrer"
-                className="text-sm text-[var(--color-primary)] font-medium hover:underline truncate"
-              >
-                {display}
-              </a>
+              <a href={`https://${display.replace(/^https?:\/\//i, "")}`} target="_blank" rel="noreferrer" className="text-sm text-[var(--color-primary)] font-medium hover:underline truncate">{display}</a>
             ) : (
-              <span className={`text-sm text-[var(--color-ink)] truncate ${mono ? "font-mono text-xs" : ""}`}>
-                {display}
-              </span>
+              <span className={`text-sm text-[var(--color-ink)] truncate ${mono ? "font-mono text-xs" : ""}`}>{display}</span>
             )
           ) : (
             <span className="text-sm italic text-[var(--color-ink-subtle)]">Not set</span>
