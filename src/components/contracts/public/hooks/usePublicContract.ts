@@ -11,6 +11,7 @@ export interface UsePublicContractReturn {
   error: string | null;
   isSigning: boolean;
   signContract: (signatureData: string) => Promise<boolean>;
+  submitHandover: (checklist: Record<string, boolean>, signature: string) => Promise<boolean>; // ✅ ADDED
   downloadPdf: () => Promise<void>;
   signed: boolean;
   signingError: string | null;
@@ -42,7 +43,6 @@ export function usePublicContract(token: string): UsePublicContractReturn {
   }, [token]);
 
   const signContract = async (signatureData: string): Promise<boolean> => {
-    // Validate contract state
     if (!contract) {
       setSigningError("No contract found");
       toast.error("No contract found");
@@ -55,14 +55,12 @@ export function usePublicContract(token: string): UsePublicContractReturn {
       return false;
     }
     
-    // Validate signature data
     if (!signatureData || signatureData.trim() === "") {
       setSigningError("Please provide a valid signature");
       toast.error("Signature is required");
       return false;
     }
     
-    // Check if signature is empty canvas (common issue with signature pads)
     if (signatureData === "data:image/png;base64," || signatureData.length < 100) {
       setSigningError("Please draw your signature before submitting");
       toast.error("Signature cannot be empty");
@@ -75,7 +73,6 @@ export function usePublicContract(token: string): UsePublicContractReturn {
     try {
       await contractsApi.publicSign(token, signatureData);
       
-      // Update local state
       setContract(prev => prev ? { 
         ...prev, 
         signed_by_client: true,
@@ -98,7 +95,6 @@ export function usePublicContract(token: string): UsePublicContractReturn {
       const status = apiErr.response?.status;
       const responseData = apiErr.response?.data;
       
-      // Handle validation errors (422)
       if (status === 422) {
         if (responseData?.errors) {
           const errorMessages = responseData.errors
@@ -114,6 +110,69 @@ export function usePublicContract(token: string): UsePublicContractReturn {
       } else {
         const detail = responseData?.detail || "Failed to sign contract. Please try again.";
         setSigningError(detail);
+        toast.error(detail);
+      }
+      
+      return false;
+    } finally {
+      setIsSigning(false);
+    }
+  };
+
+  // ✅ NEW: Submit handover checklist + second signature
+  const submitHandover = async (
+    checklist: Record<string, boolean>,
+    signature: string
+  ): Promise<boolean> => {
+    if (!contract) {
+      toast.error("No contract found");
+      return false;
+    }
+    if (contract.handover_signed_at) {
+      toast.error("Handover already signed");
+      return false;
+    }
+    if (!signature || signature.trim() === "" || signature.length < 100) {
+      toast.error("Please draw your signature before submitting");
+      return false;
+    }
+
+    setIsSigning(true);
+    setSigningError(null);
+
+    try {
+      await contractsApi.publicSubmitHandover(token, { checklist, signature });
+      
+      setContract(prev =>
+        prev
+          ? {
+              ...prev,
+              handover_checklist: checklist,
+              handover_signed_at: new Date().toISOString(),
+            }
+          : null
+      );
+      
+      toast.success("Handover checklist confirmed and signed!");
+      return true;
+    } catch (err: unknown) {
+      const apiErr = err as {
+        response?: {
+          status?: number;
+          data?: { detail?: string; errors?: Array<{ msg: string; loc: string[] }> };
+        };
+      };
+      
+      const status = apiErr.response?.status;
+      const responseData = apiErr.response?.data;
+      
+      if (status === 422 && responseData?.errors) {
+        const errorMessages = responseData.errors
+          .map(e => `${e.loc.join('.')}: ${e.msg}`)
+          .join(', ');
+        toast.error(errorMessages);
+      } else {
+        const detail = responseData?.detail || "Failed to submit handover. Please try again.";
         toast.error(detail);
       }
       
@@ -165,6 +224,7 @@ export function usePublicContract(token: string): UsePublicContractReturn {
     error,
     isSigning,
     signContract,
+    submitHandover, // ✅ ADDED
     downloadPdf,
     signed: contract?.signed_by_client ?? false,
     signingError,

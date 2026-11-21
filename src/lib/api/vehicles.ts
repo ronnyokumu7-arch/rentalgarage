@@ -19,6 +19,8 @@ export interface InvestorVehicleCreatePayload {
   insurance_expiry?: string | null;
   inspection_doc?: string | null;
   notes?: string | null;
+  // ✅ NEW: Investor can list features when onboarding their vehicle
+  features?: string[] | null;
 }
 
 // ✅ MATCHES BACKEND: InvestorVehicleAgencyUpdate (app/schemas/vehicle.py)
@@ -34,6 +36,8 @@ export interface InvestorVehicleAgencyUpdatePayload {
   investor_lease_rate?: number | null;
   lease_rate_type?: string | null;
   lease_rate_locked?: boolean;
+  // ✅ NEW: Agency can update features on investor-owned vehicles too
+  features?: string[] | null;
 }
 
 export const vehiclesApi = {

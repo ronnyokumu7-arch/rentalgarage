@@ -226,6 +226,9 @@ export interface Vehicle {
   supports_wedding_service: boolean;
   wedding_base_rate: number | null;
   
+  // ✅ NEW: Vehicle Features/Equipment List (e.g., ["Spare Wheel", "Car Jack", "Radio"])
+  features: string[] | null;
+  
   // ✅ NEW: Investor Lease Agreement Fields
   investor_lease_rate?: number | null;
   lease_rate_type?: string | null;  // 'daily' | 'monthly'
@@ -261,6 +264,9 @@ export interface VehicleCreate {
   airport_transfer_base_rate?: number | null;
   supports_wedding_service?: boolean;
   wedding_base_rate?: number | null;
+  
+  // ✅ NEW: Vehicle Features/Equipment List
+  features?: string[] | null;
 }
 
 export interface VehicleUpdate {
@@ -283,6 +289,9 @@ export interface VehicleUpdate {
   airport_transfer_base_rate?: number | null;
   supports_wedding_service?: boolean;
   wedding_base_rate?: number | null;
+  
+  // ✅ NEW: Vehicle Features/Equipment List
+  features?: string[] | null;
 }
 
 // ✅ NEW: Investor Lease & Earning Types
@@ -698,6 +707,12 @@ export interface Contract {
   created_at: string;
   updated_at: string;
 
+  // ✅ NEW: Handover Checklist & Second Signature
+  handover_items: string[] | null;          // Snapshot of vehicle features at contract creation
+  handover_checklist: Record<string, boolean> | null;  // Client's tick-box selections
+  handover_signature_image_path: string | null;        // URL of the handover signature image
+  handover_signed_at: string | null;                   // When the client signed the handover
+
   booking_number?: string | null;
   client_id?: number | null;
   client_name?: string | null;
@@ -744,6 +759,11 @@ export interface PublicContractView {
     is_active: boolean;
     display_order: number;
   }> | null;
+
+  // ✅ NEW: Handover Checklist for the public signing page
+  handover_items?: string[] | null;                  // Snapshot of vehicle features to tick off
+  handover_checklist?: Record<string, boolean> | null;  // Client's current tick-box state (for resume)
+  handover_signed_at?: string | null;                // When handover was signed (null = not yet signed)
 }
 
 // ─── Invoices ────────────────────────────────────────────────────────────────

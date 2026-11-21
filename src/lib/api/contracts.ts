@@ -41,6 +41,16 @@ export const contractsApi = {
   publicSign: (token: string, signature?: string) =>
     apiClient.post<{ message: string }>(`/contracts/public/${token}/sign`, { signature }).then((r) => r.data),
 
+  // ✅ NEW: Submit the handover checklist + second signature (Step 2 of signing)
+  publicSubmitHandover: (
+    token: string,
+    payload: { checklist: Record<string, boolean>; signature: string }
+  ) =>
+    apiClient.post<{ message: string; handover_signed_at: string }>(
+      `/contracts/public/${token}/handover`,
+      payload
+    ).then((r) => r.data),
+
   // ✅ 60s timeout for the public PDF as well
   publicDownloadPdf: (token: string) =>
     apiClient.get(`/contracts/public/${token}/pdf`, { responseType: "blob", timeout: 60000 }),

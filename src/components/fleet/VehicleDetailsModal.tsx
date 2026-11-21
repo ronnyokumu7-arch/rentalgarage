@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import { X, CircleNotch as Loader2 } from "@phosphor-icons/react/ssr";
+import { X, CircleNotch as Loader2, Wrench } from "@phosphor-icons/react/ssr";
 import { vehiclesApi } from "@/lib/api/vehicles";
 import type { Vehicle } from "@/lib/types";
 import OverlayPortal from "@/components/ui/OverlayPortal";
@@ -28,6 +28,7 @@ interface FormState {
   airport_transfer_base_rate: string;
   supports_wedding_service: boolean;
   wedding_base_rate: string;
+  features: string; // ✅ NEW: Comma-separated features list
 }
 
 const EMPTY_FORM: FormState = {
@@ -44,6 +45,7 @@ const EMPTY_FORM: FormState = {
   airport_transfer_base_rate: "",
   supports_wedding_service: false,
   wedding_base_rate: "",
+  features: "", // ✅ NEW
 };
 
 export default function VehicleDetailsModal({
@@ -75,6 +77,7 @@ export default function VehicleDetailsModal({
       supports_wedding_service: !!vehicle.supports_wedding_service,
       wedding_base_rate:
         vehicle.wedding_base_rate != null ? String(Number(vehicle.wedding_base_rate)) : "",
+      features: vehicle.features ? vehicle.features.join(", ") : "", // ✅ NEW: Array → string
     });
   }, [vehicle, isOpen]);
 
@@ -88,6 +91,11 @@ export default function VehicleDetailsModal({
     setLoading(true);
 
     try {
+      // ✅ Parse features: split by comma, trim, drop empties, or null if blank
+      const featuresList = form.features.trim()
+        ? form.features.split(",").map(f => f.trim()).filter(Boolean)
+        : null;
+
       const common = {
         daily_rate: Number(form.daily_rate) || 0,
         current_mileage: Number(form.current_mileage) || 0,
@@ -103,6 +111,7 @@ export default function VehicleDetailsModal({
           form.supports_wedding_service && form.wedding_base_rate.trim() !== ""
             ? Number(form.wedding_base_rate)
             : null,
+        features: featuresList, // ✅ NEW: Send as string[] | null
       };
 
       if (isInvestor) {
@@ -341,6 +350,24 @@ export default function VehicleDetailsModal({
                 />
               </div>
             )}
+          </div>
+
+          {/* ✅ NEW: Features & Equipment */}
+          <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3 space-y-2">
+            <div className="flex items-center gap-2">
+              <Wrench size={14} className="text-cyan-600 dark:text-cyan-400" aria-hidden="true" />
+              <p className="text-xs font-semibold text-[var(--color-ink)]">Features & Equipment</p>
+            </div>
+            <textarea
+              rows={3}
+              value={form.features}
+              onChange={(e) => setForm({ ...form, features: e.target.value })}
+              className={`${inputClass} h-auto py-2 resize-none`}
+              placeholder="Spare Wheel, Car Jack, First Aid Kit, Radio, Reflective Vest"
+            />
+            <p className="text-[10px] text-[var(--color-ink-muted)] leading-relaxed">
+              Separate items with commas. These appear on the client&apos;s handover checklist at signing.
+            </p>
           </div>
 
           {/* Notes */}

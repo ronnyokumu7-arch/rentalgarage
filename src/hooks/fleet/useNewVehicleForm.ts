@@ -39,6 +39,7 @@ export function useNewVehicleForm() {
     make: "", model: "", year: "", plate_number: "", vin: "",
     daily_rate: "", current_mileage: "", next_service_km: "",
     insurance_number: "", insurance_expiry: "", notes: "",
+    features: "", // ✅ NEW: Comma-separated list of vehicle features/equipment
   });
 
   const updateField = (field: string, value: string) => {
@@ -59,6 +60,11 @@ export function useNewVehicleForm() {
 
     setLoading(true);
     try {
+      // ✅ Parse features: split by comma, trim each, drop empties, or null if blank.
+      const featuresList = formData.features
+        ? formData.features.split(",").map(f => f.trim()).filter(Boolean)
+        : null;
+
       const payload: VehicleCreate = {
         make: formData.make,
         model: formData.model,
@@ -71,6 +77,7 @@ export function useNewVehicleForm() {
         insurance_number: formData.insurance_number || null,
         insurance_expiry: formData.insurance_expiry ? new Date(formData.insurance_expiry).toISOString() : null,
         notes: formData.notes || null,
+        features: featuresList, // ✅ NEW: Send as string[] | null
       };
 
       const newVehicle = await vehiclesApi.create(payload);

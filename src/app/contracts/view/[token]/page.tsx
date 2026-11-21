@@ -1,4 +1,3 @@
-// src/app/contracts/view/[token]/page.tsx
 "use client";
 
 import { useParams } from "next/navigation";
@@ -10,6 +9,7 @@ import PublicContractCompanyHeader from "@/components/contracts/public/PublicCon
 import PublicContractDetails from "@/components/contracts/public/PublicContractDetails";
 import PublicContractTermsSection from "@/components/contracts/public/PublicContractTermsSection";
 import PublicContractSignTab from "@/components/contracts/public/PublicContractSignTab";
+import PublicContractHandoverTab from "@/components/contracts/public/PublicContractHandoverTab";
 import ContractLoadingState from "@/components/ui/ContractLoadingState";
 import ContractErrorState from "@/components/ui/ContractErrorState";
 
@@ -30,6 +30,7 @@ export default function PublicContractViewPage() {
     error, 
     signed, 
     signContract, 
+    submitHandover,
     downloadPdf,
     isDownloadingPdf
   } = usePublicContract(token);
@@ -44,6 +45,9 @@ export default function PublicContractViewPage() {
     phone: contract.tenant_phone || "",
     email: contract.tenant_email || "",
   };
+
+  const isHandoverSigned = !!contract.handover_signed_at;
+  const showHandoverTab = signed && contract.handover_items && contract.handover_items.length > 0;
 
   return (
     <div 
@@ -157,6 +161,16 @@ export default function PublicContractViewPage() {
               contract={contract}
               onSign={signContract}
               isSigned={signed}
+            />
+          )}
+
+          {/* ✅ NEW: Handover Checklist (appears after signing, if vehicle has features) */}
+          {showHandoverTab && (
+            <PublicContractHandoverTab
+              handoverItems={contract.handover_items ?? []}
+              initialChecklist={contract.handover_checklist}
+              isHandoverSigned={isHandoverSigned}
+              onSubmitHandover={submitHandover}
             />
           )}
         </div>

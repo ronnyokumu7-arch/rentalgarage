@@ -15,6 +15,7 @@ import {
   Gauge,
   Hash,
   Note as StickyNote,
+  Wrench,
 } from "@phosphor-icons/react/ssr";
 import { CAR_DATA, YEARS } from "@/hooks/fleet/useNewVehicleForm";
 
@@ -303,7 +304,7 @@ export default function NewVehicleForm({
         </section>
       </div>
 
-      {/* RIGHT COLUMN: Financials → Notes → CTA */}
+      {/* RIGHT COLUMN: Financials → Features → Notes → CTA */}
       <aside className="lg:sticky lg:top-4 space-y-3 sm:space-y-4">
         {/* Financials */}
         <section className={sectionClass}>
@@ -360,6 +361,27 @@ export default function NewVehicleForm({
               </div>
             </div>
           </div>
+        </section>
+
+        {/* ✅ NEW: Features & Equipment */}
+        <section className={sectionClass}>
+          <div className="flex items-center gap-2 mb-3">
+            <div className="w-6 h-6 rounded-md bg-cyan-500/10 text-cyan-500 flex items-center justify-center flex-shrink-0">
+              <Wrench size={14} aria-hidden="true" />
+            </div>
+            <h3 className="text-sm font-bold text-[var(--color-ink)]">Features & Equipment</h3>
+          </div>
+          <label className={labelClass}>Available Features (Optional)</label>
+          <textarea
+            value={formData.features || ""}
+            onChange={(e) => updateField("features", e.target.value)}
+            rows={3}
+            className="w-full px-3 py-2.5 rounded-lg border border-[var(--color-surface-border)] bg-[var(--color-surface)] text-[var(--color-ink)] placeholder-[var(--color-ink-subtle)] focus:ring-2 focus:ring-[var(--color-primary)]/30 focus:border-[var(--color-primary)] outline-none transition-all text-sm resize-none"
+            placeholder="Spare Wheel, Car Jack, First Aid Kit, Radio, Reflective Vest"
+          />
+          <p className="text-[10px] text-[var(--color-ink-muted)] mt-1.5 leading-relaxed">
+            Separate items with commas. These appear on the client&apos;s handover checklist at signing.
+          </p>
         </section>
 
         {/* Internal Notes */}

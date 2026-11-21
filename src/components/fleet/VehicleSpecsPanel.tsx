@@ -1,4 +1,3 @@
-// src/components/fleet/VehicleSpecsPanel.tsx
 "use client";
 
 import { useState } from "react";
@@ -121,6 +120,32 @@ export default function VehicleSpecsPanel({
             </div>
           ))}
         </dl>
+      </div>
+
+      {/* ✅ NEW: Features & Equipment Card */}
+      <div className="bg-[var(--color-surface)] rounded-2xl border border-[var(--color-surface-border)] p-4 sm:p-5">
+        <div className="flex items-center gap-2 mb-3">
+          <Wrench size={16} className="text-cyan-600 dark:text-cyan-400" aria-hidden="true" />
+          <h2 className="text-sm font-bold text-[var(--color-ink)] tracking-tight">Features & Equipment</h2>
+        </div>
+        
+        {vehicle.features && vehicle.features.length > 0 ? (
+          <div className="flex flex-wrap gap-2">
+            {vehicle.features.map((feature, idx) => (
+              <span
+                key={idx}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold bg-cyan-500/10 text-cyan-700 dark:text-cyan-300 border border-cyan-500/20"
+              >
+                <CheckCircle2 size={10} aria-hidden="true" />
+                {feature}
+              </span>
+            ))}
+          </div>
+        ) : (
+          <p className="text-[11px] text-[var(--color-ink-muted)] italic">
+            No features configured. Edit vehicle details to add equipment like spare wheel, car jack, radio, etc.
+          </p>
+        )}
       </div>
 
       {/* ✅ PREMIUM TABBED CONTENT — fixed-height panel, unified across tabs */}
