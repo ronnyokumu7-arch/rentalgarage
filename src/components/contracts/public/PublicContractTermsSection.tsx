@@ -2,7 +2,10 @@
 "use client";
 
 import { useState } from "react";
-import { Shield, Scales as Scale, WarningCircle as AlertCircle, FileText, CheckCircle as CheckCircle2, GasPump as Fuel, MapPin, Clock } from "@phosphor-icons/react/ssr";
+import { 
+  Shield, Scales as Scale, WarningCircle as AlertCircle, FileText, CheckCircle as CheckCircle2, 
+  CaretDown, FilePdf 
+} from "@phosphor-icons/react/ssr";
 import { brand } from "@/lib/brand";
 import { MarkdownLitePreview } from "@/lib/markdownLite";
 
@@ -11,7 +14,6 @@ interface PolicyClause {
   clause_key?: string | null;
   title: string;
   content: string;
-  is_active: boolean;
   display_order: number;
 }
 
@@ -20,6 +22,7 @@ interface Props {
   contractTerms?: string | null;
   contractFooter?: string | null;
   effectivePolicies?: PolicyClause[] | null;
+  onDownloadPdf?: () => void;
 }
 
 const TABS = [
@@ -28,16 +31,39 @@ const TABS = [
   { id: "policies", label: "Agency Policies", icon: AlertCircle },
 ];
 
+const CURATED_POLICIES = [
+  { 
+    key: "General Rental Terms", 
+    fallback: "The renter must be at least 23 years of age and hold a valid driver's license. The vehicle must be used only for lawful purposes and within the agreed geographical limits." 
+  },
+  { 
+    key: "Fuel Policy", 
+    fallback: "The rental vehicle is provided as-is. Please return it with the same fuel level (or slightly higher if possible). Any fuel shortfall will be billed separately at a premium rate." 
+  },
+  { 
+    key: "Damage Policy", 
+    fallback: "The renter is liable for all damage, loss, or theft occurring during the rental period. Pre-existing damage will be noted on the vehicle condition report at handover." 
+  },
+  { 
+    key: "Cancellation Policy", 
+    fallback: "Cancellations made more than 24 hours before the rental start time are eligible for a full refund. Cancellations within 24 hours will incur a standard administrative charge." 
+  },
+  { 
+    key: "Car Wash Policy", 
+    fallback: "The vehicle is provided in a professionally washed and cleaned condition. A standard car wash fee is included. You may return the vehicle as-is after normal use, but excessive mud or dirt may incur a cleaning fee." 
+  },
+];
+
 export default function PublicContractTermsSection({ 
   tenantName, 
   contractTerms, 
   contractFooter, 
-  effectivePolicies 
+  effectivePolicies,
+  onDownloadPdf 
 }: Props) {
   const [activeTab, setActiveTab] = useState("summary");
 
   const hasCustomTerms = !!contractTerms && contractTerms.trim().length > 0;
-  const hasCustomPolicies = !!effectivePolicies && effectivePolicies.length > 0;
 
   return (
     <div className="p-4 sm:p-8">
@@ -87,9 +113,8 @@ export default function PublicContractTermsSection({
         )}
         {activeTab === "policies" && (
           <PoliciesTab 
-            tenantName={tenantName} 
-            hasCustomPolicies={hasCustomPolicies} 
-            customPolicies={effectivePolicies} 
+            effectivePolicies={effectivePolicies}
+            onDownloadPdf={onDownloadPdf}
           />
         )}
       </div>
@@ -97,7 +122,9 @@ export default function PublicContractTermsSection({
   );
 }
 
+// ============================================================================
 // Tab 1: Summary
+// ============================================================================
 function SummaryTab({ tenantName, contractFooter }: { tenantName: string; contractFooter?: string | null }) {
   return (
     <div className="space-y-4">
@@ -136,7 +163,6 @@ function SummaryTab({ tenantName, contractFooter }: { tenantName: string; contra
           The full legal agreement is available in the PDF download.
         </p>
 
-        {/* ✅ Markdown-rendered footer, same renderer as the editor preview */}
         {contractFooter && contractFooter.trim() && (
           <div className="mt-4 pt-4 border-t" style={{ borderColor: brand.colors.light.surfaceBorder }}>
             <p className="text-xs font-semibold mb-2" style={{ color: brand.colors.ink.primary }}>
@@ -150,7 +176,9 @@ function SummaryTab({ tenantName, contractFooter }: { tenantName: string; contra
   );
 }
 
+// ============================================================================
 // Tab 2: General Terms
+// ============================================================================
 function TermsTab({ hasCustomTerms, customTerms }: { hasCustomTerms: boolean; customTerms?: string | null }) {
   if (hasCustomTerms && customTerms) {
     return (
@@ -161,7 +189,6 @@ function TermsTab({ hasCustomTerms, customTerms }: { hasCustomTerms: boolean; cu
           borderColor: brand.colors.light.surfaceBorder,
         }}
       >
-        {/* ✅ Markdown-rendered: **bold**, blank-line paragraph spacing, lists */}
         <MarkdownLitePreview raw={customTerms} variant="contract" />
       </div>
     );
@@ -178,59 +205,128 @@ function TermsTab({ hasCustomTerms, customTerms }: { hasCustomTerms: boolean; cu
   );
 }
 
-// Tab 3: Agency Policies
-function PoliciesTab({ tenantName, hasCustomPolicies, customPolicies }: { tenantName: string; hasCustomPolicies: boolean; customPolicies?: PolicyClause[] | null }) {
-  if (hasCustomPolicies && customPolicies) {
-    const grouped = customPolicies.reduce((acc, policy) => {
-      if (!acc[policy.category]) acc[policy.category] = [];
-      acc[policy.category].push(policy);
-      return acc;
-    }, {} as Record<string, PolicyClause[]>);
-
-    return (
-      <div className="space-y-6">
-        {Object.entries(grouped).map(([category, policies]) => (
-          <div key={category}>
-            <h4 className="text-xs font-bold uppercase tracking-wider mb-3" style={{ color: brand.colors.ink.primary }}>
-              {category}
-            </h4>
-            <div className="space-y-3">
-              {policies.filter(p => p.is_active).map((policy, idx) => (
-                <PolicyItem 
-                  key={policy.clause_key || idx}
-                  title={policy.title}
-                  content={policy.content}
-                  contentIsMarkdown
-                />
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
+// ============================================================================
+// Tab 3: Agency Policies (Curated Preview + Accordion)
+// ============================================================================
+function PoliciesTab({ 
+  effectivePolicies,
+  onDownloadPdf 
+}: { 
+  effectivePolicies?: PolicyClause[] | null;
+  onDownloadPdf?: () => void;
+}) {
+  
+  const findPolicy = (key: string) => 
+    effectivePolicies?.find(p => p.title.toLowerCase().includes(key.toLowerCase()));
 
   return (
-    <div 
-      className="p-4 rounded-xl border space-y-4"
-      style={{ backgroundColor: brand.colors.warning.bg, borderColor: brand.colors.warning.border }}
-    >
-      <PolicyItem icon={<Fuel size={14} style={{ color: brand.colors.secondary }} aria-hidden="true" />} title="Fuel Policy" content="Return the car with the same fuel level as pickup. If below, a refueling fee applies." />
-      <PolicyItem icon={<MapPin size={14} style={{ color: brand.colors.secondary }} aria-hidden="true" />} title="Mileage Limit" content="Daily limit: 550 KM. Excess mileage: KES 50 per KM." />
-      <PolicyItem icon={<Clock size={14} style={{ color: brand.colors.secondary }} aria-hidden="true" />} title="Late Returns" content="Returns over 2 hours late are charged as a new rental day." />
-      <div className="pt-3 border-t" style={{ borderColor: brand.colors.warning.border }}>
-        <p className="text-xs font-semibold mb-2" style={{ color: brand.colors.warning.text }}>
-          {tenantName} Specific Policies
-        </p>
-        <p className="text-xs" style={{ color: brand.colors.warning.text }}>
-          Additional agency-specific policies are detailed in the full PDF contract document.
-        </p>
+    <div className="space-y-6">
+      <div 
+        className="rounded-2xl border p-5 sm:p-6 space-y-4"
+        style={{ 
+          backgroundColor: brand.colors.warning.bg, 
+          borderColor: brand.colors.warning.border 
+        }}
+      >
+        <div className="flex items-start gap-3 mb-2">
+          <div 
+            className="p-2 rounded-lg shrink-0"
+            style={{ backgroundColor: brand.colors.warning.border }}
+          >
+            <AlertCircle size={20} style={{ color: brand.colors.warning.text }} />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold" style={{ color: brand.colors.warning.text }}>
+              Key Rental Policies
+            </h3>
+            <p className="text-xs mt-0.5" style={{ color: brand.colors.warning.text }}>
+              Important terms you must agree to. Tap any item to read the full details.
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          {CURATED_POLICIES.map((config) => {
+            const livePolicy = findPolicy(config.key);
+            const title = livePolicy?.title || config.key;
+            const content = livePolicy?.content || config.fallback;
+            
+            return (
+              <PolicyAccordionItem 
+                key={config.key} 
+                title={title} 
+                content={content} 
+              />
+            );
+          })}
+        </div>
+
+        {onDownloadPdf && (
+          <div className="pt-4 mt-4 border-t" style={{ borderColor: brand.colors.warning.border }}>
+            <button
+              onClick={onDownloadPdf}
+              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all hover:opacity-90"
+              style={{ 
+                backgroundColor: brand.colors.warning.text,
+                color: brand.colors.warning.bg,
+              }}
+            >
+              <FilePdf size={16} weight="bold" />
+              Download Full Contract & All Terms (PDF)
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
 }
 
-// Reusable components
+// ============================================================================
+// Micro-Component: Single Accordion Row
+// ============================================================================
+function PolicyAccordionItem({ title, content }: { title: string; content: string }) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <div 
+      className="rounded-xl border overflow-hidden transition-all duration-200"
+      style={{ 
+        backgroundColor: brand.colors.light.surface,
+        borderColor: isOpen ? brand.colors.warning.border : 'transparent',
+        boxShadow: isOpen ? '0 4px 6px -1px rgba(0, 0, 0, 0.05)' : 'none'
+      }}
+    >
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full flex items-center justify-between p-4 text-left hover:bg-[var(--color-surface-hover)]/50 transition-colors"
+      >
+        <span className="text-sm font-bold" style={{ color: brand.colors.ink.primary }}>
+          {title}
+        </span>
+        <CaretDown 
+          size={16} 
+          className={`transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          style={{ color: brand.colors.ink.muted }}
+        />
+      </button>
+
+      {isOpen && (
+        <div 
+          className="px-4 pb-4 pt-0 border-t"
+          style={{ borderColor: brand.colors.light.surfaceBorder }}
+        >
+          <div className="pt-3">
+            <MarkdownLitePreview raw={content} variant="contract" />
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ============================================================================
+// Reusable Components (Used by TermsTab)
+// ============================================================================
 function ArticleItem({ number, title, content }: { number: number; title: string; content: string }) {
   return (
     <div className="flex gap-3">
@@ -243,31 +339,6 @@ function ArticleItem({ number, title, content }: { number: number; title: string
       <div>
         <h5 className="text-xs font-bold mb-1" style={{ color: brand.colors.ink.primary }}>{title}</h5>
         <p className="text-xs leading-relaxed" style={{ color: brand.colors.ink.muted }}>{content}</p>
-      </div>
-    </div>
-  );
-}
-
-function PolicyItem({ icon, title, content, contentIsMarkdown = false }: { 
-  icon?: React.ReactNode; 
-  title: string; 
-  content: string;
-  contentIsMarkdown?: boolean;
-}) {
-  return (
-    <div className="flex items-start gap-3">
-      {icon && (
-        <div className="p-1.5 rounded-lg shrink-0" style={{ backgroundColor: brand.colors.secondaryMuted }}>
-          {icon}
-        </div>
-      )}
-      <div className="min-w-0 flex-1">
-        <h5 className="text-xs font-bold mb-1" style={{ color: brand.colors.warning.text }}>{title}</h5>
-        {contentIsMarkdown ? (
-          <MarkdownLitePreview raw={content} variant="contract" />
-        ) : (
-          <p className="text-xs leading-relaxed" style={{ color: brand.colors.warning.text }}>{content}</p>
-        )}
       </div>
     </div>
   );
