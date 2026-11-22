@@ -81,13 +81,14 @@ export default function PublicContractHandoverTab({
   if (showSuccess) {
     return (
       <div
-        className="p-6 sm:p-8 border-t space-y-5"
+        // ✅ FIXED: Removed negative margins. Applied consistent padding. Added a top border.
+        className="w-full px-6 py-8 sm:px-8 border-t space-y-6"
         style={{ backgroundColor: brand.colors.success.bg, borderColor: brand.colors.success.border }}
       >
         <div className="flex items-center gap-3">
           <div
             className="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-            style={{ backgroundColor: brand.colors.success.bg }}
+            style={{ backgroundColor: brand.colors.light.surface }}
           >
             <CheckCircle2 className="h-5 w-5" style={{ color: brand.colors.success.main }} aria-hidden="true" />
           </div>
@@ -96,14 +97,12 @@ export default function PublicContractHandoverTab({
               Handover Checklist Signed
             </h3>
             <p className="text-xs" style={{ color: brand.colors.success.text }}>
-              You've confirmed the vehicle's condition and equipment.
+              You've confirmed the vehicle's condition and available equipment.
             </p>
           </div>
         </div>
 
-        <div className="rounded-xl border p-4 space-y-2"
-          style={{ backgroundColor: brand.colors.light.surface, borderColor: brand.colors.success.border }}
-        >
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6">
           {checklist.map((item) => (
             <div key={item.name} className="flex items-center gap-2">
               <CheckCircle2
@@ -134,7 +133,11 @@ export default function PublicContractHandoverTab({
 
   // ── Active state ────────────────────────────────────────────────────────
   return (
-    <div className="p-4 sm:p-8 space-y-6 border-t" style={{ borderColor: brand.colors.light.surfaceBorder }}>
+    <div
+      // ✅ FIXED: Removed negative margins. Applied consistent padding. Added a top border.
+      className="w-full px-6 py-8 sm:px-8 space-y-6 border-t"
+      style={{ borderColor: brand.colors.light.surfaceBorder, backgroundColor: brand.colors.light.surface }}
+    >
       {/* Header */}
       <div className="flex items-center gap-3">
         <div
@@ -153,16 +156,12 @@ export default function PublicContractHandoverTab({
         </div>
       </div>
 
-      {/* Checklist */}
-      <div className="space-y-2">
+      {/* 2-column grid for active checklist */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-2 gap-x-6">
         {checklist.map((item) => (
           <label
             key={item.name}
-            className="flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors hover:bg-[var(--color-surface-hover)]"
-            style={{
-              borderColor: item.checked ? brand.colors.info.border : brand.colors.light.surfaceBorder,
-              backgroundColor: item.checked ? brand.colors.info.bg : brand.colors.light.surface,
-            }}
+            className="flex items-center gap-3 py-2 cursor-pointer group"
           >
             <input
               type="checkbox"
@@ -171,7 +170,10 @@ export default function PublicContractHandoverTab({
               className="w-4 h-4 rounded focus:ring-2 cursor-pointer shrink-0"
               style={{ accentColor: brand.colors.info.main }}
             />
-            <span className="text-sm font-medium" style={{ color: brand.colors.ink.primary }}>
+            <span 
+              className="text-sm font-medium transition-colors group-hover:opacity-80" 
+              style={{ color: brand.colors.ink.primary }}
+            >
               {item.name}
             </span>
           </label>

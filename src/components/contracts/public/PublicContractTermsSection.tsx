@@ -220,15 +220,17 @@ function PoliciesTab({
     effectivePolicies?.find(p => p.title.toLowerCase().includes(key.toLowerCase()));
 
   return (
-    <div className="space-y-6">
-      <div 
-        className="rounded-2xl border p-5 sm:p-6 space-y-4"
-        style={{ 
-          backgroundColor: brand.colors.warning.bg, 
-          borderColor: brand.colors.warning.border 
-        }}
-      >
-        <div className="flex items-start gap-3 mb-2">
+    // ✅ Full-width colored section (breaks out of parent padding)
+    <div 
+      className="-mx-4 -mb-8 sm:-mx-8 w-[calc(100%+2rem)] sm:w-[calc(100%+4rem)] p-4 sm:p-8"
+      style={{ 
+        backgroundColor: brand.colors.warning.bg, 
+        borderTop: `1px solid ${brand.colors.warning.border}`,
+        borderBottom: `1px solid ${brand.colors.warning.border}`,
+      }}
+    >
+      <div className="space-y-6">
+        <div className="flex items-start gap-3">
           <div 
             className="p-2 rounded-lg shrink-0"
             style={{ backgroundColor: brand.colors.warning.border }}
@@ -245,7 +247,8 @@ function PoliciesTab({
           </div>
         </div>
 
-        <div className="space-y-2">
+        {/* ✅ Sub-tabs stretch to max width */}
+        <div className="space-y-2 w-full">
           {CURATED_POLICIES.map((config) => {
             const livePolicy = findPolicy(config.key);
             const title = livePolicy?.title || config.key;
@@ -262,7 +265,7 @@ function PoliciesTab({
         </div>
 
         {onDownloadPdf && (
-          <div className="pt-4 mt-4 border-t" style={{ borderColor: brand.colors.warning.border }}>
+          <div className="pt-4 border-t" style={{ borderColor: brand.colors.warning.border }}>
             <button
               onClick={onDownloadPdf}
               className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all hover:opacity-90"
@@ -289,7 +292,7 @@ function PolicyAccordionItem({ title, content }: { title: string; content: strin
 
   return (
     <div 
-      className="rounded-xl border overflow-hidden transition-all duration-200"
+      className="w-full rounded-xl border overflow-hidden transition-all duration-200"
       style={{ 
         backgroundColor: brand.colors.light.surface,
         borderColor: isOpen ? brand.colors.warning.border : 'transparent',
