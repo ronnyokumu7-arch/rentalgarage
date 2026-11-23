@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
-import { X, CircleNotch as Loader2, Wrench } from "@phosphor-icons/react/ssr";
+import { X, CircleNotch as Loader2, Wrench, Shield } from "@phosphor-icons/react/ssr";
 import { vehiclesApi } from "@/lib/api/vehicles";
 import type { Vehicle } from "@/lib/types";
 import OverlayPortal from "@/components/ui/OverlayPortal";
@@ -28,7 +28,10 @@ interface FormState {
   airport_transfer_base_rate: string;
   supports_wedding_service: boolean;
   wedding_base_rate: string;
-  features: string; // ✅ NEW: Comma-separated features list
+  features: string;
+  // ✅ NEW: Insurance fields
+  insurance_number: string;
+  insurance_expiry: string;
 }
 
 const EMPTY_FORM: FormState = {
@@ -45,7 +48,10 @@ const EMPTY_FORM: FormState = {
   airport_transfer_base_rate: "",
   supports_wedding_service: false,
   wedding_base_rate: "",
-  features: "", // ✅ NEW
+  features: "",
+  // ✅ NEW: Insurance fields initialized
+  insurance_number: "",
+  insurance_expiry: "",
 };
 
 export default function VehicleDetailsModal({
@@ -77,7 +83,10 @@ export default function VehicleDetailsModal({
       supports_wedding_service: !!vehicle.supports_wedding_service,
       wedding_base_rate:
         vehicle.wedding_base_rate != null ? String(Number(vehicle.wedding_base_rate)) : "",
-      features: vehicle.features ? vehicle.features.join(", ") : "", // ✅ NEW: Array → string
+      features: vehicle.features ? vehicle.features.join(", ") : "",
+      // ✅ NEW: Load insurance fields from vehicle data
+      insurance_number: vehicle.insurance_number ?? "",
+      insurance_expiry: vehicle.insurance_expiry ?? "",
     });
   }, [vehicle, isOpen]);
 
@@ -91,7 +100,6 @@ export default function VehicleDetailsModal({
     setLoading(true);
 
     try {
-      // ✅ Parse features: split by comma, trim, drop empties, or null if blank
       const featuresList = form.features.trim()
         ? form.features.split(",").map(f => f.trim()).filter(Boolean)
         : null;
@@ -111,7 +119,10 @@ export default function VehicleDetailsModal({
           form.supports_wedding_service && form.wedding_base_rate.trim() !== ""
             ? Number(form.wedding_base_rate)
             : null,
-        features: featuresList, // ✅ NEW: Send as string[] | null
+        features: featuresList,
+        // ✅ NEW: Include insurance fields in the update payload
+        insurance_number: form.insurance_number.trim() === "" ? null : form.insurance_number.trim(),
+        insurance_expiry: form.insurance_expiry.trim() === "" ? null : form.insurance_expiry.trim(),
       };
 
       if (isInvestor) {
@@ -153,263 +164,292 @@ export default function VehicleDetailsModal({
 
   return (
     <OverlayPortal onClose={onClose}>
-    <div
-      className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/60 animate-in fade-in duration-200"
-      onClick={onClose}
-    >
       <div
-        className="w-full sm:max-w-lg bg-[var(--color-surface)] rounded-t-[28px] sm:rounded-2xl border-t sm:border border-[var(--color-surface-border)] shadow-2xl sm:shadow-[var(--shadow-dropdown)] animate-in slide-in-from-bottom sm:zoom-in-95 duration-200 max-h-[90vh] flex flex-col"
-        onClick={(e) => e.stopPropagation()}
+        className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/60 animate-in fade-in duration-200"
+        onClick={onClose}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-[var(--color-surface-border)] flex-shrink-0">
-          <div>
-            <h2 className="text-base font-bold text-[var(--color-ink)]">
-              Edit Vehicle Details
-            </h2>
-            <p className="text-[11px] text-[var(--color-ink-muted)] mt-0.5">
-              {vehicle.make} {vehicle.model} · {vehicle.plate_number}
-              {isInvestor && <span className="ml-1.5 text-purple-600 dark:text-purple-400 font-semibold">· Investor</span>}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-2 rounded-full hover:bg-[var(--color-surface-hover)] transition-colors"
-            aria-label="Close"
-          >
-            <X size={18} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
-          </button>
-        </div>
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4">
-          {isInvestor && (
-            <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3 text-[11px] text-amber-700 dark:text-amber-400 leading-relaxed">
-              Identity fields (make, model, year, plate, VIN) are locked for investor-owned vehicles. You can still edit pricing, mileage, service, and notes.
-            </div>
-          )}
-
-          {/* Identity (agency only) */}
-          {!isInvestor && (
-            <>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className={labelClass}>Make</label>
-                  <input
-                    required
-                    type="text"
-                    value={form.make}
-                    onChange={(e) => setForm({ ...form, make: e.target.value })}
-                    className={inputClass}
-                  />
-                </div>
-                <div>
-                  <label className={labelClass}>Model</label>
-                  <input
-                    required
-                    type="text"
-                    value={form.model}
-                    onChange={(e) => setForm({ ...form, model: e.target.value })}
-                    className={inputClass}
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className={labelClass}>Year</label>
-                  <input
-                    required
-                    type="number"
-                    min={1900}
-                    max={new Date().getFullYear() + 1}
-                    value={form.year}
-                    onChange={(e) => setForm({ ...form, year: Number(e.target.value) })}
-                    className={inputClass}
-                  />
-                </div>
-                <div>
-                  <label className={labelClass}>Plate</label>
-                  <input
-                    required
-                    type="text"
-                    value={form.plate_number}
-                    onChange={(e) => setForm({ ...form, plate_number: e.target.value.toUpperCase() })}
-                    className={`${inputClass} font-mono`}
-                  />
-                </div>
-              </div>
-              <div>
-                <label className={labelClass}>VIN</label>
-                <input
-                  type="text"
-                  value={form.vin}
-                  onChange={(e) => setForm({ ...form, vin: e.target.value.toUpperCase() })}
-                  className={`${inputClass} font-mono`}
-                  placeholder="Optional"
-                />
-              </div>
-            </>
-          )}
-
-          {/* Pricing + Mileage */}
-          <div className="grid grid-cols-2 gap-3">
+        <div
+          className="w-full sm:max-w-lg bg-[var(--color-surface)] rounded-t-[28px] sm:rounded-2xl border-t sm:border border-[var(--color-surface-border)] shadow-2xl sm:shadow-[var(--shadow-dropdown)] animate-in slide-in-from-bottom sm:zoom-in-95 duration-200 max-h-[90vh] flex flex-col"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-[var(--color-surface-border)] flex-shrink-0">
             <div>
-              <label className={labelClass}>Daily Rate (KES)</label>
-              <input
-                required
-                type="number"
-                min={0}
-                step="0.01"
-                value={form.daily_rate}
-                onChange={(e) => setForm({ ...form, daily_rate: e.target.value })}
-                className={inputClass}
-              />
+              <h2 className="text-base font-bold text-[var(--color-ink)]">
+                Edit Vehicle Details
+              </h2>
+              <p className="text-[11px] text-[var(--color-ink-muted)] mt-0.5">
+                {vehicle.make} {vehicle.model} · {vehicle.plate_number}
+                {isInvestor && <span className="ml-1.5 text-purple-600 dark:text-purple-400 font-semibold">· Investor</span>}
+              </p>
             </div>
-            <div>
-              <label className={labelClass}>Current Mileage (km)</label>
-              <input
-                required
-                type="number"
-                min={0}
-                value={form.current_mileage}
-                onChange={(e) => setForm({ ...form, current_mileage: e.target.value })}
-                className={inputClass}
-              />
-            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-2 rounded-full hover:bg-[var(--color-surface-hover)] transition-colors"
+              aria-label="Close"
+            >
+              <X size={18} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
+            </button>
           </div>
 
-          <div>
-            <label className={labelClass}>Next Service (km)</label>
-            <input
-              type="number"
-              min={0}
-              value={form.next_service_km}
-              onChange={(e) => setForm({ ...form, next_service_km: e.target.value })}
-              className={inputClass}
-              placeholder="Optional"
-            />
-          </div>
-
-          {/* Service toggles */}
-          <div className="rounded-lg border border-[var(--color-surface-border)] p-3 space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-[var(--color-ink)]">Airport Transfer</p>
-                <p className="text-[10px] text-[var(--color-ink-muted)]">Offer this vehicle for airport runs</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setForm({ ...form, supports_airport_transfer: !form.supports_airport_transfer })}
-                className={toggleClass(form.supports_airport_transfer)}
-                aria-pressed={form.supports_airport_transfer}
-              >
-                <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${form.supports_airport_transfer ? "translate-x-4" : ""}`} />
-              </button>
-            </div>
-            {form.supports_airport_transfer && (
-              <div>
-                <label className={labelClass}>Airport Base Rate (KES)</label>
-                <input
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  value={form.airport_transfer_base_rate}
-                  onChange={(e) => setForm({ ...form, airport_transfer_base_rate: e.target.value })}
-                  className={inputClass}
-                />
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 space-y-4">
+            {isInvestor && (
+              <div className="rounded-lg bg-amber-500/10 border border-amber-500/20 p-3 text-[11px] text-amber-700 dark:text-amber-400 leading-relaxed">
+                Identity fields (make, model, year, plate, VIN) are locked for investor-owned vehicles. You can still edit pricing, mileage, service, and notes.
               </div>
             )}
-          </div>
 
-          <div className="rounded-lg border border-[var(--color-surface-border)] p-3 space-y-3">
-            <div className="flex items-center justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-xs font-semibold text-[var(--color-ink)]">Wedding Service</p>
-                <p className="text-[10px] text-[var(--color-ink-muted)]">Offer this vehicle for wedding events</p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setForm({ ...form, supports_wedding_service: !form.supports_wedding_service })}
-                className={toggleClass(form.supports_wedding_service)}
-                aria-pressed={form.supports_wedding_service}
-              >
-                <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${form.supports_wedding_service ? "translate-x-4" : ""}`} />
-              </button>
-            </div>
-            {form.supports_wedding_service && (
-              <div>
-                <label className={labelClass}>Wedding Base Rate (KES)</label>
-                <input
-                  type="number"
-                  min={0}
-                  step="0.01"
-                  value={form.wedding_base_rate}
-                  onChange={(e) => setForm({ ...form, wedding_base_rate: e.target.value })}
-                  className={inputClass}
-                />
-              </div>
-            )}
-          </div>
-
-          {/* ✅ NEW: Features & Equipment */}
-          <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3 space-y-2">
-            <div className="flex items-center gap-2">
-              <Wrench size={14} className="text-cyan-600 dark:text-cyan-400" aria-hidden="true" />
-              <p className="text-xs font-semibold text-[var(--color-ink)]">Features & Equipment</p>
-            </div>
-            <textarea
-              rows={3}
-              value={form.features}
-              onChange={(e) => setForm({ ...form, features: e.target.value })}
-              className={`${inputClass} h-auto py-2 resize-none`}
-              placeholder="Spare Wheel, Car Jack, First Aid Kit, Radio, Reflective Vest"
-            />
-            <p className="text-[10px] text-[var(--color-ink-muted)] leading-relaxed">
-              Separate items with commas. These appear on the client&apos;s handover checklist at signing.
-            </p>
-          </div>
-
-          {/* Notes */}
-          <div>
-            <label className={labelClass}>Notes</label>
-            <textarea
-              rows={2}
-              value={form.notes}
-              onChange={(e) => setForm({ ...form, notes: e.target.value })}
-              className={`${inputClass} h-auto py-2 resize-none`}
-              placeholder="Optional notes about this vehicle"
-            />
-          </div>
-        </form>
-
-        {/* Footer */}
-        <div className="px-5 py-3 border-t border-[var(--color-surface-border)] flex items-center gap-2 flex-shrink-0">
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={loading}
-            className="flex-1 h-10 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] text-xs font-bold text-[var(--color-ink)] transition-colors disabled:opacity-50"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={loading}
-            className="flex-1 h-10 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
-          >
-            {loading ? (
+            {/* Identity (agency only) */}
+            {!isInvestor && (
               <>
-                <Loader2 size={14} className="animate-spin" aria-hidden="true" /> Saving…
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className={labelClass}>Make</label>
+                    <input
+                      required
+                      type="text"
+                      value={form.make}
+                      onChange={(e) => setForm({ ...form, make: e.target.value })}
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Model</label>
+                    <input
+                      required
+                      type="text"
+                      value={form.model}
+                      onChange={(e) => setForm({ ...form, model: e.target.value })}
+                      className={inputClass}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className={labelClass}>Year</label>
+                    <input
+                      required
+                      type="number"
+                      min={1900}
+                      max={new Date().getFullYear() + 1}
+                      value={form.year}
+                      onChange={(e) => setForm({ ...form, year: Number(e.target.value) })}
+                      className={inputClass}
+                    />
+                  </div>
+                  <div>
+                    <label className={labelClass}>Plate</label>
+                    <input
+                      required
+                      type="text"
+                      value={form.plate_number}
+                      onChange={(e) => setForm({ ...form, plate_number: e.target.value.toUpperCase() })}
+                      className={`${inputClass} font-mono`}
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className={labelClass}>VIN</label>
+                  <input
+                    type="text"
+                    value={form.vin}
+                    onChange={(e) => setForm({ ...form, vin: e.target.value.toUpperCase() })}
+                    className={`${inputClass} font-mono`}
+                    placeholder="Optional"
+                  />
+                </div>
               </>
-            ) : (
-              "Save Changes"
             )}
-          </button>
+
+            {/* Pricing + Mileage */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className={labelClass}>Daily Rate (KES)</label>
+                <input
+                  required
+                  type="number"
+                  min={0}
+                  step="0.01"
+                  value={form.daily_rate}
+                  onChange={(e) => setForm({ ...form, daily_rate: e.target.value })}
+                  className={inputClass}
+                />
+              </div>
+              <div>
+                <label className={labelClass}>Current Mileage (km)</label>
+                <input
+                  required
+                  type="number"
+                  min={0}
+                  value={form.current_mileage}
+                  onChange={(e) => setForm({ ...form, current_mileage: e.target.value })}
+                  className={inputClass}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className={labelClass}>Next Service (km)</label>
+              <input
+                type="number"
+                min={0}
+                value={form.next_service_km}
+                onChange={(e) => setForm({ ...form, next_service_km: e.target.value })}
+                className={inputClass}
+                placeholder="Optional"
+              />
+            </div>
+
+            {/* ✅ NEW: Compliance & Insurance */}
+            <div className="rounded-lg border border-[var(--color-surface-border)] p-3 space-y-3">
+              <div className="flex items-center gap-2 mb-1">
+                <Shield size={14} className="text-[var(--color-ink-muted)]" aria-hidden="true" />
+                <p className="text-xs font-semibold text-[var(--color-ink)]">Compliance & Insurance</p>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className={labelClass}>Insurance Policy Number</label>
+                  <input
+                    type="text"
+                    value={form.insurance_number}
+                    onChange={(e) => setForm({ ...form, insurance_number: e.target.value })}
+                    className={inputClass}
+                    placeholder="e.g. POL-12345678"
+                  />
+                </div>
+                <div>
+                  <label className={labelClass}>Insurance Expiry Date</label>
+                  <input
+                    type="date"
+                    value={form.insurance_expiry}
+                    onChange={(e) => setForm({ ...form, insurance_expiry: e.target.value })}
+                    className={inputClass}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Service toggles */}
+            <div className="rounded-lg border border-[var(--color-surface-border)] p-3 space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-[var(--color-ink)]">Airport Transfer</p>
+                  <p className="text-[10px] text-[var(--color-ink-muted)]">Offer this vehicle for airport runs</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, supports_airport_transfer: !form.supports_airport_transfer })}
+                  className={toggleClass(form.supports_airport_transfer)}
+                  aria-pressed={form.supports_airport_transfer}
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${form.supports_airport_transfer ? "translate-x-4" : ""}`} />
+                </button>
+              </div>
+              {form.supports_airport_transfer && (
+                <div>
+                  <label className={labelClass}>Airport Base Rate (KES)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={form.airport_transfer_base_rate}
+                    onChange={(e) => setForm({ ...form, airport_transfer_base_rate: e.target.value })}
+                    className={inputClass}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-lg border border-[var(--color-surface-border)] p-3 space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <div className="min-w-0">
+                  <p className="text-xs font-semibold text-[var(--color-ink)]">Wedding Service</p>
+                  <p className="text-[10px] text-[var(--color-ink-muted)]">Offer this vehicle for wedding events</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setForm({ ...form, supports_wedding_service: !form.supports_wedding_service })}
+                  className={toggleClass(form.supports_wedding_service)}
+                  aria-pressed={form.supports_wedding_service}
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-4 h-4 rounded-full bg-white transition-transform ${form.supports_wedding_service ? "translate-x-4" : ""}`} />
+                </button>
+              </div>
+              {form.supports_wedding_service && (
+                <div>
+                  <label className={labelClass}>Wedding Base Rate (KES)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={form.wedding_base_rate}
+                    onChange={(e) => setForm({ ...form, wedding_base_rate: e.target.value })}
+                    className={inputClass}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Features & Equipment */}
+            <div className="rounded-lg border border-cyan-500/20 bg-cyan-500/5 p-3 space-y-2">
+              <div className="flex items-center gap-2">
+                <Wrench size={14} className="text-cyan-600 dark:text-cyan-400" aria-hidden="true" />
+                <p className="text-xs font-semibold text-[var(--color-ink)]">Features & Equipment</p>
+              </div>
+              <textarea
+                rows={3}
+                value={form.features}
+                onChange={(e) => setForm({ ...form, features: e.target.value })}
+                className={`${inputClass} h-auto py-2 resize-none`}
+                placeholder="Spare Wheel, Car Jack, First Aid Kit, Radio, Reflective Vest"
+              />
+              <p className="text-[10px] text-[var(--color-ink-muted)] leading-relaxed">
+                Separate items with commas. These appear on the client&apos;s handover checklist at signing.
+              </p>
+            </div>
+
+            {/* Notes */}
+            <div>
+              <label className={labelClass}>Notes</label>
+              <textarea
+                rows={2}
+                value={form.notes}
+                onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                className={`${inputClass} h-auto py-2 resize-none`}
+                placeholder="Optional notes about this vehicle"
+              />
+            </div>
+          </form>
+
+          {/* Footer */}
+          <div className="px-5 py-3 border-t border-[var(--color-surface-border)] flex items-center gap-2 flex-shrink-0">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={loading}
+              className="flex-1 h-10 rounded-xl border border-[var(--color-surface-border)] bg-[var(--color-surface)] hover:bg-[var(--color-surface-hover)] text-xs font-bold text-[var(--color-ink)] transition-colors disabled:opacity-50"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSubmit}
+              disabled={loading}
+              className="flex-1 h-10 rounded-xl bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white text-xs font-bold flex items-center justify-center gap-1.5 transition-colors disabled:opacity-50"
+            >
+              {loading ? (
+                <>
+                  <Loader2 size={14} className="animate-spin" aria-hidden="true" /> Saving…
+                </>
+              ) : (
+                "Save Changes"
+              )}
+            </button>
+          </div>
         </div>
       </div>
-    </div>
     </OverlayPortal>
   );
 }

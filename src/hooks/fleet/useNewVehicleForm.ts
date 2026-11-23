@@ -75,7 +75,7 @@ export function useNewVehicleForm() {
         current_mileage: formData.current_mileage ? parseInt(formData.current_mileage) : 0,
         next_service_km: formData.next_service_km ? parseInt(formData.next_service_km) : null,
         insurance_number: formData.insurance_number || null,
-        insurance_expiry: formData.insurance_expiry ? new Date(formData.insurance_expiry).toISOString() : null,
+        insurance_expiry: formData.insurance_expiry.trim() === "" ? null : formData.insurance_expiry,
         notes: formData.notes || null,
         features: featuresList, // ✅ NEW: Send as string[] | null
       };
